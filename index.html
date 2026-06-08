@@ -2115,8 +2115,6 @@ function computeVimDashas(mo,birthDateStr){
         }
         dSec+="\n";
       }
-    } else {
-      dSec="Birth date not in chart file — add 'Date: Month D, YYYY' to your JHora export to enable dasha timing.\n";
     }
     // Nakshatra layer
     let nakSec="";
@@ -2169,7 +2167,7 @@ function computeVimDashas(mo,birthDateStr){
 BIRTH DATA
 =======================================
 Chart: ${c.name}
-${c.birthDate?"Born: "+c.birthDate:"(Birth date not in file — add Date: Month D, YYYY for dasha timing)"}
+${c.birthDate?"Born: "+c.birthDate:""}
 Lagna: ${SIGNS[La]} · Lord ${GBYK[ll].name}${llP?` in H${llH} (${SIGNS[llP.sign]}) · ${llDig.full}`:" — unknown"}
 Moon: ${moP?`H${moH} (${SIGNS[moP.sign]}) · ${moNak.n} nakshatra`:"unknown"}
 
@@ -2180,10 +2178,11 @@ Key houses: ${goal.houses.map(h=>`H${h} = ${goal.hd[h]}`).join(" · ")}${goal.vn
 
 NATAL HOUSE CONDITIONS
 ---------------------------------------
-${hSec}=======================================
+${hSec}${dSec?`=======================================
 VIMSHOTTARI DASHA — 2025 to 2030
 =======================================
-${dSec}=======================================
+${dSec}`:""}
+=======================================
 NAKSHATRA LAYER
 =======================================
 ${nakSec}
@@ -2267,7 +2266,7 @@ Reference actual planets, house numbers, and BPHS principles throughout.`;
     html+=`<div class="ol-ai-wrap">
       <div class="ol-ai-hdr">
         <b>✦ Get a full AI reading</b>
-        <span>This prompt has your complete chart data${dashas?" + dasha timing":""}. Paste it into Claude or Gemini for a synthesised reading.</span>
+        <span>Complete chart data${dashas?" + Vimshottari dasha":""}${!dashas?" · Re-save chart to add dasha timing":""}. Paste into Claude or Gemini for a full reading.</span>
       </div>
       <textarea class="ol-prompt-ta" id="olPromptText" readonly></textarea>
       <div class="ol-ai-btns">
