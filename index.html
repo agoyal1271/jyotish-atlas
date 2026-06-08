@@ -246,6 +246,34 @@
   .v-mid .bb-verdict-badge{background:var(--gold);color:#0b0e1a}
   .v-weak .bb-verdict-badge{background:var(--debil);color:#fff8f8}
   @media(max-width:600px){.bb-cards{grid-template-columns:1fr}}
+  /* === special lagnas === */
+  .sl-section h4{margin:0 0 14px}
+  .sl-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .sl-card{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:18px 20px}
+  .sl-eyebrow{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;display:flex;align-items:center;gap:7px}
+  .sl-eyebrow span{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:1px 9px;font-size:10px;color:var(--gold2)}
+  .sl-sign{font-size:28px;font-weight:800;color:var(--gold2);margin-bottom:1px}
+  .sl-house{font-size:12.5px;color:var(--muted);margin-bottom:10px}
+  .sl-sig{font-size:13px;color:#dfe4f6;line-height:1.55;margin-bottom:10px}
+  .sl-gap{font-size:12.5px;padding:8px 12px;background:var(--panel);border-radius:8px;border-left:3px solid var(--gold2);margin-bottom:10px;line-height:1.5;color:#dfe4f6}
+  .sl-gap.opp{border-left-color:var(--debil)}
+  .sl-gap.tri{border-left-color:var(--exalt)}
+  .sl-meta{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:9px}
+  .sl-badge{font-size:12px;padding:3px 9px;border-radius:999px;font-weight:600;background:var(--panel);border:1px solid var(--line)}
+  .sl-badge.sav-hi{background:#1d3a20;color:var(--exalt);border-color:transparent}
+  .sl-badge.sav-mid{color:var(--fg)}
+  .sl-badge.sav-lo{background:#2d1a1a;color:var(--debil);border-color:transparent}
+  .sl-pls{font-size:12.5px;color:var(--muted);margin-bottom:10px}
+  .sl-toggle{font-size:11.5px;color:var(--gold2);cursor:pointer;user-select:none}
+  .sl-toggle:hover{text-decoration:underline}
+  .sl-calc{display:none;margin-top:10px;padding:11px 13px;background:var(--panel);border-radius:8px;font-size:12px;line-height:1.9;border:1px solid var(--line);color:#dfe4f6}
+  .sl-calc.open{display:block}
+  .sl-step{display:flex;gap:8px}
+  .sl-step-n{color:var(--muted);font-weight:700;min-width:14px;flex-shrink:0}
+  .sl-ival{display:flex;flex-wrap:wrap;gap:4px 14px;margin:4px 0 6px;padding:6px 10px;background:var(--panel2);border-radius:6px;font-size:11px}
+  .sl-ival span{color:var(--muted)}
+  .sl-ival b{color:var(--gold2)}
+  @media(max-width:600px){.sl-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -385,6 +413,13 @@
           <span style="border:1px solid var(--gold);border-radius:4px;padding:0 5px;color:var(--gold2)">outlined = natal house</span>
         </div>
         <div class="bav-insight" id="bavInsight"></div>
+      </div>
+      <div class="sl-section panel" id="specialLagnas" style="display:none;margin-top:14px">
+        <h4>Special Lagnas · Image &amp; Wealth</h4>
+        <div class="sl-grid">
+          <div class="sl-card" id="alCard"></div>
+          <div class="sl-card" id="ilCard"></div>
+        </div>
       </div>
       <div class="chart-story" id="chartStory" style="display:none">
         <div class="chart-story-header">
@@ -1236,6 +1271,9 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
         </div>
       </div>`;
 
+    // Special Lagnas
+    renderSpecialLagnas(c,La,allBAV.SAV);
+
     // Chart Story
     const story=generateStory(c,La,bavForVerdict,allBAV);
     document.getElementById("storyP1").innerHTML=story.p1;
@@ -1286,6 +1324,128 @@ function buildVarga(c,fn){
   const lagna=fn(c.La.sign,c.La.deg),planets={};
   for(const[k,p]of Object.entries(c.planets))planets[k]=fn(p.sign,p.deg);
   return{lagna,planets};
+}
+
+/* ===== ARUDHA & INDU LAGNA ===== */
+const INDU_VAL={Su:30,Mo:16,Ma:6,Me:8,Ju:10,Ve:12,Sa:1};
+
+function computeAL(c,La){
+  const lord=SIGN_LORD[La], lp=c.planets[lord];
+  if(!lp) return null;
+  const ls=lp.sign, dist=houseFromSigns(La,ls);
+  let al=(ls+dist-1)%12, rule="";
+  if(al===La){al=(La+9)%12;rule="Result fell on Lagna → moved 10 houses forward to H10 from Lagna";}
+  else if(al===(La+6)%12){al=(La+3)%12;rule="Result fell on H7 from Lagna → moved to H4 from Lagna";}
+  return{sign:al,lord,lordSign:ls,dist,rule};
+}
+
+function computeIL(c,La){
+  const d1_9=SIGN_LORD[(La+8)%12], d1v=INDU_VAL[d1_9]||0;
+  const d9La=navamsaSign(c.La.sign,c.La.deg);
+  const d9_9=SIGN_LORD[(d9La+8)%12], d9v=INDU_VAL[d9_9]||0;
+  const sum=d1v+d9v, rem=sum%12||12;
+  const mo=c.planets.Mo; if(!mo) return null;
+  return{sign:(mo.sign+rem-1)%12,d1_9,d1v,d9La,d9_9,d9v,sum,rem,moonSign:mo.sign};
+}
+
+function renderSpecialLagnas(c,La,sav){
+  const al=computeAL(c,La), il=computeIL(c,La);
+  const el=document.getElementById("specialLagnas");
+  if(!al&&!il){el.style.display="none";return;}
+  el.style.display="block";
+
+  // ── Arudha Lagna ──
+  function mkAL(){
+    if(!al) return `<p class="note">Could not compute — lagna lord missing.</p>`;
+    const alH=houseFromSigns(La,al.sign);
+    const alLord=SIGN_LORD[al.sign], alLP=c.planets[alLord];
+    const alDig=alLP?dignityOf(alLord,alLP.sign):null;
+    const alLHn=alLP?houseFromSigns(La,alLP.sign):null;
+    const alSav=sav[al.sign];
+    const pInAl=Object.entries(c.planets).filter(([k,p])=>p.sign===al.sign).map(([k])=>k);
+
+    let gapText="",gapCls="";
+    if(alH===1){gapText="AL falls on the Lagna itself — inner self and public image are unusually aligned. What others see is close to who you actually are.";gapCls="tri";}
+    else if(alH===7){gapText="AL is the 7th from Lagna — a strong polarity. Private self and public image are near-opposites; others often misjudge or idealise you.";gapCls="opp";}
+    else if([5,9].includes(alH)){gapText=`AL is in a Trikona (H${alH}) from Lagna — harmonious. Public image naturally reflects inner purpose; the outer projection is authentic.`;gapCls="tri";}
+    else if([4,10].includes(alH)){gapText=`AL is in H${alH} (Kendra) from Lagna — tangible material expression. Public image is built actively through action in the world.`;}
+    else if([6,8,12].includes(alH)){gapText=`AL is in H${alH} (Dusthana) from Lagna. Public image carries difficulty — perception by others may involve struggle, controversy, or misrepresentation.`;gapCls="opp";}
+    else{gapText=`AL is H${alH} from Lagna — distinct but not in sharp tension with the inner self.`;}
+
+    const savCls=alSav>=30?"sav-hi":alSav>=25?"sav-mid":"sav-lo";
+    const lordLine=alDig?`${GBYK[alLord].gl} ${GBYK[alLord].name} · ${alDig.full} (H${alLHn})`:`${GBYK[alLord].gl} ${GBYK[alLord].name}`;
+    const chain=Array.from({length:al.dist},(_,i)=>SIGNS[(al.lordSign+i)%12]).join(" → ");
+
+    return`<div class="sl-eyebrow">Arudha Lagna <span>AL · H${alH}</span></div>
+      <div class="sl-sign">${SIGNS[al.sign]}</div>
+      <div class="sl-house">${BHAVAS[alH-1].skt} · ${BHAVAS[alH-1].en}</div>
+      <div class="sl-sig">How the world perceives you — your public image, social reputation, and material manifestation. This is the <i>reflection</i> the outer world holds of you, not your inner reality.</div>
+      <div class="sl-gap ${gapCls}">${gapText}</div>
+      <div class="sl-meta">
+        <span class="sl-badge">${lordLine}</span>
+        <span class="sl-badge ${savCls}">SAV ${alSav}</span>
+      </div>
+      <div class="sl-pls">${pInAl.length?pInAl.map(k=>`${GBYK[k].gl} ${GBYK[k].name} in AL`).join(" · "):"No planets in AL — lord's condition is the primary indicator"}</div>
+      <span class="sl-toggle" onclick="this.nextElementSibling.classList.toggle('open');this.textContent=this.nextElementSibling.classList.contains('open')?'▾ Hide calculation':'▸ How this was calculated'">▸ How this was calculated</span>
+      <div class="sl-calc">
+        <div class="sl-step"><span class="sl-step-n">1</span><span>Lagna = <b>${SIGNS[La]}</b> · lord = <b>${GBYK[al.lord].name}</b></span></div>
+        <div class="sl-step"><span class="sl-step-n">2</span><span>${GBYK[al.lord].name} is in <b>${SIGNS[al.lordSign]}</b> = <b>H${al.dist}</b> from Lagna</span></div>
+        <div class="sl-step"><span class="sl-step-n">3</span><span>Count ${al.dist} forward from ${SIGNS[al.lordSign]}: <b style="color:var(--gold2)">${chain}</b></span></div>
+        ${al.rule?`<div class="sl-step"><span class="sl-step-n" style="color:var(--debil)">!</span><span style="color:var(--debil)">${al.rule}</span></div>`:""}
+        <div class="sl-step"><span class="sl-step-n">✓</span><span>Arudha Lagna = <b style="color:var(--gold2)">${SIGNS[al.sign]}</b></span></div>
+      </div>`;
+  }
+
+  // ── Indu Lagna ──
+  function mkIL(){
+    if(!il) return `<p class="note">Could not compute — Moon missing.</p>`;
+    const ilH=houseFromSigns(La,il.sign);
+    const ilLord=SIGN_LORD[il.sign], ilLP=c.planets[ilLord];
+    const ilDig=ilLP?dignityOf(ilLord,ilLP.sign):null;
+    const ilLHn=ilLP?houseFromSigns(La,ilLP.sign):null;
+    const ilSav=sav[il.sign];
+    const pInIl=Object.entries(c.planets).filter(([k,p])=>p.sign===il.sign).map(([k])=>k);
+
+    let wNote="";
+    if(ilDig){
+      if(ilDig.score>=2) wNote=`${GBYK[ilLord].name} exalted — wealth potential is at its peak. Financial abundance flows with relatively little friction once the right dasha runs.`;
+      else if(ilDig.score>=1.5) wNote=`${GBYK[ilLord].name} in own sign — steady, self-sustaining wealth. Assets build reliably from the planet's natural domains.`;
+      else if(ilDig.score===1) wNote=`${GBYK[ilLord].name} in friendly sign — cooperative environment for wealth. Prosperity arrives through alliance and the right associations.`;
+      else if(ilDig.score===0) wNote=`${GBYK[ilLord].name} in neutral sign — moderate wealth potential. Neither exceptional abundance nor significant obstruction.`;
+      else if(ilDig.score===-1) wNote=`${GBYK[ilLord].name} in enemy sign — friction in wealth generation. Income exists but converting it to lasting assets requires conscious effort.`;
+      else wNote=`${GBYK[ilLord].name} debilitated — wealth faces consistent challenge. Dasha timing and remedial focus matter significantly here.`;
+    }
+
+    const savCls=ilSav>=30?"sav-hi":ilSav>=25?"sav-mid":"sav-lo";
+    const lordLine=ilDig?`${GBYK[ilLord].gl} ${GBYK[ilLord].name} · ${ilDig.full} (H${ilLHn})`:`${GBYK[ilLord].gl} ${GBYK[ilLord].name}`;
+    const chain=Array.from({length:il.rem},(_,i)=>SIGNS[(il.moonSign+i)%12]).join(" → ");
+
+    return`<div class="sl-eyebrow">Indu Lagna <span>IL · H${ilH}</span></div>
+      <div class="sl-sign">${SIGNS[il.sign]}</div>
+      <div class="sl-house">${BHAVAS[ilH-1].skt} · ${BHAVAS[ilH-1].en}</div>
+      <div class="sl-sig">Primary wealth indicator from BPHS — derived from the 9th lords of D-1 and D-9, anchored to the Moon. Planets here or aspecting it form wealth yogas.</div>
+      ${wNote?`<div class="sl-gap">${wNote}</div>`:""}
+      <div class="sl-meta">
+        <span class="sl-badge">${lordLine}</span>
+        <span class="sl-badge ${savCls}">SAV ${ilSav}</span>
+      </div>
+      <div class="sl-pls">${pInIl.length?pInIl.map(k=>`${GBYK[k].gl} ${GBYK[k].name} in IL`).join(" · "):"No planets in IL — lord's condition is the primary indicator"}</div>
+      <span class="sl-toggle" onclick="this.nextElementSibling.classList.toggle('open');this.textContent=this.nextElementSibling.classList.contains('open')?'▾ Hide calculation':'▸ How this was calculated'">▸ How this was calculated</span>
+      <div class="sl-calc">
+        <div class="sl-ival">
+          <span>☉ Sun <b>30</b></span><span>☽ Moon <b>16</b></span><span>♃ Jupiter <b>10</b></span>
+          <span>♀ Venus <b>12</b></span><span>♂ Mars <b>6</b></span><span>☿ Mercury <b>8</b></span><span>♄ Saturn <b>1</b></span>
+        </div>
+        <div class="sl-step"><span class="sl-step-n">1</span><span>D-1 H9 from ${SIGNS[La]} = <b>${SIGNS[(La+8)%12]}</b> · lord <b>${GBYK[il.d1_9].name}</b> · value <b>${il.d1v}</b></span></div>
+        <div class="sl-step"><span class="sl-step-n">2</span><span>D-9 Lagna = <b>${SIGNS[il.d9La]}</b> · H9 = <b>${SIGNS[(il.d9La+8)%12]}</b> · lord <b>${GBYK[il.d9_9].name}</b> · value <b>${il.d9v}</b></span></div>
+        <div class="sl-step"><span class="sl-step-n">3</span><span>${il.d1v} + ${il.d9v} = <b>${il.sum}</b> · ${il.sum} ÷ 12 = remainder <b>${il.rem}</b></span></div>
+        <div class="sl-step"><span class="sl-step-n">4</span><span>Moon in <b>${SIGNS[il.moonSign]}</b> · count ${il.rem} forward: <b style="color:var(--gold2)">${chain}</b></span></div>
+        <div class="sl-step"><span class="sl-step-n">✓</span><span>Indu Lagna = <b style="color:var(--gold2)">${SIGNS[il.sign]}</b></span></div>
+      </div>`;
+  }
+
+  document.getElementById("alCard").innerHTML=mkAL();
+  document.getElementById("ilCard").innerHTML=mkIL();
 }
 
 /* ===== BHAVAT BHAVAM EXPLORER ===== */
