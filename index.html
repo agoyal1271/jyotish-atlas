@@ -558,6 +558,7 @@ const FRIEND={
  Ke:{f:["Ma","Ve","Sa"],e:["Su","Mo"],n:["Ju","Me"]}
 };
 const SIGN_LORD=["Ma","Ve","Me","Mo","Su","Me","Ve","Ma","Ju","Sa","Sa","Ju"];
+const INDU_VAL={Su:30,Mo:16,Ma:6,Me:8,Ju:10,Ve:12,Sa:1};
 const ELEM={Fire:"#e7795a",Earth:"#a98c5a",Air:"#7fb0e0",Water:"#5fc9c2"};
 const RASHIS=SIGNS.map((s,i)=>({
   name:s,skt:SIGN_SKT[i],lord:SIGN_LORD[i],elem:["Fire","Earth","Air","Water"][i%4],
@@ -1272,7 +1273,7 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
       </div>`;
 
     // Special Lagnas
-    renderSpecialLagnas(c,La,allBAV.SAV);
+    try{renderSpecialLagnas(c,La,allBAV.SAV);}catch(e){console.error("renderSpecialLagnas:",e);}
 
     // Chart Story
     const story=generateStory(c,La,bavForVerdict,allBAV);
@@ -1327,8 +1328,6 @@ function buildVarga(c,fn){
 }
 
 /* ===== ARUDHA & INDU LAGNA ===== */
-const INDU_VAL={Su:30,Mo:16,Ma:6,Me:8,Ju:10,Ve:12,Sa:1};
-
 function computeAL(c,La){
   const lord=SIGN_LORD[La], lp=c.planets[lord];
   if(!lp) return null;
