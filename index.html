@@ -255,6 +255,11 @@
   .sl-sign{font-size:28px;font-weight:800;color:var(--gold2);margin-bottom:1px}
   .sl-house{font-size:12.5px;color:var(--muted);margin-bottom:10px}
   .sl-sig{font-size:13px;color:#dfe4f6;line-height:1.55;margin-bottom:10px}
+  .sl-what{font-size:12.5px;line-height:1.6;background:var(--panel);border-radius:10px;padding:11px 14px;margin-bottom:11px;border:1px solid var(--line)}
+  .sl-what b{color:var(--fg);font-size:13px}
+  .sl-what ul{margin:7px 0 4px;padding-left:16px;color:#dfe4f6}
+  .sl-what li{margin-bottom:3px}
+  .sl-what .note{font-size:11.5px;color:var(--muted);display:block;margin-top:6px;font-style:italic}
   .sl-gap{font-size:12.5px;padding:8px 12px;background:var(--panel);border-radius:8px;border-left:3px solid var(--gold2);margin-bottom:10px;line-height:1.5;color:#dfe4f6}
   .sl-gap.opp{border-left-color:var(--debil)}
   .sl-gap.tri{border-left-color:var(--exalt)}
@@ -1378,7 +1383,16 @@ function renderSpecialLagnas(c,La,sav){
     return`<div class="sl-eyebrow">Arudha Lagna <span>AL · H${alH}</span></div>
       <div class="sl-sign">${SIGNS[al.sign]}</div>
       <div class="sl-house">${BHAVAS[alH-1].skt} · ${BHAVAS[alH-1].en}</div>
-      <div class="sl-sig">How the world perceives you — your public image, social reputation, and material manifestation. This is the <i>reflection</i> the outer world holds of you, not your inner reality.</div>
+      <div class="sl-what">
+        <b>What Arudha Lagna reveals</b>
+        <ul>
+          <li>Your <b>public image</b> — how others see, describe, and remember you</li>
+          <li><b>Social reputation</b>, visible status, and worldly standing</li>
+          <li>The <b>material circumstances</b> and lifestyle that follow you</li>
+          <li>Fame, authority, and your tangible presence in the world</li>
+        </ul>
+        <span class="note">Lagna = your soul's inner truth · AL = the outer reflection. The world transacts with your AL, not your Lagna.</span>
+      </div>
       <div class="sl-gap ${gapCls}">${gapText}</div>
       <div class="sl-meta">
         <span class="sl-badge">${lordLine}</span>
@@ -1422,7 +1436,16 @@ function renderSpecialLagnas(c,La,sav){
     return`<div class="sl-eyebrow">Indu Lagna <span>IL · H${ilH}</span></div>
       <div class="sl-sign">${SIGNS[il.sign]}</div>
       <div class="sl-house">${BHAVAS[ilH-1].skt} · ${BHAVAS[ilH-1].en}</div>
-      <div class="sl-sig">Primary wealth indicator from BPHS — derived from the 9th lords of D-1 and D-9, anchored to the Moon. Planets here or aspecting it form wealth yogas.</div>
+      <div class="sl-what">
+        <b>What Indu Lagna reveals</b>
+        <ul>
+          <li>The <b>seat of wealth</b> — where material abundance naturally accumulates</li>
+          <li>Planets here or aspecting IL form <b>dhana yogas</b> (wealth combinations)</li>
+          <li>The IL lord shows <b>how and through what domain</b> money flows to you</li>
+          <li>Dashas activating IL or its lord bring key <b>financial milestones</b></li>
+        </ul>
+        <span class="note">Named "Indu" (Moon) as the calculation is anchored to the Moon's position.</span>
+      </div>
       ${wNote?`<div class="sl-gap">${wNote}</div>`:""}
       <div class="sl-meta">
         <span class="sl-badge">${lordLine}</span>
