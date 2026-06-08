@@ -2118,15 +2118,50 @@ function computeVimDashas(mo,birthDateStr){
     } else {
       dSec="Birth date not in chart file — add 'Date: Month D, YYYY' to your JHora export to enable dasha timing.\n";
     }
+    // Nakshatra layer
+    let nakSec="";
+    const addNakLine=(label,p,showGoalConn)=>{
+      if(!p)return;
+      const ni=nakInfo(p.sign*30+p.deg);
+      const nlP=c.planets[ni.l],nlH=nlP?houseFromSigns(La,nlP.sign):null;
+      const nlDig=nlP?dignityOf(ni.l,nlP.sign):null;
+      const nlLords=[];for(let hh=1;hh<=12;hh++){if(SIGN_LORD[(La+hh-1)%12]===ni.l)nlLords.push(`H${hh}`);}
+      const nlInGoal=showGoalConn&&nlH&&goal.houses.includes(nlH);
+      const nlLordsGoal=showGoalConn&&nlLords.some(h=>goal.houses.map(gh=>`H${gh}`).includes(h));
+      nakSec+=`${label}: ${ni.n} pada-${ni.pada} · nakshatra lord ${GBYK[ni.l].name}${nlP?` (H${nlH}, ${SIGNS[nlP.sign]}, ${nlDig.full.split("·")[0].trim()})`:" — unknown"}\n`;
+      if(nlInGoal)nakSec+=`  ★ Nakshatra lord placed in a goal house (H${nlH})\n`;
+      if(nlLordsGoal)nakSec+=`  ★ Nakshatra lord rules ${nlLords.filter(h=>goal.houses.map(gh=>`H${gh}`).includes(h)).join(",")} — goal house connection\n`;
+    };
+    if(c.La)addNakLine("Lagna",{sign:La,deg:c.La.deg},false);
+    addNakLine("Moon",moP,false);
+    for(const h of goal.houses){
+      const lp=c.planets[SIGN_LORD[(La+h-1)%12]];
+      addNakLine(`H${h} lord ${lp?GBYK[SIGN_LORD[(La+h-1)%12]].name:"?"}`,lp,true);
+    }
+    if(dashas){
+      const today=new Date();
+      for(const md of dashas.mahas){
+        for(const ad of md.antars){
+          if(ad.start<=today&&ad.end>=today){
+            const adP2=c.planets[ad.lord];
+            addNakLine(`Current antardasha lord ${GBYK[ad.lord].name}`,adP2,true);
+            break;
+          }
+        }
+      }
+    }
     // Transit section
     let trSec="";
     for(const r of results){
-      const juSav=r.sav[(La+r.juH-1)%12],saSav=r.sav[(La+r.saH-1)%12];
+      const juSav=r.sav[(La+r.juH-1)%12],saSav=r.sav[(La+r.saH-1)%12],raSav=r.sav[(La+r.raH-1)%12];
       const juConn=goal.houses.some(h=>juAsp(r.juH).has(h)),saConn=goal.houses.some(h=>saAsp(r.saH).has(h));
+      const raConn=goal.houses.includes(r.raH)||goal.houses.includes(((r.raH-1+6)%12)+1);
+      const keH=((r.raH-1+6)%12)+1;
       const jNote=r.juChg?` (→H${houseFromSigns(La,r.juChg.to)} from ${MONTHS[r.juChg.mon-1]})`:"";
       const sNote=r.saChg?` (→H${houseFromSigns(La,r.saChg.to)} from ${MONTHS[r.saChg.mon-1]})`:"";
       trSec+=`${r.year}: Jupiter H${r.juH}${r.juExalt?" [EXALTED-Cancer]":""}${jNote} · SAV ${juSav}${juConn?" · activates goal house":""}\n`;
       trSec+=`       Saturn  H${r.saH}${r.sadeSati?" [SADE SATI]":""}${sNote} · SAV ${saSav}${saConn?" · activates goal house":""}\n`;
+      trSec+=`       Rahu    H${r.raH} · Ketu H${keH} · SAV ${raSav}${raConn?" · Rahu/Ketu axis touches goal house":""}\n`;
     }
     return `You are an expert Vedic astrologer trained in Parashara's Brihat Parashara Hora Shastra (BPHS). Analyse the chart below for the stated goal. Give a specific, honest timing forecast for 2025–2030. Reference actual planet names, house numbers, and BPHS principles. Do not give generic advice.
 
@@ -2149,7 +2184,11 @@ ${hSec}=======================================
 VIMSHOTTARI DASHA — 2025 to 2030
 =======================================
 ${dSec}=======================================
-JUPITER & SATURN TRANSITS (sidereal / Lahiri)
+NAKSHATRA LAYER
+=======================================
+${nakSec}
+=======================================
+JUPITER, SATURN & RAHU/KETU TRANSITS (sidereal / Lahiri)
 =======================================
 ${trSec}
 =======================================
@@ -2179,6 +2218,14 @@ ANALYSIS — please address each section:
 5. WATCH LIST
    What specific planetary condition or dasha would signal the goal is about to materialise?
    What would be a warning sign it is being delayed or blocked?
+
+6. NAKSHATRA INTERPRETATION
+   For the Moon nakshatra and the current antardasha lord's nakshatra:
+   - What is the nakshatra's deity, theme, and motivation — and how does it align or conflict with the goal?
+   - Is the nakshatra lord of the current dasha lord connected to the goal houses (by lordship or placement)?
+     If yes, this is a sub-lord activation and is a strong timing signal.
+   - From the Moon's nakshatra, which taras (Janma, Sampat, Vipat, Kshema, Pratyak, Sadhaka, Vadha, Mitra, Ati-Mitra)
+     do the running dasha lords fall in? Kshema (4th) and Sadhaka (7th) taras are supportive; Vipat (3rd) and Vadha (7th) are challenging.
 
 Reference actual planets, house numbers, and BPHS principles throughout.`;
   }
