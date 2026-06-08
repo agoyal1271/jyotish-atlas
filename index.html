@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Jyotish Atlas — a living primer to Parashara's grammar</title>
+<style>
+  :root{
+    --bg:#0b0e1a; --bg2:#0f1430; --panel:#151a35; --panel2:#1c2347; --line:#2a3360;
+    --ink:#eef1fb; --muted:#9aa4c8; --gold:#e7b94e; --gold2:#f4d27a; --accent:#7aa2ff;
+    --exalt:#4fd07f; --debil:#ef6a5a; --own:#e7b94e; --friend:#7fc4ff; --enemy:#ff9a8a; --neutral:#b9c0dd;
+    --r:14px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:
+      radial-gradient(1200px 600px at 80% -10%, #1a2150 0%, transparent 60%),
+      radial-gradient(900px 500px at 0% 10%, #16193a 0%, transparent 55%), var(--bg);
+    color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.55}
+  a{color:var(--gold2);text-decoration:none}
+  header.top{position:sticky;top:0;z-index:30;backdrop-filter:blur(10px);background:rgba(11,14,26,.8);
+    border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center;padding:10px 20px;flex-wrap:wrap}
+  header.top .brand{font-weight:700;letter-spacing:.4px;margin-right:8px}
+  header.top .brand small{display:block;font-size:10px;color:var(--muted);font-weight:400}
+  nav{display:flex;flex-wrap:wrap}
+  nav a{font-size:12.5px;color:var(--muted);padding:6px 10px;border-radius:8px}
+  nav a:hover{color:var(--ink);background:var(--panel2)}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+  section{padding:54px 0 12px;border-bottom:1px solid rgba(42,51,96,.5)}
+  h1.hero{font-size:40px;line-height:1.1;margin:46px 0 10px;font-weight:800;
+    background:linear-gradient(120deg,#fff,#f4d27a 55%,#7aa2ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lede{font-size:18px;color:var(--muted);max-width:720px}
+  .eyebrow{color:var(--gold);font-size:12px;letter-spacing:2px;text-transform:uppercase;font-weight:700}
+  h2{font-size:26px;margin:6px 0 4px}
+  .sub{color:var(--muted);margin:0 0 20px;max-width:780px}
+  .grammar{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:26px 0 6px}
+  @media(max-width:780px){.grammar{grid-template-columns:repeat(2,1fr)}}
+  .gcard{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--r);padding:16px}
+  .gcard .n{font-size:30px;font-weight:800;color:var(--gold2)}
+  .gcard .t{font-weight:700;margin-top:2px}
+  .gcard .d{font-size:12.5px;color:var(--muted)}
+  .equation{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:24px 0;font-size:15px}
+  .chip{background:var(--panel2);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-weight:600}
+  .chip.op{background:none;border:none;color:var(--gold);font-size:20px}
+  .tokens{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 18px}
+  .tok{cursor:pointer;border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:8px 12px;display:flex;align-items:center;gap:8px;font-size:13.5px;transition:.12s}
+  .tok:hover{transform:translateY(-2px);border-color:var(--gold)}
+  .tok.active{background:var(--panel2);border-color:var(--gold);box-shadow:0 0 0 1px var(--gold) inset}
+  .tok .gl{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:13px;color:#0b0e1a}
+  .detail{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;padding:20px;min-height:120px}
+  .detail h3{margin:0 0 2px;font-size:21px;display:flex;align-items:center;gap:10px}
+  .detail .skt{color:var(--muted);font-weight:400;font-size:14px}
+  .kv{display:grid;grid-template-columns:140px 1fr;gap:6px 14px;margin-top:12px;font-size:13.5px}
+  .kv b{color:var(--muted);font-weight:600}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .tag{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:3px 9px;font-size:12px}
+  .chapref{font-size:11.5px;color:var(--muted);margin-top:14px;border-top:1px dashed var(--line);padding-top:10px}
+
+  /* ---- mode switch ---- */
+  .modebar{display:inline-flex;gap:4px;margin:4px 0 16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:4px}
+  .mode{background:none;color:var(--muted);border:none;border-radius:9px;padding:9px 16px;cursor:pointer;font-size:13.5px;font-weight:600}
+  .mode.active{background:var(--gold);color:#0b0e1a}
+
+  /* ---- control bar (HCI: one tidy input row, labels above compact controls) ---- */
+  .controlbar{display:flex;gap:20px;flex-wrap:wrap;align-items:flex-end;background:var(--panel);
+    border:1px solid var(--line);border-radius:var(--r);padding:14px 18px;margin-bottom:16px}
+  .ctrl{display:flex;flex-direction:column;gap:6px;min-width:0}
+  .ctrl>label{font-size:10.5px;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);display:flex;gap:8px;align-items:center}
+  select{background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:14px;min-width:150px}
+  input[type=range]{width:160px;accent-color:var(--gold);vertical-align:middle}
+  .degval{font-weight:700;color:var(--gold2)}
+  .lordauto{font-weight:800;color:var(--gold2);font-size:15px;padding:7px 0}
+
+  /* ---- full-width verdict hero ---- */
+  .hero-verdict{border-radius:16px;padding:16px 20px;margin-bottom:16px;border:1px solid var(--line);
+    display:flex;align-items:center;gap:18px;background:linear-gradient(120deg,var(--panel2),var(--bg2))}
+  .hero-verdict .badge{flex:0 0 auto;width:62px;height:62px;border-radius:16px;display:grid;place-items:center;font-size:30px;color:#0b0e1a;font-weight:800}
+  .hero-verdict .ht{font-size:19px;font-weight:800;margin-bottom:2px}
+  .hero-verdict .hx{font-size:13.5px;color:#dfe4f6;max-width:820px}
+
+  /* ---- balanced result grid (fills the row, no dead space) ---- */
+  .result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start}
+  @media(max-width:900px){.result-grid{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+  .panel h4{margin:0 0 12px;font-size:11.5px;letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
+  .steps .step{display:flex;gap:11px;margin-bottom:13px}
+  .steps .step:last-child{margin-bottom:0}
+  .steps .sn{flex:0 0 22px;height:22px;border-radius:7px;background:var(--panel2);border:1px solid var(--line);display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--gold2)}
+  .steps .st{font-size:13px;line-height:1.5}
+  .steps .st b{color:#fff}
+  .vrow{display:flex;align-items:center;justify-content:space-between;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:11px 13px;margin-bottom:9px}
+  .vrow:last-child{margin-bottom:0}
+  .vrow .vl{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+  .vrow .vsign{font-size:17px;font-weight:800;margin-top:1px}
+  .vrow .vdig{font-size:11.5px;font-weight:700;color:#0b0e1a;padding:4px 11px;border-radius:999px;white-space:nowrap}
+  .houses{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:6px}
+  .hcell{aspect-ratio:1/1.05;border:1px solid var(--line);border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:var(--muted);background:var(--panel2)}
+  .hcell .hn{font-weight:700;color:var(--ink);font-size:13px}
+  .hcell.occ{background:var(--gold);color:#0b0e1a;border-color:var(--gold2)}.hcell.occ .hn{color:#0b0e1a}
+  .hcell.asp{background:#28407a;border-color:var(--accent)}.hcell.asp .hn{color:#cfe0ff}
+  .legend2{font-size:11px;color:var(--muted);margin-top:9px;display:flex;gap:14px;flex-wrap:wrap}
+  .legend2 i{display:inline-block;width:11px;height:11px;border-radius:3px;vertical-align:-1px;margin-right:4px}
+
+  /* ---- my charts ---- */
+  .chartbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+  .ctab{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 15px;cursor:pointer;font-size:13px;display:flex;gap:8px;align-items:center}
+  .ctab.active{background:var(--gold);color:#0b0e1a;border-color:var(--gold);font-weight:600}
+  .ctab .x{opacity:.5;font-weight:700}.ctab .x:hover{opacity:1}
+  .ctab.add{border-style:dashed;color:var(--gold2)}
+  .charttable{width:100%;border-collapse:collapse;font-size:13px}
+  .charttable th{text-align:left;color:var(--muted);font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;padding:7px 8px;border-bottom:1px solid var(--line)}
+  .charttable td{padding:9px 8px;border-bottom:1px solid rgba(42,51,96,.45)}
+  .charttable tr.clk{cursor:pointer}
+  .charttable tr.clk:hover td{background:var(--panel2)}
+  .dchip{display:inline-block;font-size:10.5px;font-weight:700;color:#0b0e1a;padding:2px 9px;border-radius:999px}
+  .gname{display:inline-flex;align-items:center;gap:7px;font-weight:600}
+  .gdot{width:18px;height:18px;border-radius:50%;display:inline-grid;place-items:center;font-size:11px;color:#0b0e1a;font-weight:800}
+
+  /* ---- modal ---- */
+  .modal{position:fixed;inset:0;background:rgba(4,6,12,.76);display:none;align-items:center;justify-content:center;z-index:60;padding:18px}
+  .modal.show{display:flex}
+  .modal .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;max-width:660px;width:100%;padding:24px}
+  .modal h3{margin:0 0 4px}
+  .modal textarea{width:100%;height:210px;background:var(--bg2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:12px;font-family:Menlo,Consolas,monospace;font-size:12px;resize:vertical}
+  .modal input[type=text]{width:100%;background:var(--bg2);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px}
+  .row-actions{display:flex;gap:10px;align-items:center;margin-top:14px}
+  button.btn{background:var(--gold);color:#0b0e1a;border:none;border-radius:10px;padding:10px 18px;font-weight:700;cursor:pointer}
+  button.ghost{background:none;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:10px 16px;cursor:pointer}
+
+  /* ---- quiz ---- */
+  .quiz{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;padding:22px}
+  .qq{font-size:18px;font-weight:600;margin-bottom:14px}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media(max-width:600px){.opts{grid-template-columns:1fr}}
+  .opt{cursor:pointer;border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:11px 14px;font-size:14px}
+  .opt:hover{border-color:var(--gold)}
+  .opt.right{background:rgba(79,208,127,.18);border-color:var(--exalt)}
+  .opt.wrong{background:rgba(239,106,90,.18);border-color:var(--debil)}
+  .qmeta{display:flex;justify-content:space-between;align-items:center;margin-top:14px;color:var(--muted);font-size:13px}
+  .nakband{background:linear-gradient(120deg,#1a1f48,#141938);border:1px solid var(--line);border-radius:14px;padding:12px 18px;margin-bottom:16px;font-size:13.5px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;cursor:pointer;transition:.12s}
+  .nakband:hover{border-color:var(--gold)}
+  .nakband .nstar{color:var(--gold2);font-size:20px}
+  .nakband b{color:#fff}
+  .nakclk{cursor:pointer;border-bottom:1px dotted var(--muted)}
+  .nakclk:hover{color:var(--gold2);border-color:var(--gold2)}
+  /* BAV */
+  .bav-section{margin-top:20px}
+  .bav-tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px}
+  .bav-tab{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:5px 11px;
+    cursor:pointer;font-size:12.5px;font-weight:600;transition:.1s}
+  .bav-tab.active{border-color:var(--gold);color:var(--gold2)}
+  .bav-tab.sav{border-color:var(--accent);color:var(--accent)}
+  .bav-tab.sav.active{background:var(--accent);color:#0b0e1a}
+  .bav-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:5px;margin-bottom:8px}
+  .bav-cell{border:1px solid var(--line);border-radius:8px;padding:7px 4px;text-align:center;background:var(--panel2);transition:.2s}
+  .bav-cell .bn{font-size:18px;font-weight:800;line-height:1}
+  .bav-cell .bl{font-size:10px;color:var(--muted);margin-top:2px}
+  .bav-cell .bs{font-size:9.5px;margin-top:1px;color:var(--muted);line-height:1.2}
+  .bav-cell.hi5{background:#1d3a20;border-color:var(--exalt)}.bav-cell.hi5 .bn{color:var(--exalt)}
+  .bav-cell.hi4{background:#1e3220;border-color:#6fcf87}.bav-cell.hi4 .bn{color:#9ee0b0}
+  .bav-cell.lo2{background:#2d1a1a;border-color:var(--debil)}.bav-cell.lo2 .bn{color:var(--debil)}
+  .bav-cell.lo3{background:#2a1818;border-color:#c0513c}.bav-cell.lo3 .bn{color:#de8070}
+  .bav-cell.occ{outline:2px solid var(--gold);outline-offset:1px}
+  .bav-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:6px}
+  .bav-legend span{display:flex;align-items:center;gap:5px}
+  .bav-legend i{width:12px;height:12px;border-radius:3px;display:inline-block}
+  .bav-insight{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 16px;
+    margin-top:12px;font-size:13px;color:#dfe4f6}
+  .bav-insight b{color:var(--gold2)}
+  footer{padding:40px 0 70px;color:var(--muted);font-size:12.5px}
+  .note{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">✦ Jyotish Atlas<small>Parashara's grammar, made interactive</small></div>
+  <nav>
+    <a href="#why">The idea</a>
+    <a href="#grahas">Grahas</a>
+    <a href="#rashis">Rashis</a>
+    <a href="#bhavas">Bhavas</a>
+    <a href="#synth">Synthesizer</a>
+    <a href="#charts">My Charts</a>
+    <a href="#quiz">Practice</a>
+  </nav>
+</header>
+
+<div class="wrap">
+
+  <h1 class="hero">Astrology isn't a list to memorize.<br>It's a grammar you can learn.</h1>
+  <p class="lede">The <i>Brihat Parashara Hora Shastra</i> looks like 100 chapters of riddles. Underneath, it's a tiny set of building blocks that <b>recombine</b> — like letters into words. Learn the blocks, learn how they combine, and the sky starts to read like a sentence.</p>
+
+  <section id="why">
+    <div class="eyebrow">The core idea</div>
+    <h2>Three alphabets, one grammar</h2>
+    <p class="sub">Almost everything in a horoscope is generated from three small sets and a few "states." You don't memorize meanings — you <b>build</b> them.</p>
+    <div class="grammar">
+      <div class="gcard"><div class="n">9</div><div class="t">Grahas</div><div class="d">The actors — <i>what</i> happens (soul, mind, drive, wisdom…)</div></div>
+      <div class="gcard"><div class="n">12</div><div class="t">Rashis</div><div class="d">The costumes — <i>how</i> it expresses (the sign's flavor)</div></div>
+      <div class="gcard"><div class="n">12</div><div class="t">Bhavas</div><div class="d">The stages — <i>where</i> in life it plays out (houses)</div></div>
+      <div class="gcard"><div class="n">+</div><div class="t">States</div><div class="d">Dignity, varga &amp; aspect — <i>how strong</i> &amp; whether it delivers</div></div>
+    </div>
+    <div class="equation">
+      <span class="chip">A Graha</span><span class="chip op">×</span>
+      <span class="chip">a Rashi</span><span class="chip op">×</span>
+      <span class="chip">a Bhava</span><span class="chip op">→</span>
+      <span class="chip" style="border-color:var(--gold);color:var(--gold2)">one specific meaning</span>
+    </div>
+    <p class="note">9 × 12 × 12 = 1,296 base placements — each shifting again with dignity, divisional charts and aspect. You can't memorize that. You <b>derive</b> it. Try the <a href="#synth">Synthesizer</a>.</p>
+  </section>
+
+  <section id="grahas">
+    <div class="eyebrow">Alphabet 1 · the actors</div>
+    <h2>The 9 Grahas</h2>
+    <p class="sub">Each planet is a <b>character</b> with a fixed nature and a bundle of significations (<i>karakatvas</i>). Click one to meet it.</p>
+    <div class="tokens" id="grahaTokens"></div>
+    <div class="detail" id="grahaDetail"></div>
+  </section>
+
+  <section id="rashis">
+    <div class="eyebrow">Alphabet 2 · the costumes</div>
+    <h2>The 12 Rashis</h2>
+    <p class="sub">A sign doesn't <i>do</i> things — it <b>colors</b> whatever planet stands in it, through its element, modality and ruler.</p>
+    <div class="tokens" id="rashiTokens"></div>
+    <div class="detail" id="rashiDetail"></div>
+  </section>
+
+  <section id="bhavas">
+    <div class="eyebrow">Alphabet 3 · the stages</div>
+    <h2>The 12 Bhavas</h2>
+    <p class="sub">Houses are <b>areas of life</b>. Whatever planet sits here pours its nature into these themes.</p>
+    <div class="tokens" id="bhavaTokens"></div>
+    <div class="detail" id="bhavaDetail"></div>
+  </section>
+
+  <!-- SYNTHESIZER -->
+  <section id="synth">
+    <div class="eyebrow">The grammar engine</div>
+    <h2>The Synthesizer</h2>
+    <p class="sub">Read a planet across <b>D-1 (the promise)</b> and <b>D-9 / Navamsa (the delivery)</b> — or read an <b>empty house</b> through its lord. Everything updates live.</p>
+
+    <div class="modebar">
+      <button class="mode active" data-mode="planet">Place a planet</button>
+      <button class="mode" data-mode="house">Empty house</button>
+    </div>
+
+    <!-- PLANET MODE -->
+    <div id="planetMode">
+      <div class="controlbar">
+        <div class="ctrl"><label>Graha</label><select id="sGraha"></select></div>
+        <div class="ctrl"><label>D-1 Sign</label><select id="sRashi"></select></div>
+        <div class="ctrl"><label>Degree <span class="degval" id="sDegVal">14.0°</span></label><input type="range" id="sDeg" min="0" max="29.9" step="0.5" value="14"></div>
+        <div class="ctrl"><label>House</label><select id="sBhava"></select></div>
+      </div>
+      <div class="hero-verdict"><div class="badge" id="pBadge">≈</div><div><div class="ht" id="pTitle"></div><div class="hx" id="pText"></div></div></div>
+      <div class="nakband" id="pNak"></div>
+      <div class="result-grid">
+        <div class="panel"><h4>Strength · D-1 → D-9</h4><div id="pVargas"></div></div>
+        <div class="panel"><h4>How the meaning is built</h4><div class="steps" id="pSteps"></div></div>
+        <div class="panel"><h4>Drishti · what it aspects</h4><p class="note" id="aspText"></p><div class="houses" id="aspHouses"></div>
+          <div class="legend2"><span><i style="background:var(--gold)"></i>occupies</span><span><i style="background:#28407a"></i>aspects</span></div></div>
+      </div>
+    </div>
+
+    <!-- HOUSE MODE -->
+    <div id="houseMode" style="display:none">
+      <div class="controlbar">
+        <div class="ctrl"><label>Lagna</label><select id="hLagna"></select></div>
+        <div class="ctrl"><label>House to read</label><select id="hNum"></select></div>
+        <div class="ctrl"><label>Its lord (auto)</label><div class="lordauto" id="hLordName">—</div></div>
+        <div class="ctrl"><label>Lord sits in — sign</label><select id="hLordSign"></select></div>
+        <div class="ctrl"><label>Lord's degree <span class="degval" id="hLordDegVal">15.0°</span></label><input type="range" id="hLordDeg" min="0" max="29.9" step="0.5" value="15"></div>
+      </div>
+      <div class="hero-verdict"><div class="badge" id="hBadge">⌂</div><div><div class="ht" id="hTitle"></div><div class="hx" id="hText"></div></div></div>
+      <div class="result-grid">
+        <div class="panel"><h4>① The lord's placement</h4><div class="steps" id="hPlace"></div></div>
+        <div class="panel"><h4>② The lord's strength · D-1 / D-9</h4><div id="hVargas"></div></div>
+        <div class="panel"><h4>③ Karaka &amp; what to check next</h4><div class="steps" id="hKaraka"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MY CHARTS -->
+  <section id="charts">
+    <div class="eyebrow">Apply it to a real chart</div>
+    <h2>My Charts</h2>
+    <p class="sub">Paste any natal chart (the planetary table from JHora / Parashara's Light — exactly like your <code>.txt</code> files) and the whole chart gets the D-1 → D-9 + lord treatment. Click any row to open it in the Synthesizer. Charts are saved in your browser.</p>
+    <div class="chartbar" id="chartTabs"></div>
+    <div id="chartEmpty" class="panel" style="text-align:center;color:var(--muted);padding:34px;display:none">
+      No chart yet. <a href="#" id="addFirst"><b>＋ Add your chart</b></a> &nbsp;·&nbsp; <a href="#" id="demoFirst">load a demo</a>
+    </div>
+    <div id="chartView" style="display:none">
+      <div class="result-grid" style="grid-template-columns:1.35fr 1fr">
+        <div class="panel"><h4>Planets · promise (D-1) → delivery (D-9)</h4><div style="overflow:auto"><table class="charttable" id="planetTable"></table></div></div>
+        <div class="panel"><h4>Houses · occupied, or empty → judged by lord</h4><div style="overflow:auto"><table class="charttable" id="houseTable"></table></div></div>
+      </div>
+      <div class="bav-section panel" style="margin-top:14px">
+        <h4 style="margin:0 0 4px">Bhinna Ashtakavarga (BAV) — benefic points per house</h4>
+        <p class="note" style="margin:0 0 12px">Each planet casts benefic points (0–8) into houses based on its relationships with other planets. More points = better transits through that house. 5+ is strong, 2– is weak. Outlined = planet's <b>natal</b> house. Click a planet tab to see its BAV; <span style="color:var(--accent)">SAV</span> is the combined total (out of 337).</p>
+        <div class="bav-tabs" id="bavTabs"></div>
+        <div class="bav-grid" id="bavGrid"></div>
+        <div class="bav-legend">
+          <span><i style="background:#1d3a20;border:1px solid var(--exalt)"></i>5+ strong</span>
+          <span><i style="background:#1e3220;border:1px solid #6fcf87"></i>4 solid</span>
+          <span><i style="background:var(--panel2);border:1px solid var(--line)"></i>3 average</span>
+          <span><i style="background:#2d1a1a;border:1px solid var(--debil)"></i>2 weak</span>
+          <span><i style="background:#2a1818;border:1px solid #c0513c"></i>1 very weak</span>
+          <span style="border:1px solid var(--gold);border-radius:4px;padding:0 5px;color:var(--gold2)">outlined = natal house</span>
+        </div>
+        <div class="bav-insight" id="bavInsight"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="quiz">
+    <div class="eyebrow">Make it stick</div>
+    <h2>Practice — decode the sky</h2>
+    <p class="sub">Quick questions drawn from the blocks you just met. Reasoning beats memorizing — every answer shows why.</p>
+    <div class="quiz" id="quizBox"></div>
+  </section>
+
+  <footer>
+    <p><b>About the content.</b> Significations, dignities, lordships, Navamsa &amp; aspects follow the classical <i>Brihat Parashara Hora Shastra</i>. Chapter numbering varies by edition, so references are by topic. Rahu/Ketu exaltation differs between authorities and is noted. Your pasted charts are stored only in this browser (localStorage).</p>
+  </footer>
+</div>
+
+<!-- ADD-CHART MODAL -->
+<div class="modal" id="addModal">
+  <div class="card">
+    <h3>Add a chart</h3>
+    <p class="note" style="margin:0 0 12px">Paste the planetary longitude table from your chart software — the lines listing <b>Lagna, Sun … Ketu</b> with sign &amp; degree. The parser reads the rest.</p>
+    <input type="text" id="chartName" placeholder="Name (e.g. Mine, or a relative's)"/>
+    <div style="display:flex;gap:12px;align-items:center;margin:12px 0">
+      <label class="btn" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px">📁 Upload a .txt file<input type="file" id="chartFile" accept=".txt,text/plain" style="display:none"></label>
+      <span class="note">…or paste the text below ↓</span>
+    </div>
+    <textarea id="chartText" placeholder="Lagna     14 Vi 41' 55.19&quot; Hast  2  Vi  Ta&#10;Sun - BK  14 Le 14' 38.67&quot; PPha  1  Le  Le&#10;Moon - GK  5 Ar 26' 42.40&quot; Aswi  2  Ar  Ta&#10;..."></textarea>
+    <div class="row-actions">
+      <a href="#" id="fillDemo" class="note">paste a demo chart</a>
+      <span style="flex:1"></span>
+      <button class="ghost" id="addCancel">Cancel</button>
+      <button class="btn" id="addSave">Parse &amp; save</button>
+    </div>
+    <p class="note" id="parseMsg" style="margin-top:10px;min-height:16px"></p>
+  </div>
+</div>
+
+<!-- NAKSHATRA PROFILE MODAL -->
+<div class="modal" id="nakModal"><div class="card" id="nakCard"></div></div>
+
+<script>
+"use strict";
+const SIGNS=["Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"];
+const SIGN3=["Ar","Ta","Ge","Cn","Le","Vi","Li","Sc","Sg","Cp","Aq","Pi"];
+const SIGN_SKT=["Mesha","Vrishabha","Mithuna","Karka","Simha","Kanya","Tula","Vrishchika","Dhanu","Makara","Kumbha","Meena"];
+
+const GRAHAS=[
+ {k:"Su",name:"Sun",skt:"Surya",gl:"☉",col:"#e8a33d",nature:"Mild malefic",guna:"Sattva",elem:"Fire",
+  karakas:["Soul (Atma)","Father","King / authority","Vitality & ego","Health","Fame"],body:["Bones","Eyes (right)","Heart"],exalt:0,debil:6,own:[4],
+  desc:"The soul and the self. Surya is the king — radiant, authoritative, the source of vitality and purpose. He illumines but can also scorch (ego, pride).",day:"Sunday",chap:"Graha nature — BPHS"},
+ {k:"Mo",name:"Moon",skt:"Chandra",gl:"☾",col:"#cfd8e6",nature:"Benefic (waxing)",guna:"Sattva",elem:"Water",
+  karakas:["Mind (Manas)","Mother","Emotions","The public","Nourishment","Comfort"],body:["Blood & fluids","Lungs","Left eye"],exalt:1,debil:7,own:[3],
+  desc:"The mind and feelings. Chandra is the nurturer — receptive, changeable, reflective. Strong when full, vulnerable when dark; the most personal point in the chart.",day:"Monday",chap:"Graha nature — BPHS"},
+ {k:"Ma",name:"Mars",skt:"Mangala",gl:"♂",col:"#d8503a",nature:"Malefic",guna:"Tamas",elem:"Fire",
+  karakas:["Energy & courage","Younger siblings","Land & property","Drive / aggression","War & competition","Engineers, soldiers"],body:["Muscles","Marrow","Blood (red)"],exalt:9,debil:3,own:[0,7],
+  desc:"The warrior. Mangala is raw drive, courage and force — protective when channeled, destructive when not. Commander of the planetary army.",day:"Tuesday",chap:"Graha nature — BPHS"},
+ {k:"Me",name:"Mercury",skt:"Budha",gl:"☿",col:"#4caf7d",nature:"Variable (benefic with benefics)",guna:"Rajas",elem:"Earth",
+  karakas:["Intellect & logic","Speech & writing","Commerce & trade","Skill / wit","Students","Nerves"],body:["Skin","Nervous system"],exalt:5,debil:11,own:[2,5],
+  desc:"The communicator. Budha is the clever prince — quick, analytical, adaptable. Takes the color of whatever it sits with (benefic with benefics, malefic with malefics).",day:"Wednesday",chap:"Graha nature — BPHS"},
+ {k:"Ju",name:"Jupiter",skt:"Guru",gl:"♃",col:"#e3b94e",nature:"Great benefic",guna:"Sattva",elem:"Ether",
+  karakas:["Wisdom & dharma","Children","Wealth & fortune","Teacher / guru","Faith & ethics","Expansion"],body:["Fat","Liver","Thighs"],exalt:3,debil:9,own:[8,11],
+  desc:"The guru. Brihaspati is grace, wisdom and growth — the great benefic. Expands and blesses whatever he touches; teacher of the gods.",day:"Thursday",chap:"Graha nature — BPHS"},
+ {k:"Ve",name:"Venus",skt:"Shukra",gl:"♀",col:"#e58fb0",nature:"Benefic",guna:"Rajas",elem:"Water",
+  karakas:["Love & relationships","Spouse","Art, beauty, music","Luxury & vehicles","Pleasure","Diplomacy"],body:["Reproductive system","Kidneys","Semen/ova"],exalt:11,debil:5,own:[1,6],
+  desc:"The lover-poet. Shukra is harmony, beauty and desire — guru of the asuras, master of the arts and of all worldly delight.",day:"Friday",chap:"Graha nature — BPHS"},
+ {k:"Sa",name:"Saturn",skt:"Shani",gl:"♄",col:"#7f8db0",nature:"Malefic",guna:"Tamas",elem:"Air",
+  karakas:["Discipline & time","Longevity","Sorrow & delay","The masses / labour","Detachment","Servants, elders"],body:["Nerves","Teeth","Skeleton"],exalt:6,debil:0,own:[9,10],
+  desc:"The judge. Shani is time, karma and consequence — slow, strict, fair. He delays and restricts, but rewards patience and honest effort like no other.",day:"Saturday",chap:"Graha nature — BPHS"},
+ {k:"Ra",name:"Rahu",skt:"Rahu",gl:"☊",col:"#9a8fb6",nature:"Shadowy malefic",guna:"Tamas",elem:"Air",
+  karakas:["Obsession & desire","Foreign / unconventional","Illusion (Maya)","Sudden events","Technology, outsiders","Amplification"],body:["—"],exalt:-1,debil:-1,own:[],
+  desc:"The dragon's head — a shadow point, not a body. Rahu magnifies, craves and disrupts; worldly hunger and the unfamiliar. (Exaltation varies — often Taurus or Gemini.)",day:"—",chap:"Nodes — BPHS"},
+ {k:"Ke",name:"Ketu",skt:"Ketu",gl:"☋",col:"#9a8b7a",nature:"Shadowy malefic",guna:"Tamas",elem:"Fire",
+  karakas:["Detachment & moksha","Past-life karma","Spirituality / insight","Sudden loss","Mysticism","Subtraction"],body:["—"],exalt:-1,debil:-1,own:[],
+  desc:"The dragon's tail — the other shadow point. Ketu cuts away, withdraws and seeks liberation; flashes of intuition through letting go. (Exaltation often Scorpio or Sagittarius.)",day:"—",chap:"Nodes — BPHS"}
+];
+const GBYK={}; GRAHAS.forEach(g=>GBYK[g.k]=g);
+const FRIEND={
+ Su:{f:["Mo","Ma","Ju"],e:["Ve","Sa"],n:["Me"]}, Mo:{f:["Su","Me"],e:[],n:["Ma","Ju","Ve","Sa"]},
+ Ma:{f:["Su","Mo","Ju"],e:["Me"],n:["Ve","Sa"]}, Me:{f:["Su","Ve"],e:["Mo"],n:["Ma","Ju","Sa"]},
+ Ju:{f:["Su","Mo","Ma"],e:["Me","Ve"],n:["Sa"]}, Ve:{f:["Me","Sa"],e:["Su","Mo"],n:["Ma","Ju"]},
+ Sa:{f:["Me","Ve"],e:["Su","Mo","Ma"],n:["Ju"]}, Ra:{f:["Ve","Sa"],e:["Su","Mo"],n:["Ma","Ju","Me"]},
+ Ke:{f:["Ma","Ve","Sa"],e:["Su","Mo"],n:["Ju","Me"]}
+};
+const SIGN_LORD=["Ma","Ve","Me","Mo","Su","Me","Ve","Ma","Ju","Sa","Sa","Ju"];
+const ELEM={Fire:"#e7795a",Earth:"#a98c5a",Air:"#7fb0e0",Water:"#5fc9c2"};
+const RASHIS=SIGNS.map((s,i)=>({
+  name:s,skt:SIGN_SKT[i],lord:SIGN_LORD[i],elem:["Fire","Earth","Air","Water"][i%4],
+  mode:["Movable (Chara)","Fixed (Sthira)","Dual (Dvisvabhava)"][i%3],gender:(i%2===0)?"Male / odd":"Female / even",
+  body:["Head","Face & neck","Arms & shoulders","Chest & heart","Stomach","Hips & gut","Navel & lower abdomen","Pelvis & genitals","Thighs","Knees","Calves & ankles","Feet"][i],
+  symbol:["Ram","Bull","Twins","Crab","Lion","Maiden","Scales","Scorpion","Archer","Sea-goat","Water-bearer","Fishes"][i],
+  traits:[["pioneering","impulsive","bold"],["steady","sensual","stubborn"],["curious","communicative","restless"],["nurturing","moody","protective"],["regal","proud","creative"],["analytical","precise","critical"],["balanced","relational","indecisive"],["intense","secretive","transformative"],["philosophical","free","optimistic"],["ambitious","disciplined","cautious"],["inventive","detached","humanitarian"],["compassionate","dreamy","boundless"]][i]
+}));
+const BHAVAS=[
+ {n:1,skt:"Tanu",en:"Self & body",cat:"Kendra · Trikona",kar:["physical body","personality","head","vitality","life direction"]},
+ {n:2,skt:"Dhana",en:"Wealth & speech",cat:"Maraka",kar:["accumulated wealth","family","speech","food","face & eyes"]},
+ {n:3,skt:"Sahaja",en:"Courage & siblings",cat:"Upachaya · Kama",kar:["younger siblings","courage & effort","communication","short travel","hands, skills"]},
+ {n:4,skt:"Sukha",en:"Home & heart",cat:"Kendra · Moksha",kar:["mother","home & property","vehicles","inner peace","heart, chest"]},
+ {n:5,skt:"Putra",en:"Creativity & children",cat:"Trikona · Dharma",kar:["children","intelligence","romance","past-life merit","mantra"]},
+ {n:6,skt:"Ari",en:"Obstacles & service",cat:"Upachaya · Dusthana",kar:["enemies & competition","disease","debts","daily work & service","obstacles overcome"]},
+ {n:7,skt:"Yuvati",en:"Partnership",cat:"Kendra · Maraka",kar:["spouse","marriage","business partners","open relations","trade"]},
+ {n:8,skt:"Randhra",en:"Transformation",cat:"Dusthana · Moksha",kar:["longevity & death","sudden events","occult & research","inheritance","deep change"]},
+ {n:9,skt:"Dharma",en:"Fortune & belief",cat:"Trikona · Dharma",kar:["fortune & grace","father","guru","higher learning","pilgrimage, ethics"]},
+ {n:10,skt:"Karma",en:"Career & status",cat:"Kendra · Artha",kar:["career & action","public status","authority","fame","reputation"]},
+ {n:11,skt:"Labha",en:"Gains & networks",cat:"Upachaya · Kama",kar:["income & gains","elder siblings","fulfilled desires","social networks","large goals"]},
+ {n:12,skt:"Vyaya",en:"Loss & liberation",cat:"Dusthana · Moksha",kar:["expenditure & loss","foreign lands","isolation, retreat","moksha","bed, sleep, the beyond"]}
+];
+
+/* 27 nakshatras — the finer "costume": lord, deity, symbol, theme */
+const NAK=[
+ {n:"Ashwini",l:"Ke",d:"Ashwini Kumaras",s:"horse's head",t:"swift healing, fresh starts, speed",g:"Deva (divine)",sh:"the power to quickly heal &amp; reach",st:"The twin celestial horsemen-physicians who race across the dawn sky bringing miracle cures. Ashwini is initiation, rejuvenation and the fearless first step."},
+ {n:"Bharani",l:"Ve",d:"Yama",s:"yoni / womb",t:"bearing extremes, restraint, transformation",g:"Manushya (human)",sh:"the power to take things away (and bear new life)",st:"Ruled by Yama, lord of death and dharma. Bharani holds the tension between birth and death — gestation, discipline, and the moral force to carry creation through extremes."},
+ {n:"Krittika",l:"Su",d:"Agni",s:"razor / flame",t:"cutting clarity, purification, sharp focus",g:"Rakshasa (intense)",sh:"the power to burn &amp; purify",st:"Agni's flame that both cooks and cuts. The Pleiades — fierce cosmic nurses who raised the war-god Kartikeya; sharp, purifying, protective."},
+ {n:"Rohini",l:"Mo",d:"Brahma / Prajapati",s:"chariot / ox-cart",t:"growth, beauty, fertile abundance",g:"Manushya (human)",sh:"the power to make things grow",st:"The Moon's most beloved star — fertile, magnetic, sensual. The seed that sprouts and the creative fullness of nature."},
+ {n:"Mrigashira",l:"Ma",d:"Soma",s:"deer's head",t:"seeking, curiosity, gentle searching",g:"Deva (divine)",sh:"the power to give fulfilment",st:"The deer that wanders the forest forever searching for the perfect scent. Gentle, curious, restless — the eternal seeker."},
+ {n:"Ardra",l:"Ra",d:"Rudra",s:"teardrop / diamond",t:"storm and renewal, breakthrough, intensity",g:"Manushya (human)",sh:"the power of effort that brings gain",st:"Rudra, the howling storm-god. Ardra is the thunderclap and the teardrop — destruction that clears the ground so fresh growth can begin."},
+ {n:"Punarvasu",l:"Ju",d:"Aditi",s:"quiver of arrows",t:"renewal, return of light, optimism",g:"Deva (divine)",sh:"the power to gain wealth &amp; abundance",st:"Aditi, the boundless cosmic mother. 'The return of the light' after darkness — recovery, second chances, homecoming and unshakeable optimism."},
+ {n:"Pushya",l:"Sa",d:"Brihaspati",s:"cow's udder / lotus",t:"nourishment, care, auspicious support",g:"Deva (divine)",sh:"the power to create spiritual energy",st:"Considered the most auspicious nakshatra — the cosmic cow that nourishes all. Brihaspati's star of care, devotion and protective wisdom."},
+ {n:"Ashlesha",l:"Me",d:"the Nagas (serpents)",s:"coiled serpent",t:"penetrating, hypnotic, entwining insight",g:"Rakshasa (intense)",sh:"the power to inflict poison &amp; to embrace",st:"The coiled serpents of kundalini. Hypnotic, penetrating, secretive — the entwining wisdom that can heal or bite."},
+ {n:"Magha",l:"Ke",d:"the Pitris (ancestors)",s:"throne",t:"lineage, authority, legacy, tradition",g:"Rakshasa (intense)",sh:"the power to leave the body &amp; honour the ancestors",st:"The royal throne of the forefathers. Magha is legacy, ancestry, ceremony and inherited authority — standing on the shoulders of those who came before."},
+ {n:"Purva Phalguni",l:"Ve",d:"Bhaga",s:"front legs of a bed",t:"pleasure, romance, rest, creativity",g:"Manushya (human)",sh:"the power of procreation &amp; delight",st:"Bhaga, god of bliss and good fortune. The star of love-making, relaxation, the arts and the sweetness of life enjoyed."},
+ {n:"Uttara Phalguni",l:"Su",d:"Aryaman",s:"back legs of a bed",t:"partnership, generosity, reliable service",g:"Manushya (human)",sh:"the power to give prosperity through union",st:"Aryaman, patron of contracts, marriage and patronage. The star of dependable partnership, generosity and noble friendship."},
+ {n:"Hasta",l:"Mo",d:"Savitar",s:"the hand / fist",t:"skill, craft, dexterity, manifestation",g:"Deva (divine)",sh:"the power to gain &amp; place in the hand",st:"Savitar, the skilful Sun. Hasta is the hand — craft, dexterity, healing touch, and the power to grasp what you seek and make it real."},
+ {n:"Chitra",l:"Ma",d:"Tvashtar / Vishvakarma",s:"a bright jewel / pearl",t:"design, brilliance, beauty, craftsmanship",g:"Rakshasa (intense)",sh:"the power to accumulate merit &amp; honour",st:"Tvashtar, the divine architect who fashions form. The shining jewel — brilliance, design, glamour and dazzling craftsmanship."},
+ {n:"Swati",l:"Ra",d:"Vayu",s:"young sprout in the wind",t:"independence, movement, adaptability, trade",g:"Deva (divine)",sh:"the power to scatter like the wind",st:"Vayu, the wind. Swati bends but doesn't break — independent, mobile, flexible; the self-going trader and the reed that survives the storm."},
+ {n:"Vishakha",l:"Ju",d:"Indra-Agni",s:"triumphal arch / potter's wheel",t:"goal-focus, determination, achievement",g:"Rakshasa (intense)",sh:"the power to achieve many fruits",st:"The forked star of Indra and Agni. Single-minded, ambitious, patient — the harvest that comes after relentless, focused effort."},
+ {n:"Anuradha",l:"Sa",d:"Mitra",s:"lotus",t:"friendship, devotion, cooperation",g:"Deva (divine)",sh:"the power of worship &amp; devotion",st:"Mitra, god of friendship and divine contracts. Anuradha succeeds through devotion and cooperation, and flourishes far from home."},
+ {n:"Jyeshtha",l:"Me",d:"Indra",s:"earring / umbrella",t:"seniority, protection, hard-won power",g:"Rakshasa (intense)",sh:"the power to rise &amp; conquer",st:"Indra, king of the gods. 'The eldest' — seniority, responsibility and protective authority that is hard-won and carries a hidden burden."},
+ {n:"Mula",l:"Ke",d:"Nirriti",s:"bundle of tied roots",t:"getting to the root, dissolution, inquiry",g:"Rakshasa (intense)",sh:"the power to ruin &amp; destroy (to reach the root)",st:"Nirriti, goddess of dissolution. Mula tears things up by the roots to expose the truth beneath — radical inquiry, endings that found new beginnings."},
+ {n:"Purva Ashadha",l:"Ve",d:"Apas (the waters)",s:"winnowing fan / tusk",t:"invincibility, persuasion, purification",g:"Manushya (human)",sh:"the power of invigoration",st:"The unconquerable cosmic waters. 'The undefeated' — persuasion, early victory and the cleansing, swelling power of the ocean."},
+ {n:"Uttara Ashadha",l:"Su",d:"Vishvadevas",s:"elephant tusk / planks",t:"lasting victory, integrity, endurance",g:"Manushya (human)",sh:"the power of unchallengeable victory",st:"The Vishvadevas, the universal gods. Uttara Ashadha is the victory that lasts — won through integrity, patience and righteous endurance."},
+ {n:"Shravana",l:"Mo",d:"Vishnu",s:"ear / three footprints",t:"listening, learning, wisdom, connection",g:"Deva (divine)",sh:"the power to connect",st:"Vishnu's three world-spanning steps and the listening ear. Wisdom gained through hearing — learning, lineage, scholarship and good name."},
+ {n:"Dhanishta",l:"Ma",d:"the eight Vasus",s:"drum / flute",t:"wealth, rhythm, fame, group action",g:"Rakshasa (intense)",sh:"the power to give abundance &amp; fame",st:"The eight Vasus, gods of material abundance, beating the cosmic drum. Wealth, music, rhythm and renown — but the drum is hollow, a caution against empty materialism."},
+ {n:"Shatabhisha",l:"Ra",d:"Varuna",s:"empty circle / 100 stars",t:"healing, mysticism, secrecy, research",g:"Rakshasa (intense)",sh:"the power to heal",st:"Varuna, keeper of cosmic waters and law. 'The hundred healers' and the veiling circle — mysticism, secrecy, research and unconventional cures."},
+ {n:"Purva Bhadrapada",l:"Ju",d:"Aja Ekapada",s:"sword / two front legs of a cot",t:"idealism, intensity, ascetic fire",g:"Manushya (human)",sh:"the power to raise a person spiritually",st:"Aja Ekapada, the one-footed fire-dragon. Burning idealism and intensity — the ascetic flame that transforms through extremes and otherworldly vision."},
+ {n:"Uttara Bhadrapada",l:"Sa",d:"Ahir Budhnya",s:"back legs of a cot / serpent",t:"depth, restraint, calm after storm",g:"Manushya (human)",sh:"the power to bring rain &amp; stability",st:"Ahir Budhnya, the serpent of the deep sea. Hidden depth, restraint and wisdom — the still, fertile calm that settles after the storm."},
+ {n:"Revati",l:"Me",d:"Pushan",s:"fish / drum",t:"nourishment, safe passage, completion",g:"Deva (divine)",sh:"the power to nourish &amp; give passage",st:"The final nakshatra. Pushan, the shepherd-god, guides souls and travellers safely to their destination. Completion, transcendence and a gentle, nourishing farewell."}
+];
+function nakInfo(lon){const span=40/3;lon=((lon%360)+360)%360;const idx=Math.floor(lon/span);const pada=Math.floor((lon-idx*span)/(span/4))+1;return Object.assign({idx,pada},NAK[idx]);}
+const VIMY={Ke:7,Ve:20,Su:6,Mo:10,Ma:7,Ra:18,Ju:16,Sa:19,Me:17};
+function fmtDeg(d){const s=Math.floor(d/30)%12;const dd=d-Math.floor(d/30)*30;const deg=Math.floor(dd);const min=Math.round((dd-deg)*60);return SIGN3[s]+" "+deg+"°"+(min?(" "+(min<10?"0":"")+min+"'"):"");}
+function openNak(idx){
+  const n=NAK[idx],lord=GBYK[n.l],span=40/3,start=idx*span;
+  document.getElementById("nakCard").innerHTML=`
+    <button class="ghost" style="float:right;border:none;background:none;font-size:22px;cursor:pointer;color:var(--muted)" onclick="closeNak()">×</button>
+    <h3 style="margin:0 0 2px;font-size:22px">✦ ${n.n}</h3>
+    <div class="note" style="margin-bottom:14px">Nakshatra ${idx+1} of 27 · ${fmtDeg(start)} – ${fmtDeg(start+span)}</div>
+    <div class="kv">
+      <b>Star-lord</b><span>${lord.gl} ${lord.name} — runs ${VIMY[n.l]} years of Vimsottari dasha</span>
+      <b>Deity</b><span>${n.d}</span>
+      <b>Symbol</b><span>${n.s}</span>
+      <b>Gana</b><span>${n.g}</span>
+      <b>Shakti (power)</b><span>${n.sh}</span>
+      <b>Theme</b><span>${n.t}</span>
+    </div>
+    <p style="margin:16px 0 0;color:#dfe4f6;font-size:14.5px;border-top:1px dashed var(--line);padding-top:14px">${n.st}</p>
+    <div class="chapref">A planet in ${n.n} is coloured by this star, and its star-lord <b>${lord.name}</b> also runs that planet's Vimsottari dasha — the bridge from <i>meaning</i> to <i>timing</i>.</div>`;
+  document.getElementById("nakModal").classList.add("show");
+}
+function closeNak(){document.getElementById("nakModal").classList.remove("show");}
+document.getElementById("nakModal").addEventListener("click",e=>{if(e.target.id==="nakModal")closeNak();});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeNak();});
+
+/* ===== shared engine ===== */
+const NAV_START=[0,9,6,3];
+function navamsaSign(d1Sign,degInSign){ return (NAV_START[d1Sign%4]+Math.floor(degInSign/(10/3)))%12; }
+const HOUSE_KARAKA={1:"Su",2:"Ju",3:"Ma",4:"Mo",5:"Ju",6:"Ma",7:"Ve",8:"Sa",9:"Ju",10:"Su",11:"Ju",12:"Sa"};
+const ORD=n=>n+(n===1?"st":n===2?"nd":n===3?"rd":"th");
+function houseFromSigns(refSign,sign){ return ((sign-refSign)%12+12)%12+1; }
+function glyphDot(g){return `<span class="gl" style="background:${g.col}">${g.gl}</span>`;}
+function dignityOf(gk,ri){
+  const g=GBYK[gk];
+  if(g.exalt===ri) return {full:"Exalted · Uccha",col:"var(--exalt)",score:2};
+  if(g.debil===ri) return {full:"Debilitated · Neecha",col:"var(--debil)",score:-2};
+  if(g.own.includes(ri)) return {full:"Own sign · Swakshetra",col:"var(--own)",score:1.5};
+  if(g.exalt<0) return {full:"Nodal — by dispositor",col:"var(--neutral)",score:0};
+  const lord=SIGN_LORD[ri],rel=FRIEND[gk];
+  if(rel.f.includes(lord)) return {full:"Friend's sign · Mitra",col:"var(--friend)",score:1,lord};
+  if(rel.e.includes(lord)) return {full:"Enemy's sign · Shatru",col:"var(--enemy)",score:-1,lord};
+  return {full:"Neutral sign · Sama",col:"var(--neutral)",score:0,lord};
+}
+function aspectsFromHouse(gk,house){
+  const add={Ma:[4,8],Ju:[5,9],Sa:[3,10]};
+  const set=new Set([7]); (add[gk]||[]).forEach(a=>set.add(a));
+  return [...set].map(d=>((house-1+d-1)%12)+1);
+}
+function combinedVerdict(d1,d9,vg){
+  const s1=d1.score,s9=d9.score; let t,x,col,g;
+  if(s1>=1&&s9>=1){t="Strong & consistent";g="✓";col="var(--exalt)";x="Promises in the Rasi (D-1) and delivers in the Navamsa (D-9) — real substance behind the show.";}
+  else if(s1>=1&&s9<=-1){t="Promises, under-delivers";g="▽";col="var(--debil)";x="Strong outwardly (D-1) but weak underneath (D-9) — can over-promise; results often fade or don't ripen into lasting fruit.";}
+  else if(s1<=-1&&s9>=1){t="Late bloomer · hidden strength";g="↗";col="var(--friend)";x="Struggles on the surface (D-1) but strong inside (D-9) — improves with maturity and effort, classically after marriage. Don't write it off.";}
+  else if(s1<=-1&&s9<=-1){t="Genuinely weak";g="⚠";col="var(--debil)";x="Under-supported in both charts — needs conscious effort, good dasha or remedy to function.";}
+  else {t="Mixed · workable";g="≈";col="var(--neutral)";x="Neither clearly strong nor weak — uneven results that lean on dasha, aspects and effort.";}
+  if(vg){t+=" + Vargottama";g="✦";col="var(--gold)";x="<b>Vargottama</b> (same sign in D-1 &amp; D-9): unusually steady and self-confirming — whatever its dignity, it's locked in. "+x;}
+  return {t,x,col,g};
+}
+function vrow(label,sign,dg){
+  return `<div class="vrow"><div><div class="vl">${label}</div><div class="vsign">${sign}</div></div><span class="vdig" style="background:${dg.col}">${dg.full}</span></div>`;
+}
+
+/* ===== token explorers ===== */
+function explorer(tokensId,detailId,items,renderTok,renderDetail){
+  const tEl=document.getElementById(tokensId),dEl=document.getElementById(detailId);
+  items.forEach((it,i)=>{
+    const t=document.createElement("div");t.className="tok"+(i===0?" active":"");t.innerHTML=renderTok(it);
+    t.onclick=()=>{[...tEl.children].forEach(c=>c.classList.remove("active"));t.classList.add("active");dEl.innerHTML=renderDetail(it);};
+    tEl.appendChild(t);
+  });
+  dEl.innerHTML=renderDetail(items[0]);
+}
+explorer("grahaTokens","grahaDetail",GRAHAS,g=>`${glyphDot(g)}${g.name}`,g=>{
+  const dignity=g.exalt<0?"—":`Exalts in <b style="color:var(--exalt)">${SIGNS[g.exalt]}</b>, falls in <b style="color:var(--debil)">${SIGNS[g.debil]}</b>`;
+  const own=g.own.length?g.own.map(o=>SIGNS[o]).join(", "):"—";
+  return `<h3>${glyphDot(g)} ${g.name} <span class="skt">· ${g.skt} ${g.gl}</span></h3>
+    <p style="margin:8px 0;color:#dfe4f6">${g.desc}</p>
+    <div class="tags">${g.karakas.map(k=>`<span class="tag">${k}</span>`).join("")}</div>
+    <div class="kv"><b>Nature</b><span>${g.nature} · ${g.guna} guna · ${g.elem}</span>
+      <b>Dignity</b><span>${dignity}</span><b>Own sign(s)</b><span>${own}</span>
+      <b>Body (BPHS)</b><span>${g.body.join(", ")}</span><b>Weekday</b><span>${g.day}</span></div>
+    <div class="chapref">📖 ${g.chap}. A planet's whole meaning grows from this one nature — the rest is context.</div>`;
+});
+explorer("rashiTokens","rashiDetail",RASHIS,r=>`<span class="gl" style="background:${ELEM[r.elem]}">${r.name[0]}</span>${r.name}`,r=>{
+  const lord=GBYK[r.lord];
+  return `<h3><span class="gl" style="background:${ELEM[r.elem]}">${r.name[0]}</span> ${r.name} <span class="skt">· ${r.skt} · the ${r.symbol}</span></h3>
+    <div class="tags">${r.traits.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
+    <div class="kv"><b>Ruler</b><span>${glyphDot(lord)} ${lord.name} — its agenda shapes this sign</span>
+      <b>Element</b><span style="color:${ELEM[r.elem]}">${r.elem}</span><b>Modality</b><span>${r.mode}</span>
+      <b>Polarity</b><span>${r.gender}</span><b>Body (Kalapurusha)</b><span>${r.body}</span></div>
+    <div class="chapref">📖 Rashi nature — BPHS. Element = temperament, modality = start/sustain/adapt, ruler = who runs it. A planet here is "dressed" in these qualities.</div>`;
+});
+explorer("bhavaTokens","bhavaDetail",BHAVAS,b=>`<span class="gl" style="background:#2c365f;color:#fff">${b.n}</span>${b.en}`,b=>
+  `<h3><span class="gl" style="background:#2c365f;color:#fff">${b.n}</span> ${ORD(b.n)} House <span class="skt">· ${b.skt} Bhava · ${b.en}</span></h3>
+    <div class="tags">${b.kar.map(k=>`<span class="tag">${k}</span>`).join("")}</div>
+    <div class="kv"><b>Category</b><span>${b.cat}</span></div>
+    <div class="chapref">📖 Bhava significations — BPHS. <b>Kendras</b> (1·4·7·10) are pillars; <b>Trikonas</b> (1·5·9) are grace; <b>Dusthanas</b> (6·8·12) are friction; <b>Upachayas</b> (3·6·10·11) grow with effort.</div>`);
+
+/* ===== SYNTHESIZER ===== */
+const JA={};
+(function(){
+  const sG=document.getElementById("sGraha"),sR=document.getElementById("sRashi"),sD=document.getElementById("sDeg"),sB=document.getElementById("sBhava");
+  GRAHAS.forEach(g=>sG.add(new Option(`${g.gl} ${g.name}`,g.k)));
+  RASHIS.forEach((r,i)=>sR.add(new Option(`${r.name} (${r.skt})`,i)));
+  BHAVAS.forEach(b=>sB.add(new Option(`${b.n} · ${b.en}`,b.n)));
+  sG.value="Sa";sR.value="6";sB.value="7";
+  function render(){
+    const gk=sG.value,ri=+sR.value,deg=+sD.value,bn=+sB.value;
+    const g=GBYK[gk],r=RASHIS[ri],b=BHAVAS[bn-1];
+    const d9i=navamsaSign(ri,deg),r9=RASHIS[d9i];
+    const d1=dignityOf(gk,ri),d9=dignityOf(gk,d9i),vg=(ri===d9i),v=combinedVerdict(d1,d9,vg);
+    const asp=aspectsFromHouse(gk,bn);
+    const lon=ri*30+deg, ni=nakInfo(lon), nl=GBYK[ni.l];
+    document.getElementById("sDegVal").textContent=deg.toFixed(1)+"°";
+    document.getElementById("pBadge").textContent=v.g;
+    document.getElementById("pBadge").style.background=v.col;
+    document.getElementById("pTitle").innerHTML=`${g.gl} ${g.name} · ${v.t}`;
+    document.getElementById("pTitle").style.color=v.col;
+    document.getElementById("pText").innerHTML=v.x;
+    const pnk=document.getElementById("pNak");
+    pnk.innerHTML=`<span class="nstar">✦</span><div><b>Nakshatra ${ni.n}</b> · pada ${ni.pada} · star-lord ${nl.gl} ${nl.name} &nbsp;—&nbsp; deity <b>${ni.d}</b>, symbol “<i>${ni.s}</i>” — ${ni.t}.</div><span class="note" style="margin-left:auto;white-space:nowrap;color:var(--gold2)">details ›</span>`;
+    pnk.onclick=()=>openNak(ni.idx);
+    document.getElementById("pVargas").innerHTML=
+      vrow("D-1 · Rasi",r.name,d1)+vrow("D-9 · Navamsa",r9.name,d9)+
+      (vg?`<div class="note" style="text-align:center;color:var(--gold2);font-weight:700">✦ Vargottama — same sign in both</div>`:"");
+    document.getElementById("pSteps").innerHTML=`
+      <div class="step"><div class="sn">1</div><div class="st"><b>Actor:</b> ${g.name} = ${g.karakas.slice(0,3).join(", ").toLowerCase()}.</div></div>
+      <div class="step"><div class="sn">2</div><div class="st"><b>Sign (costume):</b> in ${r.name} (${r.elem.toLowerCase()}, ruled by ${GBYK[r.lord].name}) it acts <b>${r.traits.join(", ")}</b>.</div></div>
+      <div class="step"><div class="sn">★</div><div class="st"><b>Nakshatra (deeper current):</b> ${ni.n} gives a <b>${ni.t.split(",")[0]}</b> undertone; its star-lord ${nl.name} pulls it toward ${nl.karakas[0].toLowerCase()}.</div></div>
+      <div class="step"><div class="sn">3</div><div class="st"><b>House (stage):</b> in the ${ORD(bn)} (${b.skt}) → pours into ${b.kar.slice(0,3).join(", ")}.</div></div>
+      <div class="step"><div class="sn">4</div><div class="st"><b>Navamsa (D-9):</b> sign ${r9.name} → it ${d9.score>=1?"holds its strength":d9.score<=-1?"loses strength":"stays even"} in delivering.</div></div>`;
+    document.getElementById("aspText").innerHTML=`From house ${bn}, <b>${g.name}</b> aspects house${asp.length>1?"s":""} <b>${asp.join(", ")}</b>${(gk==="Ma"||gk==="Ju"||gk==="Sa")?` (incl. special aspects)`:""} — influencing ${asp.map(h=>BHAVAS[h-1].en.toLowerCase()).join(", ")}.`;
+    const hc=document.getElementById("aspHouses");hc.innerHTML="";
+    for(let h=1;h<=12;h++){const cls=h===bn?"occ":asp.includes(h)?"asp":"";const d=document.createElement("div");d.className="hcell "+cls;d.innerHTML=`<span class="hn">${h}</span><span>${BHAVAS[h-1].en.split(" ")[0]}</span>`;hc.appendChild(d);}
+  }
+  [sG,sR,sB].forEach(s=>s.onchange=render);sD.oninput=render;render();
+  JA.setPlanet=(gk,sign,deg,house)=>{sG.value=gk;sR.value=sign;sD.value=Math.min(29.5,Math.round(deg*2)/2);sB.value=house;setMode("planet");render();document.getElementById("synth").scrollIntoView({behavior:"smooth"});};
+})();
+
+(function(){
+  const hL=document.getElementById("hLagna"),hN=document.getElementById("hNum"),hS=document.getElementById("hLordSign"),hD=document.getElementById("hLordDeg");
+  RASHIS.forEach((r,i)=>hL.add(new Option(`${r.name} (${r.skt})`,i)));
+  for(let n=1;n<=12;n++)hN.add(new Option(`${n} · ${BHAVAS[n-1].en}`,n));
+  RASHIS.forEach((r,i)=>hS.add(new Option(r.name,i)));
+  hL.value="5";hN.value="7";hS.value="2";
+  function houseClass(h){
+    if([1,4,7,10].includes(h))return{t:"a Kendra (pillar)",good:1};
+    if([5,9].includes(h))return{t:"a Trikona (grace)",good:1};
+    if([6,8,12].includes(h))return{t:"a Dusthana (difficult house)",good:-1};
+    if(h===11)return{t:"the 11th (gains)",good:1};
+    return{t:"a neutral house",good:0};
+  }
+  function render(){
+    const lag=+hL.value,hn=+hN.value,b=BHAVAS[hn-1];
+    const signOnHouse=(lag+hn-1)%12,lordK=SIGN_LORD[signOnHouse],lord=GBYK[lordK];
+    const ls=+hS.value,ld=+hD.value,lordHouse=houseFromSigns(lag,ls);
+    const d9i=navamsaSign(ls,ld),d1=dignityOf(lordK,ls),d9=dignityOf(lordK,d9i),vg=(ls===d9i),v=combinedVerdict(d1,d9,vg);
+    const hc=houseClass(lordHouse),kar=GBYK[HOUSE_KARAKA[hn]];
+    document.getElementById("hLordDegVal").textContent=ld.toFixed(1)+"°";
+    document.getElementById("hLordName").innerHTML=`${lord.gl} ${lord.name}`;
+    const supported=hc.good>0&&v.col!=="var(--debil)", challenged=hc.good<0||v.col==="var(--debil)";
+    document.getElementById("hBadge").textContent=supported?"✓":challenged?"⚠":"≈";
+    document.getElementById("hBadge").style.background=supported?"var(--exalt)":challenged?"var(--debil)":"var(--neutral)";
+    document.getElementById("hTitle").innerHTML=`Empty ${ORD(hn)} house (${RASHIS[signOnHouse].name}) — ${supported?"well-supported":challenged?"challenged":"mixed"}`;
+    document.getElementById("hTitle").style.color=supported?"var(--exalt)":challenged?"var(--debil)":"var(--neutral)";
+    document.getElementById("hText").innerHTML=`With <b>${RASHIS[lag].name}</b> rising, the ${ORD(hn)} is ${RASHIS[signOnHouse].name}; its lord <b>${lord.name}</b> sits in your ${ORD(lordHouse)} house and is <b>${v.t.toLowerCase()}</b>.`;
+    document.getElementById("hPlace").innerHTML=`
+      <div class="step"><div class="sn">→</div><div class="st"><b>${lord.name}</b> is in <b>${RASHIS[ls].name}</b> = your <b>${ORD(lordHouse)} house</b>, ${hc.t}.</div></div>
+      <div class="step"><div class="sn">∴</div><div class="st">${hc.good>0?`${ORD(hn)}-house matters get <b style="color:var(--exalt)">support</b>.`:hc.good<0?`${ORD(hn)}-house matters are <b style="color:var(--debil)">under pressure</b> (lord in a dusthana).`:`the lord neither strongly helps nor harms the ${ORD(hn)}.`}</div></div>`;
+    const niL=nakInfo(ls*30+ld);
+    document.getElementById("hVargas").innerHTML=vrow(`Lord · D-1`,RASHIS[ls].name,d1)+vrow(`Lord · D-9`,RASHIS[d9i].name,d9)+
+      `<div class="note">★ Lord's nakshatra: <b>${niL.n}</b> p${niL.pada} (star-lord ${GBYK[niL.l].name})</div>`+
+      `<div class="note" style="margin-top:4px;color:${v.col};font-weight:700">⚖︎ ${v.t}</div><div class="note">${v.x}</div>`;
+    document.getElementById("hKaraka").innerHTML=`
+      <div class="step"><div class="sn">K</div><div class="st"><b>Natural karaka:</b> ${kar.gl} ${kar.name} signifies the ${ORD(hn)} — check <i>its</i> condition too.</div></div>
+      <div class="step"><div class="sn">A</div><div class="st"><b>Aspects:</b> note any planet aspecting the ${ORD(hn)} house — a benefic lifts it, a malefic strains it.</div></div>
+      <div class="step"><div class="sn">∑</div><div class="st"><b>Verdict:</b> ${b.en} is ${supported?"<b style='color:var(--exalt)'>well-supported</b>":challenged?"<b style='color:var(--debil)'>challenged</b>":"<b>mixed</b>"} — lord ${lord.name} is ${hc.t.split(" (")[0]} &amp; ${v.t.toLowerCase()}.</div></div>`;
+  }
+  [hL,hN,hS].forEach(s=>s.onchange=render);hD.oninput=render;render();
+  JA.setHouse=(lag,hn,lordSign,lordDeg)=>{hL.value=lag;hN.value=hn;hS.value=lordSign;hD.value=Math.min(29.5,Math.round(lordDeg*2)/2);setMode("house");render();document.getElementById("synth").scrollIntoView({behavior:"smooth"});};
+})();
+
+function setMode(m){
+  document.querySelectorAll(".mode").forEach(b=>b.classList.toggle("active",b.dataset.mode===m));
+  document.getElementById("planetMode").style.display=m==="planet"?"block":"none";
+  document.getElementById("houseMode").style.display=m==="house"?"block":"none";
+}
+document.querySelectorAll(".mode").forEach(btn=>btn.onclick=()=>setMode(btn.dataset.mode));
+
+/* ===== ASHTAKAVARGA ENGINE (validated 28/28 against AG/SG/IV/PS charts) ===== */
+const AV_REFS=["Su","Mo","Ma","Me","Ju","Ve","Sa","La"];
+const AVT={
+  Su:{Su:[1,2,4,7,8,9,10,11],Mo:[3,6,10,11],Ma:[1,2,4,7,8,9,10,11],Me:[3,5,6,9,10,11,12],Ju:[5,6,9,11],Ve:[6,7,12],Sa:[1,2,4,7,8,9,10,11],La:[3,4,6,10,11,12]},
+  Mo:{Su:[3,6,7,8,10,11],Mo:[1,3,6,7,9,10,11],Ma:[2,3,5,6,10,11],Me:[1,3,4,5,7,8,10,11],Ju:[1,2,4,7,8,10,11],Ve:[3,4,5,7,9,10,11],Sa:[3,5,6,11],La:[3,6,10,11]},
+  Ma:{Su:[3,5,6,10,11],Mo:[3,6,11],Ma:[1,2,4,7,8,10,11],Me:[3,5,6,11],Ju:[6,10,11,12],Ve:[6,8,11,12],Sa:[1,4,7,8,9,10,11],La:[1,3,6,10,11]},
+  Me:{Su:[5,6,9,11,12],Mo:[2,4,6,8,10,11],Ma:[1,2,4,7,8,9,10,11],Me:[1,3,5,6,9,10,11,12],Ju:[6,8,11,12],Ve:[1,2,3,4,5,8,9,11],Sa:[1,2,4,7,8,9,10,11],La:[1,2,4,6,8,10,11]},
+  Ju:{Su:[1,2,3,4,7,8,9,10,11],Mo:[2,5,7,9,11],Ma:[1,2,4,7,8,10,11],Me:[1,2,4,5,6,9,10,11],Ju:[1,2,3,4,7,8,10,11],Ve:[2,5,6,9,10,11],Sa:[3,5,6,12],La:[1,2,4,5,6,7,9,10,11]},
+  Ve:{Su:[8,11,12],Mo:[1,2,3,4,5,8,9,11,12],Ma:[3,4,6,9,11,12],Me:[3,5,6,9,11],Ju:[5,8,9,10,11],Ve:[1,2,3,4,5,8,9,10,11],Sa:[3,4,5,8,9,10,11],La:[1,2,3,4,5,8,9,11]},
+  Sa:{Su:[1,2,4,7,8,10,11],Mo:[3,6,11],Ma:[3,5,6,10,11,12],Me:[6,8,9,10,11,12],Ju:[5,6,11,12],Ve:[6,11,12],Sa:[3,5,6,11],La:[1,3,4,6,10,11]}
+};
+function computeBAV(planet,pos){
+  // pos = {Su,Mo,Ma,Me,Ju,Ve,Sa,La} as sign indices (0-11)
+  const a=Array(12).fill(0);
+  for(const R of AV_REFS){
+    const rs=pos[R];
+    if(rs===undefined||rs===null) continue;
+    for(const h of AVT[planet][R]) a[(rs+h-1)%12]++;
+  }
+  return a; // indexed 0=Aries..11=Pisces
+}
+function computeSAV(pos){
+  const s=Array(12).fill(0);
+  for(const P of ["Su","Mo","Ma","Me","Ju","Ve","Sa"]) computeBAV(P,pos).forEach((v,i)=>s[i]+=v);
+  return s;
+}
+function bavInsightText(planet,bav,La,planets){
+  const PORD=["Su","Mo","Ma","Me","Ju","Ve","Sa"];
+  if(planet==="SAV"){
+    const sav=bav;
+    const top=sav.map((v,i)=>({v,h:i})).sort((a,b)=>b.v-a.v).slice(0,3);
+    const bot=sav.map((v,i)=>({v,h:i})).sort((a,b)=>a.v-b.v).slice(0,3);
+    const total=sav.reduce((a,b)=>a+b,0);
+    return `<b>Total: ${total}/337</b> · Best houses for any transit: <b>${top.map(x=>`H${((x.h-La+12)%12)+1} (${SIGN3[x.h]} · ${x.v}pts)`).join(", ")}</b>. Weakest: <b>${bot.map(x=>`H${((x.h-La+12)%12)+1} (${SIGN3[x.h]} · ${x.v}pts)`).join(", ")}</b>.`;
+  }
+  const p=GBYK[planet],total=bav.reduce((a,b)=>a+b,0);
+  const top=bav.map((v,i)=>({v,h:i})).sort((a,b)=>b.v-a.v).slice(0,3);
+  const bot=bav.map((v,i)=>({v,h:i})).sort((a,b)=>a.v-b.v).slice(0,2);
+  const natalSign=planets[planet]?planets[planet].sign:null;
+  const natalHouse=natalSign!==null?((natalSign-La+12)%12)+1:null;
+  const natalBav=natalSign!==null?bav[natalSign]:null;
+  let extra=""; if(natalSign!==null) extra=` Natal house ${natalHouse} has <b style="color:${natalBav>=4?"var(--exalt)":natalBav<=2?"var(--debil)":"var(--neutral)"}">${natalBav} pts</b>.`;
+  return `<b>${p.name} BAV total: ${total}/56</b>.${extra} Best transits through: <b>${top.map(x=>`H${((x.h-La+12)%12)+1} (${SIGN3[x.h]} · ${x.v}pts)`).join(", ")}</b>. Watch: <b>${bot.map(x=>`H${((x.h-La+12)%12)+1} (${x.v}pts)`).join(", ")}</b>.`;
+}
+
+/* ===== MY CHARTS (parse + persist + apply) ===== */
+(function(){
+  const LS="jyotish_charts_v1";
+  const ABBR={Ar:0,Ta:1,Ge:2,Cn:3,Le:4,Vi:5,Li:6,Sc:7,Sg:8,Cp:9,Aq:10,Pi:11};
+  const ROWS=[["Lagna","La"],["Sun","Su"],["Moon","Mo"],["Mars","Ma"],["Mercury","Me"],["Jupiter","Ju"],["Venus","Ve"],["Saturn","Sa"],["Rahu","Ra"],["Ketu","Ke"]];
+  const PORDER=["Su","Mo","Ma","Me","Ju","Ve","Sa","Ra","Ke"];
+  const DEMO=`Demo chart
+Lagna   10 Ar 00' 00" Aswi 3 Ar
+Sun     20 Sc 00' 00" Jye  2 Sc
+Moon    05 Cn 00' 00" Push 1 Cn
+Mars    28 Cp 00' 00" Dhan 4 Cp
+Mercury 12 Sc 00' 00" Anu  1 Sc
+Jupiter 05 Cn 00' 00" Push 1 Cn
+Venus   18 Li 00' 00" Swat 3 Li
+Saturn  22 Li 00' 00" Visa 1 Li
+Rahu    14 Ta 00' 00" Rohi 2 Ta
+Ketu    14 Sc 00' 00" Anu  3 Sc`;
+
+  function parse(text){
+    const lines=text.split(/\r?\n/); const out={La:null,planets:{}};
+    for(const [name,key] of ROWS){
+      // whole-word match so "Sun" doesn't grab "Sunrise:" / "Sunset:"
+      const line=lines.find(l=>{const t=l.trim();if(!t.startsWith(name))return false;const nx=t[name.length];return !nx||!/[a-z]/.test(nx);});
+      if(!line) continue;
+      const m=line.match(/(\d+)\s+(Ar|Ta|Ge|Cn|Le|Vi|Li|Sc|Sg|Cp|Aq|Pi)\s+(\d+)'\s*([\d.]+)?/);
+      if(!m) continue;
+      const deg=(+m[1])+(+m[3])/60+(m[4]?+m[4]:0)/3600, sign=ABBR[m[2]], retro=/\(R\)/.test(line);
+      if(key==="La") out.La={sign,deg}; else out.planets[key]={sign,deg,retro};
+    }
+    return out;
+  }
+  function load(){ try{return JSON.parse(localStorage.getItem(LS))||[]}catch(e){return[]} }
+  function save(a){ localStorage.setItem(LS,JSON.stringify(a)); }
+
+  let charts=load(), active=charts.length?0:-1;
+  const tabs=document.getElementById("chartTabs"), empty=document.getElementById("chartEmpty"), view=document.getElementById("chartView");
+
+  function renderTabs(){
+    tabs.innerHTML="";
+    charts.forEach((c,i)=>{
+      const t=document.createElement("div"); t.className="ctab"+(i===active?" active":"");
+      t.innerHTML=`<span>${c.name}</span><span class="x" title="remove">✕</span>`;
+      t.querySelector("span").onclick=()=>{active=i;draw();};
+      t.onclick=(e)=>{if(!e.target.classList.contains("x")){active=i;draw();}};
+      t.querySelector(".x").onclick=(e)=>{e.stopPropagation();charts.splice(i,1);if(active>=charts.length)active=charts.length-1;save(charts);draw();};
+      tabs.appendChild(t);
+    });
+    const add=document.createElement("div"); add.className="ctab add"; add.textContent="＋ Add chart"; add.onclick=openModal; tabs.appendChild(add);
+  }
+  function draw(){
+    renderTabs();
+    if(active<0||!charts[active]){empty.style.display="flex";empty.style.justifyContent="center";empty.style.alignItems="center";view.style.display="none";return;}
+    empty.style.display="none";view.style.display="block";
+    const c=charts[active], La=c.La.sign;
+    // planet table
+    let pt=`<tr><th>Planet</th><th>D-1 (house)</th><th>Nakshatra</th><th>D-9</th><th>Verdict</th></tr>`;
+    PORDER.forEach(k=>{
+      const p=c.planets[k]; if(!p) return; const g=GBYK[k];
+      const house=houseFromSigns(La,p.sign), d9i=navamsaSign(p.sign,p.deg), ni=nakInfo(p.sign*30+p.deg);
+      const d1=dignityOf(k,p.sign),d9=dignityOf(k,d9i),v=combinedVerdict(d1,d9,p.sign===d9i);
+      pt+=`<tr class="clk" data-k="${k}" data-s="${p.sign}" data-d="${p.deg}" data-h="${house}">
+        <td><span class="gname"><span class="gdot" style="background:${g.col}">${g.gl}</span>${g.name}${p.retro?" (R)":""}</span></td>
+        <td>${SIGN3[p.sign]} ${p.deg.toFixed(1)}° · H${house}</td>
+        <td><span class="nakclk" data-nak="${ni.idx}">${ni.n}</span> <span class="note">·${ni.pada}</span></td>
+        <td>${SIGN3[d9i]}</td>
+        <td><span class="dchip" style="background:${v.col}">${v.g} ${v.t.replace(" · "," ").replace(" + Vargottama","+VG")}</span></td></tr>`;
+    });
+    document.getElementById("planetTable").innerHTML=pt;
+    document.querySelectorAll("#planetTable tr.clk").forEach(tr=>tr.onclick=()=>JA.setPlanet(tr.dataset.k,+tr.dataset.s,+tr.dataset.d,+tr.dataset.h));
+    document.querySelectorAll("#planetTable .nakclk").forEach(el=>el.onclick=ev=>{ev.stopPropagation();openNak(+el.dataset.nak);});
+    // house table
+    const occ={}; PORDER.forEach(k=>{const p=c.planets[k];if(p)(occ[p.sign]=occ[p.sign]||[]).push(k);});
+    let ht=`<tr><th>House</th><th>Sign</th><th>Status</th></tr>`;
+    for(let h=1;h<=12;h++){
+      const sgn=(La+h-1)%12, lordK=SIGN_LORD[sgn], lord=GBYK[lordK], here=occ[sgn]||[];
+      let status, attr="";
+      if(here.length){ status=here.map(k=>`<span class="gdot" style="background:${GBYK[k].col};width:16px;height:16px;font-size:10px">${GBYK[k].gl}</span>`).join(" "); }
+      else{
+        const lp=c.planets[lordK];
+        if(lp){const lh=houseFromSigns(La,lp.sign); status=`empty → ${lord.gl}${lord.name} in H${lh}`; attr=`class="clk" data-lag="${La}" data-h="${h}" data-ls="${lp.sign}" data-ld="${lp.deg}"`;}
+        else status=`empty → lord ${lord.name}`;
+      }
+      ht+=`<tr ${attr}><td><b>${h}</b> <span class="note">${BHAVAS[h-1].en}</span></td><td>${SIGN3[sgn]}</td><td>${status}</td></tr>`;
+    }
+    document.getElementById("houseTable").innerHTML=ht;
+    document.querySelectorAll("#houseTable tr.clk").forEach(tr=>tr.onclick=()=>JA.setHouse(+tr.dataset.lag,+tr.dataset.h,+tr.dataset.ls,+tr.dataset.ld));
+
+    // build position map for AV engine
+    const avPos={La:c.La.sign};
+    for(const k of ["Su","Mo","Ma","Me","Ju","Ve","Sa"]) if(c.planets[k]) avPos[k]=c.planets[k].sign;
+
+    // pre-compute all BAVs and SAV
+    const allBAV={};
+    for(const P of ["Su","Mo","Ma","Me","Ju","Ve","Sa"]) allBAV[P]=computeBAV(P,avPos);
+    allBAV.SAV=computeSAV(avPos);
+
+    // tabs
+    const tabs=document.getElementById("bavTabs"); tabs.innerHTML="";
+    let activeBav="Su";
+    const PLANET_BAV_ORDER=["Su","Mo","Ma","Me","Ju","Ve","Sa","SAV"];
+    function renderBavTab(sel){
+      activeBav=sel;
+      [...tabs.children].forEach(t=>t.classList.toggle("active",t.dataset.bk===sel));
+      const bav=allBAV[sel];
+      const grid=document.getElementById("bavGrid"); grid.innerHTML="";
+      for(let s=0;s<12;s++){
+        const house=((s-La+12)%12)+1;
+        const v=bav[s];
+        const cls=v>=5?"hi5":v===4?"hi4":v<=1?"lo3":v===2?"lo2":"";
+        // is this sign occupied by any planet?
+        const occBy=["Su","Mo","Ma","Me","Ju","Ve","Sa"].filter(k=>c.planets[k]&&c.planets[k].sign===s).map(k=>GBYK[k].gl).join("");
+        // is this the planet's own natal sign?
+        const isNatal=(sel!=="SAV"&&c.planets[sel]&&c.planets[sel].sign===s)||(sel==="SAV"&&false);
+        const d=document.createElement("div"); d.className="bav-cell "+cls+(isNatal?" occ":"");
+        d.innerHTML=`<div class="bn">${v}</div><div class="bl">${SIGN3[s]}</div><div class="bs">H${house}${occBy?" "+occBy:""}</div>`;
+        grid.appendChild(d);
+      }
+      document.getElementById("bavInsight").innerHTML=bavInsightText(sel,bav,La,c.planets);
+    }
+    PLANET_BAV_ORDER.forEach(k=>{
+      const g=k==="SAV"?null:GBYK[k];
+      const t=document.createElement("div");
+      t.className="bav-tab"+(k==="SAV"?" sav":"")+(k===activeBav?" active":"");
+      t.dataset.bk=k;
+      t.innerHTML=k==="SAV"?"∑ SAV":`${g.gl} ${g.name}`;
+      if(k!=="SAV") t.style.borderColor=GBYK[k].col+"66";
+      t.onclick=()=>renderBavTab(k);
+      tabs.appendChild(t);
+    });
+    renderBavTab("Su");
+  }
+
+  // modal
+  const modal=document.getElementById("addModal"),nameEl=document.getElementById("chartName"),textEl=document.getElementById("chartText"),msg=document.getElementById("parseMsg");
+  function openModal(){nameEl.value="";textEl.value="";msg.textContent="";modal.classList.add("show");nameEl.focus();}
+  function closeModal(){modal.classList.remove("show");}
+  document.getElementById("addCancel").onclick=closeModal;
+  modal.onclick=e=>{if(e.target===modal)closeModal();};
+  document.getElementById("fillDemo").onclick=e=>{e.preventDefault();nameEl.value="Demo chart";textEl.value=DEMO;};
+  document.getElementById("chartFile").onchange=e=>{
+    const f=e.target.files[0]; if(!f)return;
+    const rd=new FileReader();
+    rd.onload=()=>{textEl.value=rd.result; if(!nameEl.value.trim())nameEl.value=f.name.replace(/\.[^.]+$/,""); msg.style.color="var(--muted)"; msg.textContent="File loaded — click “Parse & save”."; e.target.value="";};
+    rd.readAsText(f);
+  };
+  document.getElementById("addFirst").onclick=e=>{e.preventDefault();openModal();};
+  document.getElementById("demoFirst").onclick=e=>{e.preventDefault();charts.push({name:"Demo chart",...parse(DEMO)});active=charts.length-1;save(charts);draw();};
+  document.getElementById("addSave").onclick=()=>{
+    const parsed=parse(textEl.value); const np=Object.keys(parsed.planets).length;
+    if(!parsed.La||np<7){msg.style.color="var(--debil)";msg.textContent=`Couldn't read it — found Lagna:${parsed.La?"yes":"no"}, planets:${np}/9. Make sure you pasted the longitude table (Lagna, Sun…Ketu with sign & degree).`;return;}
+    charts.push({name:(nameEl.value.trim()||`Chart ${charts.length+1}`),La:parsed.La,planets:parsed.planets});
+    active=charts.length-1; save(charts); closeModal(); draw();
+  };
+  draw();
+})();
+
+/* ===== QUIZ ===== */
+(function(){
+  const box=document.getElementById("quizBox"); let score=0,qi=0,answered=false;
+  const rand=a=>a[Math.floor(Math.random()*a.length)];
+  const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+  function makeQ(){
+    const type=Math.floor(Math.random()*4);
+    if(type===0){const g=rand(GRAHAS.filter(x=>x.exalt>=0));return{q:`Which sign is <b>${g.name}</b> exalted in?`,a:SIGNS[g.exalt],opts:shuffle([SIGNS[g.exalt],SIGNS[g.debil],SIGNS[(g.exalt+4)%12],SIGNS[(g.exalt+7)%12]]),why:`${g.name} peaks (Uccha) in ${SIGNS[g.exalt]} and falls in the opposite sign, ${SIGNS[g.debil]}.`};}
+    if(type===1){const ri=Math.floor(Math.random()*12),lord=GBYK[SIGN_LORD[ri]],others=shuffle(GRAHAS.filter(x=>x.k!==lord.k&&x.exalt>=0)).slice(0,3).map(x=>x.name);return{q:`Which planet rules <b>${SIGNS[ri]}</b>?`,a:lord.name,opts:shuffle([lord.name,...others]),why:`${SIGNS[ri]} is ruled by ${lord.name}; its lord's condition flavors everything in the sign.`};}
+    if(type===2){const g=rand(GRAHAS),kar=rand(g.karakas),others=shuffle(GRAHAS.filter(x=>x.k!==g.k)).slice(0,3).map(x=>x.name);return{q:`Which graha is the natural karaka of <b>${kar.toLowerCase()}</b>?`,a:g.name,opts:shuffle([g.name,...others]),why:`${g.name} signifies ${kar.toLowerCase()} — a core karakatva.`};}
+    const b=rand(BHAVAS),kar=rand(b.kar),others=shuffle(BHAVAS.filter(x=>x.n!==b.n)).slice(0,3).map(x=>ORD(x.n)+" house");return{q:`<b>${kar[0].toUpperCase()+kar.slice(1)}</b> is primarily seen from which house?`,a:ORD(b.n)+" house",opts:shuffle([ORD(b.n)+" house",...others]),why:`The ${ORD(b.n)} (${b.skt}) house governs ${b.kar.slice(0,3).join(", ")}.`};
+  }
+  let cur=makeQ();
+  function draw(){
+    box.innerHTML=`<div class="qq">Q${qi+1}. ${cur.q}</div><div class="opts">${cur.opts.map(o=>`<div class="opt" data-o="${o}">${o}</div>`).join("")}</div><div class="qmeta"><span>Score: ${score} / ${qi+(answered?1:0)}</span><span id="qfb"></span></div>`;
+    box.querySelectorAll(".opt").forEach(el=>el.onclick=()=>{
+      if(answered)return;answered=true;const chosen=el.dataset.o;
+      box.querySelectorAll(".opt").forEach(o=>{if(o.dataset.o===cur.a)o.classList.add("right");else if(o.dataset.o===chosen)o.classList.add("wrong");});
+      if(chosen===cur.a)score++;
+      document.getElementById("qfb").innerHTML=`<button class="btn" id="nextq">${qi>=9?"Restart":"Next →"}</button>`;
+      const wy=document.createElement("p");wy.className="note";wy.style.marginTop="10px";wy.innerHTML="💡 "+cur.why;box.appendChild(wy);
+      document.getElementById("nextq").onclick=()=>{if(qi>=9){qi=0;score=0;}else qi++;answered=false;cur=makeQ();draw();};
+    });
+  }
+  draw();
+})();
+</script>
+</body>
+</html>
