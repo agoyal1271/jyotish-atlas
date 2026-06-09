@@ -318,30 +318,58 @@
   .ol-ai-btn-gm{background:linear-gradient(135deg,#4a90e2,#1a7f50);color:#fff}
   .ol-ai-note{font-size:11.5px;color:var(--muted);margin-left:4px}
 
+  /* ===== House Strip ===== */
+  .hs-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
+  @media(max-width:700px){.hs-grid{grid-template-columns:repeat(4,1fr)}}
+  .hs-cell{border:1px solid var(--line);border-radius:9px;padding:8px 5px 6px;text-align:center;background:var(--panel2)}
+  .hs-cell.hs-clk{cursor:pointer}
+  .hs-cell.hs-clk:hover{border-color:var(--gold);background:var(--panel)}
+  .hs-hn{font-size:16px;font-weight:800;color:var(--gold2);line-height:1}
+  .hs-sign{font-size:10px;color:var(--muted);margin:2px 0 5px;letter-spacing:.02em}
+  .hs-occ{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;min-height:20px;align-items:center}
+  .hs-empty{font-size:10px;color:var(--muted)}
+
   /* ===== Planet Strength Dashboard ===== */
   .ps-wrap{margin-top:14px}
   .ps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
   @media(max-width:900px){.ps-grid{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:600px){.ps-grid{grid-template-columns:1fr}}
-  .ps-card{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;position:relative}
-  .ps-card.ps-strong{border-color:rgba(79,208,127,.45)}
-  .ps-card.ps-weak{border-color:rgba(239,106,90,.45)}
-  .ps-top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-  .ps-name{font-size:15px;font-weight:800;flex:1}
-  .ps-badge{font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:999px;text-transform:uppercase;white-space:nowrap}
-  .ps-badge.strong{background:#1d3a20;color:var(--exalt)}
-  .ps-badge.average{background:var(--panel);border:1px solid var(--line);color:var(--muted)}
-  .ps-badge.weak{background:#2d1a1a;color:var(--debil)}
-  .ps-kv{display:grid;grid-template-columns:76px 1fr;gap:4px 8px;font-size:12px;margin-bottom:8px}
+  .ps-card{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px 16px;cursor:pointer;transition:.12s border-color}
+  .ps-card:hover{border-color:var(--gold)}
+  .ps-top{display:flex;align-items:center;gap:9px;margin-bottom:8px}
+  .ps-name{font-size:14px;font-weight:800;flex:1;line-height:1.2}
+  .ps-house{font-size:11px;color:var(--muted)}
+  .ps-divider{border:none;border-top:1px solid var(--line);margin:8px 0}
+  .ps-badges{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:7px;align-items:center}
+  .ps-badge{font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;text-transform:uppercase;white-space:nowrap}
+  /* Inherent strength — dignity-based */
+  .ps-badge.exalted{background:#1d3a20;color:var(--exalt)}
+  .ps-badge.mool{background:#103030;color:#4fd0c0}
+  .ps-badge.own{background:#2a2e10;color:#d4c840}
+  .ps-badge.friend{background:#131e38;color:var(--accent)}
+  .ps-badge.neutral{background:var(--panel);border:1px solid var(--line);color:var(--muted)}
+  .ps-badge.enemy{background:#2a1e0e;color:#c09050}
+  .ps-badge.debil{background:#2d1a1a;color:var(--debil)}
+  /* Functional nature — lagna-based */
+  .ps-fn{font-size:10px;font-weight:800;padding:2px 8px;border-radius:999px;white-space:nowrap}
+  .ps-fn.yogakaraka{background:linear-gradient(135deg,#c49a10,#e8c547);color:#0b0e1a}
+  .ps-fn.benefic{background:#1d3a20;color:var(--exalt)}
+  .ps-fn.mixed{background:#2a2e10;color:#d4c840}
+  .ps-fn.neutral{background:var(--panel);border:1px solid var(--line);color:var(--muted)}
+  .ps-fn.malefic{background:#2d1a1a;color:var(--debil)}
+  .ps-fn.shadow{background:#1a1040;color:#a080f0;border:1px solid rgba(120,80,200,.4)}
+  .ps-kv{display:grid;grid-template-columns:68px 1fr;gap:3px 8px;font-size:12px;margin-bottom:6px}
   .ps-kv b{color:var(--muted);font-weight:600}
   .ps-kv span{color:#dfe4f6}
-  .ps-flags{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+  .ps-hlabel{font-size:10px;color:var(--muted);margin-bottom:2px;font-style:italic}
+  .ps-flags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
   .ps-flag{font-size:10px;font-weight:700;padding:1px 7px;border-radius:999px}
   .ps-flag.combust{background:#2d1a1a;color:var(--debil);border:1px solid rgba(239,106,90,.3)}
-  .ps-flag.retro{background:#1a2040;color:var(--accent);border:1px solid rgba(122,162,255,.35)}
+  .ps-flag.retro{background:#131e38;color:var(--accent);border:1px solid rgba(122,162,255,.3)}
   .ps-flag.vg{background:#1d3a20;color:var(--exalt);border:1px solid rgba(79,208,127,.3)}
+  .ps-flag.mool{background:#103030;color:#4fd0c0;border:1px solid rgba(79,208,192,.3)}
   .ps-bav-bar{display:flex;gap:2px;margin-top:6px;align-items:center}
-  .ps-bav-dot{width:10px;height:10px;border-radius:2px;background:var(--line)}
+  .ps-bav-dot{width:9px;height:9px;border-radius:2px;background:var(--line)}
   .ps-bav-dot.on{background:var(--gold2)}
   .ps-bav-score{font-size:11px;color:var(--muted);margin-left:5px}
 
@@ -493,12 +521,12 @@
       No chart yet. <a href="#" id="addFirst"><b>＋ Add your chart</b></a> &nbsp;·&nbsp; <a href="#" id="demoFirst">load a demo</a>
     </div>
     <div id="chartView" style="display:none">
-      <div class="result-grid" style="grid-template-columns:1.35fr 1fr">
-        <div class="panel"><h4>Planets · promise (D-1) → delivery (D-9)</h4><div style="overflow:auto"><table class="charttable" id="planetTable"></table></div></div>
-        <div class="panel"><h4>Houses · occupied, or empty → judged by lord</h4><div style="overflow:auto"><table class="charttable" id="houseTable"></table></div></div>
+      <div class="panel" style="margin-bottom:14px">
+        <h4 style="margin:0 0 10px">Houses · sign, occupants &amp; lord</h4>
+        <div class="hs-grid" id="houseStripGrid"></div>
       </div>
-      <div class="ps-wrap panel" id="strengthDash" style="display:none;margin-top:14px">
-        <h4 style="margin:0 0 14px">Planet Strength · Dignity · Nakshatra · BAV</h4>
+      <div class="ps-wrap panel" id="strengthDash" style="display:none">
+        <h4 style="margin:0 0 14px">Planets · Dignity · Functional Nature · Nakshatra</h4>
         <div class="ps-grid" id="psGrid"></div>
       </div>
       <div class="bav-section panel" style="margin-top:14px">
@@ -1235,8 +1263,82 @@ function generateStory(c, La, bavForVerdict, allBAV){
   return {p1,p2,p3,p4,p5};
 }
 
+/* ===== BPHS HELPERS ===== */
+
+// Mooltrikona sign + degree range per BPHS
+const MOOL={Su:{s:4,lo:0,hi:20},Mo:{s:1,lo:3,hi:30},Ma:{s:0,lo:0,hi:12},Me:{s:5,lo:15,hi:20},Ju:{s:8,lo:0,hi:10},Ve:{s:6,lo:0,hi:15},Sa:{s:10,lo:0,hi:20}};
+function isMooltrikona(k,sign,deg){const m=MOOL[k];return m&&sign===m.s&&deg>=m.lo&&deg<m.hi;}
+
+// Inherent strength tier from D-1 dignity (Sthana Bala order)
+function inherentTier(k,sign,deg){
+  if(isMooltrikona(k,sign,deg)) return{cls:"mool",label:"Mooltrikona"};
+  const d=dignityOf(k,sign);
+  if(d.score>=2) return{cls:"exalted",label:"Exalted"};
+  if(d.score>=1.5) return{cls:"own",label:"Own sign"};
+  if(d.score>=1) return{cls:"friend",label:"Friend's sign"};
+  if(d.score===-1) return{cls:"enemy",label:"Enemy's sign"};
+  if(d.score<=-2) return{cls:"debil",label:"Debilitated"};
+  return{cls:"neutral",label:"Neutral sign"};
+}
+
+// Functional nature per BPHS based on house lordship for this lagna
+function functionalNature(k,La){
+  if(k==="Ra"||k==="Ke") return{tier:"shadow",label:"Shadow planet",houses:[]};
+  const houses=[];
+  for(let h=1;h<=12;h++) if(SIGN_LORD[(La+h-1)%12]===k) houses.push(h);
+  if(!houses.length) return{tier:"neutral",label:"No lordship",houses};
+
+  const isLagna=houses.includes(1);
+  // non-lagna kendra and trikona
+  const otherK=houses.some(h=>h!==1&&[4,7,10].includes(h));
+  const otherT=houses.some(h=>h!==1&&[5,9].includes(h));
+  const has8=houses.includes(8);
+  const has6=houses.includes(6);
+  const has12=houses.includes(12);
+  const has3=houses.includes(3);
+  const NAT_BEN=new Set(["Mo","Me","Ju","Ve"]);
+
+  // Rule 1 — Lagna lord: always benefic (H1 = kendra + trikona, overrides any other lordship)
+  if(isLagna) return{tier:"benefic",label:"Lagna lord",houses};
+
+  // Rule 2 — Yogakaraka: lords both a non-lagna kendra AND a trikona
+  if(otherK&&otherT) return{tier:"yogakaraka",label:"Yogakaraka",houses};
+
+  // Rule 3 — Trikona lord (H5 or H9)
+  if(otherT){
+    // H8 co-lordship is serious but trikona still makes it mixed-benefic
+    if(has8) return{tier:"mixed",label:`Trikona + 8th lord`,houses};
+    // H6/H12 co-lordship is present but H5/H9 dominates
+    return{tier:"benefic",label:`${houses.includes(5)?"5th":"9th"} lord`,houses};
+  }
+
+  // Rule 4 — H8 lord (most malefic dusthana) — dominates even with kendra co-lordship
+  if(has8) return{tier:"malefic",label:"8th lord"+(otherK?" + kendra":""),houses};
+
+  // Rule 5 — Kendra lord only (no trikona) — Kendradhipati
+  if(otherK){
+    return{tier:"neutral",label:NAT_BEN.has(k)?"Kendradhipati":"Kendra lord",houses};
+  }
+
+  // Rule 6 — Dusthana (6th / 12th)
+  if(has6||has12){
+    const ls=[has6?"6th":"",has12?"12th":""].filter(Boolean).join("+");
+    return{tier:"malefic",label:ls+" lord",houses};
+  }
+
+  // Rule 7 — 3rd lord (upachaya but generally inauspicious for goal purposes)
+  if(has3) return{tier:"malefic",label:"3rd lord",houses};
+
+  // Remaining: H2, H11 (wealth / labha) — neutral
+  return{tier:"neutral",label:`H${houses.join("+")} lord`,houses};
+}
+
+// House type label per BPHS
+const HTYPE={1:"Kendra · Trikona (Lagna)",2:"Dhana",3:"Upachaya (Sahaja)",4:"Kendra",5:"Trikona (Putra)",6:"Upachaya · Dusthana",7:"Kendra · Maraka",8:"Dusthana (Mrityu)",9:"Trikona (Dharma)",10:"Kendra · Upachaya (Karma)",11:"Upachaya (Labha)",12:"Dusthana (Vyaya)"};
+const NAT_MAL=new Set(["Su","Ma","Sa","Ra","Ke"]);
+
 /* ===== PLANET STRENGTH DASHBOARD ===== */
-function renderStrengthDash(c, La, allBAV, bavForVerdict){
+function renderStrengthDash(c,La,allBAV,bavForVerdict){
   const wrap=document.getElementById("strengthDash");
   const grid=document.getElementById("psGrid");
   if(!c||!c.planets){wrap.style.display="none";return;}
@@ -1255,60 +1357,113 @@ function renderStrengthDash(c, La, allBAV, bavForVerdict){
     const d9=dignityOf(k,d9i);
     const ni=nakInfo(p.sign*30+p.deg);
     const vg=(p.sign===d9i);
+    const mool=isMooltrikona(k,p.sign,p.deg);
+    const inh=inherentTier(k,p.sign,p.deg);
+    const fn=functionalNature(k,La);
 
-    // BAV score for this planet in its natal sign
+    // BAV in natal house
     const bav=bavForVerdict[k]?bavForVerdict[k][p.sign]:null;
 
-    // Combust check
-    let combust=false;
+    // Combust (BPHS: combustion weakens the planet)
+    let combust=false,combustOrb=0;
     if(k!=="Su"&&k!=="Mo"&&k!=="Ra"&&k!=="Ke"&&sunP&&CO_ORB[k]){
       const diff=Math.abs(p.sign*30+p.deg-(sunP.sign*30+sunP.deg));
       const orb=Math.min(diff,360-diff);
-      if(orb<=CO_ORB[k])combust=true;
+      if(orb<=CO_ORB[k]){combust=true;combustOrb=orb;}
     }
 
-    // Strength score
-    let score=d1.score;
-    const ht=houseType(house);
-    if(ht.kendra||ht.trikona) score+=0.5;
-    if(ht.dusthana) score-=0.5;
-    if(combust) score-=1.5;
-    if(vg) score+=0.5;
-    if(bav!==null){if(bav>=5)score+=0.3;else if(bav<=2)score-=0.3;}
-    const tier=score>=1.8?"strong":score<=-0.8?"weak":"average";
+    // Upachaya placement note per BPHS:
+    // Malefics in upachaya (3,6,10,11) thrive; benefics are subdued
+    const inUpachaya=[3,6,10,11].includes(house);
+    const upaNote=inUpachaya
+      ?(NAT_MAL.has(k)?" · malefic thrives in upachaya":" · benefic subdued in upachaya")
+      :"";
 
-    // BAV dots (0–8 scale) using per-planet score in natal house
+    // Retrograde = high Cheshta Bala in BPHS — show as strength signal, not penalty
+    const retroNote=p.retro?" · high Cheshta Bala":"";
+
+    // BAV dot bar
     const bavDots=bav!==null?Array.from({length:8},(_,i)=>`<div class="ps-bav-dot${i<bav?" on":""}"></div>`).join(""):"";
-    const bavNote=bav!==null?`<div class="ps-bav-bar">${bavDots}<span class="ps-bav-score">BAV ${bav}/8</span></div>`:"";
+    const bavRow=bav!==null?`<div class="ps-bav-bar">${bavDots}<span class="ps-bav-score">BAV ${bav}/8</span></div>`:"";
 
+    // Flags
     const flags=[];
-    if(combust) flags.push(`<span class="ps-flag combust">Combust</span>`);
-    if(p.retro) flags.push(`<span class="ps-flag retro">Retrograde</span>`);
+    if(combust) flags.push(`<span class="ps-flag combust">Combust ${combustOrb.toFixed(0)}°</span>`);
+    if(p.retro) flags.push(`<span class="ps-flag retro">Retrograde (Cheshta Bala)</span>`);
     if(vg) flags.push(`<span class="ps-flag vg">Vargottama</span>`);
+    if(mool) flags.push(`<span class="ps-flag mool">Mooltrikona</span>`);
 
-    const digShort=d1.full.split("·")[0].trim();
-    const nlK=ni.l; const nlG=GBYK[nlK];
+    const nlG=GBYK[ni.l];
+    const fnHouses=fn.houses.length?` · lords H${fn.houses.join(",")}` :"";
 
-    cards.push(`<div class="ps-card ps-${tier}">
+    const synthCall=`JA.setPlanet('${k}',${p.sign},${p.deg.toFixed(2)},${house})`;
+
+    cards.push(`<div class="ps-card" onclick="${synthCall}" title="Open in Synthesizer">
       <div class="ps-top">
-        <span class="gdot" style="background:${g.col};width:28px;height:28px;font-size:14px;flex-shrink:0">${g.gl}</span>
-        <span class="ps-name">${g.name}</span>
-        <span class="ps-badge ${tier}">${tier}</span>
+        <span class="gdot" style="background:${g.col};width:26px;height:26px;font-size:13px;flex-shrink:0">${g.gl}</span>
+        <div style="flex:1;min-width:0">
+          <div class="ps-name">${g.name}${p.retro?' <span style="font-size:10px;color:var(--accent)">(R)</span>':""}</div>
+          <div class="ps-house">H${house} · ${SIGNS[p.sign]} ${p.deg.toFixed(1)}°</div>
+        </div>
       </div>
+      <hr class="ps-divider">
+      <div class="ps-badges">
+        <span class="ps-badge ${inh.cls}">${inh.label}</span>
+        <span class="ps-fn ${fn.tier}">${fn.tier==="yogakaraka"?"★ Yogakaraka":fn.label}</span>
+      </div>
+      <div style="font-size:10.5px;color:var(--muted);margin-bottom:7px">${HTYPE[house]}${upaNote}${retroNote}${fnHouses}</div>
       <div class="ps-kv">
-        <b>House</b><span>H${house} (${BHAVAS[house-1].en})</span>
-        <b>Sign</b><span>${SIGNS[p.sign]} · <span style="color:${d1.col};font-weight:700">${digShort}</span></span>
-        <b>D-9</b><span>${SIGNS[d9i]} · <span style="color:${d9.col}">${d9.full.split("·")[0].trim()}</span></span>
-        <b>Nakshatra</b><span>${ni.n} <span style="color:var(--muted)">pd-${ni.pada}</span></span>
+        <b>D-9</b><span style="color:${d9.col}">${SIGNS[d9i]} · ${d9.full.split("·")[0].trim()}</span>
+        <b>Nakshatra</b><span>${ni.n} pd-${ni.pada}</span>
         <b>Nak lord</b><span>${nlG.gl} ${nlG.name}</span>
       </div>
-      ${bavNote}
+      ${bavRow}
       ${flags.length?`<div class="ps-flags">${flags.join("")}</div>`:""}
     </div>`);
   }
 
   grid.innerHTML=cards.join("");
   wrap.style.display="block";
+}
+
+/* ===== HOUSE STRIP ===== */
+function renderHouseStrip(c,La){
+  const grid=document.getElementById("houseStripGrid");
+  if(!grid)return;
+  const PORDER=["Su","Mo","Ma","Me","Ju","Ve","Sa","Ra","Ke"];
+  // Build occupant map
+  const occ={};
+  PORDER.forEach(k=>{const p=c.planets[k];if(p)(occ[p.sign]=occ[p.sign]||[]).push(k);});
+
+  let html="";
+  for(let h=1;h<=12;h++){
+    const sgn=(La+h-1)%12;
+    const lordK=SIGN_LORD[sgn];
+    const here=occ[sgn]||[];
+    let inner="";
+    if(here.length){
+      inner=here.map(k=>`<span class="gdot" style="background:${GBYK[k].col};width:17px;height:17px;font-size:9px">${GBYK[k].gl}</span>`).join("");
+    } else {
+      const lp=c.planets[lordK];
+      if(lp){
+        const lh=houseFromSigns(La,lp.sign);
+        inner=`<span class="hs-empty">→ H${lh}</span>`;
+      } else {
+        inner=`<span class="hs-empty">${GBYK[lordK].gl}</span>`;
+      }
+    }
+    const isClk=!here.length&&c.planets[lordK];
+    const lp=c.planets[lordK];
+    const synthAttr=isClk?`class="hs-cell hs-clk" onclick="JA.setHouse(${La},${h},${lp.sign},${lp.deg.toFixed(2)})"
+      title="H${h} empty — open lord ${GBYK[lordK].name} in Synthesizer"`
+      :`class="hs-cell"`;
+    html+=`<div ${synthAttr}>
+      <div class="hs-hn">${h}</div>
+      <div class="hs-sign">${SIGN3[sgn]}</div>
+      <div class="hs-occ">${inner}</div>
+    </div>`;
+  }
+  grid.innerHTML=html;
 }
 
 /* ===== DASHA TIMELINE ===== */
@@ -1500,39 +1655,9 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
     for(const k of ["Su","Mo","Ma","Me","Ju","Ve","Sa"]) if(c.planets[k]) avPos0[k]=c.planets[k].sign;
     const bavForVerdict={};
     for(const k of ["Su","Mo","Ma","Me","Ju","Ve","Sa"]) bavForVerdict[k]=computeBAV(k,avPos0);
-    // planet table
-    let pt=`<tr><th>Planet</th><th>D-1 (house)</th><th>Nakshatra</th><th>D-9</th><th>Verdict</th></tr>`;
-    PORDER.forEach(k=>{
-      const p=c.planets[k]; if(!p) return; const g=GBYK[k];
-      const house=houseFromSigns(La,p.sign), d9i=navamsaSign(p.sign,p.deg), ni=nakInfo(p.sign*30+p.deg);
-      const bavScore=bavForVerdict[k]?bavForVerdict[k][p.sign]:null;
-      const d1=dignityOf(k,p.sign),d9=dignityOf(k,d9i),v=combinedVerdict(d1,d9,p.sign===d9i,{house,planet:k,bavScore});
-      pt+=`<tr class="clk" data-k="${k}" data-s="${p.sign}" data-d="${p.deg}" data-h="${house}">
-        <td><span class="gname"><span class="gdot" style="background:${g.col}">${g.gl}</span>${g.name}${p.retro?" (R)":""}</span></td>
-        <td>${SIGN3[p.sign]} ${p.deg.toFixed(1)}° · H${house}</td>
-        <td><span class="nakclk" data-nak="${ni.idx}">${ni.n}</span> <span class="note">·${ni.pada}</span></td>
-        <td>${SIGN3[d9i]}</td>
-        <td><span class="dchip" style="background:${v.col}">${v.g} ${v.t.replace(" · "," ").replace(" + Vargottama","+VG")}</span></td></tr>`;
-    });
-    document.getElementById("planetTable").innerHTML=pt;
-    document.querySelectorAll("#planetTable tr.clk").forEach(tr=>tr.onclick=()=>JA.setPlanet(tr.dataset.k,+tr.dataset.s,+tr.dataset.d,+tr.dataset.h));
-    document.querySelectorAll("#planetTable .nakclk").forEach(el=>el.onclick=ev=>{ev.stopPropagation();openNak(+el.dataset.nak);});
-    // house table
-    const occ={}; PORDER.forEach(k=>{const p=c.planets[k];if(p)(occ[p.sign]=occ[p.sign]||[]).push(k);});
-    let ht=`<tr><th>House</th><th>Sign</th><th>Status</th></tr>`;
-    for(let h=1;h<=12;h++){
-      const sgn=(La+h-1)%12, lordK=SIGN_LORD[sgn], lord=GBYK[lordK], here=occ[sgn]||[];
-      let status, attr="";
-      if(here.length){ status=here.map(k=>`<span class="gdot" style="background:${GBYK[k].col};width:16px;height:16px;font-size:10px">${GBYK[k].gl}</span>`).join(" "); }
-      else{
-        const lp=c.planets[lordK];
-        if(lp){const lh=houseFromSigns(La,lp.sign); status=`empty → ${lord.gl}${lord.name} in H${lh}`; attr=`class="clk" data-lag="${La}" data-h="${h}" data-ls="${lp.sign}" data-ld="${lp.deg}"`;}
-        else status=`empty → lord ${lord.name}`;
-      }
-      ht+=`<tr ${attr}><td><b>${h}</b> <span class="note">${BHAVAS[h-1].en}</span></td><td>${SIGN3[sgn]}</td><td>${status}</td></tr>`;
-    }
-    document.getElementById("houseTable").innerHTML=ht;
-    document.querySelectorAll("#houseTable tr.clk").forEach(tr=>tr.onclick=()=>JA.setHouse(+tr.dataset.lag,+tr.dataset.h,+tr.dataset.ls,+tr.dataset.ld));
+
+    // House strip (replaces old house table)
+    try{renderHouseStrip(c,La);}catch(e){console.error("renderHouseStrip:",e);}
 
     // build position map for AV engine
     const avPos={La:c.La.sign};
