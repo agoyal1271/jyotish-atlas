@@ -433,7 +433,6 @@
   .tr-special-note.dhaiya-note{background:#28081a;border:1px solid rgba(240,80,160,.3);color:#f0a8d0}
   .tr-special-note.guru-note{background:#08162e;border:1px solid rgba(100,160,255,.25);color:#a0c0ff}
 </style>
-<script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.min.js"></script>
 </head>
 <body>
 <header class="top">
@@ -1689,20 +1688,87 @@ function lahiriAyanamsa(jd){
 // Tropical ecliptic longitude → sidereal {lon,sign,deg}
 function tropToSid(trop,ayan){const s=((trop-ayan)%360+360)%360;return{lon:s,sign:Math.floor(s/30),deg:s%30};}
 
-// Compute current sidereal positions of all 9 planets via astronomy-engine + Lahiri
+/* ---- Self-contained ephemeris (Meeus "Astronomical Algorithms", 2nd ed.) ----
+   Accuracy: Sun ~0.01°, Moon ~0.3°, planets ~0.5–1°  — sufficient for sidereal signs (30° wide). */
+const D2R=Math.PI/180;
+function rv(d){return((d%360)+360)%360;}
+// Iterative Kepler solver
+function solveKepler(M,e){let E=M;for(let i=0;i<8;i++)E-=(E-e*Math.sin(E)-M)/(1-e*Math.cos(E));return E;}
+
+// Geocentric tropical longitude of Sun (Meeus ch.25)
+function ephSun(T){
+  const L0=rv(280.46646+36000.76983*T+3.032e-4*T*T);
+  const M=rv(357.52911+35999.05029*T-1.537e-4*T*T), Mr=M*D2R;
+  const C=(1.914602-4.817e-3*T-1.4e-5*T*T)*Math.sin(Mr)
+         +(1.9993e-2-1.01e-4*T)*Math.sin(2*Mr)+2.89e-4*Math.sin(3*Mr);
+  return rv(L0+C-5.69e-3-4.78e-3*Math.sin((125.04-1934.136*T)*D2R));
+}
+
+// Geocentric tropical longitude of Moon (Meeus ch.47, ~0.3°)
+function ephMoon(T){
+  const Lp=rv(218.3164477+481267.88123421*T);
+  const D=rv(297.8501921+445267.1114034*T)*D2R;
+  const M=rv(357.5291092+35999.0502909*T)*D2R;
+  const Mp=rv(134.9633964+477198.8676313*T)*D2R;
+  const F=rv(93.2720950+483202.0175233*T)*D2R;
+  const E1=1-2.516e-3*T-7.4e-6*T*T;
+  const dL=(6288774*Math.sin(Mp)+1274027*Math.sin(2*D-Mp)+658314*Math.sin(2*D)
+    +213618*Math.sin(2*Mp)-185116*E1*Math.sin(M)-114332*Math.sin(2*F)
+    +58793*Math.sin(2*D-2*Mp)+57066*E1*Math.sin(2*D-M-Mp)
+    +53322*Math.sin(2*D+Mp)+45758*E1*Math.sin(2*D-M)
+    -40923*E1*Math.sin(M-Mp)-34720*Math.sin(D)-30383*E1*Math.sin(M+Mp)
+    +15327*Math.sin(2*D-2*F)-12528*Math.sin(Mp+2*F)+10980*Math.sin(Mp-2*F)
+    +10675*Math.sin(4*D-Mp)+10034*Math.sin(3*Mp)+8548*Math.sin(4*D-2*Mp)
+    -7888*E1*Math.sin(2*D+M-Mp)-6766*E1*Math.sin(2*D+M)-5163*Math.sin(D-Mp)
+    +4987*E1*Math.sin(D+M)+4036*E1*Math.sin(2*D-M+Mp)+3994*Math.sin(2*D+2*Mp)
+    +3861*Math.sin(4*D)+3665*Math.sin(2*D-3*Mp)-2689*E1*Math.sin(M-2*Mp)
+    -2602*Math.sin(2*D-Mp+2*F)+2390*E1*Math.sin(2*D-M-2*Mp)-2348*Math.sin(D+Mp)
+    +2236*E1*Math.sin(2*D-2*M)-2120*E1*Math.sin(M+2*Mp)
+    -2069*E1*E1*Math.sin(2*M)+2048*E1*E1*Math.sin(2*D-2*M-Mp)
+    -1773*Math.sin(2*D+Mp-2*F)-1595*Math.sin(2*F+2*D)
+    +1215*E1*Math.sin(4*D-M-Mp)-1110*Math.sin(2*Mp+2*F))/1e6;
+  return rv(Lp+dL);
+}
+
+// Planet geocentric tropical longitude via Keplerian elements (Meeus Table 31.a)
+// [L0, L1 deg/cy, e0, e1 1/cy, w0, w1 deg/cy, a AU]
+const KELEM={
+  Me:[252.25084,149472.67411,0.20563069,2.527e-5,77.45645,0.15940,0.38709893],
+  Ve:[181.97973,58517.81539,6.77323e-3,-4.938e-5,131.56370,2.68e-3,0.72333199],
+  Ea:[100.46457,35999.37245,1.671022e-2,-3.804e-5,102.93768,0.31795,1.00000011],
+  Ma:[355.45332,19140.30268,9.341233e-2,1.1902e-4,336.04084,0.44741,1.52366231],
+  Ju:[34.40438,3034.90535,4.839266e-2,-1.288e-4,14.72847,0.18095,5.20336301],
+  Sa:[49.94432,1222.49309,5.415060e-2,-3.6762e-4,92.43194,-0.61948,9.53707032]
+};
+function helioXY(key,T){
+  const[L0,L1,e0,e1,w0,w1,a]=KELEM[key];
+  const e=e0+e1*T, w=rv(w0+w1*T);
+  const M=rv(rv(L0+L1*T)-w)*D2R;
+  const E=solveKepler(M,e);
+  const v=2*Math.atan2(Math.sqrt(1+e)*Math.sin(E/2),Math.sqrt(1-e)*Math.cos(E/2));
+  const ri=a*(1-e*Math.cos(E));
+  const lon=rv(v/D2R+w);
+  return{x:ri*Math.cos(lon*D2R),y:ri*Math.sin(lon*D2R)};
+}
+function planetGeoLon(key,T){
+  const p=helioXY(key,T),e=helioXY('Ea',T);
+  return rv(Math.atan2(p.y-e.y,p.x-e.x)/D2R);
+}
+
+// Self-contained: no CDN dependency, works offline
 function getTransitPlanets(date){
-  const AE=window.Astronomy; if(!AE)return null;
   const jd=jdFromDate(date), T=(jd-2451545.0)/36525, ayan=lahiriAyanamsa(jd);
-  const BODIES={Su:'Sun',Mo:'Moon',Me:'Mercury',Ve:'Venus',Ma:'Mars',Ju:'Jupiter',Sa:'Saturn'};
   const pos={};
-  for(const[k,b]of Object.entries(BODIES)){
-    try{pos[k]=tropToSid(AE.EclipticLongitude(b,date),ayan);}
-    catch(e){console.warn('transit err',k,e);}
-  }
-  // Mean Rahu (ascending node) via IAU formula — accurate to ~0.5° for modern dates
-  const raT=((125.044522-1934.136261*T+0.0020758*T*T+T*T*T/450000)%360+360)%360;
+  pos.Su=tropToSid(ephSun(T),ayan);
+  pos.Mo=tropToSid(ephMoon(T),ayan);
+  pos.Me=tropToSid(planetGeoLon('Me',T),ayan);
+  pos.Ve=tropToSid(planetGeoLon('Ve',T),ayan);
+  pos.Ma=tropToSid(planetGeoLon('Ma',T),ayan);
+  pos.Ju=tropToSid(planetGeoLon('Ju',T),ayan);
+  pos.Sa=tropToSid(planetGeoLon('Sa',T),ayan);
+  const raT=rv(125.044522-1934.136261*T+2.0758e-3*T*T+T*T*T/450000);
   pos.Ra=tropToSid(raT,ayan);
-  pos.Ke=tropToSid((raT+180)%360,ayan);
+  pos.Ke=tropToSid(rv(raT+180),ayan);
   return{pos,ayan};
 }
 
@@ -1767,15 +1833,8 @@ function renderTransitPanel(c,La,allBAV,date){
   if(!c||!c.planets||!c.planets.Mo){wrap.style.display='none';return;}
   const moonSign=c.planets.Mo.sign;
 
-  if(!window.Astronomy){
-    wrap.style.display='block';
-    wrap.innerHTML=`<div class="tr-hdr"><h4>◎ Gochara · Transits</h4></div><div class="dt-no-data">Astronomy engine unavailable. Check your internet connection.</div>`;
-    return;
-  }
-
   date=date||new Date();
   const tr=getTransitPlanets(date);
-  if(!tr){wrap.style.display='none';return;}
 
   const ga=gocharaAnalysis(tr.pos,moonSign,allBAV);
   const fmtDate=d=>d.toISOString().slice(0,10);
