@@ -432,6 +432,100 @@
   .tr-special-note.sati-note{background:#180828;border:1px solid rgba(160,80,240,.3);color:#d0a8f8}
   .tr-special-note.dhaiya-note{background:#28081a;border:1px solid rgba(240,80,160,.3);color:#f0a8d0}
   .tr-special-note.guru-note{background:#08162e;border:1px solid rgba(100,160,255,.25);color:#a0c0ff}
+
+  /* ===== Yoga Finder ===== */
+  .yg-wrap{padding:18px 20px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+  .yg-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:8px}
+  .yg-hdr h4{margin:0;font-size:14px;font-weight:700;color:var(--gold2)}
+  .yg-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+  @media(max-width:700px){.yg-grid{grid-template-columns:1fr}}
+  .yg-card{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .yg-card.yg-A{border-color:rgba(227,185,78,.5)}
+  .yg-card.yg-B{border-color:rgba(79,208,127,.35)}
+  .yg-card.yg-C{border-color:rgba(239,106,90,.35)}
+  .yg-card-top{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+  .yg-grade{flex:0 0 auto;width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-size:13px;font-weight:800}
+  .yg-grade.A{background:#2a2010;color:var(--gold2)}
+  .yg-grade.B{background:#1d3a20;color:var(--exalt)}
+  .yg-grade.C{background:#2d1a1a;color:var(--debil)}
+  .yg-name{font-size:13px;font-weight:800;color:var(--ink);line-height:1.3}
+  .yg-cat{font-size:10.5px;color:var(--muted);margin-top:1px}
+  .yg-planets{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:7px;align-items:center}
+  .yg-desc{font-size:12.5px;color:#dfe4f6;line-height:1.62}
+  .yg-source{font-size:11px;color:var(--muted);margin-top:8px;border-top:1px dashed var(--line);padding-top:7px}
+  .yg-none{padding:18px;text-align:center;color:var(--muted);font-size:13px}
+
+  /* ===== LIGHT THEME ===== */
+  html.light{
+    --bg:#f4f6fb; --bg2:#edf0f8; --panel:#ffffff; --panel2:#f0f3fa; --line:#cdd5ee;
+    --ink:#1a1d35; --muted:#5562a0; --gold:#9a7010; --gold2:#7a5500; --accent:#2850c8;
+    --exalt:#1a7540; --debil:#bb2020; --own:#9a7010; --friend:#1060b0; --enemy:#bb5020; --neutral:#5562a0;
+  }
+  html.light body{background:var(--bg);color:var(--ink)}
+  html.light header.top{background:rgba(244,246,251,.92)}
+  html.light h1.hero{background:linear-gradient(120deg,#1a1d35,#9a7010 55%,#2850c8);-webkit-background-clip:text;background-clip:text;color:transparent}
+  html.light a{color:var(--gold)}
+  html.light select,html.light .modal textarea,html.light .modal input[type=text]{background:var(--panel2);color:var(--ink)}
+  html.light .ol-prompt-ta{background:var(--panel2);color:var(--ink)}
+  html.light .gcard,html.light .detail,html.light .quiz{background:linear-gradient(180deg,#fff,var(--bg2))}
+  html.light .nakband{background:linear-gradient(120deg,#f0f4ff,#e8ecf8)}
+  html.light .hero-verdict{background:linear-gradient(120deg,var(--panel2),var(--bg2))}
+  html.light .chart-story{background:linear-gradient(160deg,#f0f4ff,#f8faff)}
+  html.light .mode.active,.html.light .ctab.active{color:#fff}
+  html.light .ctab.active{background:var(--gold);border-color:var(--gold);color:#fff}
+  html.light .dt-now-badge{color:#fff}
+  html.light .bav-table td.hi5{background:#d0f0dc;color:#0a5a22}
+  html.light .bav-table td.hi4{background:#ddf0e4;color:#1a6a32}
+  html.light .bav-table td.lo2{background:#fce8e8;color:#992020}
+  html.light .bav-table td.lo1{background:#fad8d8;color:#881818}
+  html.light .bav-table td.sav-hi{background:#d0f0dc;color:#0a5a22}
+  html.light .bav-table td.sav-lo{background:#fce8e8;color:#992020}
+  html.light .bav-score-badge.hi{background:#d0f0dc;color:#0a5a22}
+  html.light .bav-score-badge.lo{background:#fce8e8;color:#992020}
+  html.light .ps-badge.exalted{background:#d0f0dc;color:#0a5a22}
+  html.light .ps-badge.mool{background:#ccf0ee;color:#0a4848}
+  html.light .ps-badge.own{background:#f0eeb8;color:#786010}
+  html.light .ps-badge.friend{background:#d4e8ff;color:#0848a0}
+  html.light .ps-badge.neutral{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+  html.light .ps-badge.enemy{background:#f8e4cc;color:#884018}
+  html.light .ps-badge.debil{background:#fce8e8;color:#992020}
+  html.light .ps-fn.yogakaraka{background:linear-gradient(135deg,#e4bc48,#eccf60);color:#3a2800}
+  html.light .ps-fn.benefic{background:#d0f0dc;color:#0a5a22}
+  html.light .ps-fn.mixed{background:#f0eeb8;color:#786010}
+  html.light .ps-fn.neutral{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+  html.light .ps-fn.malefic{background:#fce8e8;color:#992020}
+  html.light .ps-fn.shadow{background:#ede0ff;color:#5810a0}
+  html.light .ps-flag.combust{background:#fce8e8;color:#992020;border-color:rgba(200,60,60,.3)}
+  html.light .ps-flag.retro{background:#d4e8ff;color:#0848a0;border-color:rgba(40,80,200,.3)}
+  html.light .ps-flag.vg{background:#d0f0dc;color:#0a5a22;border-color:rgba(26,117,64,.3)}
+  html.light .ps-flag.mool{background:#ccf0ee;color:#0a4848;border-color:rgba(10,72,72,.3)}
+  html.light .tr-badge.good{background:#d0f0dc;color:#0a5a22}
+  html.light .tr-badge.bad{background:#fce8e8;color:#992020}
+  html.light .tr-badge.vedha{background:#fff0c8;color:#7a5000}
+  html.light .tr-badge.neutral{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+  html.light .tr-badge.sati{background:#f0e0ff;color:#5810a0}
+  html.light .tr-badge.dhaiya{background:#ffe0f0;color:#880840}
+  html.light .tr-badge.guru{background:#ddeeff;color:#1040b8}
+  html.light .tr-special-note.sati-note{background:#f8eeff;border-color:rgba(140,60,220,.3);color:#5810a0}
+  html.light .tr-special-note.dhaiya-note{background:#fff0f6;border-color:rgba(220,60,140,.3);color:#880840}
+  html.light .tr-special-note.guru-note{background:#e8f2ff;border-color:rgba(80,140,255,.3);color:#1040b8}
+  html.light .yg-grade.A{background:#f0e4bc;color:#7a5000}
+  html.light .yg-grade.B{background:#d0f0dc;color:#0a5a22}
+  html.light .yg-grade.C{background:#fce8e8;color:#992020}
+  html.light .yg-desc{color:var(--ink)}
+  html.light .ol-best-banner{background:linear-gradient(90deg,#d4eedd,#cbead5);border-color:#4a8a5a;color:#1a4028}
+  html.light .ol-year-card.ol-good{background:linear-gradient(135deg,#e4f2ea,var(--panel2));border-color:#4a8a5a}
+  html.light .ol-year-card.ol-weak{background:linear-gradient(135deg,#fce8e8,var(--panel2));border-color:#bb3030}
+  html.light .bb-cond.pos{background:rgba(208,240,220,.6);border-color:rgba(26,117,64,.25)}
+  html.light .bb-cond.neg{background:rgba(252,232,232,.6);border-color:rgba(187,32,32,.2)}
+  html.light .bb-verdict-bar.v-strong{background:rgba(208,240,220,.5);border-color:rgba(26,117,64,.3)}
+  html.light .bb-verdict-bar.v-weak{background:rgba(252,232,232,.5);border-color:rgba(187,32,32,.3)}
+  html.light .bb-sav-badge.bb-sav-hi{background:#d0f0dc;color:#0a5a22}
+  html.light .bb-sav-badge.bb-sav-lo{background:#fce8e8;color:#992020}
+  html.light .sl-badge.sav-hi{background:#d0f0dc;color:#0a5a22}
+  html.light .sl-badge.sav-lo{background:#fce8e8;color:#992020}
+  html.light .opt.right{background:rgba(26,117,64,.15);border-color:var(--exalt)}
+  html.light .opt.wrong{background:rgba(187,32,32,.15);border-color:var(--debil)}
 </style>
 </head>
 <body>
@@ -448,6 +542,7 @@
     <a href="#outlook">Life Outlook</a>
     <a href="#quiz">Practice</a>
   </nav>
+  <button id="themeToggle" title="Toggle light / dark theme" onclick="toggleTheme()" style="margin-left:auto;background:none;border:1px solid var(--line);color:var(--muted);border-radius:8px;padding:5px 11px;cursor:pointer;font-size:15px;line-height:1;flex-shrink:0">☾</button>
 </header>
 
 <div class="wrap">
@@ -579,6 +674,7 @@
       </div>
       <div class="dt-wrap" id="dashaTimeline" style="display:none;margin-top:14px"></div>
       <div class="tr-wrap" id="transitPanel" style="display:none;margin-top:14px"></div>
+      <div id="yogaPanel" style="display:none;margin-top:14px"></div>
       <div class="sl-section panel" id="specialLagnas" style="display:none;margin-top:14px">
         <h4>Special Lagnas · Image &amp; Wealth</h4>
         <div class="sl-grid">
@@ -1929,6 +2025,173 @@ function renderTransitPanel(c,La,allBAV,date){
   });
 }
 
+/* ===== YOGA FINDER (BPHS) ===== */
+function detectYogas(c, La) {
+  const yogas = [], pl = c.planets;
+  function hL(s) { return houseFromSigns(La, s); }
+  function conj(k1,k2){ return pl[k1]&&pl[k2]&&pl[k1].sign===pl[k2].sign; }
+  function exch(k1,k2){ return pl[k1]&&pl[k2]&&SIGN_LORD[pl[k1].sign]===k2&&SIGN_LORD[pl[k2].sign]===k1; }
+  function aspRel(k1,k2){
+    if(!pl[k1]||!pl[k2]) return false;
+    const h1=hL(pl[k1].sign),h2=hL(pl[k2].sign);
+    return aspectsFromHouse(k1,h1).includes(h2)||aspectsFromHouse(k2,h2).includes(h1);
+  }
+  function sambandha(k1,k2){
+    if(conj(k1,k2)) return "conjunction";
+    if(exch(k1,k2)) return "Parivartana (exchange)";
+    if(aspRel(k1,k2)) return "aspect";
+    return null;
+  }
+
+  /* 1. Pancha Mahapurusha — BPHS ch.25 */
+  const PANCHA={Ma:{name:"Ruchaka",ownS:[0,7],exS:9},Me:{name:"Bhadra",ownS:[2,5],exS:5},
+    Ju:{name:"Hamsa",ownS:[8,11],exS:3},Ve:{name:"Malavya",ownS:[1,6],exS:11},Sa:{name:"Shasha",ownS:[9,10],exS:6}};
+  for(const[pk,pi]of Object.entries(PANCHA)){
+    const p=pl[pk]; if(!p) continue;
+    if(![1,4,7,10].includes(hL(p.sign))) continue;
+    if(!pi.ownS.includes(p.sign)&&p.sign!==pi.exS) continue;
+    const qual=p.sign===pi.exS?"exaltation":"own sign";
+    const kn={1:"Lagna",4:"4th",7:"7th",10:"10th"}[hL(p.sign)];
+    yogas.push({name:pi.name+" Yoga",cat:"Pancha Mahapurusha",grade:"A",ps:[pk],
+      desc:`${GBYK[pk].name} is in ${qual} (${SIGNS[p.sign]}) in the ${kn} Kendra — one of the five great-person yogas. Gives qualities of ${GBYK[pk].name}: ${GBYK[pk].karakas.slice(0,3).join(", ")}.`,
+      src:"BPHS ch. 25 — Pancha Mahapurusha Yoga"});
+  }
+
+  /* 2. Raj Yoga — kendra lord + trikona lord sambandha — BPHS ch. 34–41 */
+  const kLords=new Set(),tLords=new Set();
+  for(let h=1;h<=12;h++){
+    const lord=SIGN_LORD[(La+h-1)%12];
+    if([1,4,7,10].includes(h)) kLords.add(lord);
+    if([1,5,9].includes(h)) tLords.add(lord);
+  }
+  const rySeen=new Set();
+  for(const kl of kLords){
+    for(const tl of tLords){
+      if(kl===tl) continue;
+      const key=[kl,tl].sort().join("¦");
+      if(rySeen.has(key)) continue; rySeen.add(key);
+      const rel=sambandha(kl,tl); if(!rel) continue;
+      const klHs=[],tlHs=[];
+      for(let h=1;h<=12;h++){
+        if(SIGN_LORD[(La+h-1)%12]===kl) klHs.push(h);
+        if(SIGN_LORD[(La+h-1)%12]===tl) tlHs.push(h);
+      }
+      yogas.push({name:"Raj Yoga",cat:"Raj Yoga",grade:"A",ps:[kl,tl],
+        desc:`${GBYK[kl].name} (lords H${klHs.join(",")}) and ${GBYK[tl].name} (lords H${tlHs.join(",")}) are in ${rel} — kendra lord + trikona lord = Raj Yoga. Elevates authority, status, and achievement; strongest during their Vimshottari dashas.`,
+        src:"BPHS ch. 34–41 — Raj Yoga"});
+    }
+  }
+
+  /* 3. Gajakesari — Jupiter in kendra from Moon */
+  const mo=pl.Mo,ju=pl.Ju;
+  if(mo&&ju){
+    const jFrMo=houseFromSigns(mo.sign,ju.sign);
+    if([1,4,7,10].includes(jFrMo)){
+      yogas.push({name:"Gajakesari Yoga",cat:"Special Yoga",grade:"B",ps:["Ju","Mo"],
+        desc:`Jupiter is in H${jFrMo} from natal Moon (${SIGNS[mo.sign]}) — in a kendra from Moon. Gives wisdom, eloquence, prosperity and lasting fame through Jupiter's benevolent influence.`,
+        src:"BPHS / Phaladeepika — Gajakesari Yoga"});
+    }
+  }
+
+  /* 4. Neecha Bhanga Raj Yoga — debilitation cancelled */
+  const DEBIL_S={Su:6,Mo:7,Ma:3,Me:11,Ju:9,Ve:5,Sa:0};
+  const EXALT_S={Su:0,Mo:1,Ma:9,Me:5,Ju:3,Ve:11,Sa:6};
+  for(const[pk,ds]of Object.entries(DEBIL_S)){
+    const p=pl[pk]; if(!p||p.sign!==ds) continue;
+    const exLord=SIGN_LORD[EXALT_S[pk]], dsLord=SIGN_LORD[ds];
+    const exLP=pl[exLord],dsLP=pl[dsLord];
+    let cDesc=null;
+    if(exLP&&[1,4,7,10].includes(hL(exLP.sign)))
+      cDesc=`${GBYK[exLord].name} (lord of ${GBYK[pk].name}'s exaltation sign) is in a kendra from Lagna`;
+    else if(dsLP&&[1,4,7,10].includes(hL(dsLP.sign)))
+      cDesc=`${GBYK[dsLord].name} (dispositor, lord of ${SIGNS[ds]}) is in a kendra from Lagna`;
+    else if(exLP&&mo&&[1,4,7,10].includes(houseFromSigns(mo.sign,exLP.sign)))
+      cDesc=`${GBYK[exLord].name} (lord of exaltation sign) is in a kendra from Moon`;
+    if(!cDesc) continue;
+    yogas.push({name:"Neecha Bhanga Raj Yoga",cat:"Neecha Bhanga",grade:"A",ps:[pk],
+      desc:`${GBYK[pk].name} is debilitated in ${SIGNS[ds]}, but the debilitation is cancelled: ${cDesc}. Neecha Bhanga often grants more strength than an ordinary placement — especially when ${GBYK[pk].name}'s dasha runs.`,
+      src:"BPHS — Neecha Bhanga cancellation conditions"});
+  }
+
+  /* 5. Viparita Raj Yoga — dusthana lord in a different dusthana */
+  for(const dh of[6,8,12]){
+    const lord=SIGN_LORD[(La+dh-1)%12],p=pl[lord];
+    if(!p) continue;
+    const destH=hL(p.sign);
+    if(![6,8,12].includes(destH)||destH===dh) continue;
+    if(["Mo","Me","Ju","Ve"].some(bk=>bk!==lord&&pl[bk]&&pl[bk].sign===p.sign)) continue;
+    yogas.push({name:"Viparita Raj Yoga",cat:"Viparita Raj Yoga",grade:"B",ps:[lord],
+      desc:`${GBYK[lord].name}, lord of H${dh} (dusthana), sits in H${destH} — another dusthana. The mutual weakening of difficult houses clears obstacles from the path, giving unexpected rise after hardship. Strongest in ${GBYK[lord].name}'s dasha.`,
+      src:"BPHS — Viparita Raj Yoga"});
+  }
+
+  /* 6. Dhana Yoga — wealth house lords connecting — BPHS ch.28 */
+  const dhSeen=new Set();
+  for(const[h1,h2]of[[2,11],[5,9],[2,9],[2,5],[9,11],[5,11]]){
+    const l1=SIGN_LORD[(La+h1-1)%12],l2=SIGN_LORD[(La+h2-1)%12];
+    if(l1===l2) continue;
+    const dKey=[l1,l2].sort().join("¦");
+    if(dhSeen.has(dKey)) continue; dhSeen.add(dKey);
+    const rel=sambandha(l1,l2); if(!rel) continue;
+    const isPrimary=(h1===2&&h2===11)||(h1===5&&h2===9);
+    yogas.push({name:"Dhana Yoga",cat:"Dhana Yoga",grade:isPrimary?"A":"B",ps:[l1,l2],
+      desc:`${GBYK[l1].name} (H${h1} lord) and ${GBYK[l2].name} (H${h2} lord) are in ${rel} — wealth house lords forming a connection. H${h1}×H${h2} brings prosperity${isPrimary?" — H2+H11 or H5+H9 are the strongest Dhana Yoga pairs":""}.`,
+      src:"BPHS ch. 28 — Dhana Yoga"});
+  }
+
+  /* 7. Kemadruma Yoga — Moon isolated */
+  if(mo){
+    const ms=mo.sign,s2=(ms+1)%12,s12=(ms+11)%12;
+    const PK7=["Su","Ma","Me","Ju","Ve","Sa"];
+    const has2=PK7.some(k=>pl[k]&&pl[k].sign===s2);
+    const has12=PK7.some(k=>pl[k]&&pl[k].sign===s12);
+    const conjMo=PK7.some(k=>pl[k]&&pl[k].sign===ms);
+    const juAspMo=ju&&aspectsFromHouse("Ju",hL(ju.sign)).includes(hL(ms));
+    if(!has2&&!has12&&!conjMo&&!juAspMo){
+      yogas.push({name:"Kemadruma Yoga",cat:"Challenging Yoga",grade:"C",ps:["Mo"],
+        desc:"No planet (excluding Ra/Ke) is in the 2nd or 12th sign from Moon, and Moon has no conjunction or Jupiter aspect. Can indicate inconsistent emotional support, feelings of isolation, or difficulty sustaining momentum. Partial mitigation: Moon in kendra from Lagna or waxing (Shukla paksha).",
+        src:"Classical Jyotish — Kemadruma Yoga"});
+    }
+  }
+
+  yogas.sort((a,b)=>({A:0,B:1,C:2}[a.grade]-{A:0,B:1,C:2}[b.grade]));
+  return yogas;
+}
+
+function renderYogaPanel(c, La) {
+  const wrap=document.getElementById("yogaPanel");
+  if(!wrap) return;
+  if(!c||!c.planets){wrap.style.display="none";return;}
+  const yogas=detectYogas(c,La);
+  const gradeIcon={A:"✦",B:"●",C:"▲"};
+  const gradeLabel={A:"Classical · High Confidence",B:"Confirmed Classical",C:"Challenging Yoga"};
+  let cards="";
+  for(const y of yogas){
+    const dots=y.ps.map(k=>`<span class="gdot" style="background:${GBYK[k].col};width:20px;height:20px;font-size:10px;flex-shrink:0">${GBYK[k].gl}</span>`).join("");
+    const pNames=y.ps.map(k=>GBYK[k].name).join(" + ");
+    cards+=`<div class="yg-card yg-${y.grade}">
+      <div class="yg-card-top">
+        <div class="yg-grade ${y.grade}">${gradeIcon[y.grade]}</div>
+        <div style="flex:1;min-width:0"><div class="yg-name">${y.name}</div><div class="yg-cat">${y.cat} · ${gradeLabel[y.grade]}</div></div>
+      </div>
+      <div class="yg-planets">${dots}<span style="font-size:11px;color:var(--muted);margin-left:3px">${pNames}</span></div>
+      <div class="yg-desc">${y.desc}</div>
+      <div class="yg-source">📖 ${y.src}</div>
+    </div>`;
+  }
+  wrap.style.display="block";
+  wrap.innerHTML=`<div class="yg-wrap">
+    <div class="yg-hdr">
+      <h4>◈ Yoga Finder · BPHS</h4>
+      <span style="font-size:11px;color:var(--muted)">${yogas.length} yoga${yogas.length!==1?"s":""} detected</span>
+    </div>
+    <div style="font-size:11.5px;color:var(--muted)">Only yogas with clear BPHS-defined conditions. ✦ High confidence · ● Confirmed · ▲ Challenging</div>
+    ${yogas.length
+      ?`<div class="yg-grid">${cards}</div>`
+      :`<div class="yg-none">No classical yogas detected from the specified conditions. Most charts are workhorse charts — individual planet strength and dasha timing matter more.</div>`}
+  </div>`;
+}
+
 /* ===== MY CHARTS (parse + persist + apply) ===== */
 (function(){
   const LS="jyotish_charts_v1";
@@ -2074,6 +2337,9 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
 
     // Transit Analysis (Gochara)
     try{renderTransitPanel(c,La,allBAV);}catch(e){console.error("renderTransitPanel:",e);}
+
+    // Yoga Finder
+    try{renderYogaPanel(c,La);}catch(e){console.error("renderYogaPanel:",e);}
 
     // Special Lagnas
     try{renderSpecialLagnas(c,La,allBAV.SAV);}catch(e){console.error("renderSpecialLagnas:",e);}
@@ -3135,6 +3401,20 @@ Reference actual planets, house numbers, and BPHS principles throughout.`;
     });
   }
   draw();
+})();
+
+/* ===== LIGHT / DARK THEME ===== */
+function toggleTheme(){
+  const light=document.documentElement.classList.toggle("light");
+  localStorage.setItem("ja_theme",light?"light":"dark");
+  document.getElementById("themeToggle").textContent=light?"☉":"☾";
+}
+(function(){
+  if(localStorage.getItem("ja_theme")==="light"){
+    document.documentElement.classList.add("light");
+    const btn=document.getElementById("themeToggle");
+    if(btn) btn.textContent="☉";
+  }
 })();
 </script>
 </body>
