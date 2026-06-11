@@ -455,6 +455,64 @@
   .yg-source{font-size:11px;color:var(--muted);margin-top:8px;border-top:1px dashed var(--line);padding-top:7px}
   .yg-none{padding:18px;text-align:center;color:var(--muted);font-size:13px}
 
+  /* ===== Dasha Prediction Engine ===== */
+  .dp-wrap{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+  .dp-head{padding:14px 20px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+  .dp-head h4{margin:0;font-size:11.5px;letter-spacing:1px;text-transform:uppercase;color:var(--gold)}
+  .dp-hero{display:flex;align-items:flex-start;gap:16px;padding:18px 20px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .dp-vbadge{flex:0 0 auto;min-width:110px;padding:10px 16px;border-radius:12px;text-align:center;font-weight:800;font-size:13px;line-height:1.35}
+  .dp-vbadge.vd-exceptional{background:#1a2a10;color:#6fe060;border:1px solid rgba(80,200,60,.3)}
+  .dp-vbadge.vd-strong{background:#1a2820;color:var(--exalt);border:1px solid rgba(79,208,127,.3)}
+  .dp-vbadge.vd-favorable{background:#1e2c10;color:#a0d870;border:1px solid rgba(140,200,80,.25)}
+  .dp-vbadge.vd-mixed{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+  .dp-vbadge.vd-challenging{background:#2a1818;color:var(--debil);border:1px solid rgba(239,106,90,.3)}
+  .dp-vbadge.vd-difficult{background:#200a0a;color:#ff5a4a;border:1px solid rgba(255,80,60,.4)}
+  .dp-vtier{font-size:18px;font-weight:800;margin-bottom:3px}
+  .dp-vscore{font-size:10.5px;opacity:.8;line-height:1.4}
+  .dp-hinfo{flex:1;min-width:200px}
+  .dp-period-title{font-size:17px;font-weight:800;margin-bottom:4px}
+  .dp-period-sub{font-size:12px;color:var(--muted);margin-bottom:7px}
+  .dp-summary{font-size:13px;color:#dfe4f6;line-height:1.6}
+  .dp-body{padding:16px 20px;display:flex;flex-direction:column;gap:14px}
+  .dp-section-title{font-size:10.5px;letter-spacing:.8px;text-transform:uppercase;color:var(--gold);margin-bottom:9px;font-weight:700}
+  .dp-lord-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:640px){.dp-lord-grid{grid-template-columns:1fr}}
+  .dp-lord-card{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .dp-lord-name{font-weight:800;font-size:15px;margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .dp-lord-role{font-size:10.5px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:2px 8px;font-weight:600}
+  .dp-factor{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12.5px;padding:5px 0;border-bottom:1px solid rgba(42,51,96,.3)}
+  .dp-factor:last-child{border-bottom:none}
+  .dp-flabel{color:var(--muted);flex-shrink:0}
+  .dp-fval{font-weight:600;font-size:11.5px;padding:2px 8px;border-radius:6px;text-align:right;white-space:nowrap}
+  .dp-fval.pos2{background:#1a2a10;color:var(--exalt)}
+  .dp-fval.pos1{background:#1e2c10;color:#a0d870}
+  .dp-fval.neu{background:var(--panel);color:var(--muted);border:1px solid var(--line)}
+  .dp-fval.neg1{background:#2a1818;color:var(--debil)}
+  .dp-fval.neg2{background:#200a0a;color:#ff5a4a}
+  .dp-fval.flag{background:#131e38;color:var(--accent);border:1px solid rgba(122,162,255,.25)}
+  .dp-transit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media(max-width:640px){.dp-transit-grid{grid-template-columns:1fr}}
+  .dp-tr-card{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:12px 13px}
+  .dp-tr-card.dp-tr-good{border-color:rgba(79,208,127,.4)}
+  .dp-tr-card.dp-tr-bad{border-color:rgba(239,106,90,.35)}
+  .dp-tr-card.dp-tr-sati{border-color:rgba(180,100,255,.45)}
+  .dp-tr-planet{font-weight:800;font-size:13.5px;margin-bottom:5px}
+  .dp-tr-verdict{font-size:12px;line-height:1.5;margin-bottom:4px}
+  .dp-tr-bav{font-size:11px;color:var(--muted)}
+  .dp-peak{border-radius:11px;padding:12px 16px;font-size:13px;line-height:1.55}
+  .dp-peak.peak-on{background:#152010;border:1px solid rgba(79,208,127,.45);color:#a0e080}
+  .dp-peak.peak-off{background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+  .dp-themes-box{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:14px}
+  .dp-theme-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
+  .dp-theme-tag{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 11px;font-size:12px;font-weight:600}
+  .dp-theme-tag.primary{border-color:rgba(227,185,78,.5);color:var(--gold2);background:#1e1a08}
+  .dp-wildcards{display:flex;flex-direction:column;gap:7px}
+  .dp-wildcard{border-radius:9px;padding:8px 12px;font-size:12.5px;line-height:1.5;border:1px solid transparent}
+  .dp-wildcard.w-neu{background:#131e38;border-color:rgba(122,162,255,.25);color:var(--accent)}
+  .dp-wildcard.w-amp{background:#152010;border-color:rgba(79,208,127,.3);color:#a0e080}
+  .dp-wildcard.w-damp{background:#2a1818;border-color:rgba(239,106,90,.3);color:var(--debil)}
+  .dp-relation{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:12px 14px;font-size:13px;line-height:1.6;margin-top:10px}
+
   /* ===== Charts sidebar layout ===== */
   .charts-layout{display:flex;gap:16px;align-items:flex-start;margin-top:8px}
   .charts-sidebar{width:210px;flex-shrink:0;position:sticky;top:64px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 10px}
@@ -541,6 +599,26 @@
   html.light .sl-badge.sav-lo{background:#fce8e8;color:#992020}
   html.light .opt.right{background:rgba(26,117,64,.15);border-color:var(--exalt)}
   html.light .opt.wrong{background:rgba(187,32,32,.15);border-color:var(--debil)}
+  html.light .dp-vbadge.vd-exceptional{background:#d0f0dc;color:#0a5a22;border-color:rgba(26,117,64,.3)}
+  html.light .dp-vbadge.vd-strong{background:#d0f0dc;color:#0a5a22;border-color:rgba(26,117,64,.25)}
+  html.light .dp-vbadge.vd-favorable{background:#dff0d0;color:#2a6a10;border-color:rgba(60,140,30,.2)}
+  html.light .dp-vbadge.vd-mixed{background:var(--panel2);color:var(--muted);border-color:var(--line)}
+  html.light .dp-vbadge.vd-challenging{background:#fce8e8;color:#992020;border-color:rgba(187,32,32,.2)}
+  html.light .dp-vbadge.vd-difficult{background:#fce0e0;color:#cc1010;border-color:rgba(220,20,20,.3)}
+  html.light .dp-summary{color:var(--ink)}
+  html.light .dp-fval.pos2{background:#d0f0dc;color:#0a5a22}
+  html.light .dp-fval.pos1{background:#dff0d0;color:#2a6a10}
+  html.light .dp-fval.neg1{background:#fce8e8;color:#992020}
+  html.light .dp-fval.neg2{background:#fce0e0;color:#cc1010}
+  html.light .dp-fval.flag{background:#d4e8ff;color:#0848a0;border-color:rgba(40,80,200,.3)}
+  html.light .dp-tr-card.dp-tr-good{border-color:rgba(26,117,64,.4)}
+  html.light .dp-tr-card.dp-tr-bad{border-color:rgba(187,32,32,.3)}
+  html.light .dp-tr-card.dp-tr-sati{border-color:rgba(120,30,200,.35)}
+  html.light .dp-peak.peak-on{background:#d0f0dc;border-color:rgba(26,117,64,.45);color:#0a5a22}
+  html.light .dp-theme-tag.primary{border-color:rgba(160,110,10,.4);color:#7a5000;background:#f4e8c0}
+  html.light .dp-wildcard.w-neu{background:#d4e8ff;border-color:rgba(40,80,200,.3);color:#0848a0}
+  html.light .dp-wildcard.w-amp{background:#d0f0dc;border-color:rgba(26,117,64,.3);color:#0a5a22}
+  html.light .dp-wildcard.w-damp{background:#fce8e8;border-color:rgba(187,32,32,.3);color:#992020}
 </style>
 </head>
 <body>
@@ -695,6 +773,7 @@
       <div class="dt-wrap" id="dashaTimeline" style="display:none;margin-top:14px"></div>
       <div class="tr-wrap" id="transitPanel" style="display:none;margin-top:14px"></div>
       <div id="yogaPanel" style="display:none;margin-top:14px"></div>
+      <div id="dashaPanel" style="display:none;margin-top:14px"></div>
       <div class="sl-section panel" id="specialLagnas" style="display:none;margin-top:14px">
         <h4>Special Lagnas · Image &amp; Wealth</h4>
         <div class="sl-grid">
@@ -2214,6 +2293,425 @@ function renderYogaPanel(c, La) {
   </div>`;
 }
 
+/* ===== DASHA PREDICTION ENGINE ===== */
+
+// Does planet k have Neecha Bhanga in chart c with lagna La?
+function hasNeechaBhanga(k,c,La){
+  const DEBIL_S={Su:6,Mo:7,Ma:3,Me:11,Ju:9,Ve:5,Sa:0};
+  const EXALT_S={Su:0,Mo:1,Ma:9,Me:5,Ju:3,Ve:11,Sa:6};
+  const p=c.planets[k]; if(!p) return false;
+  const ds=DEBIL_S[k]; if(p.sign!==ds) return false;
+  const exLord=SIGN_LORD[EXALT_S[k]], dsLord=SIGN_LORD[ds];
+  const exLP=c.planets[exLord], dsLP=c.planets[dsLord], mo=c.planets.Mo;
+  if(exLP&&[1,4,7,10].includes(houseFromSigns(La,exLP.sign))) return true;
+  if(dsLP&&[1,4,7,10].includes(houseFromSigns(La,dsLP.sign))) return true;
+  if(exLP&&mo&&[1,4,7,10].includes(houseFromSigns(mo.sign,exLP.sign))) return true;
+  return false;
+}
+
+// Is planet k combust in chart c?
+function isCombustDE(k,c){
+  if(!c.planets.Su||!c.planets[k]||k==='Su'||k==='Mo'||k==='Ra'||k==='Ke') return false;
+  const ORB={Ma:17,Me:14,Ju:11,Ve:10,Sa:15};
+  const o=ORB[k]; if(!o) return false;
+  const sl=c.planets.Su.sign*30+c.planets.Su.deg;
+  const pl=c.planets[k].sign*30+c.planets[k].deg;
+  let d=Math.abs(sl-pl); if(d>180) d=360-d;
+  return d<=o;
+}
+
+// Score from natal aspects received by planet k
+function natalAspects(k,c,La){
+  if(!c.planets[k]) return 0;
+  const h=houseFromSigns(La,c.planets[k].sign);
+  const BEN=new Set(['Mo','Me','Ju','Ve']);
+  let s=0;
+  for(const ok of Object.keys(c.planets)){
+    if(ok===k||!c.planets[ok]) continue;
+    const oh=houseFromSigns(La,c.planets[ok].sign);
+    if(aspectsFromHouse(ok,oh).includes(h)) s+=BEN.has(ok)?0.25:-0.2;
+  }
+  return Math.max(-0.75,Math.min(0.75,s));
+}
+
+// Returns mooltrikona house (1-12) for planet k from lagna La, or null
+function mooltrikonaHouse(k,La){
+  const m=MOOL[k]; if(!m) return null;
+  return houseFromSigns(La,m.s);
+}
+
+// Layer 1: natal foundation score for planet k
+function dpLayer1(k,c,La){
+  const p=c.planets[k]; if(!p) return null;
+  const d1=dignityOf(k,p.sign);
+  const d9s=navamsaSign(p.sign,p.deg);
+  const d9=dignityOf(k,d9s);
+  const vg=p.sign===d9s;
+  const mool=isMooltrikona(k,p.sign,p.deg);
+  const nb=hasNeechaBhanga(k,c,La);
+  const combust=isCombustDE(k,c);
+  const retro=!!p.retro;
+  const dispK=SIGN_LORD[p.sign];
+  const dispP=c.planets[dispK];
+  const dispDig=dispP?dignityOf(dispK,dispP.sign):null;
+  const aspMod=natalAspects(k,c,La);
+
+  let digScore;
+  if(d1.score===2) digScore=3;                   // exalt
+  else if(d1.score===1.5) digScore=mool?2.5:2;   // mooltrikona vs own
+  else if(d1.score===1)  digScore=1;
+  else if(d1.score===0)  digScore=0;
+  else if(d1.score===-1) digScore=-1;
+  else if(d1.score===-2) digScore=nb?-0.25:-2;   // NB restores debil
+  else digScore=0;
+
+  const d9Mod=d9.score>=1.5?0.5:d9.score>=1?0.25:d9.score<=-2?(nb?0:-0.5):d9.score<=-1?-0.25:0;
+  const combustMod=combust?-0.75:0;
+  const dispMod=dispDig?(dispDig.score>=1.5?0.25:dispDig.score<=-2?-0.25:0):0;
+
+  return{
+    k,p,d1,d9,d9s,vg,mool,nb,combust,retro,
+    digScore,d9Mod,combustMod,dispMod,aspMod,
+    score:digScore+d9Mod+combustMod+dispMod+aspMod*0.4,
+    dispK,dispDig,house:houseFromSigns(La,p.sign)
+  };
+}
+
+// Layer 2: functional quality score for planet k
+function dpLayer2(k,c,La){
+  const fn=functionalNature(k,La);
+  const p=c.planets[k]; if(!p) return{score:0,fn,house:null};
+  const house=houseFromSigns(La,p.sign);
+
+  let fnScore;
+  if(fn.tier==='yogakaraka')     fnScore=3;
+  else if(fn.tier==='benefic')   fnScore=fn.label==='Lagna lord'?2.5:2;
+  else if(fn.tier==='mixed')     fnScore=0.5;
+  else if(fn.tier==='neutral'){
+    if(fn.label==='Kendradhipati'){
+      const KDP_DOSE={Ju:-0.75,Ve:-0.5,Me:-0.25,Mo:-0.25};
+      fnScore=(KDP_DOSE[k]||0);
+    } else fnScore=0;
+  }
+  else if(fn.tier==='malefic')  fnScore=fn.label.includes('8th')?-2:-1;
+  else fnScore=0;
+
+  const hq=[1,4,7,10].includes(house)?0.5:[5,9].includes(house)?0.5:[6,8,12].includes(house)?-0.5:0;
+
+  return{score:fnScore+hq,fnScore,hq,fn,house};
+}
+
+// Layer 3: transit score (uses already-computed gochara object)
+function dpLayer3(c,La,allBAV,gochara){
+  const mo=c.planets.Mo; if(!mo) return{score:0,juScore:0,saScore:0,raScore:0,flags:[],doubleTransit:false};
+  const flags=[];
+  let juScore=0,saScore=0,raScore=0;
+
+  const juG=gochara.Ju;
+  if(juG){
+    if(juG.good&&!juG.vedha){
+      juScore=1.5;
+      if(juG.bavSign!=null) juScore*=(juG.bavSign>=5?1.2:juG.bavSign<=2?0.6:1);
+    } else if(juG.good&&juG.vedha){
+      flags.push({cls:'w-neu',text:`Jupiter in good house H${juG.h} from Moon — vedha cancelled by ${GBYK[juG.vedhaBy].name}`});
+    } else {
+      juScore=-1;
+      if(juG.bavSign!=null&&juG.bavSign>=5) juScore=-0.5; // strong BAV softens
+    }
+  }
+
+  const saG=gochara.Sa;
+  if(saG){
+    if(saG.satSpecial==='sade-sati'){
+      saScore=-1.5;
+      flags.push({cls:'w-damp',text:`Sade Sati — Saturn in H${saG.h} from Moon (7.5-year karmic load; any dasha runs within this weight)`});
+    } else if(saG.satSpecial==='dhaiya'){
+      saScore=-1;
+      flags.push({cls:'w-damp',text:`Dhaiya / Kantaka Shani — Saturn in H${saG.h} from Moon (2.5-year pressure; home, longevity and stability themes strained)`});
+    } else if(saG.good&&!saG.vedha){
+      saScore=1;
+      if(saG.bavSign!=null) saScore*=(saG.bavSign>=5?1.2:saG.bavSign<=2?0.6:1);
+    } else if(saG.good&&saG.vedha){
+      flags.push({cls:'w-neu',text:`Saturn in good house H${saG.h} from Moon — vedha cancelled by ${GBYK[saG.vedhaBy].name}`});
+    } else {
+      saScore=-0.75;
+      if(saG.bavSign!=null&&saG.bavSign>=5) saScore=-0.3;
+    }
+  }
+
+  const raG=gochara.Ra;
+  if(raG) raScore=raG.good?0.5:-0.5;
+
+  const doubleTransit=juScore>0&&saScore>0;
+  return{score:juScore+saScore+raScore,juScore,saScore,raScore,flags,doubleTransit,juG,saG,raG};
+}
+
+// Rahu / Ketu proximity flags against natal dasha lords and Moon
+function dpRahuFlags(mahaK,antarK,c,tpos){
+  const flags=[];
+  if(!tpos.Ra||!tpos.Ke) return flags;
+  const raL=tpos.Ra.sign*30+tpos.Ra.deg;
+  const keL=tpos.Ke.sign*30+tpos.Ke.deg;
+  function prox(lon1,lon2){let d=Math.abs(lon1-lon2);if(d>180)d=360-d;return d;}
+  for(const k of[mahaK,antarK]){
+    const p=c.planets[k]; if(!p) continue;
+    const pL=p.sign*30+p.deg;
+    const role=k===mahaK?'Mahadasha lord':'Antardasha lord';
+    if(prox(raL,pL)<=5) flags.push({cls:'w-neu',text:`Transit Rahu within 5° of natal ${GBYK[k].name} (${role}) — significations intensify and distort; obsessive energy around ${GBYK[k].name}'s themes`});
+    if(prox(keL,pL)<=5) flags.push({cls:'w-damp',text:`Transit Ketu within 5° of natal ${GBYK[k].name} (${role}) — withdrawal and subtraction from its significations`});
+  }
+  const mo=c.planets.Mo;
+  if(mo){
+    const moL=mo.sign*30+mo.deg;
+    if(prox(raL,moL)<=5) flags.push({cls:'w-neu',text:'Transit Rahu within 5° of natal Moon — mental turbulence and erratic emotional states; operates regardless of dasha quality'});
+  }
+  return flags;
+}
+
+// Layer 4: yoga modifiers
+function dpLayer4(yogas,mahaK,antarK){
+  const amps=[],damps=[],wilds=[];
+  let score=0;
+  for(const y of yogas){
+    const inv=y.ps&&(y.ps.includes(mahaK)||y.ps.includes(antarK));
+    if(!inv) continue;
+    if(y.cat==='Raj Yoga'){
+      amps.push({text:`Raj Yoga activates — ${y.ps.map(k=>GBYK[k].name).join(' + ')} in ${y.ps.map(k=>k===mahaK?'Maha':k===antarK?'Antar':'').filter(Boolean).join('/')} dasha`});
+      score+=2;
+    } else if(y.cat==='Pancha Mahapurusha'){
+      amps.push({text:`${y.name} fires — peak expression of ${GBYK[y.ps[0]].name}'s dharmic qualities during this dasha`});
+      score+=1.5;
+    } else if(y.cat==='Neecha Bhanga'){
+      amps.push({text:`Neecha Bhanga active on ${GBYK[y.ps[0]].name} — cancelled debilitation gives stronger-than-ordinary dasha results`});
+      score+=1;
+    } else if(y.cat==='Dhana Yoga'){
+      amps.push({text:`Dhana Yoga activated — wealth and resource themes are specifically favored during this period`});
+      score+=0.5;
+    } else if(y.cat==='Viparita Raj Yoga'){
+      wilds.push({text:`Viparita Raj Yoga (${GBYK[y.ps[0]].name}) — difficult transits can trigger the yoga; resistance and hardship may be the catalyst for unexpected rise`});
+    } else if(y.cat==='Challenging Yoga'&&y.name==='Kemadruma Yoga'){
+      const severity=y.ps.includes('Mo')&&(mahaK==='Mo'||antarK==='Mo')?1:0.5;
+      damps.push({text:`Kemadruma Yoga present — emotional consistency is thin; good periods can feel unsupported or short-lived`});
+      score-=severity;
+    } else if(y.name==='Gajakesari Yoga'){
+      amps.push({text:'Gajakesari Yoga active — wisdom, eloquence and prosperity are supported throughout this period'});
+      score+=0.5;
+    }
+  }
+  return{score,amps,damps,wilds};
+}
+
+// Theme space: which life domains activate in this period
+function dpThemeSpace(mahaK,antarK,c,La){
+  const themes=[]; const seen=new Set();
+  function addT(h,type){
+    const key=`H${h}`; if(seen.has(key)){return;} seen.add(key);
+    const b=BHAVAS[h-1];
+    themes.push({label:b?`H${h} ${b.en}`:`H${h}`,type,h});
+  }
+  function processK(k,prefix){
+    const p=c.planets[k]; if(!p) return;
+    const fn=functionalNature(k,La);
+    const mtH=mooltrikonaHouse(k,La);
+    for(const h of(fn.houses||[])) addT(h,h===mtH?'primary':'secondary');
+    const oH=houseFromSigns(La,p.sign); addT(oH,'secondary');
+    for(const ah of aspectsFromHouse(k,oH)) addT(ah,'secondary');
+    const ni=nakInfo(p.sign*30+p.deg);
+    const nlFn=functionalNature(ni.l,La);
+    for(const h of(nlFn.houses||[]).slice(0,2)) addT(h,'secondary');
+  }
+  processK(mahaK,'maha'); processK(antarK,'antar');
+  return{themes:themes.slice(0,12),kars:GBYK[mahaK].karakas.slice(0,3)};
+}
+
+// Maha × Antardasha relationship
+function dpRelation(mahaK,antarK,c){
+  const fr=FRIEND[mahaK]||{f:[],e:[],n:[]};
+  const nat=fr.f.includes(antarK)?'friend':fr.e.includes(antarK)?'enemy':'neutral';
+  const mp=c.planets[mahaK], ap=c.planets[antarK];
+  if(!mp||!ap) return{nat,hFrMaha:null};
+  const h=houseFromSigns(mp.sign,ap.sign);
+  return{nat,hFrMaha:h,difficult:[6,8,12].includes(h),supportive:[2,5,9,11].includes(h)};
+}
+
+// Verdict tier from total score
+function dpVerdict(score,hardCap){
+  if(hardCap) return{cls:'vd-challenging',label:'Challenging',sub:'Debilitation without NB caps delivery'};
+  if(score>=6)  return{cls:'vd-exceptional',label:'Exceptional',sub:'All layers aligned'};
+  if(score>=4)  return{cls:'vd-strong',    label:'Strong',      sub:'Major themes activate favorably'};
+  if(score>=2)  return{cls:'vd-favorable', label:'Favorable',   sub:'Net positive period'};
+  if(score>=-0.5)return{cls:'vd-mixed',   label:'Mixed',        sub:'Competing signals — effort and timing matter'};
+  if(score>=-2.5)return{cls:'vd-challenging',label:'Challenging',sub:'Resistance predominates'};
+  return{cls:'vd-difficult',label:'Difficult',sub:'Multiple obstacles converge'};
+}
+
+function renderDashaPrediction(c,La,allBAV){
+  const wrap=document.getElementById('dashaPanel');
+  if(!wrap) return;
+  if(!c||!c.dashas||!c.dashas.mahas||!c.dashas.mahas.length){wrap.style.display='none';return;}
+
+  const today=Date.now();
+  let curMaha=null,curAntar=null;
+  outer:for(const md of c.dashas.mahas){
+    if(md.start<=today&&(md.end==null||md.end>=today)){
+      curMaha=md;
+      for(const ad of(md.antars||[])){
+        if(ad.start<=today&&(ad.end==null||ad.end>=today)){curAntar=ad;break outer;}
+      }
+      break;
+    }
+  }
+  if(!curMaha){wrap.style.display='none';return;}
+
+  const mahaK=curMaha.lord, antarK=curAntar?curAntar.lord:mahaK;
+  const fD=ts=>{if(!ts)return'?';const d=new Date(ts);return['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]+' '+d.getFullYear();};
+
+  const tRes=getTransitPlanets(new Date());
+  const moonSign=c.planets.Mo?c.planets.Mo.sign:La;
+  const gochara=gocharaAnalysis(tRes.pos,moonSign,La,allBAV);
+  const yogas=detectYogas(c,La);
+
+  const l1M=dpLayer1(mahaK,c,La), l1A=dpLayer1(antarK,c,La);
+  const l2M=dpLayer2(mahaK,c,La), l2A=dpLayer2(antarK,c,La);
+  const l3=dpLayer3(c,La,allBAV,gochara);
+  const l4=dpLayer4(yogas,mahaK,antarK);
+  const themes=dpThemeSpace(mahaK,antarK,c,La);
+  const rel=dpRelation(mahaK,antarK,c);
+  const rahuF=dpRahuFlags(mahaK,antarK,c,tRes.pos);
+
+  // Wildcards
+  const wilds=[...l4.wilds];
+  if(l1M&&l1M.retro) wilds.push({text:`${GBYK[mahaK].name} is retrograde — high Cheshta Bala but timing is erratic; results often arrive late or via indirect paths`});
+  if(l1A&&l1A.retro&&antarK!==mahaK) wilds.push({text:`${GBYK[antarK].name} (Antardasha lord) is retrograde — sub-period events may run non-linearly`});
+  if(antarK==='Ra') wilds.push({text:'Rahu Antardasha: sudden, foreign, unconventional twist on the Mahadasha themes; unexpected opportunities or disruptions'});
+  if(antarK==='Ke') wilds.push({text:'Ketu Antardasha: withdrawal, detachment, spiritual pull on the Mahadasha themes; loss that can enable liberation'});
+  const hasVR=yogas.some(y=>y.cat==='Viparita Raj Yoga'&&y.ps&&(y.ps.includes(mahaK)||y.ps.includes(antarK)));
+  if(hasVR&&l3.score<0) wilds.push({text:'Viparita Raj Yoga present + difficult transits = classic trigger condition; hardship may catalyze the rise'});
+
+  // Hard cap
+  const hardCap=(l1M&&l1M.d1.score===-2&&!l1M.nb);
+  const antarDamp=(l1A&&l1A.d1.score===-2&&!l1A.nb)?-1:0;
+
+  const l1Score=(l1M?l1M.score:0)*0.65+(l1A?l1A.score:0)*0.35;
+  const l2Score=(l2M?l2M.score:0)*0.65+(l2A?l2A.score:0)*0.35;
+  const total=l1Score+l2Score+l3.score+l4.score+antarDamp;
+  const verdict=dpVerdict(total,hardCap);
+
+  // Helper: lord card HTML (combines L1 + L2 for one planet)
+  function lordCard(l1,l2,role){
+    if(!l1||!l1.p) return `<div class="dp-lord-card" style="display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12.5px">Same lord as Mahadasha — first sub-period</div>`;
+    const k=l1.k, g=GBYK[k];
+    const rows=[];
+    const digLabel=l1.mool?'Mooltrikona':l1.d1.full.split('·')[0].trim();
+    const digCls=l1.d1.score>=1.5?'pos2':l1.d1.score>=0.5?'pos1':l1.d1.score===0?'neu':l1.d1.score>=-1?'neg1':'neg2';
+    rows.push(`<div class="dp-factor"><span class="dp-flabel">D-1 Dignity</span><span class="dp-fval ${digCls}">${digLabel}</span></div>`);
+    if(l1.nb) rows.push(`<div class="dp-factor"><span class="dp-flabel">Neecha Bhanga</span><span class="dp-fval pos2">Cancelled — restored</span></div>`);
+    const d9Cls=l1.d9.score>=1.5?'pos2':l1.d9.score>=0.5?'pos1':l1.d9.score===0?'neu':l1.d9.score>=-1?'neg1':'neg2';
+    rows.push(`<div class="dp-factor"><span class="dp-flabel">D-9 Navamsa</span><span class="dp-fval ${d9Cls}">${l1.d9.full.split('·')[0].trim()}${l1.vg?' · Vargottama':''}</span></div>`);
+    if(l1.retro) rows.push(`<div class="dp-factor"><span class="dp-flabel">Motion</span><span class="dp-fval flag">Retrograde (Vakri)</span></div>`);
+    if(l1.combust) rows.push(`<div class="dp-factor"><span class="dp-flabel">Combustion</span><span class="dp-fval neg2">Combust — burned</span></div>`);
+    if(l1.dispDig&&l1.dispK!==k){
+      const dCls=l1.dispDig.score>=1.5?'pos1':l1.dispDig.score<=-2?'neg1':'neu';
+      rows.push(`<div class="dp-factor"><span class="dp-flabel">Dispositor</span><span class="dp-fval ${dCls}">${GBYK[l1.dispK].name}: ${l1.dispDig.full.split('·')[0].trim()}</span></div>`);
+    }
+    const ht=[1,4,7,10].includes(l1.house)?'Kendra':[5,9].includes(l1.house)?'Trikona':[6,8,12].includes(l1.house)?'Dusthana':'';
+    const htCls=ht==='Kendra'||ht==='Trikona'?'pos1':ht==='Dusthana'?'neg1':'neu';
+    rows.push(`<div class="dp-factor"><span class="dp-flabel">H${l1.house} · ${ht||'Neutral'}</span><span class="dp-fval ${htCls}">${RASHIS[c.planets[k].sign].name}</span></div>`);
+    const fn=l2.fn;
+    const fnCls=fn.tier==='yogakaraka'?'pos2':fn.tier==='benefic'?'pos1':fn.tier==='malefic'?'neg1':fn.tier==='mixed'?'neg1':'neu';
+    const fnLbl=fn.tier==='neutral'&&fn.label==='Kendradhipati'?'Kendradhipati (dosha)':fn.label;
+    rows.push(`<div class="dp-factor"><span class="dp-flabel">Functional role</span><span class="dp-fval ${fnCls}">${fnLbl}</span></div>`);
+    return `<div class="dp-lord-card"><div class="dp-lord-name">${g.gl} ${g.name}<span class="dp-lord-role">${role}</span></div>${rows.join('')}</div>`;
+  }
+
+  // Transit card HTML
+  function trCard(g,pk,score){
+    if(!g) return '';
+    const isGood=g.good&&!g.vedha&&!g.satSpecial;
+    const isSati=g.satSpecial==='sade-sati', isDhay=g.satSpecial==='dhaiya';
+    const cls=isSati||isDhay?'dp-tr-sati':isGood?'dp-tr-good':'dp-tr-bad';
+    const verdict=isSati?`Sade Sati · H${g.h} from Moon`:isDhay?`Dhaiya · H${g.h} from Moon`:
+      g.vedha?`H${g.h} from Moon · vedha by ${GBYK[g.vedhaBy].name}`:
+      isGood?`H${g.h} from Moon · favorable`:`H${g.h} from Moon · challenging`;
+    const bavNote=g.bavSign!=null?`<div class="dp-tr-bav">BAV: ${g.bavSign}/8 bindus${g.bavSign>=5?' — strong':g.bavSign<=2?' — weak':''}</div>`:'';
+    return `<div class="dp-tr-card ${cls}"><div class="dp-tr-planet">${GBYK[pk].gl} ${GBYK[pk].name}</div><div class="dp-tr-verdict">${verdict}</div>${bavNote}</div>`;
+  }
+
+  // Summary line
+  const mahaFn=l2M.fn;
+  const sumParts=[
+    `${GBYK[mahaK].name} ${mahaFn.tier==='yogakaraka'?'(Yogakaraka)':mahaFn.label.toLowerCase()} · ${l1M&&l1M.mool?'Mooltrikona':l1M?l1M.d1.full.split('·')[0].trim():''} in ${c.planets[mahaK]?RASHIS[c.planets[mahaK].sign].name:'?'}`,
+    l3.doubleTransit?'Jupiter + Saturn both favorable — double transit window open':
+    l3.juScore>0&&l3.saScore<0?'Jupiter supports; Saturn challenges':
+    l3.juScore<0&&l3.saScore>0?'Saturn supports; Jupiter tests':
+    l3.juScore<0&&l3.saScore<0?'Both major transit lords challenging':''
+  ].filter(Boolean).join(' · ');
+
+  // Modifiers section
+  const modRows=[
+    ...l4.amps.map(a=>`<div class="dp-wildcard w-amp">★ ${a.text}</div>`),
+    ...l4.damps.map(d=>`<div class="dp-wildcard w-damp">⚠ ${d.text}</div>`),
+    ...wilds.map(w=>`<div class="dp-wildcard w-neu">◈ ${w.text}</div>`),
+    ...l3.flags.map(f=>`<div class="dp-wildcard ${f.cls}">◈ ${f.text}</div>`),
+    ...rahuF.map(f=>`<div class="dp-wildcard ${f.cls}">◈ ${f.text}</div>`)
+  ];
+
+  // Relation row
+  const relCls=rel.nat==='friend'?'pos1':rel.nat==='enemy'?'neg1':'neu';
+  const relText=rel.nat==='friend'?'Natural friends — harmonious sub-period energy':rel.nat==='enemy'?'Natural enemies — competing energies create inner tension':'Neutral — workmanlike sub-period';
+  const relH=rel.hFrMaha?` · Antardasha lord is in H${rel.hFrMaha} from Maha lord's sign${rel.difficult?' (6/8/12 = difficult sub-period placement)':rel.supportive?' (2/5/9/11 = supportive placement)':''}`:' ';
+
+  // Peak window
+  const peakHtml=`<div class="dp-peak ${l3.doubleTransit?'peak-on':'peak-off'}">
+    ${l3.doubleTransit
+      ?'★ Double Transit Window active — Jupiter and Saturn are both in favorable Gochara houses from natal Moon simultaneously. BPHS Gochara: this is the highest-probability condition for the dasha themes to manifest as actual events. Act on this window.'
+      :`Double Transit: not currently active · Jupiter H${l3.juG?l3.juG.h:'?'} from Moon (${l3.juScore>0?'favorable':'unfavorable'}) · Saturn H${l3.saG?l3.saG.h:'?'} from Moon (${l3.saScore>0?'favorable':l3.saG&&l3.saG.satSpecial?l3.saG.satSpecial:'unfavorable'})`
+    }
+  </div>`;
+
+  // Theme tags
+  const themeTagsHtml=themes.themes.map(t=>`<span class="dp-theme-tag${t.type==='primary'?' primary':''}">${t.label}</span>`).join('');
+  const karTagsHtml=themes.kars.map(k=>`<span class="dp-theme-tag">${k}</span>`).join('');
+
+  wrap.style.display='block';
+  wrap.innerHTML=`<div class="dp-wrap">
+  <div class="dp-head"><h4>Dasha Prediction Engine</h4><span style="font-size:11px;color:var(--muted)">4-layer analysis · BPHS Vimshottari + Gochara</span></div>
+  <div class="dp-hero">
+    <div class="dp-vbadge ${verdict.cls}"><div class="dp-vtier">${verdict.label}</div><div class="dp-vscore">${verdict.sub}</div></div>
+    <div class="dp-hinfo">
+      <div class="dp-period-title">${GBYK[mahaK].gl} ${GBYK[mahaK].name} / ${GBYK[antarK].gl} ${GBYK[antarK].name} Antardasha</div>
+      <div class="dp-period-sub">${curAntar?`Until ${fD(curAntar.end)}`:''}</div>
+      <div class="dp-summary">${sumParts}</div>
+    </div>
+  </div>
+  <div class="dp-body">
+    <div>
+      <div class="dp-section-title">Layer 1 + 2 · Natal Foundation &amp; Functional Quality</div>
+      <div class="dp-lord-grid">
+        ${lordCard(l1M,l2M,'Mahadasha Lord')}
+        ${mahaK!==antarK?lordCard(l1A,l2A,'Antardasha Lord'):lordCard(null,null,'')}
+      </div>
+      <div class="dp-relation"><b>Maha × Antara:</b> &nbsp;<span class="dp-fval ${relCls}" style="display:inline-block">${relText}</span>${relH}</div>
+    </div>
+    <div>
+      <div class="dp-section-title">Layer 3 · Transit Overlay (today)</div>
+      <div class="dp-transit-grid">${trCard(l3.juG,'Ju',l3.juScore)}${trCard(l3.saG,'Sa',l3.saScore)}${trCard(l3.raG,'Ra',l3.raScore)}</div>
+      ${peakHtml}
+    </div>
+    ${modRows.length?`<div><div class="dp-section-title">Layer 4 · Modifiers &amp; Wildcards</div><div class="dp-wildcards">${modRows.join('')}</div></div>`:''}
+    <div>
+      <div class="dp-section-title">Theme Space · What activates in this period</div>
+      <div class="dp-themes-box">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:3px">Houses activated — gold = mooltrikona primary</div>
+        <div class="dp-theme-tags">${themeTagsHtml}</div>
+        <div style="font-size:12px;color:var(--muted);margin:10px 0 3px">Natural karakatvas of ${GBYK[mahaK].name}</div>
+        <div class="dp-theme-tags">${karTagsHtml}</div>
+      </div>
+    </div>
+  </div>
+</div>`;
+}
+
 /* ===== MY CHARTS (parse + persist + apply) ===== */
 (function(){
   const LS="jyotish_charts_v1";
@@ -2362,6 +2860,9 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
 
     // Yoga Finder
     try{renderYogaPanel(c,La);}catch(e){console.error("renderYogaPanel:",e);}
+
+    // Dasha Prediction Engine
+    try{renderDashaPrediction(c,La,allBAV);}catch(e){console.error("renderDashaPrediction:",e);}
 
     // Special Lagnas
     try{renderSpecialLagnas(c,La,allBAV.SAV);}catch(e){console.error("renderSpecialLagnas:",e);}
