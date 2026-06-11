@@ -637,12 +637,13 @@
 /* =============================================
    COSMIC UI ENHANCEMENT
    ============================================= */
+/* Canvas background: body gradient must be transparent so canvas (z-index:-1)
+   is visible. We put a fallback solid on <html> so the page isn't white
+   if JS hasn't run yet. The canvas paints the gradient itself each frame. */
+html{background:#0b0e1a}
+html.light{background:var(--bg)}
+body{background:transparent !important}
 #cosmos-bg{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none}
-body{background:
-  radial-gradient(1400px 700px at 78% -8%,#18245c 0%,transparent 55%),
-  radial-gradient(900px 600px at 2% 18%,#1a1040 0%,transparent 50%),
-  radial-gradient(600px 700px at 50% 105%,#0d1530 0%,transparent 60%),
-  #0b0e1a !important}
 
 /* Glassmorphic header */
 header.top{
@@ -1108,25 +1109,36 @@ html.light .modal .card{backdrop-filter:blur(20px);background:rgba(255,255,255,0
       sp:Math.random()*0.007+0.003
     }));
     nebulae=[
-      {x:W*.18,y:H*.27,r:310,c:[28,48,145]},
-      {x:W*.83,y:H*.62,r:260,c:[58,18,105]},
-      {x:W*.51,y:H*.9, r:370,c:[14,68,135]},
-      {x:W*.36,y:H*.1, r:220,c:[48,28,90]},
+      {x:W*.18,y:H*.27,r:310,c:'28,48,145'},
+      {x:W*.83,y:H*.62,r:260,c:'58,18,105'},
+      {x:W*.51,y:H*.9, r:370,c:'14,68,135'},
+      {x:W*.36,y:H*.1, r:220,c:'48,28,90'},
     ];
   }
   let t=0;
   function frame(){
-    ctx.clearRect(0,0,W,H);t+=.006;
+    t+=.006;
+    // Paint solid base (this is what replaces body background)
+    ctx.fillStyle='#0b0e1a';
+    ctx.fillRect(0,0,W,H);
+    // Large page gradient overlays (matching original body gradient)
+    [[W*.78,-0.05,'#18245c',W*1.3],[W*.02,H*.18,'#1a1040',W*.95],[W*.5,H*1.05,'#0d1530',W*.7]].forEach(([gx,gy,col,gr])=>{
+      const g=ctx.createRadialGradient(gx,gy,0,gx,gy,gr);
+      g.addColorStop(0,col+'cc');g.addColorStop(.55,col+'22');g.addColorStop(1,'transparent');
+      ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+    });
+    // Drifting nebulae
     nebulae.forEach(n=>{
       const dx=Math.sin(t*.25+n.r*.01)*18,dy=Math.cos(t*.18+n.r*.01)*11;
       const g=ctx.createRadialGradient(n.x+dx,n.y+dy,0,n.x+dx,n.y+dy,n.r);
-      g.addColorStop(0,`rgba(${n.c},0.055)`);g.addColorStop(.55,`rgba(${n.c},0.025)`);g.addColorStop(1,'transparent');
+      g.addColorStop(0,`rgba(${n.c},0.06)`);g.addColorStop(.5,`rgba(${n.c},0.025)`);g.addColorStop(1,'transparent');
       ctx.fillStyle=g;ctx.beginPath();ctx.arc(n.x+dx,n.y+dy,n.r,0,Math.PI*2);ctx.fill();
     });
+    // Twinkling stars
     stars.forEach(s=>{
       const a=s.a*(0.42+0.58*Math.sin(t*s.sp*80+s.ph));
       ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
-      ctx.fillStyle=`rgba(200,215,255,${a})`;ctx.fill();
+      ctx.fillStyle=`rgba(200,215,255,${a.toFixed(3)})`;ctx.fill();
     });
     requestAnimationFrame(frame);
   }
