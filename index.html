@@ -455,6 +455,21 @@
   .yg-source{font-size:11px;color:var(--muted);margin-top:8px;border-top:1px dashed var(--line);padding-top:7px}
   .yg-none{padding:18px;text-align:center;color:var(--muted);font-size:13px}
 
+  /* ===== Charts sidebar layout ===== */
+  .charts-layout{display:flex;gap:16px;align-items:flex-start;margin-top:8px}
+  .charts-sidebar{width:210px;flex-shrink:0;position:sticky;top:64px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 10px}
+  .charts-main{flex:1;min-width:0}
+  .cs-head{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:2px 4px 10px;border-bottom:1px solid var(--line);margin-bottom:10px}
+  .charts-sidebar .chartbar{flex-direction:column;gap:5px;margin-bottom:0;align-items:stretch}
+  .charts-sidebar .ctab{border-radius:10px;padding:9px 12px;justify-content:space-between;font-size:13px;width:100%}
+  .charts-sidebar .ctab.add{justify-content:center;border-style:dashed}
+  @media(max-width:780px){
+    .charts-layout{flex-direction:column}
+    .charts-sidebar{width:100%;position:static}
+    .charts-sidebar .chartbar{flex-direction:row;flex-wrap:wrap;align-items:center}
+    .charts-sidebar .ctab{width:auto}
+  }
+
   /* ===== LIGHT THEME ===== */
   html.light{
     --bg:#f4f6fb; --bg2:#edf0f8; --panel:#ffffff; --panel2:#f0f3fa; --line:#cdd5ee;
@@ -645,11 +660,16 @@
     <div class="eyebrow">Apply it to a real chart</div>
     <h2>My Charts</h2>
     <p class="sub">Paste any natal chart (the planetary table from JHora / Parashara's Light — exactly like your <code>.txt</code> files) and the whole chart gets the D-1 → D-9 + lord treatment. Click any row to open it in the Synthesizer. Charts are saved in your browser.</p>
-    <div class="chartbar" id="chartTabs"></div>
-    <div id="chartEmpty" class="panel" style="text-align:center;color:var(--muted);padding:34px;display:none">
-      No chart yet. <a href="#" id="addFirst"><b>＋ Add your chart</b></a> &nbsp;·&nbsp; <a href="#" id="demoFirst">load a demo</a>
-    </div>
-    <div id="chartView" style="display:none">
+    <div class="charts-layout">
+      <div class="charts-sidebar">
+        <div class="cs-head">My Charts</div>
+        <div class="chartbar" id="chartTabs"></div>
+      </div>
+      <div class="charts-main">
+        <div id="chartEmpty" class="panel" style="text-align:center;color:var(--muted);padding:34px;display:none">
+          No chart yet. <a href="#" id="addFirst"><b>＋ Add your chart</b></a> &nbsp;·&nbsp; <a href="#" id="demoFirst">load a demo</a>
+        </div>
+        <div id="chartView" style="display:none">
       <div class="panel" style="margin-bottom:14px">
         <h4 style="margin:0 0 10px">Houses · sign, occupants &amp; lord</h4>
         <div class="hs-grid" id="houseStripGrid"></div>
@@ -706,6 +726,8 @@
         <div class="story-block">
           <div class="story-num">5</div>
           <div class="story-content"><div class="story-label patterns">Relative patterns · house relationships</div><div class="story-text" id="storyP5"></div></div>
+        </div>
+      </div>
         </div>
       </div>
     </div>
