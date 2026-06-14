@@ -3084,10 +3084,29 @@ function dpLayer1(k,c,La){
   const combustMod=combust?-0.75:0;
   const dispMod=dispDig?(dispDig.score>=1.5?0.25:dispDig.score<=-2?-0.25:0):0;
 
+  // Ishta/Kashta phala — auspicious vs distressing delivery (BPHS Shadbala). A planet can be
+  // low on total Shadbala yet high on Ishta (gentle, benefic results) — captures "weak but pleasant".
+  let ishtaMod=0;
+  if(p.ishta!=null&&p.kashta!=null) ishtaMod=Math.max(-0.5,Math.min(0.5,(p.ishta-p.kashta)/60));
+
+  // Node delivery quality — Rahu/Ketu have no sign dignity; they deliver through their dispositor
+  // and (most strongly) through any planet they conjoin. Strengthen the node read for these.
+  let nodeMod=0,nodeNote=null;
+  if(k==='Ra'||k==='Ke'){
+    if(dispDig) nodeMod+=dispDig.score>=1.5?0.4:dispDig.score>=1?0.2:dispDig.score<=-2?-0.4:dispDig.score<=-1?-0.2:0;
+    const conj=Object.keys(c.planets).filter(ok=>ok!==k&&!['Ra','Ke'].includes(ok)&&c.planets[ok].sign===p.sign);
+    if(conj.length){
+      const avg=conj.reduce((s,ok)=>s+dignityOf(ok,c.planets[ok].sign).score,0)/conj.length;
+      const cm=Math.max(-0.5,Math.min(0.5,avg*0.3));
+      nodeMod+=cm;
+      nodeNote={planets:conj,avg,cm};
+    }
+  }
+
   return{
     k,p,d1,d9,d9s,vg,mool,nb,combust,retro,
-    digScore,d9Mod,combustMod,dispMod,aspMod,
-    score:digScore+d9Mod+combustMod+dispMod+aspMod*0.4,
+    digScore,d9Mod,combustMod,dispMod,aspMod,ishtaMod,nodeMod,nodeNote,
+    score:digScore+d9Mod+combustMod+dispMod+aspMod*0.4+ishtaMod+nodeMod,
     dispK,dispDig,house:houseFromSigns(La,p.sign)
   };
 }
@@ -3272,6 +3291,32 @@ function dpThemeSpace(mahaK,antarK,c,La){
   return{themes:themes.slice(0,12),kars:GBYK[mahaK].karakas.slice(0,3)};
 }
 
+// Nakshatra sambandha — Vimshottari is a nakshatra system, so when the AD lord is the star-lord
+// of the MD lord (or vice-versa), the sub-period is already woven into the main period at the
+// deepest level: it tends to DELIVER the dasha's promise smoothly rather than disrupt it.
+function dpNakBond(mahaK,antarK,c){
+  if(mahaK===antarK) return null;
+  const mp=c.planets[mahaK], ap=c.planets[antarK];
+  if(!mp||!ap) return null;
+  const mNakLord=nakInfo(mp.sign*30+mp.deg).l;   // star-lord of MD lord
+  const aNakLord=nakInfo(ap.sign*30+ap.deg).l;   // star-lord of AD lord
+  const adRulesMd=(mNakLord===antarK);           // AD lord is MD lord's star-lord (strongest)
+  const mdRulesAd=(aNakLord===mahaK);            // MD lord is AD lord's star-lord
+  if(!adRulesMd&&!mdRulesAd) return null;
+  let score,text;
+  if(adRulesMd&&mdRulesAd){
+    score=1.25;
+    text=`Mutual nakshatra bond — ${GBYK[mahaK].name} and ${GBYK[antarK].name} each sit in the other's star: a deeply resonant, self-reinforcing sub-period that delivers the dasha's core promise`;
+  } else if(adRulesMd){
+    score=1;
+    text=`Nakshatra sambandha — ${GBYK[mahaK].name} (MD lord) sits in ${GBYK[antarK].name}'s nakshatra: the AD lord is already running inside the MD lord at the deepest level. Smooth delivery of the period's promise, not disruption`;
+  } else {
+    score=0.75;
+    text=`Nakshatra sambandha — ${GBYK[antarK].name} (AD lord) sits in ${GBYK[mahaK].name}'s nakshatra: the sub-period is colored and supported by the main lord's intent`;
+  }
+  return{score,text,adRulesMd,mdRulesAd};
+}
+
 // Maha × Antardasha relationship — house distance table (Step 3 of 4-step framework)
 // A weak CEO cannot fund ambitious project-manager plans; even two benefics cause friction in 6-8.
 function dpRelation(mahaK,antarK,c){
@@ -3287,6 +3332,9 @@ function dpRelation(mahaK,antarK,c){
   } else if(h===3||h===11){
     relScore=1.5;relCat='excellent';
     relVerdict=`H${h} — Upachaya axis (3-11): effort and gains in smooth coordination`;
+  } else if(h===5||h===9){
+    relScore=1;relCat='harmonious';
+    relVerdict=`H${h} — Trikona axis (5-9): trinal blessing; the two lords cooperate with grace and fortune`;
   } else if(h===4||h===10){
     relScore=0.5;relCat='productive';
     relVerdict=`H${h} — Kendra axis (4-10): structural change; home/career focus — productive but demanding`;
@@ -3365,6 +3413,7 @@ function dpAnalyze(){
   const l4=dpLayer4(yogas,mahaK,antarK);
   const themes=dpThemeSpace(mahaK,antarK,c,La);
   const rel=dpRelation(mahaK,antarK,c);
+  const nakBond=dpNakBond(mahaK,antarK,c);
   const rahuF=dpRahuFlags(mahaK,antarK,c,tRes.pos);
 
   const wilds=[...l4.wilds];
@@ -3388,7 +3437,8 @@ function dpAnalyze(){
   const antarDamp=(l1A&&l1A.d1.score===-2&&!l1A.nb)?-1:0;
   const l1Score=(l1M?l1M.score:0)*0.65+(l1A?l1A.score:0)*0.35;
   const l2Score=(l2M?l2M.score:0)*0.65+(l2A?l2A.score:0)*0.35;
-  const total=l1Score+l2Score+l3.score+l4.score+antarDamp+rel.relScore;
+  const nakScore=nakBond?nakBond.score:0;
+  const total=l1Score+l2Score+l3.score+l4.score+antarDamp+rel.relScore+nakScore;
   const verdict=dpVerdict(total,hardCap);
 
   function lordCard(l1,l2,role){
@@ -3405,6 +3455,14 @@ function dpAnalyze(){
     if(l1.dispDig&&l1.dispK!==k){
       const dCls=l1.dispDig.score>=1.5?'pos1':l1.dispDig.score<=-2?'neg1':'neu';
       rows.push(`<div class="dp-factor"><span class="dp-flabel">Dispositor</span><span class="dp-fval ${dCls}">${GBYK[l1.dispK].name}: ${l1.dispDig.full.split('·')[0].trim()}</span></div>`);
+    }
+    if(l1.p.ishta!=null&&l1.p.kashta!=null){
+      const iCls=l1.ishtaMod>0.1?'pos1':l1.ishtaMod<-0.1?'neg1':'neu';
+      rows.push(`<div class="dp-factor"><span class="dp-flabel">Ishta / Kashta</span><span class="dp-fval ${iCls}">${l1.p.ishta.toFixed(0)} vs ${l1.p.kashta.toFixed(0)}${l1.ishtaMod>0.1?' — benefic delivery':l1.ishtaMod<-0.1?' — distressed':''}</span></div>`);
+    }
+    if(l1.nodeNote){
+      const nCls=l1.nodeNote.cm>0.05?'pos1':l1.nodeNote.cm<-0.05?'neg1':'neu';
+      rows.push(`<div class="dp-factor"><span class="dp-flabel">Conjunct</span><span class="dp-fval ${nCls}">${l1.nodeNote.planets.map(pk=>GBYK[pk].name).join(', ')}${l1.nodeNote.cm>0.05?' — uplifts node':l1.nodeNote.cm<-0.05?' — drags node':''}</span></div>`);
     }
     const ht=[1,4,7,10].includes(l1.house)?'Kendra':[5,9].includes(l1.house)?'Trikona':[6,8,12].includes(l1.house)?'Dusthana':'';
     const htCls=ht==='Kendra'||ht==='Trikona'?'pos1':ht==='Dusthana'?'neg1':'neu';
@@ -3439,13 +3497,14 @@ function dpAnalyze(){
 
   const modRows=[
     ...l4.amps.map(a=>`<div class="dp-wildcard w-amp">★ ${a.text}</div>`),
+    ...(nakBond?[`<div class="dp-wildcard w-amp">★ ${nakBond.text}</div>`]:[]),
     ...l4.damps.map(d=>`<div class="dp-wildcard w-damp">⚠ ${d.text}</div>`),
     ...wilds.map(w=>`<div class="dp-wildcard w-neu">◈ ${w.text}</div>`),
     ...l3.flags.map(f=>`<div class="dp-wildcard ${f.cls}">◈ ${f.text}</div>`),
     ...rahuF.map(f=>`<div class="dp-wildcard ${f.cls}">◈ ${f.text}</div>`)
   ];
 
-  const relCls=rel.relCat==='excellent'?'pos2':rel.relCat==='favorable'||rel.relCat==='productive'?'pos1':rel.relCat==='challenging'?'neg1':rel.relCat==='disruptive'?'neg2':'neu';
+  const relCls=rel.relCat==='excellent'?'pos2':rel.relCat==='favorable'||rel.relCat==='productive'||rel.relCat==='harmonious'?'pos1':rel.relCat==='challenging'?'neg1':rel.relCat==='disruptive'?'neg2':'neu';
   const natCls=rel.nat==='friend'?'pos1':rel.nat==='enemy'?'neg1':'neu';
   const relText=rel.relVerdict;
   const relH=rel.hFrMaha?` · <span class="dp-fval ${natCls}" style="display:inline-block">${rel.nat==='friend'?'Natural friends':rel.nat==='enemy'?'Natural enemies':'Neutral'}</span>`:'';
@@ -3902,6 +3961,12 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
     const dl=lines.find(l=>l.trim().startsWith("Date:"));
     if(dl){const dm=dl.match(/Date:\s+(.+)/);if(dm)out.birthDate=dm[1].trim();}
     out.dashas=parseVimsottariDasa(lines)||null;
+    // Shadbala / IshtaPhala / KashtaPhala table (optional — JHora "Shadbala In rupas % Strength IshtaPhala KashtaPhala")
+    const SHB_NAME={Sun:"Su",Moon:"Mo",Mars:"Ma",Mercury:"Me",Jupiter:"Ju",Venus:"Ve",Saturn:"Sa"};
+    for(const ln of lines){
+      const sm=ln.trim().match(/^(Sun|Moon|Mars|Mercury|Jupiter|Venus|Saturn)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*$/);
+      if(sm){const pk=SHB_NAME[sm[1]];if(out.planets[pk]){out.planets[pk].shadbalaPct=+sm[4];out.planets[pk].ishta=+sm[5];out.planets[pk].kashta=+sm[6];}}
+    }
     return out;
   }
   function load(){ try{return JSON.parse(localStorage.getItem(LS))||[]}catch(e){return[]} }
