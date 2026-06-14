@@ -1605,7 +1605,7 @@ const FRIEND={
 };
 const SIGN_LORD=["Ma","Ve","Me","Mo","Su","Me","Ve","Ma","Ju","Sa","Sa","Ju"];
 const INDU_VAL={Su:30,Mo:16,Ma:6,Me:8,Ju:10,Ve:12,Sa:1};
-const ELEM={Fire:"#e7795a",Earth:"#a98c5a",Air:"#7fb0e0",Water:"#5fc9c2"};
+const ELEM={Fire:"#e7795a",Earth:"#c4a368",Air:"#7fb0e0",Water:"#5fc9c2"};
 const RASHIS=SIGNS.map((s,i)=>({
   name:s,skt:SIGN_SKT[i],lord:SIGN_LORD[i],elem:["Fire","Earth","Air","Water"][i%4],
   mode:["Movable (Chara)","Fixed (Sthira)","Dual (Dvisvabhava)"][i%3],gender:(i%2===0)?"Male / odd":"Female / even",
@@ -1743,7 +1743,13 @@ function navamsaSign(d1Sign,degInSign){ return (NAV_START[d1Sign%4]+Math.floor(d
 const HOUSE_KARAKA={1:"Su",2:"Ju",3:"Ma",4:"Mo",5:"Ju",6:"Ma",7:"Ve",8:"Sa",9:"Ju",10:"Su",11:"Ju",12:"Sa"};
 const ORD=n=>n+(n===1?"st":n===2?"nd":n===3?"rd":"th");
 function houseFromSigns(refSign,sign){ return ((sign-refSign)%12+12)%12+1; }
-function glyphDot(g){return `<span class="gl" style="background:${g.col}">${g.gl}</span>`;}
+function badgeInk(hex){
+  const h=hex.replace('#','');
+  const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);
+  const L=(0.299*r+0.587*g+0.114*b)/255;
+  return L>0.55?'#0b0e1a':'#f4f6fb';
+}
+function glyphDot(g){return `<span class="gl" style="background:${g.col};color:${badgeInk(g.col)}">${g.gl}</span>`;}
 function dignityOf(gk,ri){
   const g=GBYK[gk];
   if(g.exalt===ri) return {full:"Exalted · Uccha",col:"var(--exalt)",score:2};
@@ -1907,9 +1913,9 @@ explorer("grahaTokens","grahaDetail",GRAHAS,g=>`${glyphDot(g)}${g.name}`,g=>{
       <b>Body (BPHS)</b><span>${g.body.join(", ")}</span><b>Weekday</b><span>${g.day}</span></div>
     <div class="chapref">📖 ${g.chap}. A planet's whole meaning grows from this one nature — the rest is context.</div>`;
 });
-explorer("rashiTokens","rashiDetail",RASHIS,r=>`<span class="gl" style="background:${ELEM[r.elem]}">${r.name[0]}</span>${r.name}`,r=>{
+explorer("rashiTokens","rashiDetail",RASHIS,r=>`<span class="gl" style="background:${ELEM[r.elem]};color:${badgeInk(ELEM[r.elem])}">${r.name[0]}</span>${r.name}`,r=>{
   const lord=GBYK[r.lord];
-  return `<h3><span class="gl" style="background:${ELEM[r.elem]}">${r.name[0]}</span> ${r.name} <span class="skt">· ${r.skt} · the ${r.symbol}</span></h3>
+  return `<h3><span class="gl" style="background:${ELEM[r.elem]};color:${badgeInk(ELEM[r.elem])}">${r.name[0]}</span> ${r.name} <span class="skt">· ${r.skt} · the ${r.symbol}</span></h3>
     <div class="tags">${r.traits.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
     <div class="kv"><b>Ruler</b><span>${glyphDot(lord)} ${lord.name} — its agenda shapes this sign</span>
       <b>Element</b><span style="color:${ELEM[r.elem]}">${r.elem}</span><b>Modality</b><span>${r.mode}</span>
