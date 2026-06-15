@@ -5310,21 +5310,68 @@ Reference exact planets, house numbers, degrees, nakshatras, and classical princ
       trSec+=`       ☊ Rahu H${r.raH} / ☋ Ketu H${keH} SAV${raSav}${raConn?" ★axis on goal house":""}\n`;
     }
 
-    return `You are a classical Vedic astrologer trained in Brihat Parashara Hora Shastra (BPHS), Saravali, Phala Deepika, and Jaimini Sutras. Your task is to deliver a precise, layered timing analysis for the stated goal using the chart data below.
+    // ---- Additional chart-derived factors for the enhanced methodology ----
+    const seven=["Su","Mo","Ma","Me","Ju","Ve","Sa"];
+    const ownsSign=k=>{const a=[];for(let s=0;s<12;s++)if(SIGN_LORD[s]===k)a.push(s);return a;};
 
-ANALYTICAL LAYERS — address in this sequence:
-  1. Natal Foundation   — Is the goal PROMISED? (house lords, dignity, yogas, SAV)
-  2. Functional Nature  — Which planets are temporal benefics vs malefics for this Lagna?
-  3. Dasha Activation   — Which dasha/antardasha lords activate goal houses (lordship, placement, aspect)?
-  4. Nakshatra Layer    — Sub-lord activations: is the nak-lord of the dasha lord connected to goal houses?
-  5. Tarabala           — From Moon's nakshatra, which tara does each running dasha lord occupy?
-  6. Transit Timing     — Jupiter/Saturn transits to goal houses; cross-reference SAV for reliability
-  7. Dasha × Transit    — Overlap periods are the strongest windows; name them with month-year precision
-  8. Verdict & Watchlist — Name 1–2 specific windows; name warning signs of delay
+    // Bhavat Bhavam — the "house from the house" that sustains each goal house
+    let bbSec="";
+    for(const h of goal.houses){
+      const bb=((2*h-2)%12)+1, bbs=(La+bb-1)%12, bbLord=SIGN_LORD[bbs], blp=c.planets[bbLord];
+      const blH=blp?houseFromSigns(La,blp.sign):null, blDig=blp?dignityOf(bbLord,blp.sign):null;
+      bbSec+=`H${h} (${goal.hd[h]}) → Bhavat Bhavam = H${bb} [${SIGNS[bbs]}] SAV:${sav[bbs]}/48\n`;
+      bbSec+=`  H${bb} lord ${GBYK[bbLord].name}${blp?` · H${blH} ${SIGNS[blp.sign]} ${Math.floor(blp.deg)}° · ${blDig.full.split("·")[0].trim()}`:" — unknown"} (this house feeds/sustains H${h})\n`;
+    }
 
-Speak with the precision of a classical commentator. Cite BPHS chapter principles where applicable. Never generalise.
+    // Jaimini Chara Karakas (8-karaka scheme; Rahu measured as 30−deg)
+    const karDeg={};
+    for(const k of seven)if(c.planets[k])karDeg[k]=c.planets[k].deg;
+    if(c.planets.Ra)karDeg.Ra=30-c.planets.Ra.deg;
+    const karSorted=Object.entries(karDeg).sort((a,b)=>b[1]-a[1]);
+    const KAR_NAMES=["Atmakaraka — soul, the self","Amatyakaraka — career, mind","Bhratrikaraka — siblings, effort","Matrikaraka — mother, home","Putrakaraka — children, intellect","Gnatikaraka — obstacles, health","Darakaraka — spouse, partner","(8th karaka)"];
+    let karSec="";
+    karSorted.forEach(([k,d],i)=>{const p=c.planets[k];const hh=p?houseFromSigns(La,p.sign):null;karSec+=`  ${KAR_NAMES[i].padEnd(30)} ${GBYK[k].name.padEnd(9)} ${d.toFixed(2)}°${hh?`  H${hh} ${SIGNS[p.sign]}`:""}\n`;});
+    const akK=karSorted.length?karSorted[0][0]:null;
 
-DISTINGUISH: PROMISE (natal guarantee) vs FRUCTIFICATION (timing required). State contradictions plainly.
+    // Vargottama (same sign in D-1 and D-9)
+    const vgList=[];
+    for(const k of["Su","Mo","Ma","Me","Ju","Ve","Sa","Ra","Ke"]){const p=c.planets[k];if(p&&navamsaSign(p.sign,p.deg)===p.sign)vgList.push(GBYK[k].name);}
+
+    // Parivartana yoga (mutual sign exchange)
+    const parList=[];
+    for(let i=0;i<seven.length;i++)for(let j=i+1;j<seven.length;j++){
+      const a=seven[i],b=seven[j],pa=c.planets[a],pb=c.planets[b];if(!pa||!pb)continue;
+      if(ownsSign(b).includes(pa.sign)&&ownsSign(a).includes(pb.sign)){
+        const ha=houseFromSigns(La,pa.sign),hb=houseFromSigns(La,pb.sign);
+        const typ=([6,8,12].includes(ha)||[6,8,12].includes(hb))?"Dainya (dusthana involved)":([3,6,11].includes(ha)||[3,6,11].includes(hb))?"Khala (mixed)":"Maha (auspicious)";
+        parList.push(`${GBYK[a].name} (H${ha}) ↔ ${GBYK[b].name} (H${hb}) — ${typ} Parivartana`);
+      }
+    }
+
+    // Dig Bala (directional strength) — planet in its strong kendra
+    const DIGH={Ju:1,Me:1,Mo:4,Ve:4,Sa:7,Su:10,Ma:10};
+    const digList=[];
+    for(const k of seven){const p=c.planets[k];if(!p)continue;const h=houseFromSigns(La,p.sign);if(DIGH[k]===h)digList.push(`${GBYK[k].name} (H${h} — full Dig Bala)`);}
+
+    // Shadbala / Ishta / Kashta (only present if pasted JHora Shadbala table was parsed)
+    let shbSec="";
+    for(const k of seven){const p=c.planets[k];if(p&&p.ishta!=null&&p.kashta!=null)shbSec+=`  ${GBYK[k].name.padEnd(9)} Shadbala ${p.shadbalaPct!=null?Math.round(p.shadbalaPct)+"%":"—"}  Ishta ${p.ishta.toFixed(1)}  Kashta ${p.kashta.toFixed(1)}  → ${p.ishta>p.kashta?"net benefic delivery (Ishta>Kashta)":"net distressed (Kashta≥Ishta)"}\n`;}
+
+    const grahaBalaSec=`Atmakaraka (Jaimini soul significator): ${akK?GBYK[akK].name:"—"}
+Chara Karakas (highest→lowest longitude):
+${karSec}Vargottama (same sign D-1 & D-9): ${vgList.length?vgList.join(", "):"none"}
+Dig Bala (directional strength): ${digList.length?digList.join(", "):"none at full strength"}
+Parivartana (sign exchange): ${parList.length?parList.join("; "):"none"}${shbSec?`\nShadbala · Ishta/Kashta Phala (from JHora):\n${shbSec}`:"\n(Shadbala/Ishta-Kashta not in pasted data — assess strength from dignity, dig bala, avastha, combustion)"}`;
+
+    return `You are an expert Vedic Astrologer (Jyotish Acharya) with deep mastery of Brihat Parashara Hora Shastra (BPHS), Jaimini Sutras, Phaladeepika, Brihat Jataka, Saravali, and Uttara Kalamrita. Deliver a structured, evidence-based, objective analysis of the stated goal using the South Indian chart data below, following the 10-step methodology exactly.
+
+CRITICAL FOUNDATIONAL GUARDRAILS
+1. MULTI-FACTOR VERIFICATION — never predict from a single factor. Every conclusion must be cross-verified by at least three independent indicators (Natal Promise + Dasha Activation + Transit Trigger + Divisional Support).
+2. CONTRADICTION BALANCE — explicitly quantify evidence before concluding (e.g., "3 supportive vs 2 limiting factors").
+3. EPISTEMIC HUMILITY — frame insights as analytical interpretations, karmic tendencies and potential trends, not absolute facts.
+4. LOGICAL PROGRESSION — reason step-by-step; never jump straight to predictions.
+
+DISTINGUISH throughout: PROMISE (lifelong natal guarantee) vs FRUCTIFICATION (dasha/transit timing). State contradictions plainly. Cite BPHS principles where applicable.
 
 =======================================
 BIRTH DATA
@@ -5348,13 +5395,23 @@ Sarvashtakavarga (SAV) by house:
 ${Array.from({length:12},(_,i)=>`H${i+1}:${sav[i]}`).join("  ")}
 
 =======================================
+GRAHA BALA — STRENGTH & SPECIAL FACTORS
+=======================================
+${grahaBalaSec}
+
+=======================================
 GOAL: ${goal.label.toUpperCase()}
 Key houses: ${goal.houses.map(h=>`H${h}=${goal.hd[h]}`).join(" · ")}${goal.vn?"\nDivisional cross-check: "+goal.vn:""}
 =======================================
 
 NATAL HOUSE CONDITIONS (D-1)
 ---------------------------------------
-${hSec}${dSec?`=======================================
+${hSec}=======================================
+BHAVAT BHAVAM — supporting "house-from-house"
+(the Xth house from house X sustains/feeds it)
+=======================================
+${bbSec}
+${dSec?`=======================================
 VIMSHOTTARI DASHA 2025–2030
 (★ = connected to goal houses by lordship or placement)
 =======================================
@@ -5375,68 +5432,70 @@ JUPITER, SATURN & RAHU/KETU TRANSITS (sidereal, 2025–2029)
 =======================================
 ${trSec}
 =======================================
-ANALYSIS — address each layer:
+ANALYSIS — 10-STEP METHODOLOGY (work in order; do not skip ahead to predictions)
+Goal under analysis: ${goal.label.toUpperCase()} · key houses ${goal.houses.map(h=>`H${h}`).join(", ")}
 =======================================
 
-1. NATAL FOUNDATION
-   Evaluate: are the goal houses (${goal.houses.map(h=>`H${h}`).join(", ")}) structurally strong?
-   For EACH goal house: assess lord dignity, placement (Kendra/Trikona/Dusthana), SAV score,
-   position of lord from its own bhava (6/8/12 = weakening), combustion, retrograde.
-   Identify any classical yogas touching these houses:
-   — Rajayoga (Kendra + Trikona lords conjoining or aspecting)
-   — Dhana yoga (lords of H1/2/5/9/11 interacting)
-   — Viparita Raja Yoga (dusthana lords in other dusthanas)
-   — Neecha Bhanga (debilitation cancelled by specific conditions per BPHS)
-   — Parivartana (mutual sign exchange between lords)
-   State the CEILING: what is the maximum this chart can deliver for ${goal.label.toLowerCase()}?
+STEP 1 · VALIDATE CHART FOUNDATIONS
+   Confirm the integrity of the data: Lagna sign/degree/nakshatra-pada, and each planet's sign,
+   house, nakshatra and pada. Note any limitation (e.g., Lagna near a sign boundary = birth-time
+   round-off risk that could shift house-based conclusions). Proceed only after stating this.
 
-2. FUNCTIONAL NATURE × GOAL HOUSES
-   Which planets are temporal benefics for this ${SIGNS[La]} Lagna?
-   Do the goal house lords happen to be temporal benefics (strengthens outcome) or malefics (creates friction)?
-   Are any natural malefics placed in goal houses — and are they functional benefics here?
+STEP 2 · ASSESS PLANETARY STRENGTH (GRAHA BALA)
+   For every planet relevant to ${goal.label.toLowerCase()}, document: sign dignity, Shadbala /
+   Ishta / Kashta phala (where given above), avastha, combustion, retrogression, Graha Yuddha,
+   Dig Bala, Vargottama status, and Atmakaraka role. Then assign a definitive score:
+   [Very Strong | Strong | Moderate | Weak | Very Weak]. Use the GRAHA BALA block above.
 
-3. DASHA ACTIVATION (2025–2030)
-   For each mahadasha/antardasha period:
-   — Is the dasha lord connected to a goal house by: (a) lordship, (b) placement, (c) classical aspect?
-   — What is the dasha lord's own condition (dignity, combustion, retrograde)?
-   — Double-activation rule: if dasha lord LORDS a goal house AND IS PLACED in a goal house = strongest signal.
-   — Triple-activation: above + nakshatra lord also in goal house = exceptionally reliable timing.
-   Starred periods (★) in the data above have at least one goal connection — rank them by strength.
+STEP 3 · HOUSE ANALYSIS (BHAVA VICHARA) — incl. BHAVAT BHAVAM
+   For each goal house (${goal.houses.map(h=>`H${h}`).join(", ")}) assess occupancy, lord
+   placement/dignity, Drishti, karakas, SAV, lord-from-own-bhava (6/8/12 = weakening), and the
+   supporting Bhavat Bhavam house listed above. Structure each house as: Strength & Blessings /
+   Weaknesses & Afflictions / Opportunities (natal promise) / Challenges & Delays.
+   State the CEILING — the maximum this chart can deliver for ${goal.label.toLowerCase()}.
 
-4. NAKSHATRA SUB-LORD ANALYSIS
-   For each key dasha lord (especially current mahadasha and antardasha lords):
-   — In which nakshatra does the dasha lord sit?
-   — Where is the nakshatra lord placed? Is it connected to a goal house?
-   — Sub-lord in goal house = fine-grained activation signal within the dasha window.
-   State the deity and motivation of the Moon's nakshatra and current AD lord's nakshatra —
-   do they align with the goal of ${goal.label.toLowerCase()}?
+STEP 4 · YOGA ANALYSIS
+   Identify yogas touching the goal houses or their lords: Raja yogas & Dharma-Karmadhipati,
+   Pancha Mahapurusha, Parivartana (see list above), Neecha Bhanga Raja Yoga, Dhana / Lakshmi /
+   Gaja Kesari, spiritual (Moksha/Sanyasa), and Arishta yogas. For EACH: Formation Status,
+   Realized Strength, Cancellation Factors, Practical Manifestation.
 
-5. TARABALA ASSESSMENT
-   From the Moon nakshatra (${moNak?moNak.n:"?"}), compute the tara each running dasha lord occupies.
-   Taras 1 (Janma), 3 (Vipat), 5 (Pratyak), 7 (Vadha) = challenging — avoid initiating in these periods.
-   Taras 2 (Sampat), 4 (Kshema), 6 (Sadhaka), 8 (Mitra), 9 (Ati-Mitra) = supportive.
-   Cross-reference: a dasha lord connected to goal houses AND in a supportive tara = double confirmation.
+STEP 5 · NAKSHATRA-LEVEL ANALYSIS
+   Deconstruct the Moon, Lagna, Atmakaraka (${akK?GBYK[akK].name:"—"}) and goal-house lords by
+   nakshatra/pada, nakshatra lord and dispositor chain (data above). Give psychological and
+   karmic/soul themes, and whether they align with the goal.
 
-6. TRANSIT × DASHA OVERLAP
-   Cross-reference the dasha sequence with Jupiter/Saturn transits year by year:
-   — Jupiter aspecting a goal house while a goal-connected dasha runs = strong window.
-   — Saturn aspecting a goal house while a goal-connected dasha runs = delayed but solid result.
-   — Both Jupiter and Saturn activating goal houses simultaneously = the strongest transit combination.
-   — If Rahu/Ketu axis touches goal house in the same year = amplification (can accelerate or distort).
-   Identify specific month-year windows where dasha + transit overlap.
+STEP 6 · DIVISIONAL (VARGA) CORRELATION
+   Cross-check D-1 against the relevant varga${goal.vn?` (${goal.vn})`:""}: Career=D9+D10,
+   Marriage=D9, Children=D7, Wealth=D2+D9, Property=D4, Spirituality=D20, Karma=D60.
+   Do NOT finalise a prediction without divisional support.
 
-7. VERDICT — strongest windows 2025–2030
-   Name the 1–2 best 12–18 month windows in the format:
-   "[Period]: [Dasha/Antardasha] + [Transit condition] — [why it's strong]"
-   Name any years where the native should consolidate rather than initiate, and why.
-   Name the single most important factor that determines success or delay for this specific goal.
+STEP 7 · DASHA (TIMING) ANALYSIS
+   For the running and upcoming Mahadasha→Antardasha→Pratyantardasha (data above): evaluate each
+   dasha lord's strength, lordship, placement and nakshatra; which yogas it triggers; divisional
+   support; and Tarabala from the Moon (${moNak?moNak.n:"?"}). Apply the activation rules —
+   double-activation (lords AND occupies a goal house) and triple-activation (+ nakshatra lord in
+   goal house). Rank the ★ periods.
 
-8. WATCHLIST
-   — What specific planetary event or dasha change signals the goal is imminent?
-   — What would be a warning sign of a permanent block vs. a timing delay?
-   — Is there any remedy implied by classical Jyotish (planet to strengthen, transit to watch for)?
+STEP 8 · TRANSIT (GOCHARA) ANALYSIS
+   Superimpose Jupiter, Saturn (incl. Sade Sati/Dhaiya) and Rahu-Ketu transits (data above) onto
+   the Lagna, natal Moon, active dasha lords and key natal planets. Identify exact dasha×transit
+   trigger windows with month-year precision; double-transit (Ju+Sa on a goal house) = strongest.
 
-Reference exact planets, house numbers, degrees, nakshatras, and BPHS principles throughout.`;
+STEP 9 · PREDICTION SYNTHESIS
+   Synthesise Steps 1–8 for ${goal.label.toLowerCase()}. Give horizons — next 1 year, 3 years,
+   5 years — with concrete windows. Where relevant also touch the adjacent life areas the goal
+   houses govern. Name years to consolidate vs initiate.
+
+STEP 10 · CONFIDENCE METRICS & EVIDENCE LOG
+   For EVERY major conclusion provide a scorecard:
+   — Confidence: [High | Medium | Low]
+   — Evidence Log: list supportive vs limiting factors, e.g.
+     "3 supportive [BB H${((2*goal.houses[0]-2)%12)+1} lord strong, goal-lord in Kendra, Jupiter transit] vs 1 limiting [dasha lord in 8th]"
+   — Distinguish lifelong natal PROMISE from temporary dasha/transit effect.
+
+Deliver as a formal Jyotish Consultation Report. Reference exact planets, house numbers, degrees,
+nakshatras and BPHS principles throughout. Avoid generic platitudes; never predict from a single factor.`;
   }
 
   function renderOutlook(chartIdx,goalIdx){
