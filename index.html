@@ -4887,15 +4887,27 @@ function renderSpecialLagnas(c,La,sav){
     return `${pw} ${hd}.`;
   }
 
-  // Compute one Graha Arudha from a single ruled sign
+  // Compute one Graha Arudha from a single ruled sign (Jaimini formula)
+  // d = exclusive forward distance from bhavaSign to planet's sign
+  // Exception A: d=0 (planet in own sign) → 10th from bhava (bhava+9)
+  // Exception B: d=6 (planet in 7th from bhava) → 4th from bhava (bhava+3)
+  // Default: reflect same d steps forward from planet's sign
   function computeGA(c,bhavaSign,pk){
     const lp=c.planets[pk]; if(!lp) return null;
-    const dist=houseFromSigns(bhavaSign,lp.sign);
-    let pada=(lp.sign+dist-1)%12, rule="";
-    if(pada===bhavaSign){pada=(bhavaSign+9)%12;rule="Result fell on the ruled sign → 10th from it (BPHS Ch.32 exception)";}
-    else if(pada===(bhavaSign+6)%12){pada=(bhavaSign+3)%12;rule="Result on the 7th from ruled sign → 4th from it (BPHS Ch.32 exception)";}
-    const chain=Array.from({length:dist},(_,j)=>SIGNS[(lp.sign+j)%12]).join(" → ");
-    return{bhavaSign,planetSign:lp.sign,dist,sign:pada,rule,chain};
+    const d=((lp.sign-bhavaSign)%12+12)%12;
+    let pada, rule="";
+    if(d===0){
+      pada=(bhavaSign+9)%12;
+      rule="Planet in own sign (d=0) → Arudha = 10th from ruled sign (Jaimini Exception A)";
+    } else if(d===6){
+      pada=(bhavaSign+3)%12;
+      rule="Planet in 7th from ruled sign (d=6) → Arudha = 4th from ruled sign (Jaimini Exception B)";
+    } else {
+      pada=(lp.sign+d)%12;
+    }
+    const toChain=Array.from({length:d+1},(_,j)=>SIGNS[(bhavaSign+j)%12]).join(" → ");
+    const frChain=Array.from({length:d+1},(_,j)=>SIGNS[(lp.sign+j)%12]).join(" → ");
+    return{bhavaSign,d,planetSign:lp.sign,sign:pada,rule,toChain,frChain};
   }
 
   const LS_KEY="jyotish_charts_v1";
@@ -4958,8 +4970,8 @@ function renderSpecialLagnas(c,La,sav){
           <button type="button" class="ar-calc-toggle">▸ How this was calculated</button>
           <div class="ar-calc">
             <div class="ar-step"><span class="ar-step-n">1</span><span>${gp.name} rules <b>${SIGNS[bhavaSign]}</b> (H${bhavaH} from Lagna)</span></div>
-            <div class="ar-step"><span class="ar-step-n">2</span><span>${gp.name} is in <b>${SIGNS[ga.planetSign]}</b> — <b>${ga.dist}</b> sign${ga.dist===1?"":"s"} from ${SIGNS[bhavaSign]}</span></div>
-            <div class="ar-step"><span class="ar-step-n">3</span><span>Count ${ga.dist} forward from ${SIGNS[ga.planetSign]}: <b style="color:var(--gold2)">${ga.chain}</b></span></div>
+            <div class="ar-step"><span class="ar-step-n">2</span><span>Count from <b>${SIGNS[bhavaSign]}</b> to <b>${SIGNS[ga.planetSign]}</b> = <b>${ga.d}</b> step${ga.d===1?"":"s"}: <span style="color:var(--muted)">${ga.toChain}</span></span></div>
+            <div class="ar-step"><span class="ar-step-n">3</span><span>Count same <b>${ga.d}</b> step${ga.d===1?"":"s"} forward from <b>${SIGNS[ga.planetSign]}</b>: <b style="color:var(--gold2)">${ga.frChain}</b></span></div>
             ${ga.rule?`<div class="ar-step"><span class="ar-step-n" style="color:var(--debil)">!</span><span style="color:var(--debil)">${ga.rule}</span></div>`:""}
             <div class="ar-step"><span class="ar-step-n">✓</span><span>Graha Arudha of ${gp.name} from ${SIGNS[bhavaSign]} = <b style="color:var(--gold2)">${SIGNS[ga.sign]}</b> · H${aruH}</span></div>
           </div>
