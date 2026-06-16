@@ -86,6 +86,43 @@
     #readProgress{left:248px;width:auto;right:0}
     .wrap{max-width:1360px;margin:0 auto;padding:0 32px}
   }
+  /* Divisional charts (Vargas) table */
+  .varga-wrap{overflow-x:auto}
+  .varga-table{width:100%;border-collapse:collapse;font-size:12px}
+  .varga-table th,.varga-table td{padding:6px 5px;text-align:center;border-bottom:1px solid var(--line)}
+  .varga-table thead th{color:var(--ink);font-weight:600;vertical-align:bottom}
+  .varga-table .vh-tag{font-size:11px;font-weight:600}
+  .varga-table .vh-name{font-size:9px;color:var(--muted);font-weight:400}
+  .varga-table .vp-label{text-align:left;white-space:nowrap;font-weight:600;padding-left:6px}
+  .varga-table .vcell{color:var(--dc,var(--ink));font-variant-numeric:tabular-nums;position:relative;font-weight:600}
+  .varga-table .vgot{outline:1px solid var(--gold);outline-offset:-3px;border-radius:5px}
+  .vg-dot{color:var(--gold2);font-size:7px;position:absolute;top:1px;right:2px}
+  .vim-wrap{display:flex;flex-direction:column;gap:3px;align-items:center;min-width:54px}
+  .vim-bar{width:48px;height:4px;border-radius:3px;background:var(--panel2);overflow:hidden}
+  .vim-bar i{display:block;height:100%}
+  .vim-hi{background:var(--exalt)}.vim-mid{background:var(--gold)}.vim-lo{background:var(--debil)}
+  .varga-table tbody tr:hover{background:var(--panel2)}
+  @media(max-width:760px){.varga-table{min-width:680px}}
+  /* Jaimini panel */
+  .jm-sub{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--gold2);font-weight:600;margin-bottom:8px}
+  .ck-table{width:100%;border-collapse:collapse;font-size:12.5px}
+  .ck-table th,.ck-table td{padding:7px 8px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  .ck-table thead th{color:var(--muted);font-weight:600;font-size:11px}
+  .ck-ab{font-weight:700;color:var(--gold2);white-space:nowrap}
+  .ck-ab .ck-name{font-size:9.5px;font-weight:400;color:var(--muted);letter-spacing:.02em}
+  .ck-pl{white-space:nowrap;font-weight:600}
+  .ck-sig{color:var(--muted);line-height:1.45}
+  .arg-yes{color:var(--exalt);font-weight:600;white-space:nowrap}
+  .arg-no{color:var(--muted);white-space:nowrap}
+  .km-head{font-size:13px;margin-bottom:8px}
+  .km-list{margin:0;padding-left:18px;font-size:12.5px;line-height:1.6}
+  .km-list li{margin-bottom:3px}
+  @media(max-width:760px){.ck-table{min-width:520px}}
+  /* Avastha panel */
+  .av-table .av-t{font-size:10px;color:var(--muted);font-style:italic}
+  .av-table td{vertical-align:top}
+  .av-table .ck-sig{font-size:11px;margin-top:2px}
+  @media(max-width:760px){.av-table{min-width:600px}}
   section{padding:var(--section-y) 0 16px;border-bottom:1px solid rgba(42,51,96,.5)}
   section.section-reveal{opacity:0;transform:translateY(10px);transition:opacity .5s var(--ease),transform .5s var(--ease)}
   section.section-reveal.visible{opacity:1;transform:none}
@@ -1306,6 +1343,26 @@ html.light .brand{color:var(--ink)!important}
         <h4 style="margin:0 0 14px">Planets · Dignity · Functional Nature · Nakshatra</h4>
         <div class="ps-grid" id="psGrid"></div>
       </div>
+      <div class="varga-section panel" id="vargaPanel" style="display:none;margin-top:14px">
+        <h4 style="margin:0 0 4px">Divisional Charts (Varga) · Shodasavarga</h4>
+        <p class="note" style="margin:0 0 12px">Each <b>D-N</b> magnifies one domain of life (hover a column header). A planet strong across many vargas truly <i>delivers</i>; strong in D-1 but weak in the divisions is a promise that fades. <b>◆ gold</b> = <i>vargottama</i> — same sign in D-1 and that varga, a major strength. <b>Viṁśopaka Bala</b> (Ṣaḍvarga · /20) weights D-1·6, D-2·2, D-3·4, D-9·5, D-12·2, D-30·1 by dignity in each.</p>
+        <div class="varga-wrap"><table class="varga-table" id="vargaTable"></table></div>
+      </div>
+      <div class="jaimini-section panel" id="jaiminiPanel" style="display:none;margin-top:14px">
+        <h4 style="margin:0 0 4px">Jaimini · Chara Kārakas, Kārakāṁśa &amp; Argala</h4>
+        <p class="note" style="margin:0 0 12px">The <b>Chara Kārakas</b> are <i>movable</i> significators: the planet at the highest degree in its sign becomes the <b>Ātmakāraka</b> (soul significator), and the rest fall in order of descending degree.</p>
+        <div class="jm-sub">Chara Kārakas</div>
+        <div class="varga-wrap" id="ckBody"></div>
+        <div class="jm-sub" style="margin-top:16px">Kārakāṁśa</div>
+        <div id="kmBody"></div>
+        <div class="jm-sub" style="margin-top:16px">Argala on the Lagna <span class="note">— who intervenes in your selfhood (effective when the intervening house outnumbers its obstruction)</span></div>
+        <div class="varga-wrap" id="argBody"></div>
+      </div>
+      <div class="avastha-section panel" id="avasthaPanel" style="display:none;margin-top:14px">
+        <h4 style="margin:0 0 4px">Planetary Avasthas · states of a planet</h4>
+        <p class="note" style="margin:0 0 12px">A planet can be well-placed yet unable to deliver. <b>Bālādi</b> reads its life-stage by degree (peaks at <i>Yuvā</i>), <b>Jāgradādi</b> its wakefulness by dignity, and <b>Dīptādi</b> its condition. <b>Net vitality</b> = how much of itself it can actually express.</p>
+        <div class="varga-wrap" id="avBody"></div>
+      </div>
       <div class="bav-section panel" style="margin-top:14px">
         <h4 style="margin:0 0 4px">Bhinna Ashtakavarga (BAV) — benefic points per house</h4>
         <p class="note" style="margin:0 0 12px">Each cell shows how many benefic points (0–8) that planet contributes to that house. <b>∑ SAV</b> is the house total across all 7 planets (≥30 strong, 25–29 average, &lt;25 weak). Gold outline = planet's natal house.</p>
@@ -1921,6 +1978,100 @@ document.addEventListener("keydown",e=>{
 /* ===== shared engine ===== */
 const NAV_START=[0,9,6,3];
 function navamsaSign(d1Sign,degInSign){ return (NAV_START[d1Sign%4]+Math.floor(degInSign/(10/3)))%12; }
+
+/* ===== Divisional charts (Vargas) — BPHS Shodasavarga (verified) =====
+   sign 0=Aries..11=Pisces ; deg 0..30 in sign. VARGA_ODD = sign-number odd. */
+const VARGA_ODD=s=>s%2===0;
+function trimsamsaSign(s,d){            // D-30: unequal divisions → lord's own sign
+  if(VARGA_ODD(s)){ if(d<5)return 0; if(d<10)return 10; if(d<18)return 8; if(d<25)return 2; return 6; }
+  if(d<5)return 1; if(d<12)return 5; if(d<20)return 11; if(d<25)return 9; return 7;
+}
+function vargaSign(s,d,N){
+  const m=x=>((x%12)+12)%12;
+  switch(N){
+    case 1:  return s;
+    case 2:  return VARGA_ODD(s)?(d<15?4:3):(d<15?3:4);                 // Hora (Leo/Cancer)
+    case 3:  return m(s+[0,4,8][Math.floor(d/10)]);                     // Drekkana
+    case 4:  return m(s+[0,3,6,9][Math.floor(d/7.5)]);                  // Chaturthamsa
+    case 7:  return m((VARGA_ODD(s)?s:s+6)+Math.floor(d/(30/7)));       // Saptamsa
+    case 9:  return navamsaSign(s,d);                                   // Navamsa
+    case 10: return m((VARGA_ODD(s)?s:s+8)+Math.floor(d/3));            // Dasamsa
+    case 12: return m(s+Math.floor(d/2.5));                             // Dwadasamsa
+    case 16: return m([0,4,8][s%3]+Math.floor(d/(30/16)));             // Shodasamsa
+    case 24: return m((VARGA_ODD(s)?4:3)+Math.floor(d/1.25));          // Chaturvimsamsa
+    case 27: return m([0,3,6,9][s%4]+Math.floor(d/(30/27)));           // Bhamsa
+    case 30: return trimsamsaSign(s,d);                                 // Trimsamsa
+    case 60: return m(s+Math.floor(d*2));                               // Shashtiamsa
+    default: return s;
+  }
+}
+/* Displayed vargas + BPHS life-domain + Shadvarga Vimshopaka weights (Σ=20) */
+const VARGA_DEFS=[
+  {N:1, name:"Rāśi",       tag:"D-1", dom:"Body · the whole life",            w:6},
+  {N:2, name:"Horā",       tag:"D-2", dom:"Wealth · resources",              w:2},
+  {N:3, name:"Drekkāṇa",   tag:"D-3", dom:"Siblings · courage · longevity",  w:4},
+  {N:7, name:"Saptāṁśa",   tag:"D-7", dom:"Children · progeny",              w:0},
+  {N:9, name:"Navāṁśa",    tag:"D-9", dom:"Spouse · dharma · core strength", w:5},
+  {N:10,name:"Daśāṁśa",    tag:"D-10",dom:"Career · status · karma",         w:0},
+  {N:12,name:"Dvādaśāṁśa", tag:"D-12",dom:"Parents · ancestry",              w:2},
+  {N:24,name:"Siddhāṁśa",  tag:"D-24",dom:"Education · learning",            w:0},
+  {N:30,name:"Triṁśāṁśa",  tag:"D-30",dom:"Adversity · weaknesses · character",w:1},
+  {N:60,name:"Ṣaṣṭyāṁśa",  tag:"D-60",dom:"Past-life · finest fructification",w:0}
+];
+const vargaStrengthFrac=score=>Math.max(0,Math.min(1,(score+2)/4)); // dignity −2..2 → 0..1
+
+/* ===== Jaimini · Chara Kārakas, Kārakāṁśa, Argala (7-kāraka scheme) ===== */
+const CHARA_KARAKAS=[
+  {ab:"AK", name:"Ātmakāraka",   sig:"Soul · self · the deepest desire driving this whole life"},
+  {ab:"AmK",name:"Amātyakāraka", sig:"Career · counsel · the mind that executes the soul's aim"},
+  {ab:"BK", name:"Bhrātṛkāraka", sig:"Siblings · courage · guru &amp; guidance"},
+  {ab:"MK", name:"Mātṛkāraka",   sig:"Mother · heart · home · emotional ground"},
+  {ab:"PK", name:"Putrakāraka",  sig:"Children · creativity · intelligence (pūrva puṇya)"},
+  {ab:"GK", name:"Jñātikāraka",  sig:"Kin &amp; rivals · obstacles · health · spiritual friction"},
+  {ab:"DK", name:"Dārakāraka",   sig:"Spouse · partnership · the other"}
+];
+function charaKarakas(c){
+  const PL=["Su","Mo","Ma","Me","Ju","Ve","Sa"];
+  const arr=PL.filter(k=>c.planets[k]).map(k=>({k,deg:c.planets[k].deg,sign:c.planets[k].sign}));
+  arr.sort((a,b)=>b.deg-a.deg);   // highest degree-in-sign ⇒ Ātmakāraka
+  return arr.map((o,i)=>({...o,...CHARA_KARAKAS[i]}));
+}
+const KARAKAMSA_GRAHA={
+  Su:"authority, politics, government — the soul as commander",
+  Mo:"public life, fluids, nurture — the mind &amp; the masses",
+  Ma:"engineering, surgery, weapons, land — drive &amp; competition",
+  Me:"commerce, writing, mathematics — communication &amp; trade",
+  Ju:"teaching, law, counsel, wealth — dharma, children &amp; the guru",
+  Ve:"arts, music, luxury, vehicles — beauty &amp; relationships",
+  Sa:"labour, service, machinery — the disciplined long haul",
+  Ra:"foreign &amp; unconventional paths — research, intrigue, the outsider",
+  Ke:"spirituality, healing, mokṣa — electronics &amp; piercing insight"
+};
+const ARGALA_HOUSE_MEAN={2:"resources, family &amp; speech",4:"home, heart, property &amp; vehicles",11:"gains, networks &amp; fulfilment",5:"intelligence, children &amp; past-life merit"};
+
+/* ===== Planetary Avasthas — Baladi, Jagradadi, Deeptadi (BPHS) ===== */
+const BALADI=[
+  {n:"Bāla",   t:"infant",     note:"¼ results — potential present but not yet active", pot:0.25},
+  {n:"Kumāra", t:"adolescent", note:"½ results — developing, not yet steady",          pot:0.5},
+  {n:"Yuvā",   t:"adult",      note:"FULL results — the peak of effective strength",    pot:1.0},
+  {n:"Vṛddha", t:"old",        note:"waning — little fresh capacity left",              pot:0.25},
+  {n:"Mṛta",   t:"dead",       note:"negligible — gives almost nothing of itself",      pot:0.0}
+];
+function baladiAvastha(s,d){ let i=Math.floor(d/6); if(!VARGA_ODD(s)) i=4-i; return BALADI[Math.max(0,Math.min(4,i))]; }
+function jagradadiAvastha(score){
+  if(score>=1.5) return {n:"Jāgrat",  t:"awake",    note:"own/exalted — fully awake; results land cleanly", pot:1.0};
+  if(score>=0)   return {n:"Svapna",  t:"dreaming", note:"friend/neutral — half-awake; results are filtered", pot:0.5};
+  return             {n:"Suṣupti", t:"sleeping", note:"enemy/debilitated — asleep; results barely register", pot:0.25};
+}
+function deeptadiAvastha(dig,combust){
+  if(combust)         return {n:"Vikala", note:"crippled — scorched by the Sun; significations damaged"};
+  if(dig.score===2)   return {n:"Dīpta",  note:"blazing — exalted; grand, expansive results"};
+  if(dig.score===1.5) return {n:"Svastha",note:"at home — own sign; comfortable, self-assured"};
+  if(dig.score===1)   return {n:"Muditā", note:"delighted — friend's sign; happy, supportive results"};
+  if(dig.score===0)   return {n:"Śānta",  note:"calm — neutral sign; moderate, peaceful results"};
+  if(dig.score===-1)  return {n:"Dīna",   note:"distressed — enemy's sign; strained, reluctant results"};
+  return                  {n:"Khala",  note:"wretched — debilitated; poor or misdirected results"};
+}
 const HOUSE_KARAKA={1:"Su",2:"Ju",3:"Ma",4:"Mo",5:"Ju",6:"Ma",7:"Ve",8:"Sa",9:"Ju",10:"Su",11:"Ju",12:"Sa"};
 const ORD=n=>n+(n===1?"st":n===2?"nd":n===3?"rd":"th");
 function houseFromSigns(refSign,sign){ return ((sign-refSign)%12+12)%12+1; }
@@ -2466,6 +2617,86 @@ const HTYPE={1:"Kendra · Trikona (Lagna)",2:"Dhana",3:"Upachaya (Sahaja)",4:"Ke
 const NAT_MAL=new Set(["Su","Ma","Sa","Ra","Ke"]);
 
 /* ===== PLANET STRENGTH DASHBOARD ===== */
+function renderAvasthas(c,La){
+  const wrap=document.getElementById("avasthaPanel"); if(!wrap) return;
+  const PL=["Su","Mo","Ma","Me","Ju","Ve","Sa"];
+  let t=`<table class="ck-table av-table"><thead><tr><th>Planet</th><th>Bālādi <span class="vh-name">(by degree)</span></th><th>Jāgradādi <span class="vh-name">(by dignity)</span></th><th>Dīptādi <span class="vh-name">(by condition)</span></th><th>Net vitality</th></tr></thead><tbody>`;
+  for(const k of PL){
+    const p=c.planets[k]; if(!p) continue;
+    const g=GBYK[k], dig=dignityOf(k,p.sign), combust=isCombustDE(k,c);
+    const bal=baladiAvastha(p.sign,p.deg), jag=jagradadiAvastha(dig.score), dee=deeptadiAvastha(dig,combust);
+    const vit=bal.pot*jag.pot, pct=Math.round(vit*100), tier=vit>=0.66?"hi":vit>=0.33?"mid":"lo";
+    t+=`<tr><td class="ck-pl">${g.gl} ${g.name}</td>`+
+       `<td><b>${bal.n}</b> <span class="av-t">${bal.t}</span><div class="ck-sig">${bal.note}</div></td>`+
+       `<td><b>${jag.n}</b> <span class="av-t">${jag.t}</span><div class="ck-sig">${jag.note}</div></td>`+
+       `<td><b>${dee.n}</b><div class="ck-sig">${dee.note}</div></td>`+
+       `<td><div class="vim-wrap"><b>${pct}%</b><div class="vim-bar"><i class="vim-${tier}" style="width:${pct}%"></i></div></div></td></tr>`;
+  }
+  wrap.querySelector("#avBody").innerHTML=t+`</tbody></table>`;
+  wrap.style.display="block";
+}
+function renderJaimini(c,La){
+  const wrap=document.getElementById("jaiminiPanel"); if(!wrap) return;
+  const ck=charaKarakas(c);
+  // --- Chara Karaka table ---
+  let kt=`<table class="ck-table"><thead><tr><th>Kāraka</th><th>Planet</th><th>Sign · deg</th><th>Significator of</th></tr></thead><tbody>`;
+  for(const o of ck){ const g=GBYK[o.k];
+    kt+=`<tr><td class="ck-ab" title="${o.name}">${o.ab}<div class="ck-name">${o.name}</div></td>`+
+        `<td class="ck-pl">${g.gl} ${g.name}</td><td>${SIGNS[o.sign]} · ${o.deg.toFixed(2)}°</td><td class="ck-sig">${o.sig}</td></tr>`; }
+  kt+=`</tbody></table>`;
+  // --- Karakamsa = Atmakaraka's navamsa sign ---
+  const ak=ck[0], kSign=navamsaSign(ak.sign,ak.deg);
+  const inK=["Su","Mo","Ma","Me","Ju","Ve","Sa","Ra","Ke"].filter(k=>{const p=c.planets[k];return p&&navamsaSign(p.sign,p.deg)===kSign;});
+  const inKtxt=inK.length
+    ? inK.map(k=>`<li><b>${GBYK[k].gl} ${GBYK[k].name}</b> in Kārakāṁśa → ${KARAKAMSA_GRAHA[k]}</li>`).join("")
+    : `<li class="note">No planet sits in the Kārakāṁśa — read it through its sign-lord and any planets aspecting it in D-9.</li>`;
+  const km=`<div class="km-head">Kārakāṁśa Lagna — <b>${SIGNS[kSign]}</b> <span class="note">(the Ātmakāraka <b>${GBYK[ak.k].name}</b> in Navāṁśa: the seat of the soul's pursuit)</span></div><ul class="km-list">${inKtxt}</ul>`;
+  // --- Argala on the Lagna ---
+  const ALL9=["Su","Mo","Ma","Me","Ju","Ve","Sa","Ra","Ke"];
+  const occ=h=>{const s=(La+h-1)%12;return ALL9.filter(k=>c.planets[k]&&c.planets[k].sign===s);};
+  let ar=`<table class="ck-table"><thead><tr><th>Argala (intervention)</th><th>Planets</th><th>Obstruction</th><th>Net</th></tr></thead><tbody>`;
+  for(const [f,o] of [[2,12],[4,10],[11,3],[5,9]]){
+    const a=occ(f),b=occ(o),eff=a.length>b.length;
+    ar+=`<tr><td>H${f} — ${ARGALA_HOUSE_MEAN[f]}</td>`+
+        `<td>${a.map(k=>GBYK[k].gl).join(" ")||"—"}</td>`+
+        `<td>H${o}: ${b.map(k=>GBYK[k].gl).join(" ")||"—"}</td>`+
+        `<td class="${eff?'arg-yes':'arg-no'}">${eff?'★ effective':'obstructed'}</td></tr>`;
+  }
+  ar+=`</tbody></table>`;
+  wrap.querySelector("#ckBody").innerHTML=kt;
+  wrap.querySelector("#kmBody").innerHTML=km;
+  wrap.querySelector("#argBody").innerHTML=ar;
+  wrap.style.display="block";
+}
+function renderVargas(c,La){
+  const wrap=document.getElementById("vargaPanel"), tbl=document.getElementById("vargaTable");
+  if(!wrap||!tbl) return;
+  const PL=["Su","Mo","Ma","Me","Ju","Ve","Sa"];
+  let th=`<thead><tr><th class="vp-label">Body</th>`;
+  for(const v of VARGA_DEFS) th+=`<th title="${v.name} — ${v.dom}"><div class="vh-tag">${v.tag}</div><div class="vh-name">${v.name}</div></th>`;
+  th+=`<th>Viṁśopaka<div class="vh-name">Ṣaḍvarga · /20</div></th></tr></thead>`;
+  let tb=`<tbody>`;
+  // Lagna row — signs only (no dignity)
+  tb+=`<tr><td class="vp-label">⟰ Lagna</td>`;
+  for(const v of VARGA_DEFS){ const vs=vargaSign(La,c.La.deg,v.N); const vg=v.N!==1&&vs===La;
+    tb+=`<td class="vcell${vg?" vgot":""}">${SIGN3[vs]}${vg?'<span class="vg-dot">◆</span>':''}</td>`; }
+  tb+=`<td class="vcell" style="color:var(--muted)">—</td></tr>`;
+  // 7 planets — dignity-coloured + Vimshopaka
+  for(const k of PL){
+    const p=c.planets[k]; if(!p) continue;
+    const g=GBYK[k]; let vim=0;
+    tb+=`<tr><td class="vp-label">${g.gl} ${g.name}</td>`;
+    for(const v of VARGA_DEFS){
+      const vs=vargaSign(p.sign,p.deg,v.N), dig=dignityOf(k,vs), vg=v.N!==1&&vs===p.sign;
+      vim+=v.w*vargaStrengthFrac(dig.score);
+      tb+=`<td class="vcell${vg?" vgot":""}" style="--dc:${dig.col}" title="${SIGNS[vs]} · ${dig.full}">${SIGN3[vs]}${vg?'<span class="vg-dot">◆</span>':''}</td>`;
+    }
+    const pct=Math.round(vim/20*100), tier=vim>=15?"hi":vim>=10?"mid":"lo";
+    tb+=`<td class="vcell"><div class="vim-wrap"><b>${vim.toFixed(1)}</b><div class="vim-bar"><i class="vim-${tier}" style="width:${pct}%"></i></div></div></td></tr>`;
+  }
+  tbl.innerHTML=th+tb+`</tbody>`;
+  wrap.style.display="block";
+}
 function renderStrengthDash(c,La,allBAV,bavForVerdict){
   const wrap=document.getElementById("strengthDash");
   const grid=document.getElementById("psGrid");
@@ -4235,6 +4466,15 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
     // Planet Strength Dashboard
     try{renderStrengthDash(c,La,allBAV,bavForVerdict);}catch(e){console.error("renderStrengthDash:",e);}
 
+    // Divisional charts (Vargas)
+    try{renderVargas(c,La);}catch(e){console.error("renderVargas:",e);}
+
+    // Jaimini · Chara Karakas, Karakamsa, Argala
+    try{renderJaimini(c,La);}catch(e){console.error("renderJaimini:",e);}
+
+    // Planetary Avasthas
+    try{renderAvasthas(c,La);}catch(e){console.error("renderAvasthas:",e);}
+
     // Dasha Timeline
     try{renderDashaTimeline(c,La);}catch(e){console.error("renderDashaTimeline:",e);}
 
@@ -5613,7 +5853,9 @@ function computeVimDashas(mo,birthDateStr){
         const orb=Math.min(diff,360-diff);
         if(COMBUST_ORB2[k]&&orb<=COMBUST_ORB2[k])combust=`[COMBUST ${orb.toFixed(0)}°]`;
       }
-      planetsSec+=`${GBYK[k].name.padEnd(9)} H${String(hno).padEnd(2)}  ${SIGNS[p.sign].padEnd(13)} ${Math.floor(p.deg).toString().padStart(2)}°  ${dig.full.split("·")[0].trim().padEnd(12)} ${retro.padEnd(4)} ${combust.padEnd(14)}  ${ni.n} P${ni.pada}  lords ${lordsOf.join(",")||"—"}\n`;
+      let avStr="—";
+      if(k!=="Ra"&&k!=="Ke"){const bal=baladiAvastha(p.sign,p.deg),jag=jagradadiAvastha(dig.score),dee=deeptadiAvastha(dig,isCombustDE(k,c));avStr=`${bal.n}/${jag.n}/${dee.n}`;}
+      planetsSec+=`${GBYK[k].name.padEnd(9)} H${String(hno).padEnd(2)}  ${SIGNS[p.sign].padEnd(13)} ${Math.floor(p.deg).toString().padStart(2)}°  ${dig.full.split("·")[0].trim().padEnd(12)} ${retro.padEnd(4)} ${combust.padEnd(14)}  ${ni.n} P${ni.pada}  lords ${(lordsOf.join(",")||"—").padEnd(10)}  av:${avStr}\n`;
     }
     // Functional nature per Lagna (kendra/trikona lords = temporal benefics; 6/8/12 lords = temporal malefics)
     let funcSec="";
@@ -5714,9 +5956,10 @@ ${funcSec}
 =======================================
 FULL PLANETARY TABLE — D-1 RASI
 =======================================
-Planet    House  Sign           Deg   Dignity      R/S   Combustion      Nakshatra    Lordship
---------  -----  -------------  ----  -----------  ----  --------------  -----------  --------
-${planetsSec}SAV scores by house: ${Array.from({length:12},(_,i)=>`H${i+1}:${sav[i]}`).join("  ")}
+Planet    House  Sign           Deg   Dignity      R/S   Combustion      Nakshatra    Lordship    Avastha [Bālādi life-stage / Jāgradādi wakefulness / Dīptādi condition]
+--------  -----  -------------  ----  -----------  ----  --------------  -----------  --------    -------
+${planetsSec}av legend → Bālādi: Bāla(¼)<Kumāra(½)<Yuvā(FULL)>Vṛddha(waning)>Mṛta(nil) · Jāgradādi: Jāgrat(awake)/Svapna(dreaming)/Suṣupti(asleep) · Dīptādi: Dīpta>Svastha>Muditā>Śānta>Dīna>Khala, Vikala=combust. A planet strong by dignity but in Mṛta/Suṣupti/Vikala under-delivers; weigh its results down accordingly.
+SAV scores by house: ${Array.from({length:12},(_,i)=>`H${i+1}:${sav[i]}`).join("  ")}
 
 =======================================
 THE BHAVAT BHAVAM QUESTION
@@ -5836,7 +6079,9 @@ Reference exact planets, house numbers, degrees, nakshatras, and classical princ
         const orb=Math.min(diff,360-diff);
         if(COMBUST_ORB3[k]&&orb<=COMBUST_ORB3[k])comb=`COMBUST(${orb.toFixed(0)}°)`;
       }
-      fullPlanetTable+=`${GBYK[k].name.padEnd(9)} H${String(hno).padEnd(2)}  ${SIGNS[p.sign].padEnd(13)} ${Math.floor(p.deg).toString().padStart(2)}°  ${dig.full.split("·")[0].trim().padEnd(12)} ${retro.padEnd(4)} ${comb.padEnd(14)}  ${ni.n} P${ni.pada}  lords ${lordsOf.join(",")||"—"}\n`;
+      let avStr="—";
+      if(k!=="Ra"&&k!=="Ke"){const bal=baladiAvastha(p.sign,p.deg),jag=jagradadiAvastha(dig.score),dee=deeptadiAvastha(dig,isCombustDE(k,c));avStr=`${bal.n}/${jag.n}/${dee.n}`;}
+      fullPlanetTable+=`${GBYK[k].name.padEnd(9)} H${String(hno).padEnd(2)}  ${SIGNS[p.sign].padEnd(13)} ${Math.floor(p.deg).toString().padStart(2)}°  ${dig.full.split("·")[0].trim().padEnd(12)} ${retro.padEnd(4)} ${comb.padEnd(14)}  ${ni.n} P${ni.pada}  lords ${(lordsOf.join(",")||"—").padEnd(10)}  av:${avStr}\n`;
     }
 
     // Functional nature per Lagna
@@ -6058,9 +6303,10 @@ ${funcSec}
 =======================================
 FULL PLANETARY TABLE — D-1 RASI (Lahiri/sidereal)
 =======================================
-Planet    House  Sign           Deg   Dignity      Vakri Combustion      Nakshatra     Lordship
---------  -----  -------------  ----  -----------  ----  --------------  ------------  --------
-${fullPlanetTable}
+Planet    House  Sign           Deg   Dignity      Vakri Combustion      Nakshatra     Lordship    Avastha [Bālādi life-stage / Jāgradādi wakefulness / Dīptādi condition]
+--------  -----  -------------  ----  -----------  ----  --------------  ------------  --------    -------
+${fullPlanetTable}av legend → Bālādi: Bāla(¼)<Kumāra(½)<Yuvā(FULL)>Vṛddha(waning)>Mṛta(nil) · Jāgradādi: Jāgrat(awake)/Svapna(dreaming)/Suṣupti(asleep) · Dīptādi: Dīpta>Svastha>Muditā>Śānta>Dīna>Khala, Vikala=combust. Treat a planet in Mṛta/Suṣupti/Vikala as under-delivering even if dignified — weight its dasha results and promises down accordingly.
+
 Sarvashtakavarga (SAV) by house:
 ${Array.from({length:12},(_,i)=>`H${i+1}:${sav[i]}`).join("  ")}
 
