@@ -2817,17 +2817,16 @@ function renderHouseStrip(c,La){
     const sgn=(La+h-1)%12;
     const lordK=SIGN_LORD[sgn];
     const here=occ[sgn]||[];
+    const lp=c.planets[lordK];
+    const isClk=!here.length&&!!lp;   // empty house whose lord is placed elsewhere → clickable
     let inner="";
     if(here.length){
       inner=here.map(k=>`<span class="gdot" style="background:${GBYK[k].col};width:17px;height:17px;font-size:9px">${GBYK[k].gl}</span>`).join("");
+    } else if(lp){
+      const lh=houseFromSigns(La,lp.sign);
+      inner=`<span class="hs-empty">→ H${lh}</span>`;
     } else {
-      const lp=c.planets[lordK];
-      if(lp){
-        const lh=houseFromSigns(La,lp.sign);
-        inner=`<span class="hs-empty">→ H${lh}</span>`;
-      } else {
-        inner=`<span class="hs-empty">${GBYK[lordK].gl}</span>`;
-      }
+      inner=`<span class="hs-empty">${GBYK[lordK].gl}</span>`;
     }
     html+=isClk
       ?`<button type="button" class="hs-cell hs-clk" onclick="JA.setHouse(${La},${h},${lp.sign},${lp.deg.toFixed(2)})" title="H${h} empty — open lord ${GBYK[lordK].name} in Synthesizer">
@@ -4975,9 +4974,10 @@ function renderSpecialLagnas(c,La,sav){
       </div>`;
   }
 
-  document.getElementById("alCard").innerHTML=mkAL();
-  document.getElementById("ilCard").innerHTML=mkIL();
-  document.getElementById("ulCard").innerHTML=mkUL();
+  const safe=fn=>{try{return fn();}catch(e){console.error("special lagna card:",e);return `<p class="note">Could not render this card.</p>`;}};
+  document.getElementById("alCard").innerHTML=safe(mkAL);
+  document.getElementById("ilCard").innerHTML=safe(mkIL);
+  document.getElementById("ulCard").innerHTML=safe(mkUL);
 }
 
 /* ===== BHAVAT BHAVAM EXPLORER ===== */
