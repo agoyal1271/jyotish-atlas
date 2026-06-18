@@ -99,9 +99,23 @@ Start with Task 7 (four-zone navigation).
 
 ## Progress
 
-- [x] **Phase 1 — Foundation** (Tasks 1–6): selftest guard, Warm Celestial tokens (dark + light), manuscript typography, emblem system, global components. Committed + pushed.
-- [ ] **Phase 2 — Learn** (Tasks 7–12): 4-zone nav, hero, authored Graha/Rashi/Bhava interpretation, Nakshatras section.
-- [ ] **Phase 3 — Synthesize** (Tasks 13–14): woven Synthesizer reading; Bhavat Bhavam / Arudhas / Compare.
-- [ ] **Phase 4 — My Charts** (Tasks 15–16): Charts/BAV/Dasha/divisional/Jaimini/avastha; Prompt Builder / Outlook / Predictor.
-- [ ] **Phase 5 — Practice & polish** (Tasks 17–19): Quiz; motion/aura; a11y/contrast/print + final regression.
-- [ ] **PR** into `pradeepsavadi/jyotish-atlas:main` (after Task 19).
+All 19 tasks complete and merged. Implementation by Cursor; verified non-destructive
+(every upstream function + section preserved; astrology compute untouched).
+
+- [x] **Phase 1 — Foundation** (Tasks 1–6): selftest guard, Warm Celestial tokens (dark + light), manuscript typography, emblem system, global components.
+- [x] **Phase 2 — Learn** (Tasks 7–12): 4-zone nav, hero, authored Graha/Rashi/Bhava interpretation, Nakshatras section.
+- [x] **Phase 3 — Synthesize** (Tasks 13–14): woven Synthesizer reading; Bhavat Bhavam / Arudhas / Compare.
+- [x] **Phase 4 — My Charts** (Tasks 15–16): Charts/BAV/Dasha/divisional/Jaimini/avastha; Prompt Builder / Outlook / Predictor.
+- [x] **Phase 5 — Practice & polish** (Tasks 17–19): Quiz; motion/aura; a11y/contrast/print + final regression.
+
+## Pull requests
+
+- [x] **PR #1 — into your fork** — `pradeepsavadi/jyotish-atlas:main` ← `cursor/ux-a11y-quick-wins`.
+  **Merged** (commit `23d9b4b`); branch auto-deleted. https://github.com/pradeepsavadi/jyotish-atlas/pull/1
+- [x] **PR #2 — into upstream (Archit)** — `agoyal1271/jyotish-atlas:main` ← `pradeepsavadi:main`.
+  **Open**, awaiting review. https://github.com/agoyal1271/jyotish-atlas/pull/2
+
+## Preview
+
+- Hosted (pinned to redesign commit): https://raw.githack.com/pradeepsavadi/jyotish-atlas/3342d08a032f2bd07d78b59a41d3815acfa51474/index.html
+- Engine self-test: append `#selftest` → expect tab title `✅ selftest 13/13`.
