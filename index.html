@@ -1168,6 +1168,20 @@ section{border-bottom-color:rgba(60,80,180,0.14)!important}
 .bm-vtab{font-size:12px;font-weight:600;padding:5px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);cursor:pointer;transition:.15s all}
 .bm-vtab:hover{color:var(--ink);border-color:color-mix(in srgb,var(--gold) 50%,var(--line))}
 .bm-vtab.active{background:linear-gradient(135deg,var(--gold),var(--terracotta));border-color:transparent;color:#2a1a0c}
+/* interactive lordship tracing */
+.bm-hmark{cursor:pointer;transition:filter .15s}
+.bm-hmark:hover{filter:brightness(1.32)}
+.bm-hmark.on{filter:drop-shadow(0 0 5px var(--gold))}
+.bm-lord-line{transition:opacity .25s}
+.bm-lord-line.on{stroke-width:2.6;animation:bm-flow .7s linear infinite}
+@keyframes bm-flow{to{stroke-dashoffset:-18}}
+.bm-pill{transition:opacity .25s,filter .2s;transform-box:fill-box;transform-origin:center}
+.bm-pill.on{animation:bm-pop 1s ease-in-out 2.5;filter:drop-shadow(0 0 6px rgba(255,255,255,.55))}
+@keyframes bm-pop{0%,100%{transform:scale(1)}45%{transform:scale(1.18)}}
+.bm-hcell{cursor:pointer}
+.bm-trace{width:100%;text-align:center;font-size:12.5px;color:var(--ink);padding:10px 16px 0;min-height:18px;opacity:.6;transition:opacity .2s}
+.bm-trace.show{opacity:1}
+@media(prefers-reduced-motion:reduce){.bm-lord-line.on,.bm-pill.on{animation:none}}
 .bm-legend{
   display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:center;
   padding:12px 16px 0;border-top:1px solid rgba(70,90,200,0.14);
@@ -1877,6 +1891,25 @@ function bmTurn(N){
   if(svg&&!reduce){svg.style.transition='transform .26s cubic-bezier(.4,0,.2,1),opacity .26s';svg.style.transformOrigin='center';svg.style.transform='rotate(-14deg) scale(.9)';svg.style.opacity='0';}
   setTimeout(()=>renderBhavaMandala(BM_CTX.c,BM_CTX.baseLa,N,!reduce), reduce?0:225);
 }
+function bmHighlight(h){
+  const ct=document.getElementById('bhavaMandala'); if(!ct) return;
+  const lines=ct.querySelectorAll('.bm-lord-line'), pills=ct.querySelectorAll('.bm-pill'), marks=ct.querySelectorAll('.bm-hmark');
+  lines.forEach(l=>{l.classList.remove('on');l.style.opacity='0.07';});
+  pills.forEach(g=>{g.classList.remove('on');g.style.opacity='0.4';});
+  marks.forEach(m=>m.classList.remove('on'));
+  const line=ct.querySelector('.bm-lord-line[data-h="'+h+'"]'), mark=ct.querySelector('.bm-hmark[data-h="'+h+'"]');
+  if(mark) mark.classList.add('on');
+  let lk=null;
+  if(line){line.style.opacity='1';line.classList.add('on');lk=line.getAttribute('data-lk');}
+  if(lk){const pill=ct.querySelector('.bm-pill[data-pk="'+lk+'"]');if(pill){pill.style.opacity='1';pill.classList.add('on');}}
+  const tr=ct.querySelector('#bmTrace'); if(tr&&line){tr.innerHTML=line.getAttribute('data-msg');tr.classList.add('show');}
+  clearTimeout(window._bmHLT);
+  window._bmHLT=setTimeout(()=>{                  // settle back so the whole chart stays readable
+    lines.forEach(l=>{l.classList.remove('on');l.style.opacity='0.33';});
+    pills.forEach(g=>{g.classList.remove('on');g.style.opacity='1';});
+    marks.forEach(m=>m.classList.remove('on'));
+  },3200);
+}
 function renderBhavaMandala(c,La,N,motion){
   N=N||1;
   const ct=document.getElementById('bhavaMandala');
@@ -1950,12 +1983,13 @@ function renderBhavaMandala(c,La,N,motion){
     arr.forEach((k,idx)=>{ planetPos[k]=pol(RP-idx*step,a); });
   });
 
-  // ---- Lordship lines: from each house to the planet that rules it ----
+  // ---- Lordship lines: from each house to the planet that rules it (clickable) ----
   for(let h=1;h<=12;h++){
     const si=(La+h-1)%12, lord=SIGN_LORD[si], lpos=planetPos[lord];
     if(!lpos) continue;
-    const hp=pol(RHNUM,sa(si)+15), v=PV[lord];
-    sv+=`<line x1="${hp.x}" y1="${hp.y}" x2="${lpos.x}" y2="${lpos.y}" stroke="${v.col}" stroke-width="1.1" stroke-dasharray="2,4" opacity="0.33"/>`;
+    const hp=pol(RHNUM,sa(si)+15), v=PV[lord], lp=c.planets[lord], lordH=lp?houseFromSigns(La,lp.sign):null;
+    const msg=`House ${h} lord <b style='color:${v.col}'>${v.gl} ${GBYK[lord].name}</b> ${lordH?(lordH===h?'sits in its <b>own</b> house':`sits in <b>House ${lordH}</b> · ${SN[(La+lordH-1)%12]}`):''}`.replace(/"/g,'&quot;');
+    sv+=`<line class="bm-lord-line" data-h="${h}" data-lk="${lord}" data-msg="${msg}" x1="${hp.x}" y1="${hp.y}" x2="${lpos.x}" y2="${lpos.y}" stroke="${v.col}" stroke-width="1.1" stroke-dasharray="2,4" opacity="0.33"/>`;
   }
 
   // ---- House markers: house number + its ruling lord's glyph ----
@@ -1965,9 +1999,11 @@ function renderBhavaMandala(c,La,N,motion){
     const si=(La+h-1)%12,a=sa(si)+15,p=pol(RHNUM,a),ht=HT(h),isH1=h===1;
     const lord=SIGN_LORD[si],lv=PV[lord],lp=c.planets[lord],lordH=lp?houseFromSigns(La,lp.sign):null;
     const tip=`House ${h} · ${SN[si]} · lord ${GBYK[lord].name}${lordH?(lordH===h?' in own house':` in H${lordH}`):''}${isH1?' · Lagna':ht==='ken'?' · Kendra':ht==='trik'?' · Trikona':ht==='dust'?' · Dusthana':''}`;
-    sv+=`<rect x="${p.x-15}" y="${p.y-17}" width="30" height="34" rx="9" fill="rgba(8,12,28,0.84)" stroke="${isH1?'#e7c14e':'rgba(95,120,205,0.42)'}" stroke-width="${isH1?1.7:1}"><title>${tip}</title></rect>`;
-    sv+=`<text x="${p.x}" y="${p.y-6}" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="${isH1?'#e7c14e':HCOL[ht]}" style="pointer-events:none">${h}</text>`;
-    sv+=`<text x="${p.x}" y="${p.y+8}" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="${lv.col}" style="pointer-events:none">${lv.gl}</text>`;
+    sv+=`<g class="bm-hmark" data-h="${h}" onclick="bmHighlight(${h})">`+
+      `<rect x="${p.x-15}" y="${p.y-17}" width="30" height="34" rx="9" fill="rgba(8,12,28,0.84)" stroke="${isH1?'#e7c14e':'rgba(95,120,205,0.42)'}" stroke-width="${isH1?1.7:1}"><title>${tip} — click to trace its lord</title></rect>`+
+      `<text x="${p.x}" y="${p.y-6}" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="${isH1?'#e7c14e':HCOL[ht]}" style="pointer-events:none">${h}</text>`+
+      `<text x="${p.x}" y="${p.y+8}" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="${lv.col}" style="pointer-events:none">${lv.gl}</text>`+
+      `</g>`;
   }
 
   // ---- Planets: clear, high-contrast pills within their sign sector ----
@@ -1976,9 +2012,11 @@ function renderBhavaMandala(c,La,N,motion){
     arr.forEach(k=>{
       const p=c.planets[k],v=PV[k],pos=planetPos[k],w=showDeg?56:36,hh=24;
       const tip=showDeg?`${GBYK[k].name} · ${SN[si]} ${p.deg.toFixed(1)}°${p.retro?' (retrograde)':''}`:`${GBYK[k].name} · ${SN[si]} (D-${N})${p.retro?' · retrograde':''}`;
-      sv+=`<rect x="${pos.x-w/2}" y="${pos.y-hh/2}" width="${w}" height="${hh}" rx="12" fill="rgba(9,12,26,0.96)" stroke="${v.col}" stroke-width="1.8"><title>${tip}</title></rect>`;
       const deg=showDeg?`<tspan font-size="10.5" dx="3" fill="rgba(214,226,252,0.95)">${p.deg.toFixed(0)}°${p.retro?'ʳ':''}</tspan>`:(p.retro?`<tspan font-size="10" dx="2" fill="rgba(214,226,252,0.85)">ʳ</tspan>`:'');
-      sv+=`<text x="${pos.x}" y="${pos.y}" text-anchor="middle" dominant-baseline="central" style="pointer-events:none"><tspan font-size="15" font-weight="bold" fill="${v.col}">${v.gl}</tspan>${deg}</text>`;
+      sv+=`<g class="bm-pill" data-pk="${k}">`+
+        `<rect x="${pos.x-w/2}" y="${pos.y-hh/2}" width="${w}" height="${hh}" rx="12" fill="rgba(9,12,26,0.96)" stroke="${v.col}" stroke-width="1.8"><title>${tip}</title></rect>`+
+        `<text x="${pos.x}" y="${pos.y}" text-anchor="middle" dominant-baseline="central" style="pointer-events:none"><tspan font-size="15" font-weight="bold" fill="${v.col}">${v.gl}</tspan>${deg}</text>`+
+        `</g>`;
     });
   });
 
@@ -2006,7 +2044,7 @@ function renderBhavaMandala(c,La,N,motion){
     const si=(La+h-1)%12, lord=SIGN_LORD[si], lp=c.planets[lord], lordH=lp?houseFromSigns(La,lp.sign):null, lv=PV[lord];
     const cls=[6,8,12].includes(h)?'dust':[1,4,7,10].includes(h)?'ken':[5,9].includes(h)?'trik':'';
     const pos=lordH?(lordH===h?'own':'H'+lordH):'—';
-    houseRows+=`<div class="bm-hcell ${cls}" title="House ${h} · ${SN[si]} · lord ${GBYK[lord].name}${lordH?` ${lordH===h?'in own house':'in House '+lordH}`:''}">`+
+    houseRows+=`<div class="bm-hcell ${cls}" data-h="${h}" onclick="bmHighlight(${h})" title="House ${h} · ${SN[si]} · lord ${GBYK[lord].name}${lordH?` ${lordH===h?'in own house':'in House '+lordH}`:''} — click to trace on the wheel">`+
       `<span class="bm-hnum">${h}</span>`+
       `<span class="bm-hlord" style="color:${lv.col}">${lv.gl} ${GBYK[lord].name}</span>`+
       `<span class="bm-hsign">${SN[si]}</span>`+
@@ -2016,7 +2054,7 @@ function renderBhavaMandala(c,La,N,motion){
   const tabs=`<div class="bm-vtabs">`+BM_VARGAS.map(([n,lab,nm])=>`<button type="button" class="bm-vtab${n===N?' active':''}" onclick="bmTurn(${n})" title="${nm}">${lab}</button>`).join('')+`</div>`;
   const caption=`<div class="bm-caption">Showing <b>D-${N} · ${vName}</b>${N===1?' — the birth chart':' — divisional chart'}. Outer ring = signs · each marker = <b>house number</b> + its <b>ruling lord's glyph</b> · pills = planets in that sign${showDeg?' with degree':''} · the faint <b>lord-coloured line</b> links each house to the planet that rules it. <span style="color:#9db4ff">Blue</span> kendra · <span style="color:#7fe0a0">green</span> trikona · <span style="color:#f0a890">amber</span> dusthana · gold = Lagna.</div>`;
 
-  ct.innerHTML=`${tabs}<div class="bm-container">${sv}</div>${caption}<div class="bm-houses">${houseRows}</div><div class="bm-legend">${leg}</div>`;
+  ct.innerHTML=`${tabs}<div class="bm-container">${sv}</div><div class="bm-trace" id="bmTrace">▶ Click any house (on the wheel or in the table) to trace where its lord sits</div>${caption}<div class="bm-houses">${houseRows}</div><div class="bm-legend">${leg}</div>`;
   if(motion){const ns=ct.querySelector('.bm-svg');if(ns){ns.style.transformOrigin='center';ns.style.transform='rotate(14deg) scale(.9)';ns.style.opacity='0';requestAnimationFrame(()=>{ns.style.transition='transform .46s cubic-bezier(.34,1.12,.4,1),opacity .4s';ns.style.transform='none';ns.style.opacity='1';});}}
 }
 
