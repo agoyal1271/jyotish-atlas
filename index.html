@@ -3763,6 +3763,36 @@ function gocharaAnalysis(pos,moonSign,La,allBAV){
   return res;
 }
 
+// Build a current-transit (Gochara) text block for the AI prompts. focusHouses
+// (optional) flags transiting planets currently over/aspecting the queried houses.
+function transitPromptSection(c,La,focusHouses){
+  let tp; try{tp=getTransitPlanets(new Date()).pos;}catch(e){return "";}
+  const moonSign=c.planets.Mo?c.planets.Mo.sign:La;
+  const avPos={La}; for(const k of ['Su','Mo','Ma','Me','Ju','Ve','Sa']) if(c.planets[k]) avPos[k]=c.planets[k].sign;
+  const allBAV={}; try{for(const k of ['Su','Mo','Ma','Me','Ju','Ve','Sa']) allBAV[k]=computeBAV(k,avPos);}catch(e){}
+  const g=gocharaAnalysis(tp,moonSign,La,allBAV), ORD=['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke'];
+  const today=new Date().toLocaleDateString('en',{day:'numeric',month:'short',year:'numeric'});
+  let s=`=======================================\nCURRENT TRANSITS — GOCHARA (as of ${today}, Lahiri sidereal)\n=======================================\nPlanet     Sign           H-Lagna  H-Moon  Notes\n`;
+  for(const k of ORD){const t=g[k]; if(!t)continue;
+    const n=[]; if(t.good&&!t.vedha)n.push('favorable gochara'); if(t.vedha)n.push('vedha by '+GBYK[t.vedhaBy].name); if(t.satSpecial)n.push(t.satSpecial==='sade-sati'?'SADE SATI':'Dhaiya/Kantaka'); if(t.bavSign!=null)n.push('BAV '+t.bavSign+'/8');
+    s+=`${GBYK[k].name.padEnd(10)} ${SIGNS[t.sign].padEnd(13)} H${String(t.hLa).padEnd(6)} H${String(t.h).padEnd(5)} ${n.join(', ')||'—'}\n`;
+  }
+  const ju=g.Ju, sa=g.Sa, hl=[];
+  if(ju) hl.push(`Jupiter in H${ju.h} from Moon (${ju.good&&!ju.vedha?'favorable — grace/expansion to that house':'transitional'}).`);
+  if(sa) hl.push(sa.satSpecial==='sade-sati'?`SADE SATI — Saturn H${sa.h} from Moon (${sa.h===1?'peak':sa.h===12?'opening':'closing'} phase).`:sa.satSpecial==='dhaiya'?`Dhaiya / Kantaka Shani — Saturn H${sa.h} from Moon.`:`Saturn in H${sa.h} from Moon (${sa.good&&!sa.vedha?'favorable':'discipline / pressure'}).`);
+  if(hl.length) s+=`Headline: ${hl.join(' ')}\n`;
+  if(focusHouses&&focusHouses.length){
+    const hits=new Set();
+    for(const k of ORD){const t=g[k]; if(!t)continue;
+      if(focusHouses.includes(t.hLa)) hits.add(`${GBYK[k].name} transiting H${t.hLa}`);
+      for(const ah of aspectsFromHouse(k,t.hLa)) if(focusHouses.includes(ah)) hits.add(`${GBYK[k].name} aspecting H${ah}`);
+    }
+    if(hits.size) s+=`Transits touching the queried house(s) [${focusHouses.map(h=>'H'+h).join(', ')}]: ${[...hits].join('; ')}\n`;
+  }
+  s+=`Use Gochara to TIME the result: a natal promise fructifies when its dasha lord is active AND benefic transits (esp. Jupiter & Saturn from the Moon/Lagna) activate the relevant house. Treat Sade Sati / vedha as caveats on timing, not denials of the promise.`;
+  return s;
+}
+
 function renderTransitPanel(c,La,allBAV,date){
   const wrap=document.getElementById('transitPanel');
   if(!wrap)return;
@@ -4377,13 +4407,15 @@ function dpRelation(mahaK,antarK,c){
 }
 
 // Verdict tier from total score
+// Thresholds calibrated to the actual score distribution (median ≈ 3.9, p75 ≈ 6.5,
+// p90 ≈ 9): Exceptional is the top ~8%, not ~28%. Keep in sync with lpScoreColor().
 function dpVerdict(score,hardCap){
   if(hardCap) return{cls:'vd-challenging',label:'Challenging',sub:'Debilitation without NB caps delivery'};
-  if(score>=6)  return{cls:'vd-exceptional',label:'Exceptional',sub:'All layers aligned'};
-  if(score>=4)  return{cls:'vd-strong',    label:'Strong',      sub:'Major themes activate favorably'};
-  if(score>=2)  return{cls:'vd-favorable', label:'Favorable',   sub:'Net positive period'};
-  if(score>=-0.5)return{cls:'vd-mixed',   label:'Mixed',        sub:'Competing signals — effort and timing matter'};
-  if(score>=-2.5)return{cls:'vd-challenging',label:'Challenging',sub:'Resistance predominates'};
+  if(score>=9.5) return{cls:'vd-exceptional',label:'Exceptional',sub:'All layers aligned'};
+  if(score>=6)   return{cls:'vd-strong',    label:'Strong',      sub:'Major themes activate favorably'};
+  if(score>=4)   return{cls:'vd-favorable', label:'Favorable',   sub:'Net positive period'};
+  if(score>=1.5) return{cls:'vd-mixed',     label:'Mixed',        sub:'Competing signals — effort and timing matter'};
+  if(score>=-1.5)return{cls:'vd-challenging',label:'Challenging',sub:'Resistance predominates'};
   return{cls:'vd-difficult',label:'Difficult',sub:'Multiple obstacles converge'};
 }
 
@@ -4643,7 +4675,10 @@ function lpComputePeriodScore(c,La,allBAV,maha,antar){
   const antarDamp=(l1A&&l1A.d1.score===-2&&!l1A.nb)?-1:0;
   const l1Score=(l1M?l1M.score:0)*0.65+(l1A?l1A.score:0)*0.35;
   const l2Score=(l2M?l2M.score:0)*0.65+(l2A?l2A.score:0)*0.35;
-  const total=l1Score+l2Score+l3.score+l4.score+antarDamp;
+  // include the Maha×Antar relationship and nakshatra bond so the Life Predictor
+  // timeline agrees with the Dasha Prediction Engine for the same period
+  const rel=dpRelation(mahaK,antarK,c), nak=dpNakBond(mahaK,antarK,c);
+  const total=l1Score+l2Score+l3.score+l4.score+antarDamp+rel.relScore+(nak?nak.score:0);
   return{
     mahaK,antarK,maha,antar,total,hardCap,
     verdict:dpVerdict(total,hardCap),
@@ -4656,19 +4691,19 @@ function lpScoreColor(total,hardCap){
   if(window.JA&&JA.cbMode){
     // Colorblind-safe: blue = favorable, orange = challenging, grey = mixed
     if(hardCap) return{fill:'#9a4d00',bar:'#fb8500'};
-    if(total>=6) return{fill:'#1d4e89',bar:'#3a86ff'};
-    if(total>=4) return{fill:'#23548f',bar:'#4895ff'};
-    if(total>=2) return{fill:'#2a5a96',bar:'#5aa9ff'};
-    if(total>=-0.5) return{fill:'#41485f',bar:'#9aa4c8'};
-    if(total>=-2.5) return{fill:'#8a5a1a',bar:'#f0a23a'};
+    if(total>=9.5) return{fill:'#1d4e89',bar:'#3a86ff'};
+    if(total>=6) return{fill:'#23548f',bar:'#4895ff'};
+    if(total>=4) return{fill:'#2a5a96',bar:'#5aa9ff'};
+    if(total>=1.5) return{fill:'#41485f',bar:'#9aa4c8'};
+    if(total>=-1.5) return{fill:'#8a5a1a',bar:'#f0a23a'};
     return{fill:'#9a4d00',bar:'#fb8500'};
   }
   if(hardCap) return{fill:'#7a1828',bar:'#a82838'};
-  if(total>=6) return{fill:'#1a6030',bar:'#2d9a58'};
-  if(total>=4) return{fill:'#247040',bar:'#3cb868'};
-  if(total>=2) return{fill:'#2f8050',bar:'#4fd07f'};
-  if(total>=-0.5) return{fill:'#3a4570',bar:'#7aa2ff'};
-  if(total>=-2.5) return{fill:'#8a4838',bar:'#c06050'};
+  if(total>=9.5) return{fill:'#1a6030',bar:'#2d9a58'};
+  if(total>=6) return{fill:'#247040',bar:'#3cb868'};
+  if(total>=4) return{fill:'#2f8050',bar:'#4fd07f'};
+  if(total>=1.5) return{fill:'#3a4570',bar:'#7aa2ff'};
+  if(total>=-1.5) return{fill:'#8a4838',bar:'#c06050'};
   return{fill:'#7a1828',bar:'#ef6a5a'};
 }
 
@@ -6563,6 +6598,7 @@ Planets in H${resultH} (${topic.vn}): ${vPls}
 D-1 vs ${topic.vn}: ${vLordDig?(vLordDig.score>=1?"Divisional confirms natal promise — delivery is reliable":vLordDig.score<=-1?"Divisional weakens natal promise — delivery is compromised or partial":"Divisional is neutral — D-1 placement is the primary determinant"):"Insufficient data"}
 `;
     }
+    const transitSec=transitPromptSection(c,La,[resultH,person.h]);
     return `You are a classical Vedic astrologer trained in the tradition of Brihat Parashara Hora Shastra (BPHS), Saravali, Phala Deepika, and Jaimini Sutras. Your analysis is methodical, layered, and specific — you never generalise. You cite exact house numbers, planet names, degrees, nakshatras, and classical principles (with chapter references where you know them).
 
 ANALYTICAL FRAMEWORK — always work through these layers in sequence:
@@ -6572,8 +6608,9 @@ ANALYTICAL FRAMEWORK — always work through these layers in sequence:
   Layer 4 · DIVISIONAL — relevant varga chart (${topic.vn||"D-9 for general confirmation"}) confirming or denying D-1 promise
   Layer 5 · NAKSHATRA — sub-lord linkages (nakshatra lord of bhava lord connecting back to goal houses)
   Layer 6 · DRISHTI — classical aspects (Rasi and Graha drishti) on H${resultH}
-  Layer 7 · YOGA — any applicable classical yoga touching these houses
-  Layer 8 · VERDICT — PROMISE vs FRUCTIFICATION; what dasha is needed; permanent blocks vs timing delays
+  Layer 7 · GOCHARA — current transits (esp. Jupiter & Saturn from the Moon) timing the fructification
+  Layer 8 · YOGA — any applicable classical yoga touching these houses
+  Layer 9 · VERDICT — PROMISE vs FRUCTIFICATION; what dasha AND transit window is needed; permanent blocks vs timing delays
 
 Speak with the precision of a classical commentator — not a counsellor. State contradictions plainly.
 
@@ -6629,6 +6666,7 @@ SAV (H${resultH}): ${resultSav}/48  (${resultSav>=30?"strong — transits throug
 NAKSHATRA SUB-LAYER
 =======================================
 ${nakSec}${vargaSec}
+${transitSec}
 =======================================
 ANALYSIS — address each layer in sequence:
 =======================================
@@ -6912,6 +6950,7 @@ ${karSec}Vargottama (same sign D-1 & D-9): ${vgList.length?vgList.join(", "):"no
 Dig Bala (directional strength): ${digList.length?digList.join(", "):"none at full strength"}
 Parivartana (sign exchange): ${parList.length?parList.join("; "):"none"}${shbSec?`\nShadbala · Ishta/Kashta Phala (from JHora):\n${shbSec}`:"\n(Shadbala/Ishta-Kashta not in pasted data — assess strength from dignity, dig bala, avastha, combustion)"}`;
 
+    const transitSec=transitPromptSection(c,La,goal.houses);
     return `You are an expert Vedic Astrologer (Jyotish Acharya) with deep mastery of Brihat Parashara Hora Shastra (BPHS), Jaimini Sutras, Phaladeepika, Brihat Jataka, Saravali, and Uttara Kalamrita. Deliver a structured, evidence-based, objective analysis of the stated goal using the South Indian chart data below, following the 10-step methodology exactly.
 
 CRITICAL FOUNDATIONAL GUARDRAILS
@@ -6981,6 +7020,7 @@ JUPITER, SATURN & RAHU/KETU TRANSITS (sidereal, 2025–2029)
 (★ = planet aspects or occupies a goal house)
 =======================================
 ${trSec}
+${transitSec}
 =======================================
 ANALYSIS — 10-STEP METHODOLOGY (work in order; do not skip ahead to predictions)
 Goal under analysis: ${goal.label.toUpperCase()} · key houses ${goal.houses.map(h=>`H${h}`).join(", ")}
