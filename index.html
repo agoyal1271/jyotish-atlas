@@ -2046,12 +2046,28 @@ const FRIEND={
 const SIGN_LORD=["Ma","Ve","Me","Mo","Su","Me","Ve","Ma","Ju","Sa","Sa","Ju"];
 const INDU_VAL={Su:30,Mo:16,Ma:6,Me:8,Ju:10,Ve:12,Sa:1};
 const ELEM={Fire:"#e7795a",Earth:"#c4a368",Air:"#7fb0e0",Water:"#5fc9c2"};
+const RASHI_BIJA=["मेष","वृषभ","मिथुन","कर्क","सिंह","कन्या","तुला","वृश्चिक","धनु","मकर","कुम्भ","मीन"];
+const RASHI_INTERP=[
+  "Mesha, the ram: cardinal fire ruled by Mangala. It is the zodiac's first impulse — direct, initiating, and unafraid of friction. Planets here act quickly, prefer autonomy, and learn through action before theory. Surya exalts here, while Shani falls: initiative thrives, patience must be cultivated. In Kalapurusha it governs the head, so the sign speaks through identity, bold starts, and leadership under pressure.",
+  "Vrishabha is fixed earth ruled by Shukra: steady, sensorial, and value-centered. It preserves, accumulates, and stabilizes what faster signs begin. Planets in Taurus seek durability, comfort, and tangible outcomes. Chandra exalts here, making emotional steadiness and nourishment strong themes. As face and throat in Kalapurusha, it governs voice, taste, and resource orientation — beauty with endurance rather than urgency.",
+  "Mithuna is dual air ruled by Budha: curious, linguistic, and mentally mobile. It connects ideas, people, and systems with wit and adaptability. Planets here become conversational and versatile, but can scatter without focus. As arms and shoulders in Kalapurusha, Gemini signifies reach, exchange, and skillful coordination. Its gift is intelligent movement between perspectives; its lesson is committing thought into coherent direction.",
+  "Karka is cardinal water ruled by Chandra: protective, receptive, and memory-rich. It responds through feeling first, then strategy. Planets in Cancer seek safety, belonging, and emotional coherence before outward expansion. Mangala debilitates here, showing that force must soften into care to work well. As chest and heart in Kalapurusha, this sign governs nurture, home, and inner anchoring — the power of emotional intelligence.",
+  "Simha is fixed fire ruled by Surya: radiant, sovereign, and creatively expressive. It seeks noble authorship, recognition, and principled leadership. Planets in Leo want to stand visibly and act from center rather than imitation. As stomach/solar center in Kalapurusha, it governs confidence, will, and personal authority. Its strength is dignity and generosity; its imbalance is pride when validation replaces purpose.",
+  "Kanya is dual earth ruled by Budha: analytical, methodical, and precision-oriented. It refines, edits, diagnoses, and improves systems through detail. Planets here become practical and service-driven, sometimes overly critical when perfection dominates proportion. Budha exalts in Kanya, so intellect and craft are potent. As hips and gut in Kalapurusha, Virgo governs assimilation, sorting, and functional order — intelligence applied to utility.",
+  "Tula is cardinal air ruled by Shukra: balancing, relational, and justice-seeking. It measures two sides, negotiates proportion, and civilizes conflict through fairness. Planets in Libra become partnership-aware and diplomatic, though indecision can arise when harmony is over-prioritized. Shani exalts here while Surya falls, emphasizing social order over unilateral ego. As lower abdomen in Kalapurusha, Libra governs exchange, agreement, and shared equilibrium.",
+  "Vrischika is fixed water ruled by Mangala: intense, strategic, and transformative. It penetrates beneath appearances, holding power in secrecy, endurance, and psychological depth. Planets here gain focus and resilience, but can become guarded or extreme without trust. Chandra debilitates in Scorpio, highlighting emotional volatility when depth lacks regulation. As pelvis/genitals in Kalapurusha, it governs vulnerability, regeneration, and irreversible change.",
+  "Dhanu is dual fire ruled by Guru: expansive, principled, and horizon-seeking. It pursues meaning, law, philosophy, pilgrimage, and high learning. Planets here orient toward growth and future vision, sometimes outrunning practical detail. As thighs in Kalapurusha, Sagittarius signifies movement, direction, and purposeful journey. Its gift is faith with breadth; its shadow is certainty without verification.",
+  "Makara is cardinal earth ruled by Shani: structured, disciplined, and outcome-driven. It builds slowly, respects hierarchy, and values proof over promise. Planets in Capricorn become strategic, realistic, and endurance-based. Mangala exalts here and Guru debilitates, showing pragmatic execution can dominate idealism. As knees in Kalapurusha, Capricorn governs effort under load, responsible ambition, and institutional competence.",
+  "Kumbha is fixed air ruled by Shani: conceptual, collective, and future-oriented. It systems social vision, networks ideas, and challenges stagnant conventions. Planets here become objective and reformist, sometimes detached from personal emotion. As calves and ankles in Kalapurusha, Aquarius signifies circulation, distribution, and collective pathways. Its strength is principled innovation; its risk is abstraction without human warmth.",
+  "Meena is dual water ruled by Guru: porous, compassionate, and imaginal. It dissolves rigid boundaries and reconnects life to devotion, empathy, and transcendence. Planets here become intuitive and symbolic, though clarity may blur without grounding. Shukra exalts in Pisces while Budha debilitates, highlighting heart-led refinement over dry analysis. As feet in Kalapurusha, Pisces governs surrender, completion, and spiritual direction."
+];
 const RASHIS=SIGNS.map((s,i)=>({
   name:s,skt:SIGN_SKT[i],lord:SIGN_LORD[i],elem:["Fire","Earth","Air","Water"][i%4],
   mode:["Movable (Chara)","Fixed (Sthira)","Dual (Dvisvabhava)"][i%3],gender:(i%2===0)?"Male / odd":"Female / even",
   body:["Head","Face & neck","Arms & shoulders","Chest & heart","Stomach","Hips & gut","Navel & lower abdomen","Pelvis & genitals","Thighs","Knees","Calves & ankles","Feet"][i],
   symbol:["Ram","Bull","Twins","Crab","Lion","Maiden","Scales","Scorpion","Archer","Sea-goat","Water-bearer","Fishes"][i],
-  traits:[["pioneering","impulsive","bold"],["steady","sensual","stubborn"],["curious","communicative","restless"],["nurturing","moody","protective"],["regal","proud","creative"],["analytical","precise","critical"],["balanced","relational","indecisive"],["intense","secretive","transformative"],["philosophical","free","optimistic"],["ambitious","disciplined","cautious"],["inventive","detached","humanitarian"],["compassionate","dreamy","boundless"]][i]
+  traits:[["pioneering","impulsive","bold"],["steady","sensual","stubborn"],["curious","communicative","restless"],["nurturing","moody","protective"],["regal","proud","creative"],["analytical","precise","critical"],["balanced","relational","indecisive"],["intense","secretive","transformative"],["philosophical","free","optimistic"],["ambitious","disciplined","cautious"],["inventive","detached","humanitarian"],["compassionate","dreamy","boundless"]][i],
+  bija:RASHI_BIJA[i],interp:RASHI_INTERP[i]
 }));
 const BHAVAS=[
  {n:1,skt:"Tanu",en:"Self & body",cat:"Kendra · Trikona",kar:["physical body","personality","head","vitality","life direction"]},
@@ -2539,12 +2555,26 @@ explorer("grahaTokens","grahaDetail",GRAHAS,g=>`${glyphDot(g)}${g.name}`,g=>{
 });
 explorer("rashiTokens","rashiDetail",RASHIS,r=>`<span class="gl" style="background:${ELEM[r.elem]};color:${badgeInk(ELEM[r.elem])}">${r.name[0]}</span>${r.name}`,r=>{
   const lord=GBYK[r.lord];
-  return `<h3><span class="gl" style="background:${ELEM[r.elem]};color:${badgeInk(ELEM[r.elem])}">${r.name[0]}</span> ${r.name} <span class="skt">· ${r.skt} · the ${r.symbol}</span></h3>
-    <div class="tags">${r.traits.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
-    <div class="kv"><b>Ruler</b><span>${glyphDot(lord)} ${lord.name} — its agenda shapes this sign</span>
-      <b>Element</b><span style="color:${ELEM[r.elem]}">${r.elem}</span><b>Modality</b><span>${r.mode}</span>
-      <b>Polarity</b><span>${r.gender}</span><b>Body (Kalapurusha)</b><span>${r.body}</span></div>
-    <div class="chapref">📖 Rashi nature — BPHS. Element = temperament, modality = start/sustain/adapt, ruler = who runs it. A planet here is "dressed" in these qualities.</div>`;
+  const ri=RASHIS.indexOf(r);
+  return `<div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+    <div style="flex:0 0 auto">${rashiEmblem(ri,{size:96})}</div>
+    <div style="flex:1;min-width:260px">
+      <h3>${r.name} <span class="skt">· <span class="devanagari">${r.bija}</span> · ${r.skt}</span></h3>
+      <div class="tags" style="margin-top:8px">
+        <span class="ec-chip gold">Ruler · ${lord.name}</span>
+        <span class="ec-chip">Element · ${r.elem}</span>
+        <span class="ec-chip">Modality · ${r.mode.replace(" ("," · ").replace(")","")}</span>
+      </div>
+      <p class="dropcap" style="margin:14px 0 0;color:#dfe4f6;line-height:1.72">${r.interp}</p>
+      <div class="kv" style="margin-top:12px;grid-template-columns:140px 1fr">
+        <b>Symbol</b><span>${r.symbol}</span>
+        <b>Polarity</b><span>${r.gender}</span>
+        <b>Body (Kalapurusha)</b><span>${r.body}</span>
+      </div>
+      <div class="tags">${r.traits.map(t=>`<span class="tag">${t}</span>`).join("")}</div>
+      <div class="chapref">📖 Rashi nature — BPHS. Element and modality shape expression; the ruler governs delivery.</div>
+    </div>
+  </div>`;
 });
 explorer("bhavaTokens","bhavaDetail",BHAVAS,b=>`<span class="gl" style="background:#2c365f;color:#fff">${b.n}</span>${b.en}`,b=>
   `<h3><span class="gl" style="background:#2c365f;color:#fff">${b.n}</span> ${ORD(b.n)} House <span class="skt">· ${b.skt} Bhava · ${b.en}</span></h3>
