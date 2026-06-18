@@ -349,15 +349,26 @@
   button.ghost{background:none;color:var(--muted);border:1px solid var(--line);border-radius:10px;padding:10px 16px;cursor:pointer}
 
   /* ---- quiz ---- */
-  .quiz{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:16px;padding:22px}
-  .qq{font-size:18px;font-weight:600;margin-bottom:14px}
+  .quiz{position:relative;overflow:hidden;background:linear-gradient(180deg,var(--panel),color-mix(in srgb,var(--panel2) 52%,var(--panel)));border:1px solid var(--line);border-radius:16px;padding:22px}
+  .quiz::before{content:"";position:absolute;left:18px;right:18px;top:0;height:2px;background:linear-gradient(90deg,var(--gold),var(--terracotta));opacity:.55}
+  .quiz-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .quiz-step{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .quiz-score{font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);color:var(--ink)}
+  .quiz-score b{color:var(--gold2)}
+  .qq{font-size:clamp(19px,2.8vw,24px);font-weight:600;line-height:1.35;font-family:var(--font-display);margin:0 0 14px}
   .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   @media(max-width:600px){.opts{grid-template-columns:1fr}}
-  .opt{cursor:pointer;border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:11px 14px;font-size:var(--text-base);width:100%}
-  .opt:hover{border-color:var(--gold)}
-  .opt.right{background:rgba(79,208,127,.18);border-color:var(--exalt)}
-  .opt.wrong{background:rgba(239,106,90,.18);border-color:var(--debil)}
-  .qmeta{display:flex;justify-content:space-between;align-items:center;margin-top:14px;color:var(--muted);font-size:13px}
+  .opt{cursor:pointer;border:1px solid var(--line);background:var(--panel2);border-radius:10px;padding:11px 14px;font-size:var(--text-base);width:100%;text-align:left;line-height:1.45;font-weight:600;transition:border-color var(--dur) var(--ease),transform var(--dur) var(--ease),background var(--dur) var(--ease),box-shadow var(--dur) var(--ease)}
+  .opt:hover{border-color:var(--gold);transform:translateY(-1px)}
+  .opt.right{background:color-mix(in srgb,var(--exalt) 18%,var(--panel2));border-color:color-mix(in srgb,var(--exalt) 54%,var(--line));box-shadow:0 0 0 1px color-mix(in srgb,var(--exalt) 35%,transparent) inset}
+  .opt.wrong{background:color-mix(in srgb,var(--debil) 16%,var(--panel2));border-color:color-mix(in srgb,var(--debil) 54%,var(--line));box-shadow:0 0 0 1px color-mix(in srgb,var(--debil) 34%,transparent) inset}
+  .opt:disabled{cursor:default;opacity:1}
+  .qmeta{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;color:var(--muted);font-size:13px}
+  .quiz-status{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+  .quiz-status.is-right{color:var(--exalt)}
+  .quiz-status.is-wrong{color:var(--debil)}
+  .quiz-next{padding:8px 15px;font-size:12px;border-radius:9px}
+  .quiz-why{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);color:var(--ink);font-size:13px;line-height:1.58}
   .nakband{background:linear-gradient(120deg,#1a1f48,#141938);border:1px solid var(--line);border-radius:14px;padding:12px 18px;margin-bottom:16px;font-size:13.5px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;cursor:pointer;transition:.12s}
   .nakband:hover{border-color:var(--gold)}
   .nakband .nstar{color:var(--gold2);font-size:20px}
@@ -961,8 +972,8 @@
   html.light .bb-sav-badge.bb-sav-lo{background:#fce8e8;color:#992020}
   html.light .sl-badge.sav-hi{background:#d0f0dc;color:#0a5a22}
   html.light .sl-badge.sav-lo{background:#fce8e8;color:#992020}
-  html.light .opt.right{background:rgba(26,117,64,.15);border-color:var(--exalt)}
-  html.light .opt.wrong{background:rgba(187,32,32,.15);border-color:var(--debil)}
+  html.light .opt.right{background:color-mix(in srgb,var(--exalt) 16%,var(--panel2));border-color:color-mix(in srgb,var(--exalt) 48%,var(--line))}
+  html.light .opt.wrong{background:color-mix(in srgb,var(--debil) 14%,var(--panel2));border-color:color-mix(in srgb,var(--debil) 48%,var(--line))}
   html.light .dp-wrap{background:var(--panel)}
   html.light .dp-lord-card{background:var(--panel2)}
   html.light .dp-themes-box{background:var(--panel2)}
@@ -1743,9 +1754,9 @@ html.light .brand{color:var(--ink)!important}
 
   <section id="quiz" class="section-reveal">
     <div class="eyebrow">Make it stick</div>
-    <h2>Practice — decode the sky</h2>
+    <h2 class="display">Practice — decode the sky</h2>
     <p class="sub">Quick questions drawn from the blocks you just met. Reasoning beats memorizing — every answer shows why.</p>
-    <div class="quiz" id="quizBox"></div>
+    <div class="quiz ec-zone-card" id="quizBox"></div>
   </section>
 
   <footer>
@@ -7021,13 +7032,16 @@ nakshatras and BPHS principles throughout. Avoid generic platitudes; never predi
   }
   let cur=makeQ();
   function draw(){
-    box.innerHTML=`<div class="qq">Q${qi+1}. ${cur.q}</div><div class="opts">${cur.opts.map((o,j)=>`<button type="button" class="opt" data-o="${j}">${o}</button>`).join("")}</div><div class="qmeta"><span>Score: ${score} / ${qi+(answered?1:0)}</span><span id="qfb"></span></div>`;
+    const attempts=qi+(answered?1:0);
+    box.innerHTML=`<div class="quiz-head"><div class="quiz-step">Question ${qi+1} of 10</div><div class="quiz-score">Score <b>${score}</b> / ${attempts}</div></div><div class="qq">Q${qi+1}. ${cur.q}</div><div class="opts">${cur.opts.map((o,j)=>`<button type="button" class="opt" data-o="${j}">${o}</button>`).join("")}</div><div class="qmeta"><span id="qstatus" class="quiz-status">Select the best answer.</span><span id="qfb"></span></div>`;
     box.querySelectorAll(".opt").forEach(el=>el.onclick=()=>{
       if(answered)return;answered=true;const chosen=cur.opts[+el.dataset.o];
-      box.querySelectorAll(".opt").forEach(o=>{const v=cur.opts[+o.dataset.o];if(v===cur.a)o.classList.add("right");else if(v===chosen)o.classList.add("wrong");});
-      if(chosen===cur.a)score++;
-      document.getElementById("qfb").innerHTML=`<button class="btn" id="nextq">${qi>=9?"Restart":"Next →"}</button>`;
-      const wy=document.createElement("p");wy.className="note";wy.style.marginTop="10px";wy.innerHTML="💡 "+cur.why;box.appendChild(wy);
+      box.querySelectorAll(".opt").forEach(o=>{const v=cur.opts[+o.dataset.o];o.disabled=true;if(v===cur.a)o.classList.add("right");else if(v===chosen)o.classList.add("wrong");});
+      const status=document.getElementById("qstatus");
+      if(chosen===cur.a){score++;status.textContent="Correct — classical match.";status.classList.add("is-right");}
+      else{status.textContent="Not quite — review the key signal.";status.classList.add("is-wrong");}
+      document.getElementById("qfb").innerHTML=`<button class="ec-btn-primary quiz-next" id="nextq">${qi>=9?"Restart":"Next →"}</button>`;
+      const wy=document.createElement("p");wy.className="quiz-why";wy.innerHTML="💡 "+cur.why;box.appendChild(wy);
       document.getElementById("nextq").onclick=()=>{if(qi>=9){qi=0;score=0;}else qi++;answered=false;cur=makeQ();draw();};
     });
   }
