@@ -1391,6 +1391,14 @@ html.light .brand{color:var(--ink)!important}
     <div class="detail" id="bhavaDetail"></div>
   </section>
 
+  <section id="nakshatras" class="section-reveal">
+    <div class="eyebrow">Lunar mansions · fine grain</div>
+    <h2 class="display">The 27 Nakshatras</h2>
+    <p class="sub">Nakshatras are the Moon's 27 stations: the subtle layer beneath sign placement. Select one to read its lord, deity, symbol, and interpretive current.</p>
+    <div class="tokens" id="nakshatraTokens"></div>
+    <div class="detail" id="nakshatraDetail"></div>
+  </section>
+
   <!-- SYNTHESIZER -->
   <section id="synth" class="section-reveal">
     <div class="eyebrow">The grammar engine</div>
@@ -2154,6 +2162,11 @@ const NAK=[
  {n:"Uttara Bhadrapada",l:"Sa",d:"Ahir Budhnya",s:"back legs of a cot / serpent",t:"depth, restraint, calm after storm",g:"Manushya (human)",sh:"the power to bring rain &amp; stability",st:"Ahir Budhnya, the serpent of the deep sea. Hidden depth, restraint and wisdom — the still, fertile calm that settles after the storm."},
  {n:"Revati",l:"Me",d:"Pushan",s:"fish / drum",t:"nourishment, safe passage, completion",g:"Deva (divine)",sh:"the power to nourish &amp; give passage",st:"The final nakshatra. Pushan, the shepherd-god, guides souls and travellers safely to their destination. Completion, transcendence and a gentle, nourishing farewell."}
 ];
+NAK.forEach(n=>{
+  if(!n.interp){
+    n.interp=`${n.st} In delineation, ${n.n} channels ${n.t}; ${n.d} presides, and the symbol ${n.s} shows how that current manifests in life.`;
+  }
+});
 /* == EMBLEM SYSTEM == */
 const TAU=Math.PI*2;
 function _rays(n,r1,r2){let s='';for(let i=0;i<n;i++){const a=i/n*TAU-Math.PI/2;
@@ -2594,6 +2607,22 @@ explorer("bhavaTokens","bhavaDetail",BHAVAS,b=>`<span class="gl" style="backgrou
     <p class="dropcap" style="margin:14px 0 0;color:#dfe4f6;line-height:1.72">${b.interp}</p>
     <div class="tags">${b.kar.map(k=>`<span class="tag">${k}</span>`).join("")}</div>
     <div class="chapref">📖 Bhava significations — BPHS. Kendras are structural pillars, Trikonas carry grace, Dusthanas test and transform, Upachayas improve through effort.</div>`);
+explorer("nakshatraTokens","nakshatraDetail",NAK,n=>`<span class="gl" style="background:var(--gold);color:#2a1a0c">✦</span>${n.n}`,n=>{
+  const lord=GBYK[n.l];
+  return `<h3><span class="gl" style="background:var(--gold);color:#2a1a0c">✦</span> ${n.n} <span class="skt">· lord ${lord.name} · deity ${n.d}</span></h3>
+    <div class="tags">
+      <span class="ec-chip gold">Lord · ${lord.gl} ${lord.name}</span>
+      <span class="ec-chip">Deity · ${n.d}</span>
+      <span class="ec-chip">Symbol · ${n.s}</span>
+    </div>
+    <p class="dropcap" style="margin:14px 0 0;color:#dfe4f6;line-height:1.72">${n.interp}</p>
+    <div class="kv" style="margin-top:12px;grid-template-columns:140px 1fr">
+      <b>Gana</b><span>${n.g}</span>
+      <b>Shakti</b><span>${n.sh}</span>
+      <b>Theme</b><span>${n.t}</span>
+    </div>
+    <div class="chapref">📖 Nakshatra layer: lord + deity + symbol refine how a graha in this star actually behaves.</div>`;
+});
 
 /* ===== SYNTHESIZER ===== */
 const JA={};
@@ -7099,7 +7128,7 @@ function toggleTheme(){
   const cmdInput=document.getElementById("cmdInput");
   const cmdList=document.getElementById("cmdList");
   let cmdItems=[],cmdView=[],cmdSel=0;
-  const SECTIONS=[["why","The idea"],["grahas","Grahas"],["rashis","Rashis"],["bhavas","Bhavas"],
+  const SECTIONS=[["why","The idea"],["grahas","Grahas"],["rashis","Rashis"],["bhavas","Bhavas"],["nakshatras","Nakshatras"],
     ["synth","Synthesizer"],["bbavam","Bhavat Bhavam"],["arudhas","Graha Arudhas"],["compare","Compare charts"],
     ["charts","My Charts"],["promptbuilder","Prompt Builder"],["outlook","Life Outlook"],["lifepredictor","Life Predictor"],
     ["quiz","Practice quiz"]];
@@ -7115,6 +7144,7 @@ function toggleTheme(){
     GRAHAS.forEach((g,i)=>items.push({label:`${g.name} · ${g.skt}`,cat:"Graha",ic:g.gl,run:()=>openTokenDetail("grahaTokens","grahas",i)}));
     RASHIS.forEach((r,i)=>items.push({label:`${r.name} · ${r.skt}`,cat:"Rashi",ic:r.name[0],run:()=>openTokenDetail("rashiTokens","rashis",i)}));
     BHAVAS.forEach((b,i)=>items.push({label:`${b.n} · ${b.en}`,cat:"Bhava",ic:b.n,run:()=>openTokenDetail("bhavaTokens","bhavas",i)}));
+    NAK.forEach((n,i)=>items.push({label:`${n.n} · Nakshatra`,cat:"Nakshatra",ic:"✦",run:()=>openTokenDetail("nakshatraTokens","nakshatras",i)}));
     (JA.getCharts?JA.getCharts():[]).forEach((c,i)=>items.push({label:c.name,cat:"Chart",ic:"📊",run:()=>JA.activateChart(i)}));
     items.push({label:"Toggle light / dark theme",cat:"Action",ic:"☾",run:()=>toggleTheme()});
     items.push({label:"Toggle colorblind-safe colors",cat:"Action",ic:"◐",run:()=>JA.toggleCb()});
