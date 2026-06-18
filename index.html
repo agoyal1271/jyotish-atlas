@@ -894,6 +894,18 @@
   .dp-peak{border-radius:11px;padding:12px 16px;font-size:13px;line-height:1.55}
   .dp-peak.peak-on{background:#152010;border:1px solid rgba(79,208,127,.45);color:#a0e080}
   .dp-peak.peak-off{background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+  .dp-tl{margin-top:14px}
+  .dp-tl-bar{display:flex;gap:2px;height:26px;border-radius:6px;overflow:hidden;margin:6px 0}
+  .dp-tl-cell{flex:1 1 0;min-width:3px;cursor:default;transition:.1s}
+  .dp-tl-cell:hover{outline:2px solid var(--ink);outline-offset:-2px;z-index:1}
+  .dp-tl-axis{display:flex;justify-content:space-between;font-size:10.5px;color:var(--muted);margin-bottom:9px}
+  .dp-tl-cards{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .dp-tl-card{border-radius:8px;padding:8px 11px;font-size:12.5px;border:1px solid var(--line)}
+  .dp-tl-card.good{background:rgba(47,125,87,.14);border-color:rgba(47,125,87,.32)}
+  .dp-tl-card.bad{background:rgba(187,59,40,.12);border-color:rgba(187,59,40,.3)}
+  .dp-tl-card div{color:var(--muted);margin-top:2px}
+  .dp-tl-note{font-size:11px;color:var(--muted);margin-top:8px}
+  @media(max-width:560px){.dp-tl-cards{grid-template-columns:1fr}}
   .dp-themes-box{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:14px}
   .dp-theme-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
   .dp-theme-tag{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 11px;font-size:12px;font-weight:600}
@@ -4305,6 +4317,33 @@ function dpLayer3(c,La,allBAV,gochara){
   return{score:juScore+saScore+raScore+taraScore,juScore,saScore,raScore,taraScore,flags,doubleTransit,juG,saG,raG};
 }
 
+// Scan an antardasha month-by-month: transit quality (gochara + tara) over its span,
+// so we can surface the best & worst windows instead of judging from one snapshot.
+function scanAntarTransits(c,La,allBAV,start,end){
+  if(!start||!end||end<=start||!c.planets.Mo) return null;
+  const moonSign=c.planets.Mo.sign;
+  const months=(end-start)/(1000*60*60*24*30.4);
+  const steps=Math.min(40,Math.max(6,Math.round(months)));
+  const dt=(end-start)/steps, out=[];
+  for(let i=0;i<=steps;i++){
+    const t=start+i*dt, gochara=gocharaAnalysis(getTransitPlanets(new Date(t)).pos,moonSign,La,allBAV);
+    const l3=dpLayer3(c,La,allBAV,gochara);
+    out.push({t,score:l3.score,juG:gochara.Ju,saG:gochara.Sa,raG:gochara.Ra,keG:gochara.Ke});
+  }
+  return out;
+}
+function dpSampleReason(c,La,s){
+  const bits=[], janmaNak=nakIndexOf(c.planets.Mo.sign*30+c.planets.Mo.deg);
+  const ju=s.juG, sa=s.saG, ra=s.raG;
+  if(ju&&ju.good&&!ju.vedha) bits.push(`Jupiter favorable (H${ju.h} from Moon)`);
+  else if(ju&&!ju.good) bits.push(`Jupiter weak (H${ju.h} from Moon)`);
+  if(sa&&sa.satSpecial==='sade-sati') bits.push(`Sade Sati ${sa.h===1?'peak':sa.h===12?'opening':'closing'}`);
+  else if(sa&&sa.satSpecial==='dhaiya') bits.push('Kantaka Shani');
+  else if(sa&&sa.good&&!sa.vedha) bits.push('Saturn favorable');
+  if(ra){const ta=taraFrom(janmaNak,nakIndexOf(ra.sign*30+ra.deg)); if(ta.q<0) bits.push(`Rahu in ${nakInfo(ra.sign*30+ra.deg).n} — ${ta.name} tāra`); else if(ta.q>0) bits.push(`Rahu in ${nakInfo(ra.sign*30+ra.deg).n} — ${ta.name} tāra`);}
+  return bits.join(' · ')||'mixed influences';
+}
+
 // Rahu / Ketu proximity flags against natal dasha lords and Moon
 function dpRahuFlags(mahaK,antarK,c,tpos){
   const flags=[];
@@ -4611,6 +4650,27 @@ function dpAnalyze(){
     }
   </div>`;
 
+  // Transit timeline across the selected sub-period — surfaces best/worst windows
+  let timelineHtml='';
+  if(selAntar&&selAntar.start&&selAntar.end){
+    const samples=scanAntarTransits(c,La,allBAV,selAntar.start,selAntar.end);
+    if(samples&&samples.length>1){
+      const col=v=>v>=0.5?'#2d9a58':v>=-0.2?'#c9a23a':v>=-1?'#d98038':'#d85040';
+      const cells=samples.map(s=>`<div class="dp-tl-cell" style="background:${col(s.score)}" title="${_fD(s.t)} · score ${s.score.toFixed(2)} — ${dpSampleReason(c,La,s)}"></div>`).join('');
+      const best=samples.reduce((a,b)=>b.score>a.score?b:a), worst=samples.reduce((a,b)=>b.score<a.score?b:a);
+      timelineHtml=`<div class="dp-tl">
+        <div class="dp-section-title">Transit Timeline · best &amp; worst windows within this sub-period</div>
+        <div class="dp-tl-bar">${cells}</div>
+        <div class="dp-tl-axis"><span>${_fD(samples[0].t)}</span><span>${_fD(samples[samples.length-1].t)}</span></div>
+        <div class="dp-tl-cards">
+          <div class="dp-tl-card good"><b>★ Most supportive · ${_fD(best.t)}</b><div>${dpSampleReason(c,La,best)}</div></div>
+          <div class="dp-tl-card bad"><b>⚠ Most testing · ${_fD(worst.t)}</b><div>${dpSampleReason(c,La,worst)}</div></div>
+        </div>
+        <div class="dp-tl-note">Each cell ≈ one month; colour = transit quality (gochara + nakṣatra tāra). Hover a cell for its date and active influences.</div>
+      </div>`;
+    }
+  }
+
   const thTags=themes.themes.map(t=>`<span class="dp-theme-tag${t.type==='primary'?' primary':''}">${t.label}</span>`).join('');
   const karTags=themes.kars.map(k=>`<span class="dp-theme-tag">${k}</span>`).join('');
 
@@ -4638,6 +4698,7 @@ function dpAnalyze(){
       <div class="dp-section-title">Layer 3 · Transit Overlay</div>
       <div class="dp-transit-grid">${trCard(l3.juG,'Ju')}${trCard(l3.saG,'Sa')}${trCard(l3.raG,'Ra')}</div>
       ${peakHtml}
+      ${timelineHtml}
     </div>
     ${modRows.length?`<div><div class="dp-section-title">Layer 4 · Modifiers &amp; Wildcards</div><div class="dp-wildcards">${modRows.join('')}</div></div>`:''}
     <div>
