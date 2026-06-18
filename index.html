@@ -42,6 +42,15 @@
     float:left;font-size:3.4em;line-height:.72;padding:.05em .12em 0 0}
   .watchfor{border-left:2px solid var(--terracotta);padding:6px 0 6px 14px;margin-top:14px}
   .watchfor .label{font-family:var(--font-sans);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--terracotta);margin-bottom:4px}
+  /* == EMBLEMS == */
+  .emblem{display:inline-block;vertical-align:middle}
+  .emblem .ring-base{stroke:var(--line)}
+  .emblem .ring-gold{stroke:var(--gold);opacity:.5}
+  .emblem .ink{fill:var(--ink)} .emblem .gold{fill:var(--gold)} .emblem .terra{fill:var(--terracotta)}
+  .emblem .stroke-gold{stroke:var(--gold);fill:none}
+  .emblem.focus .aura{animation:embpulse 3.4s ease-in-out infinite}
+  @keyframes embpulse{0%,100%{opacity:.28;transform:scale(1)}50%{opacity:.5;transform:scale(1.05)}}
+  @media (prefers-reduced-motion:reduce){.emblem.focus .aura{animation:none;opacity:.4}}
   *{box-sizing:border-box}
   :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
   a:focus:not(:focus-visible),button:focus:not(:focus-visible){outline:none}
@@ -1868,6 +1877,7 @@ function renderBhavaMandala(c,La){
   ct.innerHTML=`<div class="bm-container">${sv}</div>${caption}<div class="bm-houses">${houseRows}</div><div class="bm-legend">${leg}</div>`;
 }
 
+/* == DATA == */
 const SIGNS=["Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"];
 const SIGN3=["Ar","Ta","Ge","Cn","Le","Vi","Li","Sc","Sg","Cp","Aq","Pi"];
 const SIGN_SKT=["Mesha","Vrishabha","Mithuna","Karka","Simha","Kanya","Tula","Vrishchika","Dhanu","Makara","Kumbha","Meena"];
@@ -1992,6 +2002,50 @@ const NAK=[
  {n:"Uttara Bhadrapada",l:"Sa",d:"Ahir Budhnya",s:"back legs of a cot / serpent",t:"depth, restraint, calm after storm",g:"Manushya (human)",sh:"the power to bring rain &amp; stability",st:"Ahir Budhnya, the serpent of the deep sea. Hidden depth, restraint and wisdom — the still, fertile calm that settles after the storm."},
  {n:"Revati",l:"Me",d:"Pushan",s:"fish / drum",t:"nourishment, safe passage, completion",g:"Deva (divine)",sh:"the power to nourish &amp; give passage",st:"The final nakshatra. Pushan, the shepherd-god, guides souls and travellers safely to their destination. Completion, transcendence and a gentle, nourishing farewell."}
 ];
+/* == EMBLEM SYSTEM == */
+const TAU=Math.PI*2;
+function _rays(n,r1,r2){let s='';for(let i=0;i<n;i++){const a=i/n*TAU-Math.PI/2;
+  const x1=(50+Math.cos(a)*r1).toFixed(1),y1=(50+Math.sin(a)*r1).toFixed(1),
+        x2=(50+Math.cos(a)*r2).toFixed(1),y2=(50+Math.sin(a)*r2).toFixed(1);
+  s+=`<line class="stroke-gold" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke-width="2"/>`;}return s;}
+function _dots(n,r){let s='';for(let i=0;i<n;i++){const a=i/n*TAU-Math.PI/2;
+  s+=`<circle class="gold" cx="${(50+Math.cos(a)*r).toFixed(1)}" cy="${(50+Math.sin(a)*r).toFixed(1)}" r="1.4"/>`;}return s;}
+// inner art per graha key — centered on (50,50), classical Vedic cues
+const EMBLEM_ART={
+  Su:()=>`${_rays(12,30,40)}<circle class="gold" cx="50" cy="50" r="20"/><circle class="ink" cx="50" cy="50" r="3.4"/>`,
+  Mo:()=>`<path class="stroke-gold" d="M58 32 A22 22 0 1 0 58 68 A17 17 0 1 1 58 32 Z" stroke-width="2" fill="var(--ink)" fill-opacity=".08"/>`,
+  Ma:()=>`<path class="gold" d="M50 28 L57 50 L50 46 L43 50 Z"/><path class="terra" d="M50 40 L54 66 L50 60 L46 66 Z"/>`,
+  Me:()=>`${_dots(2,26)}<circle class="stroke-gold" cx="50" cy="52" r="11" stroke-width="2"/><path class="stroke-gold" d="M50 41 V31 M44 35 H56" stroke-width="2"/>`,
+  Ju:()=>`${_dots(8,32)}<path class="stroke-gold" d="M40 38 Q60 38 56 56 Q54 66 44 64" stroke-width="2.4"/><line class="stroke-gold" x1="36" y1="56" x2="58" y2="56" stroke-width="2.4"/>`,
+  Ve:()=>`${_rays(6,28,36)}<circle class="stroke-gold" cx="50" cy="46" r="12" stroke-width="2"/><path class="stroke-gold" d="M50 58 V70 M44 64 H56" stroke-width="2"/>`,
+  Sa:()=>`<circle class="stroke-gold" cx="50" cy="50" r="22" stroke-width="5" stroke-opacity=".5"/><ellipse class="stroke-gold" cx="50" cy="50" rx="30" ry="9" stroke-width="1.4" transform="rotate(-18 50 50)"/>`,
+  Ra:()=>`<path class="stroke-gold" d="M34 60 Q34 34 50 34 Q66 34 66 60" stroke-width="3"/><path class="terra" d="M50 34 l-5 -8 h10 z"/>`,
+  Ke:()=>`<path class="stroke-gold" d="M34 40 Q34 66 50 66 Q66 66 66 40" stroke-width="3"/><path class="terra" d="M50 66 l-5 8 h10 z"/>`
+};
+// returns an <svg> string; opts: {size=64, focus=false, bija=''}
+function grahaEmblem(k,opts={}){
+  const size=opts.size||64, art=(EMBLEM_ART[k]||EMBLEM_ART.Su)();
+  const g=GBYK[k]||{}; const label=(g.skt||k)+" emblem";
+  const aura=opts.focus?`<circle class="aura gold" cx="50" cy="50" r="46" opacity=".35"/>`:'';
+  const bija=opts.bija?`<text x="50" y="${k==='Su'?'55':'90'}" text-anchor="middle" class="${k==='Su'?'ink':'gold'}" font-family="var(--font-sans)" font-size="${k==='Su'?'14':'13'}">${opts.bija}</text>`:'';
+  return `<svg class="emblem${opts.focus?' focus':''}" width="${size}" height="${size}" viewBox="0 0 100 100" role="img" aria-label="${label}">`
+    +aura
+    +`<circle class="ring-base" cx="50" cy="50" r="44" fill="none" stroke-width="5"/>`
+    +`<circle class="ring-gold" cx="50" cy="50" r="44" fill="none" stroke-width="1"/>`
+    +art+bija+`</svg>`;
+}
+// Rashi roundel: element-tinted ring + classical unicode glyph in display face
+const RASHI_GLYPH=["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"];
+const ELEM_TINT={Fire:"var(--terracotta)",Earth:"#9a8a5e",Air:"var(--friend)",Water:"#6f9fb0"};
+function rashiEmblem(i,opts={}){
+  const size=opts.size||56, r=RASHIS[i]||{}, tint=ELEM_TINT[r.elem]||"var(--gold)";
+  return `<svg class="emblem" width="${size}" height="${size}" viewBox="0 0 100 100" role="img" aria-label="${(r.skt||'')} roundel">`
+    +`<circle class="ring-base" cx="50" cy="50" r="44" fill="none" stroke-width="5"/>`
+    +`<circle cx="50" cy="50" r="44" fill="none" stroke="${tint}" stroke-width="1.4" opacity=".7"/>`
+    +`<circle cx="50" cy="50" r="33" fill="none" stroke="${tint}" stroke-width=".8" opacity=".4"/>`
+    +`<text x="50" y="64" text-anchor="middle" fill="${tint}" font-family="var(--font-display)" font-size="40">${RASHI_GLYPH[i]}</text>`
+    +`</svg>`;
+}
 function nakInfo(lon){const span=40/3;lon=((lon%360)+360)%360;const idx=Math.floor(lon/span);const pada=Math.floor((lon-idx*span)/(span/4))+1;return Object.assign({idx,pada},NAK[idx]);}
 const VIMY={Ke:7,Ve:20,Su:6,Mo:10,Ma:7,Ra:18,Ju:16,Sa:19,Me:17};
 const DASHA_SEQ_K=["Ke","Ve","Su","Mo","Ma","Ra","Ju","Sa","Me"];
