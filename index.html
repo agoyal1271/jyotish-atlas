@@ -272,6 +272,17 @@
   .hero-verdict .badge{flex:0 0 auto;width:62px;height:62px;border-radius:16px;display:grid;place-items:center;font-size:30px;color:#0b0e1a;font-weight:800}
   .hero-verdict .ht{font-size:19px;font-weight:800;margin-bottom:2px}
   .hero-verdict .hx{font-size:13.5px;color:#dfe4f6;max-width:820px}
+  .synth-placement{display:flex;justify-content:space-between;align-items:flex-end;gap:14px;margin:6px 0 12px;border-bottom:1px solid var(--line);padding-bottom:12px}
+  .synth-placement .title{font-size:clamp(30px,4.2vw,44px)}
+  .synth-placement .meta{font-family:Menlo,Consolas,monospace;font-size:12px;color:var(--muted);text-align:right;line-height:1.6;white-space:pre-line}
+  .synth-verdicts{display:grid;grid-template-columns:repeat(4,minmax(110px,1fr));gap:10px;margin-bottom:14px}
+  .synth-reading p{margin:0 0 12px;color:#dfe4f6;line-height:1.74}
+  .synth-reading p:last-of-type{margin-bottom:0}
+  @media(max-width:900px){
+    .synth-placement{flex-direction:column;align-items:flex-start}
+    .synth-placement .meta{text-align:left}
+    .synth-verdicts{grid-template-columns:repeat(2,minmax(120px,1fr))}
+  }
 
   /* ---- balanced result grid (fills the row, no dead space) ---- */
   .result-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;align-items:start}
@@ -1418,11 +1429,15 @@ html.light .brand{color:var(--ink)!important}
         <div class="ctrl"><label for="sDeg">Degree <span class="degval" id="sDegVal">14.0°</span></label><input type="range" id="sDeg" min="0" max="29.9" step="0.5" value="14" aria-label="Degree in sign"></div>
         <div class="ctrl"><label for="sBhava">House</label><select id="sBhava" aria-label="House"></select></div>
       </div>
-      <div class="hero-verdict"><div class="badge" id="pBadge">≈</div><div><div class="ht" id="pTitle"></div><div class="hx" id="pText"></div></div></div>
-      <div class="nakband" id="pNak" role="button" tabindex="0" aria-label="Open nakshatra details"></div>
+      <div class="synth-placement">
+        <div class="display title" id="pPlacement"></div>
+        <div class="meta" id="pPlacementMeta"></div>
+      </div>
+      <div class="synth-verdicts" id="pVerdicts"></div>
+      <div class="panel"><h4>Woven Reading</h4><div class="synth-reading" id="pReading"></div></div>
       <div class="result-grid">
-        <div class="panel"><h4>Strength · D-1 → D-9</h4><div id="pVargas"></div></div>
-        <div class="panel"><h4>How the meaning is built</h4><div class="steps" id="pSteps"></div></div>
+        <div class="panel"><h4>D-1 / D-9 Evidence</h4><div id="pVargas"></div></div>
+        <div class="panel"><h4>Applied Fragments</h4><div class="steps" id="pSteps"></div></div>
         <div class="panel"><h4>Drishti · what it aspects</h4><p class="note" id="aspText"></p><div class="houses" id="aspHouses"></div>
           <div class="legend2"><span><i style="background:var(--gold)"></i>occupies</span><span><i style="background:#28407a"></i>aspects</span></div></div>
       </div>
@@ -2639,25 +2654,48 @@ const JA={};
     const d1=dignityOf(gk,ri),d9=dignityOf(gk,d9i),vg=(ri===d9i),v=combinedVerdict(d1,d9,vg,{house:bn,planet:gk});
     const asp=aspectsFromHouse(gk,bn);
     const lon=ri*30+deg, ni=nakInfo(lon), nl=GBYK[ni.l];
+    const d1Col=d1.score>=1?"var(--exalt)":d1.score<=-1?"var(--debil)":"var(--gold)";
+    const d9Col=d9.score>=1?"var(--exalt)":d9.score<=-1?"var(--debil)":"var(--gold)";
+    const firstSentence=t=>String(t||"").split(/(?<=[.!?])\s+/)[0]||"";
+    const promiseDelivery=d1.score>=1&&d9.score>=1
+      ? "Promise and delivery align: the placement is strong in D-1 and supported in D-9."
+      : d1.score>=1&&d9.score<=-1
+      ? "Promise exceeds delivery: D-1 shows strength, but D-9 asks for refinement before results stabilize."
+      : d1.score<=-1&&d9.score>=1
+      ? "Delivery redeems the promise: early friction softens as D-9 support matures over time."
+      : d1.score<=-1&&d9.score<=-1
+      ? "Both layers are pressured: treat this as a growth curriculum, not a fixed limitation."
+      : "Promise and delivery are mixed: results depend strongly on timing and conscious effort.";
+    const afflictedCase=d1.score<=-1||d9.score<=-1;
+    const overStrong=d1.score===2&&d9.score>=1;
+    const watchText=afflictedCase?g.afflicted:(overStrong?`Power is high here; channel it consciously so ${g.karakas[0].toLowerCase()} does not become excess.`:"");
+
     document.getElementById("sDegVal").textContent=deg.toFixed(1)+"°";
-    document.getElementById("pBadge").textContent=v.g;
-    document.getElementById("pBadge").style.background=v.col;
-    document.getElementById("pTitle").innerHTML=`${g.gl} ${g.name} · ${v.t}`;
-    document.getElementById("pTitle").style.color=v.col;
-    document.getElementById("pText").innerHTML=v.x;
-    const pnk=document.getElementById("pNak");
-    pnk.innerHTML=`<span class="nstar">✦</span><div><b>Nakshatra ${ni.n}</b> · pada ${ni.pada} · star-lord ${nl.gl} ${nl.name} &nbsp;—&nbsp; deity <b>${ni.d}</b>, symbol “<i>${ni.s}</i>” — ${ni.t}.</div><span class="note" style="margin-left:auto;white-space:nowrap;color:var(--gold2)">details ›</span>`;
-    pnk.onclick=()=>openNak(ni.idx);
-    pnk.onkeydown=e=>{if(e.key==="Enter"||e.key===" ") {e.preventDefault();openNak(ni.idx);}};
+    document.getElementById("pPlacement").innerHTML=`${g.name} in ${r.name} · ${ORD(bn)} Bhava`;
+    document.getElementById("pPlacementMeta").textContent=`${deg.toFixed(1)}° in ${r.name} | D-9 ${r9.name}\nNakshatra ${ni.n} p${ni.pada} | lord ${nl.name}`;
+    document.getElementById("pVerdicts").innerHTML=`
+      <div class="ec-verdict"><div class="k">Dignity</div><div class="v" style="color:${d1Col}">${d1.full}</div></div>
+      <div class="ec-verdict"><div class="k">Navamsa D-9</div><div class="v" style="color:${d9Col}">${r9.name}${vg?" · Vargottama":""}</div></div>
+      <div class="ec-verdict"><div class="k">Nakshatra</div><div class="v">${ni.n} · ${nl.name}</div></div>
+      <div class="ec-verdict"><div class="k">Drishti</div><div class="v">${asp.length?`H${asp.join(", H")}`:"None"}</div></div>
+    `;
+    document.getElementById("pReading").innerHTML=`
+      <p class="dropcap">${firstSentence(g.interp)} In this placement, it expresses through ${r.name} and acts in the ${ORD(bn)} house (${b.en.toLowerCase()}).</p>
+      <p>${firstSentence(r.interp)} ${firstSentence(b.interp)}</p>
+      <p>${firstSentence(ni.interp)}</p>
+      <p><b>Promise vs delivery:</b> ${promiseDelivery}</p>
+      ${watchText?`<div class="watchfor"><div class="label">Watch For</div><div style="color:#dfe4f6">${watchText}</div></div>`:""}
+    `;
     document.getElementById("pVargas").innerHTML=
       vrow("D-1 · Rasi",r.name,d1)+vrow("D-9 · Navamsa",r9.name,d9)+
-      (vg?`<div class="note" style="text-align:center;color:var(--gold2);font-weight:700">✦ Vargottama — same sign in both</div>`:"");
+      (vg?`<div class="note" style="text-align:center;color:var(--gold2);font-weight:700">✦ Vargottama — same sign in both</div>`:"")+
+      `<div class="note" style="margin-top:6px">${v.x}</div>`;
     document.getElementById("pSteps").innerHTML=`
-      <div class="step"><div class="sn">1</div><div class="st"><b>Actor:</b> ${g.name} = ${g.karakas.slice(0,3).join(", ").toLowerCase()}.</div></div>
-      <div class="step"><div class="sn">2</div><div class="st"><b>Sign (costume):</b> in ${r.name} (${r.elem.toLowerCase()}, ruled by ${GBYK[r.lord].name}) it acts <b>${r.traits.join(", ")}</b>.</div></div>
-      <div class="step"><div class="sn">★</div><div class="st"><b>Nakshatra (deeper current):</b> ${ni.n} gives a <b>${ni.t.split(",")[0]}</b> undertone; its star-lord ${nl.name} pulls it toward ${nl.karakas[0].toLowerCase()}.</div></div>
-      <div class="step"><div class="sn">3</div><div class="st"><b>House (stage):</b> in the ${ORD(bn)} (${b.skt}) → pours into ${b.kar.slice(0,3).join(", ")}.</div></div>
-      <div class="step"><div class="sn">4</div><div class="st"><b>Navamsa (D-9):</b> sign ${r9.name} → it ${d9.score>=1?"holds its strength":d9.score<=-1?"loses strength":"stays even"} in delivering.</div></div>`;
+      <div class="step"><div class="sn">G</div><div class="st"><b>Graha fragment:</b> ${g.name} (${d1.full}) → ${afflictedCase?"afflicted":"strong"} expression selected.</div></div>
+      <div class="step"><div class="sn">R</div><div class="st"><b>Rashi fragment:</b> ${r.name} (${r.elem}, ${r.mode.replace(" ("," · ").replace(")","")}).</div></div>
+      <div class="step"><div class="sn">B</div><div class="st"><b>Bhava fragment:</b> ${ORD(bn)} house (${b.skt}) — ${b.en.toLowerCase()}.</div></div>
+      <div class="step"><div class="sn">N</div><div class="st"><b>Nakshatra fragment:</b> ${ni.n} p${ni.pada} — lord ${nl.name}, tone ${ni.t.split(",")[0]}.</div></div>
+      <div class="step"><div class="sn">D9</div><div class="st"><b>Delivery line:</b> D-9 ${r9.name}${vg?" (vargottama)":"."}</div></div>`;
     document.getElementById("aspText").innerHTML=`From house ${bn}, <b>${g.name}</b> aspects house${asp.length>1?"s":""} <b>${asp.join(", ")}</b>${(gk==="Ma"||gk==="Ju"||gk==="Sa")?` (incl. special aspects)`:""} — influencing ${asp.map(h=>BHAVAS[h-1].en.toLowerCase()).join(", ")}.`;
     const hc=document.getElementById("aspHouses");hc.innerHTML="";
     for(let h=1;h<=12;h++){const cls=h===bn?"occ":asp.includes(h)?"asp":"";const b=document.createElement("button");b.type="button";b.className="hcell "+cls;b.disabled=true;b.innerHTML=`<span class="hn">${h}</span><span>${BHAVAS[h-1].en.split(" ")[0]}</span>`;hc.appendChild(b);}
