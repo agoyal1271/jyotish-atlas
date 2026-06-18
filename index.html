@@ -3729,6 +3729,16 @@ const GCH_VEDHA={
 const GCH_VEXC=new Set(['Su|Sa','Sa|Su','Mo|Me','Me|Mo','Ju|Me','Me|Ju']);
 const GCH_ALL=['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke'];
 
+// Transit Tara Bala — the nakshatra "tara" of a transiting planet counted from the
+// janma nakshatra (natal Moon's star). Taras 3 (Vipat), 5 (Pratyari) and 7 (Vadha)
+// are inauspicious; 2/4/6/8/9 are auspicious. A slow or nodal planet sitting in a bad
+// tara is a classical caution that pure house-gochara misses (e.g. Rahu in Dhanishtha
+// is the 5th tara — Pratyari — from janma Aswini).
+const TARA_NAMES=['Janma','Sampat','Vipat','Kshema','Pratyari','Sadhaka','Vadha','Mitra','Parama Mitra'];
+const TARA_Q={1:0,2:1,3:-1,4:1,5:-1,6:1,7:-1,8:1,9:1};
+const nakIndexOf=lon=>Math.floor((((lon%360)+360)%360)/(360/27));
+function taraFrom(janmaNakIdx,targetNakIdx){const c=(((targetNakIdx-janmaNakIdx)%27)+27)%27,t=c%9;return{num:t+1,name:TARA_NAMES[t],q:TARA_Q[t+1]};}
+
 function gocharaAnalysis(pos,moonSign,La,allBAV){
   // House from natal Moon AND from natal Lagna for each transiting planet
   const hFrMo={}, hFrLa={};
@@ -3772,11 +3782,18 @@ function transitPromptSection(c,La,focusHouses){
   const allBAV={}; try{for(const k of ['Su','Mo','Ma','Me','Ju','Ve','Sa']) allBAV[k]=computeBAV(k,avPos);}catch(e){}
   const g=gocharaAnalysis(tp,moonSign,La,allBAV), ORD=['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke'];
   const today=new Date().toLocaleDateString('en',{day:'numeric',month:'short',year:'numeric'});
-  let s=`=======================================\nCURRENT TRANSITS — GOCHARA (as of ${today}, Lahiri sidereal)\n=======================================\nPlanet     Sign           H-Lagna  H-Moon  Notes\n`;
+  const janmaNak=c.planets.Mo?nakIndexOf(c.planets.Mo.sign*30+c.planets.Mo.deg):0;
+  const janmaNakName=c.planets.Mo?nakInfo(c.planets.Mo.sign*30+c.planets.Mo.deg).n:'?';
+  let s=`=======================================\nCURRENT TRANSITS — GOCHARA (as of ${today}, Lahiri sidereal)\nJanma nakṣatra (natal Moon): ${janmaNakName}\n=======================================\nPlanet     Sign           Nakshatra (Tara)        H-Lagna H-Moon Notes\n`;
+  const badTaras=[];
   for(const k of ORD){const t=g[k]; if(!t)continue;
-    const n=[]; if(t.good&&!t.vedha)n.push('favorable gochara'); if(t.vedha)n.push('vedha by '+GBYK[t.vedhaBy].name); if(t.satSpecial)n.push(t.satSpecial==='sade-sati'?'SADE SATI':'Dhaiya/Kantaka'); if(t.bavSign!=null)n.push('BAV '+t.bavSign+'/8');
-    s+=`${GBYK[k].name.padEnd(10)} ${SIGNS[t.sign].padEnd(13)} H${String(t.hLa).padEnd(6)} H${String(t.h).padEnd(5)} ${n.join(', ')||'—'}\n`;
+    const lon=t.sign*30+t.deg, ni=nakInfo(lon), ta=taraFrom(janmaNak,nakIndexOf(lon));
+    const taraStr=`${ni.n} (${ta.num}·${ta.name})`;
+    if(ta.q<0&&['Sa','Ra','Ke','Ju','Ma'].includes(k)) badTaras.push(`${GBYK[k].name} in ${ni.n} = ${ta.name} tāra`);
+    const n=[]; if(t.good&&!t.vedha)n.push('favorable gochara'); if(t.vedha)n.push('vedha by '+GBYK[t.vedhaBy].name); if(t.satSpecial)n.push(t.satSpecial==='sade-sati'?'SADE SATI':'Dhaiya/Kantaka'); if(ta.q<0)n.push(ta.name+' tāra ✗'); else if(ta.q>0)n.push(ta.name+' tāra ✓'); if(t.bavSign!=null)n.push('BAV '+t.bavSign+'/8');
+    s+=`${GBYK[k].name.padEnd(10)} ${SIGNS[t.sign].padEnd(13)} ${taraStr.padEnd(23)} H${String(t.hLa).padEnd(6)}H${String(t.h).padEnd(5)} ${n.join(', ')||'—'}\n`;
   }
+  if(badTaras.length) s+=`Inauspicious nakṣatra transits (Vipat/Pratyari/Vadha tāra from janma ${janmaNakName}): ${badTaras.join('; ')} — these temper the period regardless of house-gochara.\n`;
   const ju=g.Ju, sa=g.Sa, hl=[];
   if(ju) hl.push(`Jupiter in H${ju.h} from Moon (${ju.good&&!ju.vedha?'favorable — grace/expansion to that house':'transitional'}).`);
   if(sa) hl.push(sa.satSpecial==='sade-sati'?`SADE SATI — Saturn H${sa.h} from Moon (${sa.h===1?'peak':sa.h===12?'opening':'closing'} phase).`:sa.satSpecial==='dhaiya'?`Dhaiya / Kantaka Shani — Saturn H${sa.h} from Moon.`:`Saturn in H${sa.h} from Moon (${sa.good&&!sa.vedha?'favorable':'discipline / pressure'}).`);
@@ -4155,10 +4172,16 @@ function dpLayer1(k,c,La){
     }
   }
 
+  // Atmakaraka (Jaimini) — the soul's significator. Its dasha/bhukti is especially
+  // fruitful when the AK is well-placed (BPHS+Jaimini): give it explicit credit.
+  let akMod=0;
+  try{const ak=charaKarakas(c)[0]; if(ak&&ak.k===k){const ht=houseFromSigns(La,p.sign),kt=[1,4,5,7,9,10].includes(ht);
+    akMod=d1.score>=1?(kt?0.7:0.45):d1.score>=0?(kt?0.4:0.2):(nb?0.2:0);}}catch(e){}
+
   return{
     k,p,d1,d9,d9s,vg,mool,nb,combust,retro,
-    digScore,d9Mod,combustMod,dispMod,aspMod,ishtaMod,nodeMod,nodeNote,
-    score:digScore+d9Mod+combustMod+dispMod+aspMod*0.4+ishtaMod+nodeMod,
+    digScore,d9Mod,combustMod,dispMod,aspMod,ishtaMod,nodeMod,nodeNote,akMod,
+    score:digScore+d9Mod+combustMod+dispMod+aspMod*0.4+ishtaMod+nodeMod+akMod,
     dispK,dispDig,house:houseFromSigns(La,p.sign)
   };
 }
@@ -4184,7 +4207,13 @@ function dpLayer2(k,c,La){
 
   const hq=[1,4,7,10].includes(house)?0.5:[5,9].includes(house)?0.5:[6,8,12].includes(house)?-0.5:0;
 
-  return{score:fnScore+hq,fnScore,hq,fn,house};
+  // Trikona lord in a kendra (or kendra lord in a trikona) — a classical auspicious /
+  // Raja-Yoga-forming placement (e.g. 9th lord of fortune in the 10th of karma).
+  const rules=fn.houses||[];
+  const rajaMod=((rules.some(h=>[1,5,9].includes(h))&&[1,4,7,10].includes(house))||
+                 (rules.some(h=>[4,7,10].includes(h))&&[1,5,9].includes(house)))?0.6:0;
+
+  return{score:fnScore+hq+rajaMod,fnScore,hq,rajaMod,fn,house};
 }
 
 // Layer 3: transit score (uses already-computed gochara object)
@@ -4261,8 +4290,19 @@ function dpLayer3(c,La,allBAV,gochara){
   const raG=gochara.Ra;
   if(raG) raScore=raG.good?0.5:-0.5;
 
+  // Transit Tara Bala — nakshatra quality of the slow & nodal transits from janma nakshatra.
+  // Pure house-gochara misses this; a slow/nodal planet in an inauspicious tara is a real caution.
+  let taraScore=0;
+  const janmaNak=nakIndexOf(mo.sign*30+mo.deg);
+  for(const k of ['Sa','Ra','Ke','Ju']){
+    const tg=gochara[k]; if(!tg) continue;
+    const lon=tg.sign*30+tg.deg, ta=taraFrom(janmaNak,nakIndexOf(lon)), wt=(k==='Ju')?0.2:0.3;
+    if(ta.q<0){ taraScore-=wt; flags.push({cls:'w-damp',text:`Transit ${GBYK[k].name} in ${nakInfo(lon).n} — ${ta.name} tāra (${ta.num} from janma nakṣatra): inauspicious nakṣatra transit`}); }
+    else if(ta.q>0){ taraScore+=wt*0.5; }
+  }
+
   const doubleTransit=juScore>0&&saScore>0;
-  return{score:juScore+saScore+raScore,juScore,saScore,raScore,flags,doubleTransit,juG,saG,raG};
+  return{score:juScore+saScore+raScore+taraScore,juScore,saScore,raScore,taraScore,flags,doubleTransit,juG,saG,raG};
 }
 
 // Rahu / Ketu proximity flags against natal dasha lords and Moon
@@ -4489,8 +4529,9 @@ function dpAnalyze(){
 
   const hardCap=(l1M&&l1M.d1.score===-2&&!l1M.nb);
   const antarDamp=(l1A&&l1A.d1.score===-2&&!l1A.nb)?-1:0;
-  const l1Score=(l1M?l1M.score:0)*0.65+(l1A?l1A.score:0)*0.35;
-  const l2Score=(l2M?l2M.score:0)*0.65+(l2A?l2A.score:0)*0.35;
+  // Antardasha (bhukti) lord shapes the sub-period — give it more weight than a flat 0.35.
+  const l1Score=(l1M?l1M.score:0)*0.6+(l1A?l1A.score:0)*0.4;
+  const l2Score=(l2M?l2M.score:0)*0.6+(l2A?l2A.score:0)*0.4;
   const nakScore=nakBond?nakBond.score:0;
   const total=l1Score+l2Score+l3.score+l4.score+antarDamp+rel.relScore+nakScore;
   const verdict=dpVerdict(total,hardCap);
@@ -4673,8 +4714,9 @@ function lpComputePeriodScore(c,La,allBAV,maha,antar){
   const l4=dpLayer4(yogas,mahaK,antarK);
   const hardCap=(l1M&&l1M.d1.score===-2&&!l1M.nb);
   const antarDamp=(l1A&&l1A.d1.score===-2&&!l1A.nb)?-1:0;
-  const l1Score=(l1M?l1M.score:0)*0.65+(l1A?l1A.score:0)*0.35;
-  const l2Score=(l2M?l2M.score:0)*0.65+(l2A?l2A.score:0)*0.35;
+  // Antardasha (bhukti) lord shapes the sub-period — give it more weight than a flat 0.35.
+  const l1Score=(l1M?l1M.score:0)*0.6+(l1A?l1A.score:0)*0.4;
+  const l2Score=(l2M?l2M.score:0)*0.6+(l2A?l2A.score:0)*0.4;
   // include the Maha×Antar relationship and nakshatra bond so the Life Predictor
   // timeline agrees with the Dasha Prediction Engine for the same period
   const rel=dpRelation(mahaK,antarK,c), nak=dpNakBond(mahaK,antarK,c);
