@@ -7343,6 +7343,36 @@ function toggleTheme(){
 
   refreshCharts();
 })();
+
+/* == SELFTEST == */
+function runSelfTest(){
+  const A=[]; const ok=(n,c)=>A.push({test:n,pass:!!c});
+  // Navamsa (D-9) — exact known values from NAV_START=[Aries,Capricorn,Libra,Cancer]
+  ok("navamsa Aries 0° = Aries(0)",      navamsaSign(0,0)===0);
+  ok("navamsa Aries 6.7° = Gemini(2)",   navamsaSign(0,6.7)===2);
+  ok("navamsa Aries 29.99° = Sag(8)",    navamsaSign(0,29.99)===8);
+  ok("navamsa Taurus 0° = Capricorn(9)", navamsaSign(1,0)===9);
+  ok("navamsa Gemini 0° = Libra(6)",     navamsaSign(2,0)===6);
+  ok("navamsa Cancer 0° = Cancer(3)",    navamsaSign(3,0)===3);
+  // Data invariants — guard against corruption during refactor
+  ok("9 grahas",   GRAHAS.length===9);
+  ok("12 rashis",  RASHIS.length===12);
+  ok("12 bhavas",  BHAVAS.length===12);
+  ok("27 nakshatras", NAK.length===27);
+  ok("Sun exalts Aries / falls Libra / owns Leo", GBYK.Su.exalt===0 && GBYK.Su.debil===6 && GBYK.Su.own.includes(4));
+  ok("Jupiter exalts Cancer / falls Capricorn",   GBYK.Ju.exalt===3 && GBYK.Ju.debil===9);
+  ok("dignityOf Sun-in-Aries truthy", !!dignityOf("Su",0));
+  const failed=A.filter(x=>!x.pass);
+  if(console.table) console.table(A);
+  return {total:A.length, failed:failed.length, fails:failed.map(f=>f.test)};
+}
+if(location.hash==="#selftest"){
+  window.addEventListener("load",()=>{
+    const r=runSelfTest();
+    document.title=(r.failed? "❌ " : "✅ ")+"selftest "+(r.total-r.failed)+"/"+r.total;
+    if(r.failed) console.error("SELFTEST FAILURES:", r.fails);
+  });
+}
 </script>
 </body>
 </html>
