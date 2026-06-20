@@ -906,6 +906,14 @@
   .dp-tl-card div{color:var(--muted);margin-top:2px}
   .dp-tl-note{font-size:11px;color:var(--muted);margin-top:8px}
   @media(max-width:560px){.dp-tl-cards{grid-template-columns:1fr}}
+  .dp-asp-row{display:flex;gap:10px;font-size:12.5px;padding:5px 0;border-bottom:1px solid var(--line)}
+  .dp-asp-lbl{min-width:150px;font-weight:600;color:var(--ink)}
+  .dp-asp-ben{color:var(--exalt)} .dp-asp-mal{color:var(--debil)} .dp-asp-none{color:var(--muted)}
+  .dp-asp-sub{font-size:11.5px;color:var(--muted);margin-top:2px}
+  .dp-topic-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:6px 0}
+  .dp-topic-card{border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-size:12.5px;background:var(--panel2)}
+  .dp-topic-conn{font-size:12.5px;color:var(--ink);margin-top:4px}
+  @media(max-width:560px){.dp-topic-grid{grid-template-columns:1fr}.dp-asp-row{flex-direction:column;gap:2px}}
   .dp-themes-box{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:14px}
   .dp-theme-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
   .dp-theme-tag{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 11px;font-size:12px;font-weight:600}
@@ -4507,6 +4515,58 @@ function dpRelation(mahaK,antarK,c){
          relScore,relVerdict,relCat,volatile};
 }
 
+// Topic focus — pair D-1 with the matter's varga (BPHS Shodasavarga assignment).
+const DP_TOPICS={
+  general:{label:'General (whole life)',house:null,varga:1,vlabel:'D-1 Rāśi'},
+  wealth:{label:'Wealth · D-2',house:2,varga:2,vlabel:'D-2 Horā',karaka:'Ju'},
+  relationship:{label:'Relationship · D-9',house:7,varga:9,vlabel:'D-9 Navāṁśa',karaka:'Ve'},
+  career:{label:'Career · D-10',house:10,varga:10,vlabel:'D-10 Daśāṁśa',karaka:'Su'},
+  health:{label:'Health · D-30',house:1,varga:30,vlabel:'D-30 Triṁśāṁśa',karaka:'Su'}
+};
+function isBeneficPlanet(k,c){
+  if(k==='Ju'||k==='Ve') return true;
+  if(k==='Su'||k==='Ma'||k==='Sa'||k==='Ra'||k==='Ke') return false;
+  if(k==='Me'){const p=c.planets.Me; if(!p) return true; return !['Su','Ma','Sa','Ra','Ke'].some(m=>c.planets[m]&&c.planets[m].sign===p.sign);}
+  if(k==='Mo'){const mo=c.planets.Mo,su=c.planets.Su; if(!mo||!su) return true; let d=Math.abs((mo.sign*30+mo.deg)-(su.sign*30+su.deg)); if(d>180)d=360-d; return d>72;}
+  return true;
+}
+// Graha drishti on a sign, classified benefic / malefic (natural). 7th for all; Mars 4/8, Jupiter 5/9, Saturn 3/10.
+function dpAspectsOn(c,La,sign){
+  const ben=[],mal=[];
+  for(const k of ['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke']){
+    const p=c.planets[k]; if(!p||p.sign===sign) continue;
+    const d=(sign-p.sign+12)%12;
+    const hit=(d===6)||(k==='Ma'&&(d===3||d===7))||(k==='Ju'&&(d===4||d===8))||(k==='Sa'&&(d===2||d===9));
+    if(hit){(isBeneficPlanet(k,c)?ben:mal).push({k,fromH:houseFromSigns(La,p.sign)});}
+  }
+  return {ben,mal,score:ben.length*0.35-mal.length*0.35};
+}
+// Topic-aware natal layer — the relevant bhava read in BOTH D-1 and the matter's varga,
+// the aspects on it, and whether the dasha lords activate it.
+function dpTopicAnalysis(c,La,topicKey,mahaK,antarK){
+  const t=DP_TOPICS[topicKey]; if(!t||!t.house) return null;
+  const h=t.house, hs=(La+h-1)%12, lord=SIGN_LORD[hs], lp=c.planets[lord];
+  const d1Dig=lp?dignityOf(lord,lp.sign):null, lordH=lp?houseFromSigns(La,lp.sign):null;
+  const occ=Object.entries(c.planets).filter(([k,p])=>p&&p.sign===hs).map(([k])=>k);
+  const asp=dpAspectsOn(c,La,hs);
+  const N=t.varga, vLa=vargaSign(c.La.sign,c.La.deg||0,N), vhs=(vLa+h-1)%12, vlord=SIGN_LORD[vhs], vlp=c.planets[vlord];
+  const vlordSign=vlp?vargaSign(vlp.sign,vlp.deg,N):null, vDig=vlordSign!=null?dignityOf(vlord,vlordSign):null;
+  const lordsConnect=[...new Set([mahaK,antarK])].map(k=>{
+    const con=[];
+    if(SIGN_LORD[hs]===k) con.push('rules it');
+    if(c.planets[k]&&c.planets[k].sign===hs) con.push('sits in it');
+    if(asp.ben.some(a=>a.k===k)) con.push('aspects (benefic)');
+    else if(asp.mal.some(a=>a.k===k)) con.push('aspects (malefic)');
+    return {k,con};
+  }).filter(x=>x.con.length);
+  let score=0;
+  if(d1Dig) score+=d1Dig.score>=1.5?0.6:d1Dig.score>=1?0.35:d1Dig.score<=-2?-0.6:d1Dig.score<=-1?-0.3:0;
+  if(vDig)  score+=vDig.score>=1.5?0.4:vDig.score>=1?0.25:vDig.score<=-2?-0.4:vDig.score<=-1?-0.2:0;
+  score+=asp.score*0.5;
+  score+=lordsConnect.length?0.4:-0.2;
+  return {t,h,hs,lord,lp,d1Dig,lordH,occ,asp,N,vLa,vhs,vlord,vlordSign,vDig,lordsConnect,score:Math.max(-1.5,Math.min(1.5,score))};
+}
+
 // Verdict tier from total score
 // Thresholds calibrated to the actual score distribution (median ≈ 3.9, p75 ≈ 6.5,
 // p90 ≈ 9): Exceptional is the top ~8%, not ~28%. Keep in sync with lpScoreColor().
@@ -4596,7 +4656,14 @@ function dpAnalyze(){
   const _avNat=(l1,l2)=>{const s=(l1?l1.score:0)+(l2?l2.score:0); return s>0?s*(l1?l1.avMult:1):s;};
   const natalScore=_avNat(l1M,l2M)*0.6+(l1A?_avNat(l1A,l2A):0)*0.4;
   const nakScore=nakBond?nakBond.score:0;
-  const total=natalScore+l3.score+l4.score+antarDamp+rel.relScore+nakScore;
+  // Aspects (graha drishti, benefic/malefic) on each dasha lord — read BEFORE transit.
+  const aspM=dpAspectsOn(c,La,c.planets[mahaK]?c.planets[mahaK].sign:La);
+  const aspA=(antarK!==mahaK&&c.planets[antarK])?dpAspectsOn(c,La,c.planets[antarK].sign):null;
+  // Topic focus — D-1 paired with the matter's varga (wealth D-2 / relationship D-9 / career D-10).
+  const topicKey=(document.getElementById('dpTopicSelect')||{}).value||'general';
+  const topicA=dpTopicAnalysis(c,La,topicKey,mahaK,antarK);
+
+  const total=natalScore+l3.score+l4.score+antarDamp+rel.relScore+nakScore+(topicA?topicA.score:0);
   const verdict=dpVerdict(total,hardCap);
 
   function lordCard(l1,l2,role){
@@ -4698,6 +4765,28 @@ function dpAnalyze(){
   const thTags=themes.themes.map(t=>`<span class="dp-theme-tag${t.type==='primary'?' primary':''}">${t.label}</span>`).join('');
   const karTags=themes.kars.map(k=>`<span class="dp-theme-tag">${k}</span>`).join('');
 
+  // Aspect section (graha drishti, benefic/malefic) on the dasha lords — shown before transit.
+  const NM=k=>GBYK[k].name, GLn=k=>`${GBYK[k].gl} ${GBYK[k].name}`;
+  const aspLine=(label,a)=>`<div class="dp-asp-row"><span class="dp-asp-lbl">${label}</span><span>`+
+    `${a.ben.length?`<span class="dp-asp-ben">benefic: ${a.ben.map(x=>GLn(x.k)+' (H'+x.fromH+')').join(', ')}</span>`:''}`+
+    `${a.ben.length&&a.mal.length?' · ':''}`+
+    `${a.mal.length?`<span class="dp-asp-mal">malefic: ${a.mal.map(x=>GLn(x.k)+' (H'+x.fromH+')').join(', ')}</span>`:''}`+
+    `${!a.ben.length&&!a.mal.length?'<span class="dp-asp-none">no graha dṛṣṭi</span>':''}</span></div>`;
+  const aspectHtml=`<div class="dp-asp"><div class="dp-section-title">Aspects on the dasha lords · graha dṛṣṭi</div>${aspLine(NM(mahaK)+' (MD)',aspM)}${aspA?aspLine(NM(antarK)+' (AD)',aspA):''}</div>`;
+  let topicHtml='';
+  if(topicA){
+    const ta=topicA, dg=d=>d?d.full.split('·')[0].trim():'—';
+    const conn=ta.lordsConnect.length?ta.lordsConnect.map(x=>`${NM(x.k)} ${x.con.join(' & ')}`).join('; '):'neither dasha lord directly activates this house';
+    const aspTxt=(ta.asp.ben.length||ta.asp.mal.length)?`${ta.asp.ben.length?'<span class="dp-asp-ben">benefic: '+ta.asp.ben.map(x=>NM(x.k)).join(', ')+'</span>':''}${ta.asp.ben.length&&ta.asp.mal.length?' · ':''}${ta.asp.mal.length?'<span class="dp-asp-mal">malefic: '+ta.asp.mal.map(x=>NM(x.k)).join(', ')+'</span>':''}`:'none';
+    const both=ta.d1Dig&&ta.vDig?(ta.d1Dig.score+ta.vDig.score>=2?'both charts support this matter':ta.d1Dig.score+ta.vDig.score<=-2?'both charts weaken this matter':'mixed — one supports, one tempers'):'—';
+    topicHtml=`<div class="dp-topic"><div class="dp-section-title">Focus · ${ta.t.label} — D-1 paired with ${ta.t.vlabel}</div>
+      <div class="dp-topic-grid">
+        <div class="dp-topic-card"><b>H${ta.h} in D-1</b> · ${SIGNS[ta.hs]} · lord ${NM(ta.lord)}${ta.lp?` in H${ta.lordH} (${dg(ta.d1Dig)})`:''}<div class="dp-asp-sub">occupants: ${ta.occ.length?ta.occ.map(NM).join(', '):'empty'}</div><div class="dp-asp-sub">aspects: ${aspTxt}</div></div>
+        <div class="dp-topic-card"><b>H${ta.h} in ${ta.t.vlabel}</b> · ${SIGNS[ta.vhs]} · lord ${NM(ta.vlord)}${ta.vlordSign!=null?` (${dg(ta.vDig)})`:''}<div class="dp-asp-sub">D-1 vs varga: ${both}</div></div>
+      </div>
+      <div class="dp-topic-conn"><b>Dasha activation:</b> ${conn}.</div></div>`;
+  }
+
   const resultEl=document.getElementById('dpResult'); if(!resultEl) return;
   document.getElementById('dpTransitNote').textContent=transitNote;
   resultEl.innerHTML=`
@@ -4718,6 +4807,8 @@ function dpAnalyze(){
       </div>
       <div class="dp-relation"><b>Maha × Antara:</b> &nbsp;<span class="dp-fval ${relCls}" style="display:inline-block">${relText}</span>${relH}</div>
     </div>
+    <div>${aspectHtml}</div>
+    ${topicA?`<div>${topicHtml}</div>`:''}
     <div>
       <div class="dp-section-title">Layer 3 · Transit Overlay</div>
       <div class="dp-transit-grid">${trCard(l3.juG,'Ju')}${trCard(l3.saG,'Sa')}${trCard(l3.raG,'Ra')}</div>
@@ -4766,10 +4857,11 @@ function renderDashaPrediction(c,La,allBAV){
 
   wrap.style.display='block';
   wrap.innerHTML=`<div class="dp-wrap">
-  <div class="dp-head"><h4>Dasha Prediction Engine</h4><span style="font-size:11px;color:var(--muted)">4-layer analysis · BPHS Vimshottari + Gochara</span></div>
+  <div class="dp-head"><h4>Dasha Prediction Engine</h4><span style="font-size:11px;color:var(--muted)">Natal (D-1 + varga) · aspects · avasthā · gochara + nakṣatra tāra</span></div>
   <div class="dp-selector">
     <div class="dp-sel-group"><div class="dp-sel-label">Mahadasha</div><select id="dpMahaSelect">${mahaOpts}</select></div>
     <div class="dp-sel-group"><div class="dp-sel-label">Antardasha</div><select id="dpAntarSelect">${dpBuildAntarOpts(mahas[defMahaIdx],defAntarIdx)}</select></div>
+    <div class="dp-sel-group"><div class="dp-sel-label">Focus</div><select id="dpTopicSelect">${Object.entries(DP_TOPICS).map(([k,t])=>`<option value="${k}">${t.label}</option>`).join('')}</select></div>
   </div>
   <div class="dp-transit-note" id="dpTransitNote"></div>
   <div id="dpResult"></div>
@@ -4781,6 +4873,7 @@ function renderDashaPrediction(c,La,allBAV){
     dpAnalyze();
   };
   document.getElementById('dpAntarSelect').onchange=dpAnalyze;
+  document.getElementById('dpTopicSelect').onchange=dpAnalyze;
   dpAnalyze();
 }
 
