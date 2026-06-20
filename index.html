@@ -4194,11 +4194,24 @@ function dpLayer1(k,c,La){
   // Retrograde (Vakri) planets carry high Cheshta Bala — strong, intensified delivery in their period.
   const retroMod=(retro&&!combust&&k!=='Ra'&&k!=='Ke')?0.3:0;
 
+  // Bālādi avasthā (degree life-stage) is a MULTIPLIER on delivery, not a tweak: a planet
+  // 'dead' (Mṛta) or 'infant' (Bāla) by degree cannot deliver no matter how dignified — this
+  // is the layer an astrologer reads when a 9th-lord AK at 28° still feels "flat". Kumāra
+  // (the commonest stage) ≈ neutral so the overall distribution isn't shifted.
+  const base=digScore+d9Mod+combustMod+dispMod+aspMod*0.4+ishtaMod+nodeMod+akMod+retroMod;
+  const AV_MULT={'Yuvā':1.1,'Kumāra':1.0,'Vṛddha':0.8,'Bāla':0.7,'Mṛta':0.45};
+  let avMult=1; try{avMult=AV_MULT[baladiAvastha(p.sign,p.deg).n]??1;}catch(e){}
+  const hk=houseFromSigns(La,p.sign);
+  // Grahaṇa dosha — a luminary conjunct a node (eclipse) loses lustre.
+  const grahanMod=((k==='Su'||k==='Mo')&&['Ra','Ke'].some(nk=>c.planets[nk]&&c.planets[nk].sign===p.sign))?-0.5:0;
+  // Nodes thrive in upachaya houses (3/6/11) — Rahu in the 6th is classically strong.
+  const nodeUpaMod=((k==='Ra'||k==='Ke')&&[3,6,11].includes(hk))?0.45:0;
+
   return{
     k,p,d1,d9,d9s,vg,mool,nb,combust,retro,
-    digScore,d9Mod,combustMod,dispMod,aspMod,ishtaMod,nodeMod,nodeNote,akMod,retroMod,
-    score:digScore+d9Mod+combustMod+dispMod+aspMod*0.4+ishtaMod+nodeMod+akMod+retroMod,
-    dispK,dispDig,house:houseFromSigns(La,p.sign)
+    digScore,d9Mod,combustMod,dispMod,aspMod,ishtaMod,nodeMod,nodeNote,akMod,retroMod,avMult,grahanMod,nodeUpaMod,
+    score:base+grahanMod+nodeUpaMod,
+    dispK,dispDig,house:hk
   };
 }
 
@@ -4577,11 +4590,13 @@ function dpAnalyze(){
 
   const hardCap=(l1M&&l1M.d1.score===-2&&!l1M.nb);
   const antarDamp=(l1A&&l1A.d1.score===-2&&!l1A.nb)?-1:0;
-  // Antardasha (bhukti) lord shapes the sub-period — give it more weight than a flat 0.35.
-  const l1Score=(l1M?l1M.score:0)*0.6+(l1A?l1A.score:0)*0.4;
-  const l2Score=(l2M?l2M.score:0)*0.6+(l2A?l2A.score:0)*0.4;
+  // Each lord's natal promise (L1+L2) is modulated by its Bālādi avasthā — a 'dead' (Mṛta)
+  // planet cannot deliver its dignity/yoga, however good it looks. The bhukti (AD) lord is
+  // weighted more than the MD lord (it rules the sub-period).
+  const _avNat=(l1,l2)=>{const s=(l1?l1.score:0)+(l2?l2.score:0); return s>0?s*(l1?l1.avMult:1):s;};
+  const natalScore=_avNat(l1M,l2M)*0.6+(l1A?_avNat(l1A,l2A):0)*0.4;
   const nakScore=nakBond?nakBond.score:0;
-  const total=l1Score+l2Score+l3.score+l4.score+antarDamp+rel.relScore+nakScore;
+  const total=natalScore+l3.score+l4.score+antarDamp+rel.relScore+nakScore;
   const verdict=dpVerdict(total,hardCap);
 
   function lordCard(l1,l2,role){
@@ -4784,13 +4799,15 @@ function lpComputePeriodScore(c,La,allBAV,maha,antar){
   const l4=dpLayer4(yogas,mahaK,antarK);
   const hardCap=(l1M&&l1M.d1.score===-2&&!l1M.nb);
   const antarDamp=(l1A&&l1A.d1.score===-2&&!l1A.nb)?-1:0;
-  // Antardasha (bhukti) lord shapes the sub-period — give it more weight than a flat 0.35.
-  const l1Score=(l1M?l1M.score:0)*0.6+(l1A?l1A.score:0)*0.4;
-  const l2Score=(l2M?l2M.score:0)*0.6+(l2A?l2A.score:0)*0.4;
+  // Each lord's natal promise (L1+L2) is modulated by its Bālādi avasthā — a 'dead' (Mṛta)
+  // planet cannot deliver its dignity/yoga, however good it looks. The bhukti (AD) lord is
+  // weighted more than the MD lord (it rules the sub-period).
+  const _avNat=(l1,l2)=>{const s=(l1?l1.score:0)+(l2?l2.score:0); return s>0?s*(l1?l1.avMult:1):s;};
+  const natalScore=_avNat(l1M,l2M)*0.6+(l1A?_avNat(l1A,l2A):0)*0.4;
   // include the Maha×Antar relationship and nakshatra bond so the Life Predictor
   // timeline agrees with the Dasha Prediction Engine for the same period
   const rel=dpRelation(mahaK,antarK,c), nak=dpNakBond(mahaK,antarK,c);
-  const total=l1Score+l2Score+l3.score+l4.score+antarDamp+rel.relScore+(nak?nak.score:0);
+  const total=natalScore+l3.score+l4.score+antarDamp+rel.relScore+(nak?nak.score:0);
   return{
     mahaK,antarK,maha,antar,total,hardCap,
     verdict:dpVerdict(total,hardCap),
