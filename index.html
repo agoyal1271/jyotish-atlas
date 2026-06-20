@@ -4184,16 +4184,20 @@ function dpLayer1(k,c,La){
     }
   }
 
-  // Atmakaraka (Jaimini) — the soul's significator. Its dasha/bhukti is especially
-  // fruitful when the AK is well-placed (BPHS+Jaimini): give it explicit credit.
+  // Chara-karaka credit (Jaimini): the Atmakaraka (soul) and Amatyakaraka (career /
+  // minister) dasha-bhuktis are especially fruitful when the karaka is well placed.
   let akMod=0;
-  try{const ak=charaKarakas(c)[0]; if(ak&&ak.k===k){const ht=houseFromSigns(La,p.sign),kt=[1,4,5,7,9,10].includes(ht);
-    akMod=d1.score>=1?(kt?0.7:0.45):d1.score>=0?(kt?0.4:0.2):(nb?0.2:0);}}catch(e){}
+  try{const ck=charaKarakas(c), ht=houseFromSigns(La,p.sign), kt=[1,4,5,7,9,10].includes(ht);
+    if(ck[0]&&ck[0].k===k) akMod=d1.score>=1?(kt?0.7:0.45):d1.score>=0?(kt?0.4:0.2):(nb?0.2:0);
+    else if(ck[1]&&ck[1].k===k) akMod=d1.score>=1?(kt?0.5:0.3):d1.score>=0?(kt?0.28:0.14):0;
+  }catch(e){}
+  // Retrograde (Vakri) planets carry high Cheshta Bala — strong, intensified delivery in their period.
+  const retroMod=(retro&&!combust&&k!=='Ra'&&k!=='Ke')?0.3:0;
 
   return{
     k,p,d1,d9,d9s,vg,mool,nb,combust,retro,
-    digScore,d9Mod,combustMod,dispMod,aspMod,ishtaMod,nodeMod,nodeNote,akMod,
-    score:digScore+d9Mod+combustMod+dispMod+aspMod*0.4+ishtaMod+nodeMod+akMod,
+    digScore,d9Mod,combustMod,dispMod,aspMod,ishtaMod,nodeMod,nodeNote,akMod,retroMod,
+    score:digScore+d9Mod+combustMod+dispMod+aspMod*0.4+ishtaMod+nodeMod+akMod+retroMod,
     dispK,dispDig,house:houseFromSigns(La,p.sign)
   };
 }
@@ -4214,7 +4218,9 @@ function dpLayer2(k,c,La){
       fnScore=(KDP_DOSE[k]||0);
     } else fnScore=0;
   }
-  else if(fn.tier==='malefic')  fnScore=fn.label.includes('8th')?-2:-1;
+  // A functional malefic's OWN dasha still delivers the significations of the houses it
+  // rules/occupies — penalise it, but not as harshly as its capacity to harm other bhavas.
+  else if(fn.tier==='malefic')  fnScore=fn.label.includes('8th')?-1:-0.6;
   else fnScore=0;
 
   const hq=[1,4,7,10].includes(house)?0.5:[5,9].includes(house)?0.5:[6,8,12].includes(house)?-0.5:0;
@@ -4224,6 +4230,9 @@ function dpLayer2(k,c,La){
   const rules=fn.houses||[];
   const rajaMod=((rules.some(h=>[1,5,9].includes(h))&&[1,4,7,10].includes(house))||
                  (rules.some(h=>[4,7,10].includes(h))&&[1,5,9].includes(house)))?0.6:0;
+  // A kendra-lord-in-trikona (or trikona-lord-in-kendra) Raja Yoga overrides the
+  // Kendradhipati dosha — the yoga prevails over the benefic-ruling-kendras penalty.
+  if(rajaMod>0 && fnScore<0 && fn.tier==='neutral') fnScore=0;
 
   return{score:fnScore+hq+rajaMod,fnScore,hq,rajaMod,fn,house};
 }
