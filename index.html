@@ -1203,14 +1203,22 @@ section{border-bottom-color:rgba(60,80,180,0.14)!important}
 .bm-trace.show{opacity:1}
 @media(prefers-reduced-motion:reduce){.bm-lord-line.on,.bm-pill.on{animation:none}}
 .bm-legend{
-  display:flex;flex-wrap:wrap;gap:8px 16px;justify-content:center;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(232px,1fr));gap:8px;
   padding:12px 16px 0;border-top:1px solid rgba(70,90,200,0.14);
-  width:100%;font-size:11.5px;color:var(--muted);
+  width:100%;font-size:12px;color:var(--muted);
 }
-.bm-legend-item{display:flex;align-items:center;gap:6px}
 .bm-legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 .bm-lg-name{color:var(--ink);font-weight:600}
-.bm-lg-pos{color:var(--muted)}
+.bm-pcard{border:1px solid var(--line);border-radius:9px;padding:8px 11px;background:rgba(20,28,60,0.4)}
+html.light .bm-pcard{background:rgba(240,244,255,0.7)}
+.bm-pc-h{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.bm-pc-deg{font-size:11px;color:var(--muted)}
+.bm-pc-tags{font-size:11px;color:var(--muted);margin-top:3px}
+.bm-ben{color:var(--exalt);font-weight:600}
+.bm-mal{color:var(--debil);font-weight:600}
+.bm-neu{color:var(--muted)}
+.bm-combust{color:#f0a23a;font-weight:600}
+.bm-sec{width:100%;padding:14px 16px 2px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold2);font-weight:600}
 .bm-caption{width:100%;text-align:center;font-size:10.5px;color:var(--muted);padding:8px 16px 0;opacity:0.85}
 .bm-houses{width:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px;
   padding:12px 16px 4px;border-top:1px solid rgba(70,90,200,0.14)}
@@ -2056,11 +2064,23 @@ function renderBhavaMandala(c,La,N,motion){
   }
   sv+=`</svg>`;
 
-  // Planet legend — name · degree · rāśi · nakshatra · house
+  // Planets — name·degree·rāśi·nakshatra + avasthā (recomputed for this varga), combustion
+  // (carried up from D-1, since vargas have no degrees) and functional nature (by the Lagna).
+  const D1=(typeof BM_CTX!=='undefined'&&BM_CTX&&BM_CTX.c)?BM_CTX.c:c;
+  const BLA=(typeof BM_CTX!=='undefined'&&BM_CTX&&BM_CTX.baseLa!=null)?BM_CTX.baseLa:La;
   const leg=PO.filter(k=>c.planets[k]).map(k=>{
-    const v=PV[k],p=c.planets[k],h=houseFromSigns(La,p.sign),ni=showDeg?nakInfo(p.sign*30+p.deg):null;
-    const detail=showDeg?`${p.deg.toFixed(1)}° ${SN[p.sign]}${ni?' · '+ni.n:''} · H${h}`:`${SN[p.sign]} · H${h}`;
-    return `<div class="bm-legend-item"><div class="bm-legend-dot" style="background:${v.col};box-shadow:0 0 4px ${v.col}"></div><span class="bm-lg-name">${v.gl} ${GBYK[k].name}</span><span class="bm-lg-pos">${detail}</span></div>`;
+    const v=PV[k],p=c.planets[k],h=houseFromSigns(La,p.sign),d1=D1.planets[k]||p;
+    const bal=baladiAvastha(d1.sign,d1.deg), dig=dignityOf(k,p.sign), jag=jagradadiAvastha(dig.score);
+    const combust=isCombustDE(k,D1);
+    let fn=null; try{fn=functionalNature(k,BLA);}catch(e){}
+    const benCls=fn?((fn.tier==='benefic'||fn.tier==='yogakaraka')?'bm-ben':fn.tier==='malefic'?'bm-mal':'bm-neu'):'bm-neu';
+    const benLbl=fn?(fn.tier==='yogakaraka'?'yogakāraka':fn.tier==='benefic'?'func. benefic':fn.tier==='malefic'?'func. malefic':'func. neutral'):'';
+    const nak=showDeg?' · '+nakInfo(d1.sign*30+d1.deg).n:'';
+    const loc=showDeg?`${d1.deg.toFixed(1)}° ${SN[p.sign]}${nak}`:SN[p.sign];
+    return `<div class="bm-pcard">`+
+      `<div class="bm-pc-h"><span class="bm-legend-dot" style="background:${v.col};box-shadow:0 0 4px ${v.col}"></span><b class="bm-lg-name">${v.gl} ${GBYK[k].name}</b><span class="bm-pc-deg">${loc} · H${h}</span></div>`+
+      `<div class="bm-pc-tags"><span class="${benCls}">${benLbl}</span> · ${dig.full.split('·')[0].trim()} · <span title="Bālādi life-stage · Jāgradādi wakefulness">${bal.n}/${jag.n}</span>${combust?' · <span class="bm-combust">⊙ combust</span>':''}</div>`+
+      `</div>`;
   }).join('');
 
   // Rāśi → Lord table — each sign, its ruling lord, WHERE that lord sits (linkage), and its occupants
@@ -2080,7 +2100,7 @@ function renderBhavaMandala(c,La,N,motion){
   const tabs=`<div class="bm-vtabs">`+BM_VARGAS.map(([n,lab,nm])=>`<button type="button" class="bm-vtab${n===N?' active':''}" onclick="bmTurn(${n})" title="${nm}">${lab}</button>`).join('')+`</div>`;
   const caption=`<div class="bm-caption">Showing <b>D-${N} · ${vName}</b>${N===1?' — the birth chart':' — divisional chart'}. Outer ring = signs · each marker = <b>house number</b> + its <b>ruling lord's glyph</b> · pills = planets in that sign${showDeg?' with degree':''} · the faint <b>lord-coloured line</b> links each house to the planet that rules it. <span style="color:#9db4ff">Blue</span> kendra · <span style="color:#7fe0a0">green</span> trikona · <span style="color:#f0a890">amber</span> dusthana · gold = Lagna.</div>`;
 
-  ct.innerHTML=`${tabs}<div class="bm-container">${sv}</div><div class="bm-trace" id="bmTrace">▶ Click any house (on the wheel or in the table) to trace where its lord sits</div>${caption}<div class="bm-houses">${houseRows}</div><div class="bm-legend">${leg}</div>`;
+  ct.innerHTML=`${tabs}<div class="bm-container">${sv}</div><div class="bm-trace" id="bmTrace">▶ Click any house (on the wheel or in the table) to trace where its lord sits</div>${caption}<div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div>`;
   if(motion){const ns=ct.querySelector('.bm-svg');if(ns){ns.style.transformOrigin='center';ns.style.transform='rotate(14deg) scale(.9)';ns.style.opacity='0';requestAnimationFrame(()=>{ns.style.transition='transform .46s cubic-bezier(.34,1.12,.4,1),opacity .4s';ns.style.transform='none';ns.style.opacity='1';});}}
 }
 
