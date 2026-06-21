@@ -1625,7 +1625,7 @@ html.light .brand{color:var(--ink)!important}
       </div>
       <div class="avastha-section panel ec-zone-card" id="avasthaPanel" style="display:none;margin-top:14px">
         <h4 style="margin:0 0 4px">Planetary Avasthas · states of a planet</h4>
-        <p class="note" style="margin:0 0 12px">A planet can be well-placed yet unable to deliver. <b>Bālādi</b> reads its life-stage by degree (peaks at <i>Yuvā</i>), <b>Jāgradādi</b> its wakefulness, <b>Dīptādi</b> its condition. <b>Effective strength</b> leads with <b>dignity across D-1, D-9 &amp; D-10</b> plus <b>vargottama</b> — the primary strength — and only <i>modulates</i> by avastha, so an exalted, own-sign or vargottama planet stays strong even at a weak degree. The notes flag where promise (D-1) and delivery (D-9 / D-10) diverge.</p>
+        <p class="note" style="margin:0 0 12px">A planet can be well-placed yet unable to deliver. <b>Bālādi</b> reads its life-stage by degree (peaks at <i>Yuvā</i>), <b>Jāgradādi</b> its wakefulness, <b>Dīptādi</b> its condition. <b>Effective strength</b> leads with <b>dignity across D-1, D-9 &amp; D-10</b> plus <b>vargottama</b> — the primary strength — and only <i>modulates</i> by avastha, so an exalted, own-sign or vargottama planet stays strong even at a weak degree. The notes flag where promise (D-1) and delivery (D-9 / D-10) diverge. <b>Use the D-1 … D-60 tabs</b> to read each planet's dignity &amp; avasthā in any divisional chart — combustion is carried from D-1 (vargas have no degrees).</p>
         <div class="varga-wrap" id="avBody"></div>
       </div>
       <div class="bav-section panel ec-zone-card" style="margin-top:14px">
@@ -3278,41 +3278,78 @@ const HTYPE={1:"Kendra · Trikona (Lagna)",2:"Dhana",3:"Upachaya (Sahaja)",4:"Ke
 const NAT_MAL=new Set(["Su","Ma","Sa","Ra","Ke"]);
 
 /* ===== PLANET STRENGTH DASHBOARD ===== */
-function renderAvasthas(c,La){
+let AV_CTX=null;
+function renderAvasthas(c,La,N){
+  N=N||1;
   const wrap=document.getElementById("avasthaPanel"); if(!wrap) return;
+  AV_CTX={c,La};
   const PL=["Su","Mo","Ma","Me","Ju","Ve","Sa"];
-  // dignity score (−2..2) → strength fraction (0..1)
   const dF=s=>({"2":1,"1.5":0.85,"1":0.65,"0":0.5,"-1":0.3,"-2":0.15}[String(s)]??0.5);
   const chip=(s,d)=>`<span class="av-chip" style="color:${d.col}" title="${SIGNS[s]} · ${d.full}">${SIGN3[s]}</span>`;
-  let t=`<table class="ck-table av-table"><thead><tr><th>Planet</th>`+
-    `<th>Dignity · D-1 / D-9 / D-10</th><th>Bālādi <span class="vh-name">(degree)</span></th>`+
-    `<th>Jāgradādi <span class="vh-name">(wakefulness)</span></th><th>Dīptādi <span class="vh-name">(condition)</span></th>`+
-    `<th>Effective strength</th></tr></thead><tbody>`;
-  for(const k of PL){
-    const p=c.planets[k]; if(!p) continue;
-    const g=GBYK[k];
-    const {d1,d9,d10,d9s,d10s,vargottama,bal,jag,dee,combust,pct}=planetAvasthaStrength(k,c);
-    const tier=pct>=66?"hi":pct>=40?"mid":"lo";
-    const N=[];
-    if(vargottama) N.push("★ Vargottama — same sign in D-1 & D-9; strength strongly reinforced.");
-    if(d1.score>=1.5&&d9.score<=-1) N.push("Strong in Rāśi but weak in Navāṁśa — the promise exceeds the delivery; results can feel hollow or fade.");
-    if(d1.score<=-1&&d9.score>=1.5) N.push("Weak in Rāśi but strong in Navāṁśa — Navāṁśa redeems it; results improve with maturity and effort.");
-    if(d10.score>=1.5) N.push("Strong in Daśāṁśa — expresses powerfully through career and public action.");
-    else if(d10.score<=-2) N.push("Debilitated in Daśāṁśa — career expression of this planet needs conscious effort.");
-    if(d1.score>=1.5&&(bal.n==="Bāla"||bal.n==="Mṛta")) N.push(`Dignified yet ${bal.n} by degree — the strength is real but expresses late or needs a dasha/transit to ignite.`);
-    if(combust) N.push("Combust — scorched by the Sun; outward results are suppressed even when otherwise strong.");
-    const noteHtml=N.length?`<div class="ck-sig" style="margin-top:4px">${N.join(" ")}</div>`:"";
-    const digCell=`<div class="av-digrow"><span class="av-dlabel">D1</span>${chip(p.sign,d1)} <span class="av-dlabel">D9</span>${chip(d9s,d9)} <span class="av-dlabel">D10</span>${chip(d10s,d10)}${vargottama?` <span class="av-vgot">★ vargottama</span>`:""}</div><div class="ck-sig">${d1.full.split("·")[0].trim()} in Rāśi</div>`;
-    t+=`<tr><td class="ck-pl"><span class="row-emblem">${grahaEmblem(k,{size:18})}<span>${g.name}</span></span>${noteHtml}</td>`+
-       `<td>${digCell}</td>`+
-       `<td title="${bal.note}"><b>${bal.n}</b> <span class="av-t">${bal.t}</span></td>`+
-       `<td title="${jag.note}"><b>${jag.n}</b> <span class="av-t">${jag.t}</span></td>`+
-       `<td title="${dee.note}"><b>${dee.n}</b></td>`+
-       `<td><div class="vim-wrap"><b>${pct}%</b><div class="vim-bar"><i class="vim-${tier}" style="width:${pct}%"></i></div></div></td></tr>`;
+  const tabs=`<div class="bm-vtabs">`+BM_VARGAS.map(([n,lab,nm])=>`<button type="button" class="bm-vtab${n===N?' active':''}" onclick="avTurn(${n})" title="${nm}">${lab}</button>`).join('')+`</div>`;
+  let t;
+  if(N===1){
+    t=`<table class="ck-table av-table"><thead><tr><th>Planet</th>`+
+      `<th>Dignity · D-1 / D-9 / D-10</th><th>Bālādi <span class="vh-name">(degree)</span></th>`+
+      `<th>Jāgradādi <span class="vh-name">(wakefulness)</span></th><th>Dīptādi <span class="vh-name">(condition)</span></th>`+
+      `<th>Effective strength</th></tr></thead><tbody>`;
+    for(const k of PL){
+      const p=c.planets[k]; if(!p) continue;
+      const g=GBYK[k];
+      const {d1,d9,d10,d9s,d10s,vargottama,bal,jag,dee,combust,pct}=planetAvasthaStrength(k,c);
+      const tier=pct>=66?"hi":pct>=40?"mid":"lo";
+      const NT=[];
+      if(vargottama) NT.push("★ Vargottama — same sign in D-1 & D-9; strength strongly reinforced.");
+      if(d1.score>=1.5&&d9.score<=-1) NT.push("Strong in Rāśi but weak in Navāṁśa — the promise exceeds the delivery; results can feel hollow or fade.");
+      if(d1.score<=-1&&d9.score>=1.5) NT.push("Weak in Rāśi but strong in Navāṁśa — Navāṁśa redeems it; results improve with maturity and effort.");
+      if(d10.score>=1.5) NT.push("Strong in Daśāṁśa — expresses powerfully through career and public action.");
+      else if(d10.score<=-2) NT.push("Debilitated in Daśāṁśa — career expression of this planet needs conscious effort.");
+      if(d1.score>=1.5&&(bal.n==="Bāla"||bal.n==="Mṛta")) NT.push(`Dignified yet ${bal.n} by degree — the strength is real but expresses late or needs a dasha/transit to ignite.`);
+      if(combust) NT.push("Combust — scorched by the Sun; outward results are suppressed even when otherwise strong.");
+      const noteHtml=NT.length?`<div class="ck-sig" style="margin-top:4px">${NT.join(" ")}</div>`:"";
+      const digCell=`<div class="av-digrow"><span class="av-dlabel">D1</span>${chip(p.sign,d1)} <span class="av-dlabel">D9</span>${chip(d9s,d9)} <span class="av-dlabel">D10</span>${chip(d10s,d10)}${vargottama?` <span class="av-vgot">★ vargottama</span>`:""}</div><div class="ck-sig">${d1.full.split("·")[0].trim()} in Rāśi</div>`;
+      t+=`<tr><td class="ck-pl"><span class="row-emblem">${grahaEmblem(k,{size:18})}<span>${g.name}</span></span>${noteHtml}</td>`+
+         `<td>${digCell}</td>`+
+         `<td title="${bal.note}"><b>${bal.n}</b> <span class="av-t">${bal.t}</span></td>`+
+         `<td title="${jag.note}"><b>${jag.n}</b> <span class="av-t">${jag.t}</span></td>`+
+         `<td title="${dee.note}"><b>${dee.n}</b></td>`+
+         `<td><div class="vim-wrap"><b>${pct}%</b><div class="vim-bar"><i class="vim-${tier}" style="width:${pct}%"></i></div></div></td></tr>`;
+    }
+    t+=`</tbody></table>`;
+  } else {
+    const vn=(BM_VARGAS.find(v=>v[0]===N)||[N,'D-'+N,''])[2];
+    t=`<table class="ck-table av-table"><thead><tr><th>Planet</th>`+
+      `<th>Sign · Dignity (D-${N})</th><th>Bālādi <span class="vh-name">(degree, D-1)</span></th>`+
+      `<th>Jāgradādi <span class="vh-name">(by D-${N})</span></th><th>Dīptādi</th>`+
+      `<th>Effective strength (D-${N})</th></tr></thead><tbody>`;
+    for(const k of PL){
+      const p=c.planets[k]; if(!p) continue;
+      const g=GBYK[k];
+      const vs=vargaSign(p.sign,p.deg,N), dig=dignityOf(k,vs);
+      const bal=baladiAvastha(p.sign,p.deg), jag=jagradadiAvastha(dig.score), combust=isCombustDE(k,c), dee=deeptadiAvastha(dig,combust);
+      const same=vs===p.sign;
+      const eff=Math.max(0,Math.min(1,dF(dig.score)*(0.72+0.28*bal.pot)*(combust?0.8:1)));
+      const pct=Math.round(eff*100), tier=pct>=66?"hi":pct>=40?"mid":"lo";
+      const NT=[];
+      if(same) NT.push(`Same sign as the Rāśi (vargottama-like in ${vn}) — reinforced.`);
+      if(dig.score<=-2) NT.push(`Debilitated in ${vn} — weak for this domain.`);
+      else if(dig.score>=1.5) NT.push(`Dignified in ${vn} — strong for this domain.`);
+      if(bal.n==="Mṛta"||bal.n==="Bāla") NT.push(`${bal.n} by degree — under-delivers even where dignified.`);
+      if(combust) NT.push("Combust (from D-1) — outward results suppressed.");
+      const noteHtml=NT.length?`<div class="ck-sig" style="margin-top:4px">${NT.join(" ")}</div>`:"";
+      t+=`<tr><td class="ck-pl"><span class="row-emblem">${grahaEmblem(k,{size:18})}<span>${g.name}</span></span>${noteHtml}</td>`+
+         `<td><div class="av-digrow">${chip(vs,dig)} <span style="color:${dig.col}">${dig.full.split("·")[0].trim()}</span>${same?` <span class="av-vgot">★ as D-1</span>`:""}</div></td>`+
+         `<td title="${bal.note}"><b>${bal.n}</b> <span class="av-t">${bal.t}</span></td>`+
+         `<td title="${jag.note}"><b>${jag.n}</b> <span class="av-t">${jag.t}</span></td>`+
+         `<td title="${dee.note}"><b>${dee.n}</b></td>`+
+         `<td><div class="vim-wrap"><b>${pct}%</b><div class="vim-bar"><i class="vim-${tier}" style="width:${pct}%"></i></div></div></td></tr>`;
+    }
+    t+=`</tbody></table>`;
   }
-  wrap.querySelector("#avBody").innerHTML=t+`</tbody></table>`;
+  wrap.querySelector("#avBody").innerHTML=tabs+t;
   wrap.style.display="block";
 }
+function avTurn(N){ if(AV_CTX) renderAvasthas(AV_CTX.c,AV_CTX.La,N); }
 function renderJaimini(c,La){
   const wrap=document.getElementById("jaiminiPanel"); if(!wrap) return;
   const ck=charaKarakas(c);
