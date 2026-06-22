@@ -1193,8 +1193,9 @@ section{border-bottom-color:rgba(60,80,180,0.14)!important}
 .bm-lens{font-size:11.5px;font-weight:600;padding:4px 13px;border-radius:20px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);cursor:pointer;transition:.15s all}
 .bm-lens:hover{color:var(--ink);border-color:color-mix(in srgb,var(--accent,#6a86ff) 55%,var(--line))}
 .bm-lens.active{background:linear-gradient(135deg,#5a6fd0,#7a55c0);border-color:transparent;color:#fff;box-shadow:0 2px 10px rgba(90,110,210,.3)}
-.bm-arc{transition:opacity .25s;cursor:default}
-.bm-arc.on{stroke-width:2.6;filter:drop-shadow(0 0 4px currentColor)}
+.bm-arc{transition:opacity .25s}
+.bm-arc.on{filter:drop-shadow(0 0 5px rgba(255,255,255,.45))}
+.bm-arc.on path{stroke-width:2.9}
 .bm-chord{transition:opacity .25s}
 .bm-chord.on{stroke-width:2.2;opacity:1!important}
 .bm-asplegend{width:100%;display:flex;flex-wrap:wrap;gap:14px;justify-content:center;padding:10px 16px 0;font-size:11px;color:var(--muted)}
@@ -1948,50 +1949,69 @@ function bmLayer(name){
   if(!BM_CTX) return; BM_CTX.layer=name;
   renderBhavaMandala(BM_CTX.c,BM_CTX.baseLa,BM_CTX.N||1,false);
 }
+// Restore the wheel to its lens after a click highlight settles
+function bmRestore(ct){
+  if(!ct) return;
+  const layer=(BM_CTX&&BM_CTX.layer)||'lord';
+  const showLord=(layer==='lord'||layer==='all'), showGraha=(layer==='graha'||layer==='all');
+  const lordG=ct.querySelector('.bm-g-lord'), grahaG=ct.querySelector('.bm-g-graha');
+  if(lordG) lordG.style.display=showLord?'':'none';
+  if(grahaG) grahaG.style.display=showGraha?'':'none';
+  ct.querySelectorAll('.bm-lord-line').forEach(l=>{l.classList.remove('on');l.style.opacity='';l.style.stroke='';l.style.strokeWidth='';l.style.strokeDasharray='';});
+  ct.querySelectorAll('.bm-arc').forEach(a=>{a.classList.remove('on');a.style.opacity='';});
+  ct.querySelectorAll('.bm-chord').forEach(ch=>{ch.classList.remove('on');ch.style.opacity='';});
+  ct.querySelectorAll('.bm-pill').forEach(g=>{g.classList.remove('on');g.style.opacity='1';});
+  ct.querySelectorAll('.bm-hmark').forEach(m=>m.classList.remove('on'));
+}
+// Click a house → draw TWO linkages at once, whatever lens is active:
+//   • GOLD line   = where the house lord sits
+//   • GREEN/RED   = every planet aspecting this house (benefic / malefic)
 function bmHighlight(h){
   const ct=document.getElementById('bhavaMandala'); if(!ct) return;
-  const lines=ct.querySelectorAll('.bm-lord-line'), pills=ct.querySelectorAll('.bm-pill'), marks=ct.querySelectorAll('.bm-hmark');
-  const arcs=ct.querySelectorAll('.bm-arc'), chords=ct.querySelectorAll('.bm-chord');
-  lines.forEach(l=>{l.classList.remove('on');l.style.opacity='0.07';});
-  pills.forEach(g=>{g.classList.remove('on');g.style.opacity='0.4';});
-  marks.forEach(m=>m.classList.remove('on'));
-  const mark=ct.querySelector('.bm-hmark[data-h="'+h+'"]'), line=ct.querySelector('.bm-lord-line[data-h="'+h+'"]');
-  const si=mark?+mark.getAttribute('data-si'):null;
-  if(mark) mark.classList.add('on');
+  const lordG=ct.querySelector('.bm-g-lord'), grahaG=ct.querySelector('.bm-g-graha');
+  if(lordG) lordG.style.display=''; if(grahaG) grahaG.style.display='';   // force both linkage layers on
+  const lines=ct.querySelectorAll('.bm-lord-line'), pills=ct.querySelectorAll('.bm-pill'),
+        marks=ct.querySelectorAll('.bm-hmark'), arcs=ct.querySelectorAll('.bm-arc'), chords=ct.querySelectorAll('.bm-chord');
+  const mark=ct.querySelector('.bm-hmark[data-h="'+h+'"]'), si=mark?+mark.getAttribute('data-si'):null;
+  marks.forEach(m=>m.classList.remove('on')); if(mark) mark.classList.add('on');
+  // ── LORD linkage: recolour to gold, flowing ──
   let lk=null;
-  if(line){line.style.opacity='1';line.classList.add('on');lk=line.getAttribute('data-lk');}
-  if(lk){const pill=ct.querySelector('.bm-pill[data-pk="'+lk+'"]');if(pill){pill.style.opacity='1';pill.classList.add('on');}}
-  // Incoming graha dṛṣṭi (arrows landing on this house) + rāśi chords feeding this sign
-  let inB=0,inM=0;
-  arcs.forEach(a=>{const on=(+a.getAttribute('data-ts')===si);a.style.opacity=on?'1':'0.05';a.classList.toggle('on',on);if(on){a.getAttribute('data-ben')==='1'?inB++:inM++;}});
-  chords.forEach(ch=>{const on=(+ch.getAttribute('data-s1')===si||+ch.getAttribute('data-s2')===si);ch.style.opacity=on?'1':'0.06';ch.classList.toggle('on',on);});
-  const tr=ct.querySelector('#bmTrace');
-  if(tr){let msg=line?line.getAttribute('data-msg'):`House ${h}`;
-    if(inB||inM) msg+=` &nbsp;·&nbsp; receives <b style="color:#5fd0a0">${inB} benefic</b> / <b style="color:#ef6a5a">${inM} malefic</b> aspect${(inB+inM)!==1?'s':''}`;
-    tr.innerHTML=msg;tr.classList.add('show');}
-  clearTimeout(window._bmHLT);
-  window._bmHLT=setTimeout(()=>{                  // settle back so the whole chart stays readable
-    lines.forEach(l=>{l.classList.remove('on');l.style.opacity='0.33';});
-    pills.forEach(g=>{g.classList.remove('on');g.style.opacity='1';});
-    marks.forEach(m=>m.classList.remove('on'));
-    arcs.forEach(a=>{a.classList.remove('on');a.style.opacity='';});
-    chords.forEach(ch=>{ch.classList.remove('on');ch.style.opacity='';});
-  },3600);
+  lines.forEach(l=>{const on=(+l.getAttribute('data-h')===h);
+    if(on){l.style.opacity='1';l.style.stroke='#e7c14e';l.style.strokeWidth='2.4';l.style.strokeDasharray='5,4';l.classList.add('on');lk=l.getAttribute('data-lk');}
+    else{l.style.opacity='0.05';l.style.stroke='';l.style.strokeWidth='';l.style.strokeDasharray='';l.classList.remove('on');}
+  });
+  // ── ASPECT linkages: planets whose dṛṣṭi lands on this sign ──
+  const asp=[];
+  arcs.forEach(a=>{const on=(+a.getAttribute('data-ts')===si);
+    if(on){a.style.opacity='1';a.classList.add('on');asp.push({k:a.getAttribute('data-pk'),ben:a.getAttribute('data-ben')==='1'});}
+    else{a.style.opacity='0.04';a.classList.remove('on');}
+  });
+  chords.forEach(ch=>{ch.style.opacity='0.05';ch.classList.remove('on');});
+  const involved=new Set([lk]); asp.forEach(a=>involved.add(a.k));
+  pills.forEach(g=>{const pk=g.getAttribute('data-pk'),on=involved.has(pk);g.style.opacity=on?'1':'0.3';g.classList.toggle('on',pk===lk);});
+  // ── trace text ──
+  const NML={Su:'Sun',Mo:'Moon',Ma:'Mars',Me:'Mercury',Ju:'Jupiter',Ve:'Venus',Sa:'Saturn',Ra:'Rahu',Ke:'Ketu'};
+  const lordLine=ct.querySelector('.bm-lord-line[data-h="'+h+'"]');
+  let msg=lordLine?`<span style="color:#e7c14e;font-weight:700">―</span> ${lordLine.getAttribute('data-msg')}`:`House ${h}`;
+  if(asp.length){
+    const dd=[...new Map(asp.map(a=>[a.k,a])).values()];
+    msg+=` &nbsp;·&nbsp; <span style="color:var(--muted)">aspected by</span> ${dd.map(a=>`<b style="color:${a.ben?'#5fd0a0':'#ef6a5a'}">${NML[a.k]||a.k}</b>`).join(', ')}`;
+  } else { msg+=` &nbsp;·&nbsp; <span style="color:var(--muted)">no planetary aspects</span>`; }
+  const tr=ct.querySelector('#bmTrace'); if(tr){tr.innerHTML=msg;tr.classList.add('show');}
+  clearTimeout(window._bmHLT); window._bmHLT=setTimeout(()=>bmRestore(ct),4600);
 }
-// Bloom a single planet's drishti — clicking a planet pill answers "what does THIS planet aspect?"
+// Click a planet pill → bloom only that planet's dṛṣṭi (what THIS planet aspects)
 function bmFocusPlanet(k){
-  if(!BM_CTX) return;
-  if(BM_CTX.layer!=='graha'&&BM_CTX.layer!=='all'){BM_CTX.layer='graha';renderBhavaMandala(BM_CTX.c,BM_CTX.baseLa,BM_CTX.N||1,false);}
   const ct=document.getElementById('bhavaMandala'); if(!ct) return;
+  const grahaG=ct.querySelector('.bm-g-graha'); if(grahaG) grahaG.style.display='';
   const arcs=ct.querySelectorAll('.bm-arc'), pills=ct.querySelectorAll('.bm-pill');
   let ben=null;
-  arcs.forEach(a=>{const on=a.getAttribute('data-pk')===k;a.style.opacity=on?'1':'0.06';a.classList.toggle('on',on);if(on)ben=a.getAttribute('data-ben')==='1';});
-  pills.forEach(g=>g.style.opacity=g.getAttribute('data-pk')===k?'1':'0.4');
+  arcs.forEach(a=>{const on=a.getAttribute('data-pk')===k;a.style.opacity=on?'1':'0.05';a.classList.toggle('on',on);if(on)ben=a.getAttribute('data-ben')==='1';});
+  pills.forEach(g=>g.style.opacity=g.getAttribute('data-pk')===k?'1':'0.3');
   const tr=ct.querySelector('#bmTrace');
   if(tr){const nm=(typeof GBYK!=='undefined'&&GBYK[k])?GBYK[k].name:k;
-    tr.innerHTML=`<b>${nm}</b> casts a <b style="color:${ben?'#5fd0a0':'#ef6a5a'}">${ben?'benefic':'malefic'}</b> dṛṣṭi on the highlighted houses — solid = 7th (full) aspect, dashed = special aspect.`;tr.classList.add('show');}
-  clearTimeout(window._bmHLT);
-  window._bmHLT=setTimeout(()=>{arcs.forEach(a=>{a.classList.remove('on');a.style.opacity='';});pills.forEach(g=>g.style.opacity='1');},3600);
+    tr.innerHTML=`<b>${nm}</b> casts a <b style="color:${ben?'#5fd0a0':'#ef6a5a'}">${ben?'benefic':'malefic'}</b> dṛṣṭi on the highlighted houses — solid = 7th (full) aspect, dashed = special (Ma 4/8 · Ju 5/9 · Sa 3/10).`;tr.classList.add('show');}
+  clearTimeout(window._bmHLT); window._bmHLT=setTimeout(()=>bmRestore(ct),4600);
 }
 function renderBhavaMandala(c,La,N,motion){
   N=N||1;
@@ -2069,6 +2089,15 @@ function renderBhavaMandala(c,La,N,motion){
     sv+=`<path d="${sec(244,231,sa(i)+1.2,sa(i)+28.8)}" fill="rgba(${col},${op})" stroke="none"/>`;
   }
 
+  // ---- Occupant tint: each house wedge glows in the colour of the planet(s) sitting in it
+  //      (Sun = gold · Moon = white · Mars = red · Mercury = teal · Jupiter = amber · Venus = pink · Saturn = violet · nodes) ----
+  Object.keys(occ).forEach(siKey=>{
+    const si=+siKey, a1=sa(si)+1, a2=sa(si)+29;
+    occ[si].forEach((k,idx)=>{
+      sv+=`<path d="${sec(229,60,a1,a2)}" fill="${PV[k].col}" fill-opacity="${Math.max(0.18-idx*0.05,0.07)}" stroke="none"/>`;
+    });
+  });
+
   // Pre-compute each planet's pill position (shared by lordship lines, aspect arcs + planet pills)
   const planetPos={};
   Object.keys(occ).forEach(siKey=>{
@@ -2104,7 +2133,7 @@ function renderBhavaMandala(c,La,N,motion){
     const ben=isBeneficPlanet(k,c), col=ben?'#5fd0a0':'#ef6a5a';
     (ASP_OFF[k]||[[6,0]]).forEach(([off,special])=>{
       const ts=(p.sign+off)%12, tgt=pol(RHNUM,sa(ts)+15), arc=qpath(planetPos[k],tgt,0.34);
-      grahaG+=`<path class="bm-arc" data-pk="${k}" data-ts="${ts}" data-ben="${ben?1:0}" d="${arc.d}" fill="none" stroke="${col}" stroke-width="1.5" opacity="${opGraha}"${special?' stroke-dasharray="4,4"':''}/>`+arrow(tgt,arc.cx,arc.cy,col);
+      grahaG+=`<g class="bm-arc" data-pk="${k}" data-ts="${ts}" data-ben="${ben?1:0}" opacity="${opGraha}"><path d="${arc.d}" fill="none" stroke="${col}" stroke-width="1.5"${special?' stroke-dasharray="4,4"':''}/>${arrow(tgt,arc.cx,arc.cy,col)}</g>`;
     });
   });
   grahaG+=`</g>`;
@@ -2135,16 +2164,19 @@ function renderBhavaMandala(c,La,N,motion){
       `</g>`;
   }
 
-  // ---- Planets: clear, high-contrast pills within their sign sector ----
+  // ---- Planets: named pills within their sign sector (name, not glyph) ----
+  const SHORT={Su:'Sun',Mo:'Moon',Ma:'Mars',Me:'Merc',Ju:'Jup',Ve:'Ven',Sa:'Sat',Ra:'Rahu',Ke:'Ketu'};
   Object.keys(occ).forEach(siKey=>{
     const si=+siKey, arr=occ[si];
     arr.forEach(k=>{
-      const p=c.planets[k],v=PV[k],pos=planetPos[k],w=showDeg?56:36,hh=24;
+      const p=c.planets[k],v=PV[k],pos=planetPos[k],hh=22, nm=SHORT[k]||k;
+      const degStr=showDeg?`${p.deg.toFixed(0)}°${p.retro?'ʳ':''}`:(p.retro?'ʳ':'');
+      const label=nm+(degStr?' '+degStr:''), w=Math.max(42,label.length*6.3+16);
       const tip=showDeg?`${GBYK[k].name} · ${SN[si]} ${p.deg.toFixed(1)}°${p.retro?' (retrograde)':''}`:`${GBYK[k].name} · ${SN[si]} (D-${N})${p.retro?' · retrograde':''}`;
-      const deg=showDeg?`<tspan font-size="10.5" dx="3" fill="rgba(214,226,252,0.95)">${p.deg.toFixed(0)}°${p.retro?'ʳ':''}</tspan>`:(p.retro?`<tspan font-size="10" dx="2" fill="rgba(214,226,252,0.85)">ʳ</tspan>`:'');
+      const degTsp=degStr?`<tspan font-size="9.5" dx="2.5" fill="rgba(206,220,252,0.9)">${degStr}</tspan>`:'';
       sv+=`<g class="bm-pill" data-pk="${k}" style="cursor:pointer" onclick="bmFocusPlanet('${k}')">`+
-        `<rect x="${pos.x-w/2}" y="${pos.y-hh/2}" width="${w}" height="${hh}" rx="12" fill="rgba(9,12,26,0.96)" stroke="${v.col}" stroke-width="1.8"><title>${tip} — click to see what it aspects</title></rect>`+
-        `<text x="${pos.x}" y="${pos.y}" text-anchor="middle" dominant-baseline="central" style="pointer-events:none"><tspan font-size="15" font-weight="bold" fill="${v.col}">${v.gl}</tspan>${deg}</text>`+
+        `<rect x="${pos.x-w/2}" y="${pos.y-hh/2}" width="${w}" height="${hh}" rx="11" fill="rgba(9,12,26,0.97)" stroke="${v.col}" stroke-width="1.6"><title>${tip} — click to see what it aspects</title></rect>`+
+        `<text x="${pos.x}" y="${pos.y}" text-anchor="middle" dominant-baseline="central" style="pointer-events:none"><tspan font-size="11" font-weight="700" fill="${v.col}">${nm}</tspan>${degTsp}</text>`+
         `</g>`;
     });
   });
