@@ -1188,6 +1188,19 @@ section{border-bottom-color:rgba(60,80,180,0.14)!important}
 .bm-vtab{font-size:12px;font-weight:600;padding:5px 12px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);cursor:pointer;transition:.15s all}
 .bm-vtab:hover{color:var(--ink);border-color:color-mix(in srgb,var(--gold) 50%,var(--line))}
 .bm-vtab.active{background:linear-gradient(135deg,var(--gold),var(--terracotta));border-color:transparent;color:#2a1a0c}
+/* Relationship lenses — switch what the wheel reveals */
+.bm-lenses{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;padding:8px 16px 0}
+.bm-lens{font-size:11.5px;font-weight:600;padding:4px 13px;border-radius:20px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);cursor:pointer;transition:.15s all}
+.bm-lens:hover{color:var(--ink);border-color:color-mix(in srgb,var(--accent,#6a86ff) 55%,var(--line))}
+.bm-lens.active{background:linear-gradient(135deg,#5a6fd0,#7a55c0);border-color:transparent;color:#fff;box-shadow:0 2px 10px rgba(90,110,210,.3)}
+.bm-arc{transition:opacity .25s;cursor:default}
+.bm-arc.on{stroke-width:2.6;filter:drop-shadow(0 0 4px currentColor)}
+.bm-chord{transition:opacity .25s}
+.bm-chord.on{stroke-width:2.2;opacity:1!important}
+.bm-asplegend{width:100%;display:flex;flex-wrap:wrap;gap:14px;justify-content:center;padding:10px 16px 0;font-size:11px;color:var(--muted)}
+.bm-asplegend span{display:inline-flex;align-items:center;gap:5px}
+.bm-asplegend i{width:18px;height:0;border-top-width:2px;border-top-style:solid;display:inline-block}
+.bm-asplegend i.dot{width:11px;height:11px;border:0;border-radius:3px}
 /* interactive lordship tracing */
 .bm-hmark{cursor:pointer;transition:filter .15s}
 .bm-hmark:hover{filter:brightness(1.32)}
@@ -1923,30 +1936,69 @@ function bmTurn(N){
   if(svg&&!reduce){svg.style.transition='transform .26s cubic-bezier(.4,0,.2,1),opacity .26s';svg.style.transformOrigin='center';svg.style.transform='rotate(-14deg) scale(.9)';svg.style.opacity='0';}
   setTimeout(()=>renderBhavaMandala(BM_CTX.c,BM_CTX.baseLa,N,!reduce), reduce?0:225);
 }
+// Jaimini rāśi dṛṣṭi — which signs a sign aspects (movable↔fixed except adjacent; dual↔dual)
+function bmRashiDrishti(s){
+  const mov=[0,3,6,9],fix=[1,4,7,10],dual=[2,5,8,11];
+  if(mov.includes(s)) return fix.filter(f=>f!==(s+1)%12);
+  if(fix.includes(s)) return mov.filter(m=>m!==(s+11)%12);
+  return dual.filter(d=>d!==s);
+}
+// Switch the relationship lens (lordship · graha dṛṣṭi · rāśi dṛṣṭi · all) without losing the varga
+function bmLayer(name){
+  if(!BM_CTX) return; BM_CTX.layer=name;
+  renderBhavaMandala(BM_CTX.c,BM_CTX.baseLa,BM_CTX.N||1,false);
+}
 function bmHighlight(h){
   const ct=document.getElementById('bhavaMandala'); if(!ct) return;
   const lines=ct.querySelectorAll('.bm-lord-line'), pills=ct.querySelectorAll('.bm-pill'), marks=ct.querySelectorAll('.bm-hmark');
+  const arcs=ct.querySelectorAll('.bm-arc'), chords=ct.querySelectorAll('.bm-chord');
   lines.forEach(l=>{l.classList.remove('on');l.style.opacity='0.07';});
   pills.forEach(g=>{g.classList.remove('on');g.style.opacity='0.4';});
   marks.forEach(m=>m.classList.remove('on'));
-  const line=ct.querySelector('.bm-lord-line[data-h="'+h+'"]'), mark=ct.querySelector('.bm-hmark[data-h="'+h+'"]');
+  const mark=ct.querySelector('.bm-hmark[data-h="'+h+'"]'), line=ct.querySelector('.bm-lord-line[data-h="'+h+'"]');
+  const si=mark?+mark.getAttribute('data-si'):null;
   if(mark) mark.classList.add('on');
   let lk=null;
   if(line){line.style.opacity='1';line.classList.add('on');lk=line.getAttribute('data-lk');}
   if(lk){const pill=ct.querySelector('.bm-pill[data-pk="'+lk+'"]');if(pill){pill.style.opacity='1';pill.classList.add('on');}}
-  const tr=ct.querySelector('#bmTrace'); if(tr&&line){tr.innerHTML=line.getAttribute('data-msg');tr.classList.add('show');}
+  // Incoming graha dṛṣṭi (arrows landing on this house) + rāśi chords feeding this sign
+  let inB=0,inM=0;
+  arcs.forEach(a=>{const on=(+a.getAttribute('data-ts')===si);a.style.opacity=on?'1':'0.05';a.classList.toggle('on',on);if(on){a.getAttribute('data-ben')==='1'?inB++:inM++;}});
+  chords.forEach(ch=>{const on=(+ch.getAttribute('data-s1')===si||+ch.getAttribute('data-s2')===si);ch.style.opacity=on?'1':'0.06';ch.classList.toggle('on',on);});
+  const tr=ct.querySelector('#bmTrace');
+  if(tr){let msg=line?line.getAttribute('data-msg'):`House ${h}`;
+    if(inB||inM) msg+=` &nbsp;·&nbsp; receives <b style="color:#5fd0a0">${inB} benefic</b> / <b style="color:#ef6a5a">${inM} malefic</b> aspect${(inB+inM)!==1?'s':''}`;
+    tr.innerHTML=msg;tr.classList.add('show');}
   clearTimeout(window._bmHLT);
   window._bmHLT=setTimeout(()=>{                  // settle back so the whole chart stays readable
     lines.forEach(l=>{l.classList.remove('on');l.style.opacity='0.33';});
     pills.forEach(g=>{g.classList.remove('on');g.style.opacity='1';});
     marks.forEach(m=>m.classList.remove('on'));
-  },3200);
+    arcs.forEach(a=>{a.classList.remove('on');a.style.opacity='';});
+    chords.forEach(ch=>{ch.classList.remove('on');ch.style.opacity='';});
+  },3600);
+}
+// Bloom a single planet's drishti — clicking a planet pill answers "what does THIS planet aspect?"
+function bmFocusPlanet(k){
+  if(!BM_CTX) return;
+  if(BM_CTX.layer!=='graha'&&BM_CTX.layer!=='all'){BM_CTX.layer='graha';renderBhavaMandala(BM_CTX.c,BM_CTX.baseLa,BM_CTX.N||1,false);}
+  const ct=document.getElementById('bhavaMandala'); if(!ct) return;
+  const arcs=ct.querySelectorAll('.bm-arc'), pills=ct.querySelectorAll('.bm-pill');
+  let ben=null;
+  arcs.forEach(a=>{const on=a.getAttribute('data-pk')===k;a.style.opacity=on?'1':'0.06';a.classList.toggle('on',on);if(on)ben=a.getAttribute('data-ben')==='1';});
+  pills.forEach(g=>g.style.opacity=g.getAttribute('data-pk')===k?'1':'0.4');
+  const tr=ct.querySelector('#bmTrace');
+  if(tr){const nm=(typeof GBYK!=='undefined'&&GBYK[k])?GBYK[k].name:k;
+    tr.innerHTML=`<b>${nm}</b> casts a <b style="color:${ben?'#5fd0a0':'#ef6a5a'}">${ben?'benefic':'malefic'}</b> dṛṣṭi on the highlighted houses — solid = 7th (full) aspect, dashed = special aspect.`;tr.classList.add('show');}
+  clearTimeout(window._bmHLT);
+  window._bmHLT=setTimeout(()=>{arcs.forEach(a=>{a.classList.remove('on');a.style.opacity='';});pills.forEach(g=>g.style.opacity='1');},3600);
 }
 function renderBhavaMandala(c,La,N,motion){
   N=N||1;
   const ct=document.getElementById('bhavaMandala');
   if(!ct)return;
-  BM_CTX={c:c,baseLa:La};
+  const layer=(BM_CTX&&BM_CTX.layer)||'lord';
+  BM_CTX={c:c,baseLa:La,N:N,layer:layer};
   if(N>1){
     const wp={};
     for(const _k of ['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke']){const _p=c.planets[_k];if(_p)wp[_k]={sign:vargaSign(_p.sign,_p.deg,N),deg:_p.deg,retro:_p.retro};}
@@ -2007,7 +2059,17 @@ function renderBhavaMandala(c,La,N,motion){
   // sector dividers (sign edge → centre)
   for(let i=0;i<12;i++){const a=sa(i),o=pol(ROo,a),n=pol(RC,a);sv+=`<line x1="${o.x}" y1="${o.y}" x2="${n.x}" y2="${n.y}" stroke="rgba(120,150,225,0.15)" stroke-width="1"/>`;}
 
-  // Pre-compute each planet's pill position (shared by lordship lines + planet pills)
+  // ---- Ambient aspect AURA (always on): net graha dṛṣṭi each house-sign receives.
+  //      Green glow = net benefic aspects · red glow = net malefic — readable at a glance, no lines. ----
+  for(let i=0;i<12;i++){
+    let _asp=null; try{_asp=dpAspectsOn(c,La,i);}catch(e){}
+    const net=_asp?(_asp.ben.length-_asp.mal.length):0;
+    if(!net) continue;
+    const col=net>0?'90,210,150':'235,95,80', op=Math.min(0.08+Math.abs(net)*0.07,0.30);
+    sv+=`<path d="${sec(244,231,sa(i)+1.2,sa(i)+28.8)}" fill="rgba(${col},${op})" stroke="none"/>`;
+  }
+
+  // Pre-compute each planet's pill position (shared by lordship lines, aspect arcs + planet pills)
   const planetPos={};
   Object.keys(occ).forEach(siKey=>{
     const si=+siKey, arr=occ[si], a=sa(si)+15;
@@ -2015,14 +2077,49 @@ function renderBhavaMandala(c,La,N,motion){
     arr.forEach((k,idx)=>{ planetPos[k]=pol(RP-idx*step,a); });
   });
 
-  // ---- Lordship lines: from each house to the planet that rules it (clickable) ----
+  // arc geometry: quadratic curve bent toward centre + a matching arrowhead at the target
+  const qpath=(p1,p2,bend)=>{const mx=(p1.x+p2.x)/2,my=(p1.y+p2.y)/2,cx=mx+(CX-mx)*bend,cy=my+(CY-my)*bend;return{d:`M${p1.x},${p1.y} Q${cx},${cy} ${p2.x},${p2.y}`,cx,cy};};
+  const arrow=(p2,fx,fy,col)=>{const ang=Math.atan2(p2.y-fy,p2.x-fx),L=7.5,w=3.6;const x1=p2.x-L*Math.cos(ang)+w*Math.sin(ang),y1=p2.y-L*Math.sin(ang)-w*Math.cos(ang),x2=p2.x-L*Math.cos(ang)-w*Math.sin(ang),y2=p2.y-L*Math.sin(ang)+w*Math.cos(ang);return`<path d="M${p2.x},${p2.y} L${x1},${y1} L${x2},${y2} Z" fill="${col}" opacity="0.92"/>`;};
+
+  // which layers are visible for the active lens, and at what opacity
+  const showLord=(layer==='lord'||layer==='all'), showGraha=(layer==='graha'||layer==='all'), showRashi=(layer==='rashi'||layer==='all');
+  const opLord=layer==='all'?0.15:0.33, opGraha=layer==='all'?0.5:0.9, opRashi=layer==='all'?0.32:0.6;
+
+  // ---- LAYER · Rāśi Dṛṣṭi (Jaimini sign chords across the band) ----
+  const RSB=(ROo+ROi)/2;
+  let rashiG=`<g class="bm-g-rashi" style="display:${showRashi?'':'none'}">`;
+  for(let i=0;i<12;i++){
+    bmRashiDrishti(i).forEach(ts=>{ if(ts<=i) return;
+      const a=pol(RSB,sa(i)+15), b=pol(RSB,sa(ts)+15), arc=qpath(a,b,0.62);
+      rashiG+=`<path class="bm-chord" data-s1="${i}" data-s2="${ts}" d="${arc.d}" fill="none" stroke="rgba(150,130,235,0.9)" stroke-width="1" opacity="${opRashi}"/>`;
+    });
+  }
+  rashiG+=`</g>`;
+
+  // ---- LAYER · Graha Dṛṣṭi (planet aspect arrows, benefic green / malefic red) ----
+  const ASP_OFF={Ma:[[6,0],[3,1],[7,1]],Ju:[[6,0],[4,1],[8,1]],Sa:[[6,0],[2,1],[9,1]]};
+  let grahaG=`<g class="bm-g-graha" style="display:${showGraha?'':'none'}">`;
+  PO.forEach(k=>{
+    const p=c.planets[k]; if(!p||!planetPos[k]) return;
+    const ben=isBeneficPlanet(k,c), col=ben?'#5fd0a0':'#ef6a5a';
+    (ASP_OFF[k]||[[6,0]]).forEach(([off,special])=>{
+      const ts=(p.sign+off)%12, tgt=pol(RHNUM,sa(ts)+15), arc=qpath(planetPos[k],tgt,0.34);
+      grahaG+=`<path class="bm-arc" data-pk="${k}" data-ts="${ts}" data-ben="${ben?1:0}" d="${arc.d}" fill="none" stroke="${col}" stroke-width="1.5" opacity="${opGraha}"${special?' stroke-dasharray="4,4"':''}/>`+arrow(tgt,arc.cx,arc.cy,col);
+    });
+  });
+  grahaG+=`</g>`;
+
+  // ---- LAYER · Lordship lines: from each house to the planet that rules it (clickable) ----
+  let lordG=`<g class="bm-g-lord" style="display:${showLord?'':'none'}">`;
   for(let h=1;h<=12;h++){
     const si=(La+h-1)%12, lord=SIGN_LORD[si], lpos=planetPos[lord];
     if(!lpos) continue;
     const hp=pol(RHNUM,sa(si)+15), v=PV[lord], lp=c.planets[lord], lordH=lp?houseFromSigns(La,lp.sign):null;
     const msg=`House ${h} lord <b style='color:${v.col}'>${v.gl} ${GBYK[lord].name}</b> ${lordH?(lordH===h?'sits in its <b>own</b> house':`sits in <b>House ${lordH}</b> · ${SN[(La+lordH-1)%12]}`):''}`.replace(/"/g,'&quot;');
-    sv+=`<line class="bm-lord-line" data-h="${h}" data-lk="${lord}" data-msg="${msg}" x1="${hp.x}" y1="${hp.y}" x2="${lpos.x}" y2="${lpos.y}" stroke="${v.col}" stroke-width="1.1" stroke-dasharray="2,4" opacity="0.33"/>`;
+    lordG+=`<line class="bm-lord-line" data-h="${h}" data-lk="${lord}" data-msg="${msg}" x1="${hp.x}" y1="${hp.y}" x2="${lpos.x}" y2="${lpos.y}" stroke="${v.col}" stroke-width="1.1" stroke-dasharray="2,4" opacity="${opLord}"/>`;
   }
+  lordG+=`</g>`;
+  sv+=rashiG+grahaG+lordG;
 
   // ---- House markers: house number + its ruling lord's glyph ----
   const HT=h=>[1,4,7,10].includes(h)?'ken':[5,9].includes(h)?'trik':[6,8,12].includes(h)?'dust':'';
@@ -2031,7 +2128,7 @@ function renderBhavaMandala(c,La,N,motion){
     const si=(La+h-1)%12,a=sa(si)+15,p=pol(RHNUM,a),ht=HT(h),isH1=h===1;
     const lord=SIGN_LORD[si],lv=PV[lord],lp=c.planets[lord],lordH=lp?houseFromSigns(La,lp.sign):null;
     const tip=`House ${h} · ${SN[si]} · lord ${GBYK[lord].name}${lordH?(lordH===h?' in own house':` in H${lordH}`):''}${isH1?' · Lagna':ht==='ken'?' · Kendra':ht==='trik'?' · Trikona':ht==='dust'?' · Dusthana':''}`;
-    sv+=`<g class="bm-hmark" data-h="${h}" onclick="bmHighlight(${h})">`+
+    sv+=`<g class="bm-hmark" data-h="${h}" data-si="${si}" onclick="bmHighlight(${h})">`+
       `<rect x="${p.x-15}" y="${p.y-17}" width="30" height="34" rx="9" fill="rgba(8,12,28,0.84)" stroke="${isH1?'#e7c14e':'rgba(95,120,205,0.42)'}" stroke-width="${isH1?1.7:1}"><title>${tip} — click to trace its lord</title></rect>`+
       `<text x="${p.x}" y="${p.y-6}" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="${isH1?'#e7c14e':HCOL[ht]}" style="pointer-events:none">${h}</text>`+
       `<text x="${p.x}" y="${p.y+8}" text-anchor="middle" dominant-baseline="central" font-size="11.5" fill="${lv.col}" style="pointer-events:none">${lv.gl}</text>`+
@@ -2045,8 +2142,8 @@ function renderBhavaMandala(c,La,N,motion){
       const p=c.planets[k],v=PV[k],pos=planetPos[k],w=showDeg?56:36,hh=24;
       const tip=showDeg?`${GBYK[k].name} · ${SN[si]} ${p.deg.toFixed(1)}°${p.retro?' (retrograde)':''}`:`${GBYK[k].name} · ${SN[si]} (D-${N})${p.retro?' · retrograde':''}`;
       const deg=showDeg?`<tspan font-size="10.5" dx="3" fill="rgba(214,226,252,0.95)">${p.deg.toFixed(0)}°${p.retro?'ʳ':''}</tspan>`:(p.retro?`<tspan font-size="10" dx="2" fill="rgba(214,226,252,0.85)">ʳ</tspan>`:'');
-      sv+=`<g class="bm-pill" data-pk="${k}">`+
-        `<rect x="${pos.x-w/2}" y="${pos.y-hh/2}" width="${w}" height="${hh}" rx="12" fill="rgba(9,12,26,0.96)" stroke="${v.col}" stroke-width="1.8"><title>${tip}</title></rect>`+
+      sv+=`<g class="bm-pill" data-pk="${k}" style="cursor:pointer" onclick="bmFocusPlanet('${k}')">`+
+        `<rect x="${pos.x-w/2}" y="${pos.y-hh/2}" width="${w}" height="${hh}" rx="12" fill="rgba(9,12,26,0.96)" stroke="${v.col}" stroke-width="1.8"><title>${tip} — click to see what it aspects</title></rect>`+
         `<text x="${pos.x}" y="${pos.y}" text-anchor="middle" dominant-baseline="central" style="pointer-events:none"><tspan font-size="15" font-weight="bold" fill="${v.col}">${v.gl}</tspan>${deg}</text>`+
         `</g>`;
     });
@@ -2098,9 +2195,19 @@ function renderBhavaMandala(c,La,N,motion){
   }
 
   const tabs=`<div class="bm-vtabs">`+BM_VARGAS.map(([n,lab,nm])=>`<button type="button" class="bm-vtab${n===N?' active':''}" onclick="bmTurn(${n})" title="${nm}">${lab}</button>`).join('')+`</div>`;
-  const caption=`<div class="bm-caption">Showing <b>D-${N} · ${vName}</b>${N===1?' — the birth chart':' — divisional chart'}. Outer ring = signs · each marker = <b>house number</b> + its <b>ruling lord's glyph</b> · pills = planets in that sign${showDeg?' with degree':''} · the faint <b>lord-coloured line</b> links each house to the planet that rules it. <span style="color:#9db4ff">Blue</span> kendra · <span style="color:#7fe0a0">green</span> trikona · <span style="color:#f0a890">amber</span> dusthana · gold = Lagna.</div>`;
+  const LENSES=[['lord','Lordship','Which planet rules each house'],['graha','Graha Dṛṣṭi','Which planets aspect each house (benefic / malefic)'],['rashi','Rāśi Dṛṣṭi','Jaimini sign-to-sign aspects'],['all','All layers','Lordship + planet aspects + sign aspects together']];
+  const lensRow=`<div class="bm-lenses">`+LENSES.map(([id,lab,tip])=>`<button type="button" class="bm-lens${id===layer?' active':''}" onclick="bmLayer('${id}')" title="${tip}">${lab}</button>`).join('')+`</div>`;
+  const LENS_DESC={
+    lord:`the faint <b>lord-coloured line</b> links each house to the planet that rules it (click a house to trace it)`,
+    graha:`<b style="color:#5fd0a0">green arrows</b> = benefic graha dṛṣṭi · <b style="color:#ef6a5a">red arrows</b> = malefic · <b>dashed</b> = special aspect (Ma 4/8 · Ju 5/9 · Sa 3/10). Click a planet to isolate its aspects`,
+    rashi:`<b style="color:#9682eb">violet chords</b> = Jaimini rāśi dṛṣṭi (movable↔fixed, dual↔dual). Click a house to see which signs aspect it`,
+    all:`all three layers at once — lordship lines, benefic/malefic aspect arrows, and rāśi-dṛṣṭi chords`
+  };
+  const aspLegend=`<div class="bm-asplegend"><span><i class="dot" style="background:rgba(90,210,150,.5)"></i>house aura: net benefic aspect</span><span><i class="dot" style="background:rgba(235,95,80,.5)"></i>net malefic aspect</span><span><i style="border-top-color:#5fd0a0"></i>benefic dṛṣṭi</span><span><i style="border-top-color:#ef6a5a"></i>malefic dṛṣṭi</span><span><i style="border-top-color:#9682eb"></i>rāśi dṛṣṭi</span></div>`;
+  const caption=`<div class="bm-caption">Showing <b>D-${N} · ${vName}</b>${N===1?' — the birth chart':' — divisional chart'} · lens: <b>${(LENSES.find(l=>l[0]===layer)||[,'Lordship'])[1]}</b>. ${LENS_DESC[layer]}. The coloured <b>aura</b> behind each sign always shows the net aspect load. <span style="color:#9db4ff">Blue</span> kendra · <span style="color:#7fe0a0">green</span> trikona · <span style="color:#f0a890">amber</span> dusthana · gold = Lagna.</div>`;
+  const traceDefault={lord:'▶ Click any house to trace where its lord sits',graha:'▶ Click a planet to see what it aspects, or a house to see what aspects it',rashi:'▶ Click a house to see which signs cast rāśi dṛṣṭi on it',all:'▶ Click a house, or a planet, to isolate its relationships'}[layer];
 
-  ct.innerHTML=`${tabs}<div class="bm-container">${sv}</div><div class="bm-trace" id="bmTrace">▶ Click any house (on the wheel or in the table) to trace where its lord sits</div>${caption}<div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div>`;
+  ct.innerHTML=`${tabs}${lensRow}<div class="bm-container">${sv}</div>${aspLegend}<div class="bm-trace" id="bmTrace">${traceDefault}</div>${caption}<div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div>`;
   if(motion){const ns=ct.querySelector('.bm-svg');if(ns){ns.style.transformOrigin='center';ns.style.transform='rotate(14deg) scale(.9)';ns.style.opacity='0';requestAnimationFrame(()=>{ns.style.transition='transform .46s cubic-bezier(.34,1.12,.4,1),opacity .4s';ns.style.transform='none';ns.style.opacity='1';});}}
 }
 
