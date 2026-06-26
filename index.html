@@ -4761,12 +4761,41 @@ function dpTopicAnalysis(c,La,topicKey,mahaK,antarK){
     else if(asp.mal.some(a=>a.k===k)) con.push('aspects (malefic)');
     return {k,con};
   }).filter(x=>x.con.length);
+  // Varga LAGNA lord = the delivery ceiling for this whole matter (e.g. weak D-10 lagna
+  // lord caps every career result no matter how strong the 10th-lord looks).
+  const vLaLord=SIGN_LORD[vLa], vLaLp=c.planets[vLaLord];
+  const vLaLordSign=vLaLp?vargaSign(vLaLp.sign,vLaLp.deg,N):null;
+  const vLaDig=vLaLordSign!=null?dignityOf(vLaLord,vLaLordSign):null;
+  // Promise(D-1) vs delivery(varga) reconciliation on the topic-house lord.
+  let undermined=false, recovered=false;
+  if(d1Dig&&vDig){
+    if(d1Dig.score>=1&&vDig.score<=-1) undermined=true;       // strong promise, weak delivery
+    else if(d1Dig.score<=-1&&vDig.score>=1) recovered=true;   // Neecha-bhanga-like rescue
+  }
+  // Vargottama (topic lord same sign in D-1 & D-9) = reinforced promise.
+  let vgottama=false;
+  if(lp&&lp.sign===navamsaSign(lp.sign,lp.deg)) vgottama=true;
+  // Running dasha lord(s) strong/weak in THIS area-varga = the real timing lever:
+  // a lord dignified in D-10 delivers career in its period even if its D-1 is ordinary.
+  const dashaVarga=[];
+  for(const k of [...new Set([mahaK,antarK])]){
+    const p=c.planets[k]; if(!p||k==='Ra'||k==='Ke') continue;
+    const kd=dignityOf(k,vargaSign(p.sign,p.deg,N));
+    if(kd.score>=1||kd.score<=-1) dashaVarga.push({k,dig:kd});
+  }
   let score=0;
-  if(d1Dig) score+=d1Dig.score>=1.5?0.6:d1Dig.score>=1?0.35:d1Dig.score<=-2?-0.6:d1Dig.score<=-1?-0.3:0;
-  if(vDig)  score+=vDig.score>=1.5?0.4:vDig.score>=1?0.25:vDig.score<=-2?-0.4:vDig.score<=-1?-0.2:0;
-  score+=asp.score*0.5;
-  score+=lordsConnect.length?0.4:-0.2;
-  return {t,h,hs,lord,lp,d1Dig,lordH,occ,asp,N,vLa,vhs,vlord,vlordSign,vDig,lordsConnect,score:Math.max(-1.5,Math.min(1.5,score))};
+  if(d1Dig) score+=d1Dig.score>=1.5?0.5:d1Dig.score>=1?0.3:d1Dig.score<=-2?-0.5:d1Dig.score<=-1?-0.25:0;
+  if(vDig)  score+=vDig.score>=1.5?0.35:vDig.score>=1?0.2:vDig.score<=-2?-0.35:vDig.score<=-1?-0.18:0;
+  if(undermined) score-=0.4;          // do NOT let a strong D-1 mask a weak varga
+  else if(recovered) score+=0.3;
+  if(vLaDig) score+=vLaDig.score>=1.5?0.25:vLaDig.score>=1?0.12:vLaDig.score<=-2?-0.25:vLaDig.score<=-1?-0.12:0;
+  if(vgottama) score+=0.15;
+  score+=asp.score*0.45;
+  for(const d of dashaVarga) score+=d.dig.score>=1?0.2:d.dig.score<=-2?-0.2:-0.1;
+  score+=lordsConnect.length?0.35:-0.15;
+  return {t,h,hs,lord,lp,d1Dig,lordH,occ,asp,N,vLa,vhs,vlord,vlordSign,vDig,
+    vLaLord,vLaDig,undermined,recovered,vgottama,dashaVarga,lordsConnect,
+    score:Math.max(-1.6,Math.min(1.6,score))};
 }
 
 // Verdict tier from total score
@@ -4980,12 +5009,17 @@ function dpAnalyze(){
     const ta=topicA, dg=d=>d?d.full.split('·')[0].trim():'—';
     const conn=ta.lordsConnect.length?ta.lordsConnect.map(x=>`${NM(x.k)} ${x.con.join(' & ')}`).join('; '):'neither dasha lord directly activates this house';
     const aspTxt=(ta.asp.ben.length||ta.asp.mal.length)?`${ta.asp.ben.length?'<span class="dp-asp-ben">benefic: '+ta.asp.ben.map(x=>NM(x.k)).join(', ')+'</span>':''}${ta.asp.ben.length&&ta.asp.mal.length?' · ':''}${ta.asp.mal.length?'<span class="dp-asp-mal">malefic: '+ta.asp.mal.map(x=>NM(x.k)).join(', ')+'</span>':''}`:'none';
-    const both=ta.d1Dig&&ta.vDig?(ta.d1Dig.score+ta.vDig.score>=2?'both charts support this matter':ta.d1Dig.score+ta.vDig.score<=-2?'both charts weaken this matter':'mixed — one supports, one tempers'):'—';
+    const both=ta.undermined?'<span class="dp-asp-mal">⚠ strong in D-1 but undermined in the varga — delivery partial/delayed</span>'
+      :ta.recovered?'<span class="dp-asp-ben">weak in D-1 but recovers in the varga — improves with maturity</span>'
+      :ta.d1Dig&&ta.vDig?(ta.d1Dig.score+ta.vDig.score>=2?'both charts support this matter':ta.d1Dig.score+ta.vDig.score<=-2?'both charts weaken this matter':'mixed — one supports, one tempers'):'—';
+    const ceiling=ta.vLaDig?`${ta.t.vlabel} Lagna lord ${NM(ta.vLaLord)} (${dg(ta.vLaDig)}) — ${ta.vLaDig.score>=1?'high delivery ceiling':ta.vLaDig.score<=-1?'low ceiling, caps results':'moderate ceiling'}`:'';
+    const dvTxt=ta.dashaVarga.length?ta.dashaVarga.map(d=>`${NM(d.k)} ${d.dig.score>=1?'<span class="dp-asp-ben">strong':'<span class="dp-asp-mal">weak'} in ${ta.t.vlabel.split(' ')[0]}</span>`).join(', '):'neither dasha lord notably dignified in this varga';
     topicHtml=`<div class="dp-topic"><div class="dp-section-title">Focus · ${ta.t.label} — D-1 paired with ${ta.t.vlabel}</div>
       <div class="dp-topic-grid">
-        <div class="dp-topic-card"><b>H${ta.h} in D-1</b> · ${SIGNS[ta.hs]} · lord ${NM(ta.lord)}${ta.lp?` in H${ta.lordH} (${dg(ta.d1Dig)})`:''}<div class="dp-asp-sub">occupants: ${ta.occ.length?ta.occ.map(NM).join(', '):'empty'}</div><div class="dp-asp-sub">aspects: ${aspTxt}</div></div>
-        <div class="dp-topic-card"><b>H${ta.h} in ${ta.t.vlabel}</b> · ${SIGNS[ta.vhs]} · lord ${NM(ta.vlord)}${ta.vlordSign!=null?` (${dg(ta.vDig)})`:''}<div class="dp-asp-sub">D-1 vs varga: ${both}</div></div>
+        <div class="dp-topic-card"><b>H${ta.h} in D-1</b> · ${SIGNS[ta.hs]} · lord ${NM(ta.lord)}${ta.lp?` in H${ta.lordH} (${dg(ta.d1Dig)})`:''}${ta.vgottama?' <span class="dp-asp-ben">· vargottama</span>':''}<div class="dp-asp-sub">occupants: ${ta.occ.length?ta.occ.map(NM).join(', '):'empty'}</div><div class="dp-asp-sub">aspects: ${aspTxt}</div></div>
+        <div class="dp-topic-card"><b>H${ta.h} in ${ta.t.vlabel}</b> · ${SIGNS[ta.vhs]} · lord ${NM(ta.vlord)}${ta.vlordSign!=null?` (${dg(ta.vDig)})`:''}<div class="dp-asp-sub">D-1 vs varga: ${both}</div>${ceiling?`<div class="dp-asp-sub">${ceiling}</div>`:''}</div>
       </div>
+      <div class="dp-topic-conn"><b>Delivery in this period:</b> ${dvTxt}.</div>
       <div class="dp-topic-conn"><b>Dasha activation:</b> ${conn}.</div></div>`;
   }
 
