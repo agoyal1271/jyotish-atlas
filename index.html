@@ -1243,6 +1243,31 @@ html.light .bm-pcard{background:rgba(240,244,255,0.7)}
 .bm-hcell.ken{border-left:3px solid rgba(90,130,235,0.6)}
 .bm-hcell.trik{border-left:3px solid rgba(75,195,115,0.6)}
 .bm-hcell.dust{border-left:3px solid rgba(210,115,95,0.55)}
+/* ── D-10 Step-by-step reading panel ── */
+.d10-guide{width:100%;padding:0 16px 24px;margin-top:8px}
+.d10-guide-title{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold2);font-weight:700;padding:16px 0 10px;border-top:1px solid rgba(70,90,200,0.14)}
+.d10-steps{display:flex;flex-direction:column;gap:8px}
+.d10-step{border-radius:10px;border:1px solid rgba(70,90,200,0.14);background:rgba(14,20,50,0.55);overflow:hidden}
+html.light .d10-step{background:rgba(240,244,255,0.7);border-color:rgba(80,100,200,0.14)}
+.d10-step-hd{display:flex;align-items:flex-start;gap:10px;padding:10px 13px;cursor:pointer;user-select:none}
+.d10-step-hd:hover{background:rgba(80,100,200,0.07)}
+.d10-snum{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;background:rgba(100,120,220,0.22);color:#9db4ff;margin-top:1px}
+.d10-stitle{flex:1}
+.d10-stitle b{font-size:12.5px;color:var(--ink);display:block;line-height:1.3}
+.d10-stitle .d10-verdict{font-size:11px;margin-top:3px}
+.d10-schevron{font-size:13px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.d10-step.open .d10-schevron{transform:rotate(90deg)}
+.d10-step-body{font-size:12px;color:var(--muted);line-height:1.6;padding:0 13px 12px 45px;display:none}
+.d10-step.open .d10-step-body{display:block}
+.d10-step-body b{color:var(--ink)}
+.d10-tag{display:inline-block;padding:1px 7px;border-radius:5px;font-size:10.5px;font-weight:700;margin-right:4px}
+.d10-tag.good{background:rgba(79,208,192,0.15);color:#4fd0c0}
+.d10-tag.warn{background:rgba(231,185,78,0.15);color:#e7b94e}
+.d10-tag.bad{background:rgba(239,106,90,0.15);color:#ef6a5a}
+.d10-tag.neu{background:rgba(120,140,200,0.12);color:#8094c8}
+.d10-pill{display:inline-flex;align-items:center;gap:4px;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:600;border:1px solid rgba(80,100,200,0.2);margin-right:3px}
+.d10-step-body ul{margin:5px 0 5px 14px;padding:0}
+.d10-step-body li{margin:2px 0}
 .bm-hc-head{display:flex;align-items:baseline;gap:7px}
 .bm-hnum{font-weight:700;color:var(--ink);font-size:12px}
 .bm-hsign{color:var(--ink);font-size:12.5px;font-weight:600}
@@ -1954,6 +1979,184 @@ html.light .brand{color:var(--ink)!important}
 })();
 
 /* ===== BHAVA MANDALA SVG RENDERER ===== */
+// Toggle a D-10 step accordion open/closed
+function d10Toggle(el){const s=el.closest('.d10-step');s.classList.toggle('open');}
+
+// Build the 9-step D-10 reading panel from the D-1 chart object and D-1 lagna
+function renderD10Guide(d1c, d1La){
+  const PO=['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke'];
+  const NM={Su:'Sun',Mo:'Moon',Ma:'Mars',Me:'Mercury',Ju:'Jupiter',Ve:'Venus',Sa:'Saturn',Ra:'Rahu',Ke:'Ketu'};
+  const PC={Su:'#ffb030',Mo:'#c8d8ff',Ma:'#ef6a5a',Me:'#4fd0c0',Ju:'#e7b94e',Ve:'#ffb0d0',Sa:'#8060c0',Ra:'#6040a0',Ke:'#909090'};
+
+  // Build D-10 planet positions
+  const d10p={};
+  for(const k of PO){const p=d1c.planets[k];if(p)d10p[k]={sign:vargaSign(p.sign,p.deg,10),deg:p.deg,retro:p.retro};}
+  const d10La=vargaSign(d1La,d1c.La.deg||0,10);
+
+  const hOf=k=>d10p[k]?houseFromSigns(d10La,d10p[k].sign):null;
+  const sigOf=k=>d10p[k]?d10p[k].sign:null;
+  const digOf=(k,si)=>{if(si==null)return null;try{return dignityOf(k,si);}catch(e){return null;}};
+  const nameH=h=>{const si=(d10La+h-1)%12;return SIGNS[si];};
+  const lordOf=h=>SIGN_LORD[(d10La+h-1)%12];
+  const planetsInH=h=>PO.filter(k=>hOf(k)===h);
+  const tag=(txt,cls)=>`<span class="d10-tag ${cls}">${txt}</span>`;
+  const pill=(k)=>`<span class="d10-pill" style="color:${PC[k]};border-color:${PC[k]}33">${NM[k]}</span>`;
+  const digTag=d=>{if(!d)return'';if(d.score>=2)return tag('Exalted','good');if(d.score>=1.5)return tag('Own sign','good');if(d.score>=1)return tag("Friend's sign",'neu');if(d.score<=-2)return tag('Debilitated','bad');if(d.score<=-1)return tag("Enemy's sign",'warn');return tag('Neutral','neu');};
+  const aspOnH=(h,si)=>{const ben=[],mal=[];PO.forEach(k=>{const p=d10p[k];if(!p||p.sign===si)return;const d=(si-p.sign+12)%12;const hit=(d===6)||(k==='Ma'&&(d===3||d===7))||(k==='Ju'&&(d===4||d===8))||(k==='Sa'&&(d===2||d===9));if(hit){(isBeneficPlanet(k,{planets:d10p})?ben:mal).push(k);}});return{ben,mal};};
+
+  // Chara karakas from D-1
+  let AK='Ve', AmK='Ma';
+  try{const ck=charaKarakas(d1c);AK=ck[0]?.k||'Ve';AmK=ck[1]?.k||'Ma';}catch(e){}
+
+  const steps=[];
+
+  // STEP 1: D-10 Lagna
+  const lagSign=SIGNS[d10La], lagLord=lordOf(1), lagLordH=hOf(lagLord), lagLordDig=digOf(lagLord,sigOf(lagLord));
+  const lagLordNote=lagLordH===1?'sits in the lagna itself (very strong — identity and career are self-powered)':
+    [4,7,10].includes(lagLordH)?`sits in H${lagLordH} (${nameH(lagLordH)}) — a kendra, giving the career chart excellent structural strength`:
+    [5,9].includes(lagLordH)?`sits in H${lagLordH} (${nameH(lagLordH)}) — a trikona, connecting career to dharma and fortune`:
+    [6,8,12].includes(lagLordH)?`sits in H${lagLordH} (${nameH(lagLordH)}) — a dusthana, indicating some obstruction or hidden effort in the career`:
+    `sits in H${lagLordH} (${nameH(lagLordH)})`;
+  const lagOcc=planetsInH(1);
+  steps.push({num:1,title:'D-10 Lagna — the career personality',
+    verdict:`${lagSign} rising · ruled by ${NM[lagLord]} · ${lagLordDig&&lagLordDig.score>=1?'<span style="color:#4fd0c0">lord is strong</span>':lagLordDig&&lagLordDig.score<0?'<span style="color:#ef6a5a">lord is weakened</span>':'lord is neutral'}`,
+    body:`<p>The D-10 lagna is <b>${lagSign}</b>, ruled by ${pill(lagLord)}. ${digTag(lagLordDig)} The lagna lord ${lagLordNote}.</p>
+<p>This sign describes your <b>professional personality</b> — how you show up at work, your natural work style, and what kind of career environment suits you. ${lagSign==='Virgo'?'Virgo brings <b>analytical precision, systems thinking, and service orientation</b> — you excel in roles requiring detail, problem-solving, and methodical execution.':lagSign==='Leo'?'Leo brings <b>leadership, creativity, and visibility</b> — you thrive where self-expression and authority are valued.':lagSign==='Aries'?'Aries brings <b>initiative, boldness, and drive</b> — you lead by action and excel in competitive environments.':lagSign==='Scorpio'?'Scorpio brings <b>depth, research ability, and strategic thinking</b> — you excel in investigative, transformational, or high-stakes roles.':lagSign==='Capricorn'?'Capricorn brings <b>discipline, ambition, and long-term planning</b> — you build steadily and your best results come through sustained effort.':lagSign==='Gemini'?'Gemini brings <b>communication, versatility, and intellectual range</b> — you excel in roles involving ideas, networks, and information.':lagSign==='Taurus'?'Taurus brings <b>persistence, resource management, and reliability</b> — you build tangible value methodically.':lagSign==='Cancer'?'Cancer brings <b>intuition, care, and emotional intelligence</b> — you excel in roles involving people, leadership with empathy, and nurturing environments.':lagSign==='Libra'?'Libra brings <b>balance, diplomacy, and aesthetic sensibility</b> — you thrive in partnerships, creative fields, and roles requiring judgment.':lagSign==='Sagittarius'?'Sagittarius brings <b>vision, philosophy, and expansive thinking</b> — you thrive where big ideas, mentorship, and international scope matter.':lagSign==='Aquarius'?'Aquarius brings <b>innovation, systems, and social consciousness</b> — you excel in fields that are ahead of their time.':'Pisces brings <b>imagination, adaptability, and spiritual depth</b> — you thrive in creative, healing, or visionary roles.'}</p>
+${lagOcc.length?`<p>Planets in the lagna: ${lagOcc.map(pill).join(' ')} — these planets <b>colour your entire professional personality</b> and their significations are visible in how others experience you at work.</p>`:''}`
+  });
+
+  // STEP 2: 10th house in D-10 (career peak/achievement)
+  const h10sign=nameH(10), h10lord=lordOf(10), h10lordH=hOf(h10lord), h10lordDig=digOf(h10lord,sigOf(h10lord));
+  const h10Occ=planetsInH(10), h10Asp=aspOnH(10,(d10La+9)%12);
+  const h10Note=h10lordH===10?'sits in its own house (Ātma-yoga — career ambition is self-sufficient and powerful)':
+    [1,4,5,7,9].includes(h10lordH)?`sits in H${h10lordH} (${nameH(h10lordH)}) — a strong position, career potential is well-connected`:
+    [6,8,12].includes(h10lordH)?`sits in H${h10lordH} (${nameH(h10lordH)}) — a dusthana, meaning career peak requires overcoming obstacles or working in unconventional ways`:
+    `sits in H${h10lordH} (${nameH(h10lordH)})`;
+  steps.push({num:2,title:'H10 — the career peak & public recognition',
+    verdict:`${h10sign} · lord ${NM[h10lord]} ${h10Occ.length?'with planets present':'is unoccupied'} · ${h10Asp.ben.length?h10Asp.ben.length+' benefic aspect(s)':'no benefic aspect'} / ${h10Asp.mal.length?h10Asp.mal.length+' malefic':'no malefic'}`,
+    body:`<p>The 10th house of D-10 shows the <b>peak of your career achievement and public recognition</b>. Its sign is <b>${h10sign}</b>, ruled by ${pill(h10lord)} ${digTag(h10lordDig)}, which ${h10Note}.</p>
+${h10Occ.length?`<p>Planets <b>occupying</b> H10: ${h10Occ.map(pill).join(' ')} — their significations define the domains where you reach your career peak.</p>`:
+`<p>H10 is <b>empty</b> — career peak is entirely driven by the 10th lord's placement and aspects landing on this house. An empty 10th is not weak; it means all energy flows through the lord.</p>`}
+${h10Asp.ben.length||h10Asp.mal.length?`<p>Aspects on H10: ${h10Asp.ben.map(k=>`<span style="color:#5fd0a0">${NM[k]} (benefic)</span>`).join(', ')} ${h10Asp.mal.length?h10Asp.mal.map(k=>`<span style="color:#ef6a5a">${NM[k]} (malefic)</span>`).join(', '):''}. ${h10Asp.ben.length&&!h10Asp.mal.length?'The house receives pure benefic energy — career peak comes with grace and support.':!h10Asp.ben.length&&h10Asp.mal.length?'Malefic aspect only — career peak requires sustained effort against friction; results are earned, not gifted.':'Mixed aspects — some friction, some support; timing and effort determine which dominates.'}</p>`:''}`
+  });
+
+  // STEP 3: Arudha Lagna in D-10 — public career image
+  // Compute AL in D-10
+  let alH=null,alSign=null;
+  try{
+    const lagLordSi=sigOf(lagLord);
+    if(lagLordSi!=null){
+      const distLordFromLag=houseFromSigns(d10La,lagLordSi);
+      let alRaw=((d10La+2*(distLordFromLag-1))%12);
+      if(alRaw===d10La) alRaw=(d10La+6)%12;
+      alSign=SIGNS[alRaw];
+      alH=houseFromSigns(d10La,alRaw);
+    }
+  }catch(e){}
+  const alOcc=alH?planetsInH(alH):[];
+  steps.push({num:3,title:'Arudha Lagna (AL) — career reputation & public image',
+    verdict:alH?`AL falls in H${alH} (${alSign||'?'}) — ${[1,4,7,10].includes(alH)?'a kendra, very visible publicly':[5,9].includes(alH)?'a trikona, reputation tied to dharma and fortune':[6,8,12].includes(alH)?'a dusthana, reputation built through struggle or unconventional means':'a neutral house'}`:'-',
+    body:`<p>The Arudha Lagna in D-10 is <b>how the world perceives your career status</b> — your professional reputation, the image others hold of you at work. It is computed from the lagna lord's position.</p>
+${alH?`<p>Your D-10 AL sits in <b>H${alH} (${alSign})</b>. ${alH===9?'H9 AL = the world sees you as wise, fortunate, and dharmic — a trusted voice with good judgment.':alH===10?'H10 AL = the world sees you as ambitious, high-achieving, and publicly recognised — career is your primary identity.':alH===7?'H7 AL = the world sees you through your partnerships and collaborations — reputation is built through who you work with.':alH===1?'H1 AL = very self-driven reputation — you ARE your career brand; personal identity and career image are one.':alH===11?'H11 AL = the world sees you as a networker and achiever of gains — reputation tied to income and social connections.':alH===4?'H4 AL = the world sees you as stable, dependable, and rooted — reputation built on reliability.':alH===5?'H5 AL = the world sees you as creative, intelligent, and intellectually capable.':alH===2?'H2 AL = reputation tied to wealth, speech, and family connections.':alH===3?'H3 AL = reputation built through effort, skill, and courage — often in communication or technical domains.':alH===6?'H6 AL = reputation built through service, competition, or overcoming obstacles.':alH===8?'H8 AL = reputation in research, transformation, or recovery roles — unconventional but deep.':'H12 AL = reputation in foreign, spiritual, or behind-the-scenes domains.'}</p>
+${alOcc.length?`<p>Planets in the AL house: ${alOcc.map(pill).join(' ')} — these directly colour how others perceive your career status.</p>`:'<p>No planets in the AL house — the AL sign-lord and aspects define your public career image.</p>'}`:`<p>AL cannot be computed without sufficient chart data.</p>`}`
+  });
+
+  // STEP 4: Ātmakāraka in D-10
+  const akH=hOf(AK), akSi=sigOf(AK), akDig=digOf(AK,akSi);
+  const akInKendra=[1,4,7,10].includes(akH), akInTrik=[5,9].includes(akH)||akH===1;
+  steps.push({num:4,title:`Ātmakāraka (${NM[AK]}) in D-10 — soul's career purpose`,
+    verdict:`${NM[AK]} is in H${akH} (${nameH(akH)}) · ${akDig?akDig.full.split('·')[0].trim():'neutral'} · ${akInKendra?tag('Kendra — powerfully placed','good'):akInTrik?tag('Trikona — dharmic placement','good'):[6,8,12].includes(akH)?tag('Dusthana — soul works through challenge','warn'):tag('Neutral house','neu')}`,
+    body:`<p>The Ātmakāraka is the planet with the highest degree in your D-1 chart — it represents your <b>soul's primary theme and desire</b>. In D-10, where it falls tells you what the soul truly came here to accomplish professionally.</p>
+<p>Your AK is ${pill(AK)} ${digTag(akDig)}, sitting in <b>H${akH} (${nameH(akH)})</b>. ${akDig&&akDig.score>=2?`${NM[AK]} is <b>exalted</b> in D-10 — the soul's career purpose has exceptional capacity to manifest. This is a rare and powerful indicator.`:akDig&&akDig.score>=1.5?`${NM[AK]} is in its own sign in D-10 — the soul is comfortable and effective in its career purpose.`:akDig&&akDig.score<=-2?`${NM[AK]} is debilitated in D-10 — the soul's career purpose requires humility, repeated learning, and conscious effort before flowering. The struggle itself is the teaching.`:''}</p>
+<p>${akH===7?`H7 in D-10 = the soul's career purpose is fulfilled through <b>partnerships, clients, and collaborations</b>. You are meant to co-create professionally, not work alone.`:akH===10?`H10 in D-10 = the soul came to achieve public recognition and career mastery directly — career is a primary dharmic vehicle.`:akH===9?`H9 in D-10 = the soul's purpose is expressed through <b>wisdom, teaching, guiding, and dharmic action</b> professionally.`:akH===1?`H1 in D-10 = the soul's career purpose is expressed through your own identity, initiative, and direct action.`:akH===11?`H11 in D-10 = the soul's purpose is fulfilled through professional gains, networks, and realising aspirations.`:akH===4?`H4 in D-10 = the soul's career is rooted in foundational work — education, research, institutional building.`:akH===5?`H5 in D-10 = the soul's purpose is expressed through creativity, intelligence, and mentorship.`:akH===2?`H2 in D-10 = the soul's purpose is tied to creating wealth and resources through career.`:akH===3?`H3 in D-10 = the soul's purpose is expressed through skills, communication, and courageous effort.`:akH===6?`H6 in D-10 = the soul serves through competition, overcoming obstacles, and offering professional service.`:akH===8?`H8 in D-10 = the soul is a transformer — career purpose involves research, crisis management, or deep institutional work.`:`H12 in D-10 = the soul's career purpose has a foreign, spiritual, or behind-the-scenes dimension.`}</p>`
+  });
+
+  // STEP 5: Amātyakāraka (AmK) in D-10 — the career minister
+  const amkH=hOf(AmK), amkSi=sigOf(AmK), amkDig=digOf(AmK,amkSi);
+  steps.push({num:5,title:`Amātyakāraka (${NM[AmK]}) in D-10 — primary career planet`,
+    verdict:`${NM[AmK]} in H${amkH} (${nameH(amkH)}) · ${amkDig?amkDig.full.split('·')[0].trim():'neutral'} · AmK is the single most important planet for career timing`,
+    body:`<p>The Amātyakāraka (AmK) is the planet with the <b>second-highest degree</b> in D-1. It is the <b>primary Jaimini significator of career and professional action</b> — the planet that runs the "ministry" of your career. During the AmK's daśā periods, career accelerates significantly.</p>
+<p>Your AmK is ${pill(AmK)} ${digTag(amkDig)}, placed in <b>H${amkH} (${nameH(amkH)})</b> of D-10.${d10p[AmK]?.retro?' <b>(Retrograde)</b> — retrograde AmK is internalised, often revisiting or deepening career themes before delivering results; strength is not reduced.':''}</p>
+<p><b>What H${amkH} means for career delivery:</b> ${amkH===1?'AmK in the lagna = career is self-driven and identity-led. Your career and your personal brand are inseparable.':amkH===2?'AmK in H2 = career delivers through wealth, speech, and resource accumulation.':amkH===3?'AmK in H3 = career delivered through skills, effort, and communication — courage is the key asset.':amkH===4?'AmK in H4 = career grounded in institutional, educational, or property-related domains.':amkH===5?'AmK in H5 = career delivered through intelligence, creativity, and mentoring.':amkH===6?'AmK in H6 = career in service, competition, or problem-solving roles — thriving through challenges.':amkH===7?'AmK in H7 = career activated through partnerships and business relationships — key alliances define career trajectory.':amkH===8?'AmK in H8 = career involves transformation, research, or institutional deep work. Results come through reinvention.':amkH===9?'AmK in H9 = career blessed by fortune and dharma. Mentors, foreign connections, and higher knowledge are career assets.':amkH===10?'AmK in H10 = very strong — career planet in the career house itself. Direct, unfiltered career power.':amkH===11?'AmK in H11 = career delivers gains, networks, and fulfilment of professional aspirations.':'AmK in H12 = career has a foreign, spiritual, or unconventional dimension. International work is a career accelerator.'}</p>
+<p>The daśā of ${NM[AmK]} (and any sub-period of ${NM[AmK]}) is always a <b>primary career activation window</b> to watch.</p>`
+  });
+
+  // STEP 6: Planets in the four kendras of D-10
+  const kendras=[1,4,7,10], kendraPlanets=kendras.map(h=>({h,si:(d10La+h-1)%12,pl:planetsInH(h)})).filter(x=>x.pl.length);
+  steps.push({num:6,title:'Planets in Kendras (H1·H4·H7·H10) — career pillars',
+    verdict:kendraPlanets.length?`${kendraPlanets.map(x=>`${x.pl.map(k=>NM[k]).join('+')} in H${x.h}`).join(' · ')}`:'No planets in angular houses — career driven by house lords',
+    body:`<p>Planets in the <b>four angular houses</b> of D-10 are the most visibly active career forces. They represent the structural pillars of your professional life — what shows up reliably, what others can see, what sustains.</p>
+${kendraPlanets.length?kendraPlanets.map(x=>{
+  const H10MEANING={1:'H1 (career personality) — a planet here shapes how you present professionally',4:'H4 (career foundation) — a planet here anchors your career in specific domain knowledge or institutional stability',7:'H7 (career partnerships) — a planet here makes collaborations and client relationships central to your career',10:'H10 (career peak) — a planet in the 10th itself is one of the most powerful career placements possible'}[x.h];
+  return `<p><b>${x.pl.map(k=>NM[k]).join(' + ')}</b> in <b>H${x.h} (${SIGNS[x.si]})</b> — ${H10MEANING||''}. ${x.pl.map(k=>{const d=digOf(k,(d10La+x.h-1)%12);return d&&d.score>=2?`${NM[k]} is exalted here — extraordinarily powerful`:d&&d.score>=1.5?`${NM[k]} is in own sign — strong and steady`:d&&d.score<=-2?`${NM[k]} is debilitated — functions with difficulty here`:''}).filter(Boolean).join('; ')}</p>`;
+}).join('')
+:`<p>No planets occupy the kendras. The career chart's angular houses are <b>empty</b> — this means the chart lords control the energy and daśā timing is everything. Career progresses in steps rather than constant momentum, but each step can be significant.</p>`}`
+  });
+
+  // STEP 7: Key yogas — 10th lord + lagna lord relationship
+  const l1=lagLord, l10=h10lord, l1H=lagLordH, l10H=h10lordH;
+  const inSameH=l1H===l10H, inExchange=l1H===hOf(l10)&&l10H===hOf(l1)||false;
+  const l1asps=l1?aspectsFromHouse(l1,l1H):[], l10asps=l10?aspectsFromHouse(l10,l10H):[];
+  const mutualAsp=l1asps.includes(l10H)&&l10asps.includes(l1H);
+  const yogaQuality=inSameH?'Conjunction (Sambandha)':inExchange?'Parivartan Yoga (Exchange)':mutualAsp?'Mutual aspect (Drishti Sambandha)':'No direct connection — independent operation';
+  const hasYoga=inSameH||inExchange||mutualAsp;
+  steps.push({num:7,title:'Lagna lord + 10th lord — the career yoga',
+    verdict:hasYoga?`${tag('Career Yoga present','good')} ${yogaQuality}`:`${tag('No direct yoga','warn')} Lagna lord (${NM[l1]}) and 10th lord (${NM[l10]}) operate independently`,
+    body:`<p>The relationship between the <b>lagna lord</b> (${pill(l1)}) and the <b>10th lord</b> (${pill(l10)}) is the most classical career yoga in any divisional chart. When they are connected, your personality and career peak are directly aligned — you do what you are.</p>
+${inSameH?`<p>${tag('Conjunction — Sambandha','good')} Both lords sit in <b>H${l1H} (${nameH(l1H)})</b>. This is a powerful career yoga — identity and achievement are fused in one house. The domain of that house becomes your career destiny.</p>`:''}
+${inExchange?`<p>${tag('Parivartan Yoga','good')} The lagna lord and 10th lord are in each other's signs — a complete exchange. This creates one of the strongest career yogas in Vedic astrology. The two houses involved become deeply interwoven themes in your professional life.</p>`:''}
+${mutualAsp&&!inSameH&&!inExchange?`<p>${tag('Mutual Aspect','good')} The lagna lord (H${l1H}) and 10th lord (H${l10H}) aspect each other — they communicate across the chart. Career success requires conscious alignment of your identity with your ambition.</p>`:''}
+${!hasYoga?`<p>${tag('Independent operation','warn')} The lagna lord and 10th lord have no direct connection in D-10. Career and self-image operate in separate lanes. This is not a weakness, but it means career success requires <b>deliberate effort to bridge</b> your personal identity with your professional ambitions. Other yogas in the chart can still deliver excellent career results.</p>`:''}
+<p><b>Other key connections to check:</b></p>
+<ul>
+<li>Is the 9th lord (fortune) connected to the 10th lord? — If yes, career has strong divine support (Rāja Yoga)</li>
+<li>Is the 5th lord (intelligence) aspecting or joining the 10th? — Career is driven by intellect and past-life merit</li>
+<li>Are 2nd and 11th lords strong? — Determines whether career converts into wealth</li>
+</ul>`
+  });
+
+  // STEP 8: Dusthana analysis — H6, H8, H12 of D-10
+  const dusth=[[6,'H6','Competition, conflict, service — obstacles and service-oriented career'],[8,'H8','Transformation, research, hidden work — career reinvention and depth'],[12,'H12','Foreign lands, remote work, behind-the-scenes — international or unconventional career']];
+  const dusthContent=dusth.map(([h,lab,meaning])=>{
+    const occ=planetsInH(h),asp=aspOnH(h,(d10La+h-1)%12);
+    if(!occ.length&&!asp.ben.length&&!asp.mal.length) return `<p><b>${lab} (${nameH(h)}):</b> empty and unafflicted — this career challenge is minimal.</p>`;
+    return `<p><b>${lab} (${nameH(h)}) — ${meaning}:</b>${occ.length?' Occupied by '+occ.map(pill).join(' ')+'.':' Empty.'} ${asp.mal.length?'Malefic aspects: '+asp.mal.map(k=>`<span style="color:#ef6a5a">${NM[k]}</span>`).join(', ')+' — adds friction.':''} ${asp.ben.length?'Benefic aspects: '+asp.ben.map(k=>`<span style="color:#5fd0a0">${NM[k]}</span>`).join(', ')+' — mitigates the dusthana.':''}</p>`;
+  }).join('');
+  steps.push({num:8,title:'Dusthanas (H6·H8·H12) — career challenges & hidden strengths',
+    verdict:`Planets in dusthanas: ${[6,8,12].flatMap(h=>planetsInH(h).map(k=>NM[k]+'(H'+h+')')).join(', ')||'none — relatively clean career chart'}`,
+    body:`<p>The three dusthana houses in D-10 represent <b>career friction, challenges, and hidden dimensions</b>. They are not purely negative — H6 gives competitive ability, H8 gives research depth and transformational capacity, H12 gives international or behind-the-scenes capacity.</p>
+${dusthContent}
+<p><b>Key principle:</b> A planet in its own sign or exalted in a dusthana is not weak — it actually produces <i>Viparita effects</i>, meaning career setbacks lead to unexpected rises. A debilitated planet in a dusthana is the most challenging.</p>`
+  });
+
+  // STEP 9: Timing — which daśā periods activate D-10 most
+  const d10activators=[lagLord, h10lord, AmK, AK].filter((k,i,a)=>a.indexOf(k)===i);
+  const h10Planets=planetsInH(10), kendraPlants=kendraPlanets.flatMap(x=>x.pl);
+  const allActivators=[...new Set([...d10activators,...h10Planets,...kendraPlants])];
+  steps.push({num:9,title:'Daśā timing — when D-10 gets activated',
+    verdict:`Watch daśās of: ${allActivators.map(k=>pill(k)).join(' ')}`,
+    body:`<p>In D-10 reading, timing is everything. Career breakthroughs happen during daśā/antardaśā of planets that are <b>powerfully placed or functionally significant</b> in D-10.</p>
+<p><b>Primary activators for your D-10 career:</b></p>
+<ul>
+${allActivators.map(k=>{const h=hOf(k),d=digOf(k,sigOf(k));return`<li>${pill(k)} — H${h} in D-10 ${d&&d.score>=1.5?'(own/exalted — strong delivery)':d&&d.score<=-2?'(debilitated — results require extra effort)':''} ${k===lagLord?'<b>· lagna lord</b>':''} ${k===h10lord?'<b>· 10th lord</b>':''} ${k===AmK?`<b>· Amātyakāraka (primary career planet)</b>`:''} ${k===AK?'<b>· Ātmakāraka (soul planet)</b>':''}</li>`;}).join('')}
+</ul>
+<p><b>Rule of thumb:</b> When a daśā lord also transits (in gochara) a kendra or trikona of D-10, or conjuncts the D-10 lagna — that period can produce visible, external career results. Cross-check with D-1 gochara for confirmation.</p>`
+  });
+
+  // Build accordion HTML
+  const stepsHtml=steps.map(s=>`
+<div class="d10-step">
+  <div class="d10-step-hd" onclick="d10Toggle(this)">
+    <div class="d10-snum">${s.num}</div>
+    <div class="d10-stitle"><b>${s.title}</b><div class="d10-verdict">${s.verdict}</div></div>
+    <div class="d10-schevron">›</div>
+  </div>
+  <div class="d10-step-body">${s.body}</div>
+</div>`).join('');
+
+  return `<div class="d10-guide"><div class="d10-guide-title">Step-by-step D-10 Reading · ${SIGNS[d10La]} Lagna</div><div class="d10-steps">${stepsHtml}</div></div>`;
+}
+
 let BM_CTX=null;
 const BM_VARGAS=[[1,'D-1','Rāśi'],[2,'D-2','Horā'],[3,'D-3','Drekkāṇa'],[9,'D-9','Navāṁśa'],[10,'D-10','Daśāṁśa'],[27,'D-27','Bhāṁśa'],[60,'D-60','Ṣaṣṭyāṁśa']];
 function bmTurn(N){
@@ -2356,7 +2559,9 @@ function renderBhavaMandala(c,La,N,motion){
   const caption=`<div class="bm-caption">Showing <b>D-${N} · ${vName}</b>${N===1?' — the birth chart':' — divisional chart'} · lens: <b>${(LENSES.find(l=>l[0]===layer)||[,'Lordship'])[1]}</b>. ${LENS_DESC[layer]}. The coloured <b>aura</b> behind each sign always shows the net aspect load. <span style="color:#9db4ff">Blue</span> kendra · <span style="color:#7fe0a0">green</span> trikona · <span style="color:#f0a890">amber</span> dusthana · gold = Lagna.</div>`;
   const traceDefault={lord:'▶ Click any house to trace where its lord sits',graha:'▶ Click a planet to see what it aspects, or a house to see what aspects it',rashi:'▶ Click a house to see which signs cast rāśi dṛṣṭi on it',all:'▶ Click a house, or a planet, to isolate its relationships'}[layer];
 
-  ct.innerHTML=`${tabs}${lensRow}<div class="bm-container">${sv}</div>${aspLegend}<div class="bm-trace" id="bmTrace">${traceDefault}</div>${caption}<div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div><div class="bm-planet-panel" id="bmPlanetPanel"></div>`;
+  let d10Html='';
+  if(N===10&&BM_CTX.c){try{d10Html=renderD10Guide(BM_CTX.c,BM_CTX.baseLa);}catch(e){console.warn('D10 guide:',e);}}
+  ct.innerHTML=`${tabs}${lensRow}<div class="bm-container">${sv}</div>${aspLegend}<div class="bm-trace" id="bmTrace">${traceDefault}</div>${caption}<div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div>${d10Html}<div class="bm-planet-panel" id="bmPlanetPanel"></div>`;
   if(motion){const ns=ct.querySelector('.bm-svg');if(ns){ns.style.transformOrigin='center';ns.style.transform='rotate(14deg) scale(.9)';ns.style.opacity='0';requestAnimationFrame(()=>{ns.style.transition='transform .46s cubic-bezier(.34,1.12,.4,1),opacity .4s';ns.style.transform='none';ns.style.opacity='1';});}}
 }
 
