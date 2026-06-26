@@ -656,6 +656,7 @@
   .ol-ai-btn:hover{transform:translateY(-1px);filter:brightness(1.03)}
   .ol-ai-btn-cl{background:linear-gradient(135deg,var(--gold),var(--terracotta));color:#2a1a0c}
   .ol-ai-btn-gm{background:var(--panel);border-color:var(--line);color:var(--gold2)}
+  .ol-ai-btn-cp{background:var(--panel);border-color:var(--line);color:var(--muted)}
   .ol-ai-btn:focus-visible{border-color:var(--gold2)}
   .ol-ai-note{font-size:11.5px;color:var(--muted);margin-left:4px}
 
@@ -1723,6 +1724,7 @@ html.light .brand{color:var(--ink)!important}
           </div>
           <textarea class="ol-prompt-ta" id="pbPromptText" readonly style="height:320px"></textarea>
           <div class="ol-ai-btns">
+            <button class="ol-ai-btn ol-ai-btn-cp" onclick="JA.copyOnly('pbPromptText')">Copy prompt</button>
             <button class="ol-ai-btn ol-ai-btn-cl" onclick="JA.pbCopyOpen('https://claude.ai')">Copy &amp; open Claude.ai →</button>
             <button class="ol-ai-btn ol-ai-btn-gm" onclick="JA.pbCopyOpen('https://gemini.google.com')">Copy &amp; open Gemini →</button>
             <span class="ol-ai-note">Prompt is copied to clipboard — just paste ⌘V</span>
@@ -1763,6 +1765,7 @@ html.light .brand{color:var(--ink)!important}
           </div>
           <textarea class="ol-prompt-ta" id="bbPromptText" readonly></textarea>
           <div class="ol-ai-btns">
+            <button class="ol-ai-btn ol-ai-btn-cp" onclick="JA.copyOnly('bbPromptText')">Copy prompt</button>
             <button class="ol-ai-btn ol-ai-btn-cl" onclick="JA.bbCopyOpen('https://claude.ai')">Copy &amp; open Claude.ai →</button>
             <button class="ol-ai-btn ol-ai-btn-gm" onclick="JA.bbCopyOpen('https://gemini.google.com')">Copy &amp; open Gemini →</button>
             <span class="ol-ai-note">Prompt is copied to clipboard — just paste ⌘V</span>
@@ -6992,6 +6995,14 @@ function computeVimDashas(mo,birthDateStr){
 
   const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
+  JA.copyOnly=function(id){
+    const el=document.getElementById(id); if(!el) return;
+    const txt=el.value;
+    const go=()=>{JA.toast&&JA.toast("Prompt copied to clipboard","ok");};
+    if(navigator.clipboard){navigator.clipboard.writeText(txt).then(go).catch(go);}
+    else{const ta=document.createElement("textarea");ta.value=txt;ta.style.cssText="position:fixed;opacity:0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");}catch(e){}ta.remove();go();}
+  };
+
   JA.olCopyOpen=function(url){
     const txt=document.getElementById("olPromptText").value;
     const go=()=>{JA.toast&&JA.toast("Prompt copied to clipboard","ok");window.open(url,"_blank");};
@@ -7660,6 +7671,7 @@ nakshatras and BPHS principles throughout. Avoid generic platitudes; never predi
       </div>
       <textarea class="ol-prompt-ta" id="olPromptText" readonly></textarea>
       <div class="ol-ai-btns">
+        <button class="ol-ai-btn ol-ai-btn-cp" onclick="JA.copyOnly('olPromptText')">Copy prompt</button>
         <button class="ol-ai-btn ol-ai-btn-cl" onclick="JA.olCopyOpen('https://claude.ai')">Copy &amp; open Claude.ai →</button>
         <button class="ol-ai-btn ol-ai-btn-gm" onclick="JA.olCopyOpen('https://gemini.google.com')">Copy &amp; open Gemini →</button>
         <span class="ol-ai-note">Prompt is copied to clipboard — just paste ⌘V</span>
