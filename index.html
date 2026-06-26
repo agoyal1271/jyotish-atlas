@@ -1246,9 +1246,35 @@ html.light .bm-pcard{background:rgba(240,244,255,0.7)}
 .bm-hc-head{display:flex;align-items:baseline;gap:7px}
 .bm-hnum{font-weight:700;color:var(--ink);font-size:12px}
 .bm-hsign{color:var(--ink);font-size:12.5px;font-weight:600}
+.bm-helem{font-size:9.5px;font-weight:700;opacity:.75;letter-spacing:.03em}
 .bm-hc-lord{font-size:11px;margin-top:3px;color:var(--muted)}
 .bm-hc-link{color:var(--muted)}
 .bm-hc-pl{font-size:11px;margin-top:3px;color:var(--ink)}
+/* Planet side panel */
+.bm-outer{display:flex;align-items:flex-start;justify-content:center;gap:0}
+.bm-wheel-col{flex:0 1 616px;min-width:0;display:flex;flex-direction:column;align-items:center}
+.bm-planet-panel{flex:0 0 220px;width:220px;margin-left:14px;position:sticky;top:80px;align-self:flex-start;opacity:0;pointer-events:none;transform:translateX(-10px);transition:opacity .2s,transform .22s cubic-bezier(.34,1.1,.5,1)}
+.bm-planet-panel.open{opacity:1;pointer-events:auto;transform:none}
+.bm-pp-inner{background:rgba(10,14,34,0.97);border:1px solid rgba(90,115,210,0.35);border-radius:13px;padding:15px 13px 14px;font-size:12px;color:var(--muted);position:relative;box-shadow:0 6px 28px rgba(0,0,0,.45)}
+html.light .bm-pp-inner{background:rgba(237,242,255,0.98);border-color:rgba(90,110,200,0.22);box-shadow:0 4px 20px rgba(0,0,0,.12)}
+.bm-pp-close{position:absolute;top:7px;right:9px;background:none;border:none;font-size:17px;cursor:pointer;color:var(--muted);line-height:1;padding:1px 4px;border-radius:4px}
+.bm-pp-close:hover{color:var(--ink);background:rgba(255,255,255,.07)}
+.bm-pp-name{font-size:17px;font-weight:700;margin-bottom:2px;line-height:1.2}
+.bm-pp-loc{font-size:11px;color:var(--muted);line-height:1.55;margin-bottom:9px}
+.bm-pp-dignity{font-size:13px;font-weight:700;margin-bottom:3px}
+.bm-pp-label{font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold2);font-weight:700;margin:10px 0 4px;border-top:1px solid rgba(90,115,210,.15);padding-top:8px}
+.bm-pp-label:first-of-type,.bm-pp-label.no-border{border-top:none;padding-top:0;margin-top:6px}
+.bm-pp-av{display:flex;flex-wrap:wrap;gap:4px}
+.bm-pp-av-chip{padding:2px 7px;border-radius:10px;background:rgba(70,90,200,.13);border:1px solid rgba(70,90,200,.22);font-size:10.5px;color:var(--ink)}
+.bm-vg-grid{display:grid;grid-template-columns:auto 1fr;gap:3px 8px;align-items:center}
+.bm-vg-lab{font-size:10px;color:var(--muted);font-weight:600;white-space:nowrap}
+.bm-vg-val{font-size:11px;font-weight:700;white-space:nowrap}
+.bm-pp-asp-row{font-size:11px;line-height:1.7;color:var(--ink)}
+@media(max-width:1010px){
+  .bm-outer{flex-direction:column;align-items:center;gap:0}
+  .bm-planet-panel{position:fixed;right:14px;top:50%;left:auto;margin:0;transform:translateY(-50%) translateX(10px);z-index:320;width:min(256px,88vw);max-height:86vh;overflow-y:auto}
+  .bm-planet-panel.open{transform:translateY(-50%)}
+}
 html.light .bm-hcell{background:rgba(240,244,255,0.7);border-color:rgba(80,100,200,0.16)}
 
 /* ===== COSMOS ANIMATIONS ===== */
@@ -1965,6 +1991,7 @@ function bmRestore(ct){
   ct.querySelectorAll('.bm-chord').forEach(ch=>{ch.classList.remove('on');ch.style.opacity='';});
   ct.querySelectorAll('.bm-pill').forEach(g=>{g.classList.remove('on');g.style.opacity='1';});
   ct.querySelectorAll('.bm-hmark').forEach(m=>m.classList.remove('on'));
+  // don't auto-close the side panel on restore — let the user close it explicitly
 }
 // Click a house → draw TWO linkages at once, whatever lens is active:
 //   • GOLD line   = where the house lord sits
@@ -2015,6 +2042,93 @@ function bmFocusPlanet(k){
   if(tr){const nm=(typeof GBYK!=='undefined'&&GBYK[k])?GBYK[k].name:k;
     tr.innerHTML=`<b>${nm}</b> casts a <b style="color:${ben?'#5fd0a0':'#ef6a5a'}">${ben?'benefic':'malefic'}</b> dṛṣṭi on the highlighted houses — solid = 7th (full) aspect, dashed = special (Ma 4/8 · Ju 5/9 · Sa 3/10).`;tr.classList.add('show');}
   clearTimeout(window._bmHLT); window._bmHLT=setTimeout(()=>bmRestore(ct),4600);
+  bmShowPlanetPanel(k,ct);
+}
+function bmShowPlanetPanel(k,ct){
+  const panel=ct.querySelector('#bmPlanetPanel'); if(!panel) return;
+  if(!BM_CTX||!BM_CTX.c) return;
+  const c0=BM_CTX.c, La=BM_CTX.baseLa, N=BM_CTX.N||1;
+  const p=c0.planets[k]; if(!p) return;
+  const PV_COL={Su:'#ffb030',Mo:'#c8d8ff',Ma:'#ef6a5a',Me:'#4fd0c0',Ju:'#e7b94e',Ve:'#ffb0d0',Sa:'#8060c0',Ra:'#6040a0',Ke:'#909090'};
+  const PV_GL={Su:'☉',Mo:'☽',Ma:'♂',Me:'☿',Ju:'♃',Ve:'♀',Sa:'♄',Ra:'☊',Ke:'☋'};
+  const col=PV_COL[k]||'var(--gold)', gl=PV_GL[k]||'', nm=GBYK[k].name;
+  const isNode=(k==='Ra'||k==='Ke');
+  const h1=houseFromSigns(La,p.sign);
+  const d1dig=dignityOf(k,p.sign);
+  const nak=nakInfo(p.sign*30+p.deg);
+  const bal=baladiAvastha(p.sign,p.deg);
+  const jag=jagradadiAvastha(d1dig.score);
+  let dee; try{dee=deeptadiAvastha(d1dig,isCombustDE(k,c0));}catch(e){dee={n:'—'};}
+  const combust=isCombustDE(k,c0);
+  let fn=null; try{fn=functionalNature(k,La);}catch(e){}
+  const benLbl=fn?(fn.tier==='yogakaraka'?'yogakāraka':fn.tier==='benefic'?'func. benefic':fn.tier==='malefic'?'func. malefic':'func. neutral'):'';
+  const benCls=fn?((fn.tier==='benefic'||fn.tier==='yogakaraka')?'bm-ben':fn.tier==='malefic'?'bm-mal':'bm-neu'):'bm-neu';
+  // current varga position (if not D-1)
+  let varSec='';
+  if(N>1){
+    const vs=vargaSign(p.sign,p.deg,N), vd=dignityOf(k,vs), vh=houseFromSigns(La,vs);
+    const vott=vs===p.sign;
+    varSec=`<div class="bm-pp-label">D-${N} position</div>`+
+      `<div style="font-size:12px;color:var(--ink)">${SIGNS[vs]} · H${vh} · `+
+      `<span style="color:${vd.score>=1?'var(--exalt)':vd.score<=-1?'var(--debil)':'var(--muted)'};font-weight:600">${vd.full.split('·')[0].trim()}</span>`+
+      (vott?` <span style="color:var(--gold)">★ vargottama</span>`:'')+`</div>`;
+  }
+  // dignity across all vargas
+  const DA=s=>s>=2?'Exalt':s>=1.5?'Own':s>=1?'Friend':s<=-2?'Debil':s<=-1?'Enemy':'Neut';
+  const DC=s=>s>=1?'var(--exalt)':s<=-1?'var(--debil)':'rgba(178,198,242,0.6)';
+  const vgGrid=BM_VARGAS.map(([n,lab])=>{
+    if(isNode) return `<span class="bm-vg-lab">${lab}</span><span class="bm-vg-val" style="color:rgba(178,198,242,0.3)">—</span>`;
+    const vs=vargaSign(p.sign,p.deg,n), vd=dignityOf(k,vs);
+    const vott=n!==1&&vs===p.sign?' ★':'';
+    const isCur=n===N;
+    return `<span class="bm-vg-lab" style="${isCur?'color:var(--gold2)':''}">${lab}</span>`+
+      `<span class="bm-vg-val" style="color:${DC(vd.score)};${isCur?'text-decoration:underline;text-underline-offset:3px':''}" title="${SIGNS[vs]} · ${vd.full}">${DA(vd.score)}${vott}</span>`;
+  }).join('');
+  // aspects this planet casts
+  const ASPMAP={Ma:[6,3,7],Ju:[6,4,8],Sa:[6,2,9]};
+  const offs=ASPMAP[k]||[6];
+  const aspRows=offs.map((off,i)=>{
+    const ts=(p.sign+off)%12, th=houseFromSigns(La,ts);
+    const occ=Object.keys(c0.planets).filter(pk=>c0.planets[pk]&&c0.planets[pk].sign===ts&&pk!==k).map(pk=>GBYK[pk].name);
+    const spec=i>0?' (special)':'';
+    return `<span style="color:var(--ink)">H${th} · ${SIGNS[ts]}</span>${occ.length?' · <span style="color:var(--muted)">'+occ.join(', ')+'</span>':''}${spec?`<span style="color:var(--muted)">${spec}</span>`:''}`;
+  });
+  panel.innerHTML=`<div class="bm-pp-inner">`+
+    `<button class="bm-pp-close" onclick="bmClosePlanetPanel()" title="Close (or click outside)">×</button>`+
+    `<div class="bm-pp-name" style="color:${col}">${gl} ${nm}</div>`+
+    `<div class="bm-pp-loc">D-1 · <b style="color:var(--ink)">${SIGNS[p.sign]}</b> ${isNode?'':p.deg.toFixed(1)+'° '} · H${h1}<br>`+
+    (isNode?'':`${nak.n} · Pada ${nak.pada}`)+`</div>`+
+    `<div class="bm-pp-dignity" style="color:${d1dig.score>=1?'var(--exalt)':d1dig.score<=-1?'var(--debil)':'var(--ink)'}">${isNode?'—':d1dig.full.split('·')[0].trim()}</div>`+
+    `<div><span class="${benCls}">${benLbl}</span>${combust?' &nbsp;·&nbsp; <span class="bm-combust">⊙ combust</span>':''}</div>`+
+    varSec+
+    `<div class="bm-pp-label">Avastha</div>`+
+    `<div class="bm-pp-av">`+
+    `<span class="bm-pp-av-chip" title="${bal.note}">${bal.n}</span>`+
+    `<span class="bm-pp-av-chip" title="${jag.note}">${jag.n}</span>`+
+    `<span class="bm-pp-av-chip">${dee.n}</span>`+
+    `</div>`+
+    `<div class="bm-pp-label">Varga strength</div>`+
+    `<div class="bm-vg-grid">${vgGrid}</div>`+
+    `<div class="bm-pp-label">Aspects cast</div>`+
+    `<div class="bm-pp-asp-row">${aspRows.join('<br>')}</div>`+
+    `</div>`;
+  panel.classList.add('open');
+  clearTimeout(window._bmPOT);
+  window._bmPOT=setTimeout(()=>document.addEventListener('click',bmPanelOutside,{capture:true,once:true}),200);
+}
+function bmClosePlanetPanel(){
+  const panel=document.querySelector('#bmPlanetPanel'); if(!panel) return;
+  panel.classList.remove('open');
+  document.removeEventListener('click',bmPanelOutside,{capture:true});
+}
+function bmPanelOutside(e){
+  const panel=document.querySelector('#bmPlanetPanel'); if(!panel) return;
+  if(panel.contains(e.target)||e.target.closest('.bm-pill')){
+    // click inside panel or on another planet pill — reattach
+    document.addEventListener('click',bmPanelOutside,{capture:true,once:true});
+  } else {
+    panel.classList.remove('open');
+  }
 }
 function renderBhavaMandala(c,La,N,motion){
   N=N||1;
@@ -2038,9 +2152,11 @@ function renderBhavaMandala(c,La,N,motion){
     const la=Math.abs(a2-a1)>180?1:0;
     return`M${s1.x},${s1.y} A${r1},${r1} 0 ${la} 1 ${e1.x},${e1.y} L${e2.x},${e2.y} A${r2},${r2} 0 ${la} 0 ${s2.x},${s2.y} Z`;
   }
-  const EL=[0,2,1,3,0,2,1,3,0,2,1,3];
+  const EL=[0,1,2,3,0,1,2,3,0,1,2,3]; // 0=Fire 1=Earth 2=Air 3=Water (Aries→Fire, Taurus→Earth, Gemini→Air, Cancer→Water …)
   const ELF=['rgba(175,55,18,0.22)','rgba(38,108,48,0.22)','rgba(38,88,192,0.22)','rgba(18,108,148,0.22)'];
   const ELS=['rgba(195,72,30,0.38)','rgba(55,135,65,0.38)','rgba(55,105,212,0.38)','rgba(28,128,165,0.38)'];
+  const EL_NAME=['Fire','Earth','Air','Water'];
+  const EL_COL=['#ef7050','#66bb66','#5e8ef0','#3ab5b5'];
   const SG=['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
   const SN=['Aries','Taurus','Gemini','Cancer','Leo','Virgo','Libra','Scorpio','Sagitt','Capric','Aquar','Pisces'];
   const PV={
@@ -2077,7 +2193,8 @@ function renderBhavaMandala(c,La,N,motion){
     const a1=sa(i),a2=a1+30,isLa=(i===La);
     sv+=`<path d="${sec(ROo,ROi,a1,a2)}" fill="${isLa?'rgba(122,162,255,0.32)':ELF[EL[i]]}" stroke="${isLa?'rgba(150,185,255,0.9)':'rgba(120,150,225,0.32)'}" stroke-width="${isLa?2:1}"/>`;
     const gp=pol((ROo+ROi)/2,a1+15);
-    sv+=`<text x="${gp.x}" y="${gp.y}" text-anchor="middle" dominant-baseline="central" font-size="22" fill="${isLa?'#dce8ff':'rgba(206,222,255,0.92)'}">${SG[i]}</text>`;
+    sv+=`<text x="${gp.x}" y="${gp.y-7}" text-anchor="middle" dominant-baseline="central" font-size="20" fill="${isLa?'#dce8ff':'rgba(206,222,255,0.92)'}">${SG[i]}</text>`;
+    sv+=`<text x="${gp.x}" y="${gp.y+9}" text-anchor="middle" dominant-baseline="central" font-size="7.5" font-weight="600" fill="${EL_COL[EL[i]]}" opacity="0.85">${EL_NAME[EL[i]]}</text>`;
   }
   // sector dividers (sign edge → centre)
   for(let i=0;i<12;i++){const a=sa(i),o=pol(ROo,a),n=pol(RC,a);sv+=`<line x1="${o.x}" y1="${o.y}" x2="${n.x}" y2="${n.y}" stroke="rgba(120,150,225,0.15)" stroke-width="1"/>`;}
@@ -2224,7 +2341,7 @@ function renderBhavaMandala(c,La,N,motion){
     const here=PO.filter(k=>c.planets[k]&&c.planets[k].sign===si);
     const occ=here.length?here.map(k=>`<span style="color:${PV[k].col}">${GBYK[k].name}${showDeg?' '+c.planets[k].deg.toFixed(0)+'°':''}</span>`).join(', '):'<span style="color:var(--muted)">—</span>';
     houseRows+=`<div class="bm-hcell ${cls}" data-h="${h}" onclick="bmHighlight(${h})" title="House ${h} · ${SN[si]} · lord ${GBYK[lord].name} ${link.replace(/<[^>]+>/g,'')} — click to trace on the wheel">`+
-      `<div class="bm-hc-head"><span class="bm-hnum">H${h}</span><span class="bm-hsign">${SN[si]}</span></div>`+
+      `<div class="bm-hc-head"><span class="bm-hnum">H${h}</span><span class="bm-hsign">${SN[si]}</span><span class="bm-helem" style="color:${EL_COL[EL[si]]}">${EL_NAME[EL[si]]}</span></div>`+
       `<div class="bm-hc-lord">lord <b style="color:${lv.col}">${lv.gl} ${GBYK[lord].name}</b> <span class="bm-hc-link">${link}</span></div>`+
       `<div class="bm-hc-pl">${occ}</div></div>`;
   }
@@ -2242,7 +2359,7 @@ function renderBhavaMandala(c,La,N,motion){
   const caption=`<div class="bm-caption">Showing <b>D-${N} · ${vName}</b>${N===1?' — the birth chart':' — divisional chart'} · lens: <b>${(LENSES.find(l=>l[0]===layer)||[,'Lordship'])[1]}</b>. ${LENS_DESC[layer]}. The coloured <b>aura</b> behind each sign always shows the net aspect load. <span style="color:#9db4ff">Blue</span> kendra · <span style="color:#7fe0a0">green</span> trikona · <span style="color:#f0a890">amber</span> dusthana · gold = Lagna.</div>`;
   const traceDefault={lord:'▶ Click any house to trace where its lord sits',graha:'▶ Click a planet to see what it aspects, or a house to see what aspects it',rashi:'▶ Click a house to see which signs cast rāśi dṛṣṭi on it',all:'▶ Click a house, or a planet, to isolate its relationships'}[layer];
 
-  ct.innerHTML=`${tabs}${lensRow}<div class="bm-container">${sv}</div>${aspLegend}<div class="bm-trace" id="bmTrace">${traceDefault}</div>${caption}<div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div>`;
+  ct.innerHTML=`${tabs}${lensRow}<div class="bm-outer"><div class="bm-wheel-col"><div class="bm-container">${sv}</div>${aspLegend}<div class="bm-trace" id="bmTrace">${traceDefault}</div>${caption}</div><div class="bm-planet-panel" id="bmPlanetPanel"></div></div><div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div>`;
   if(motion){const ns=ct.querySelector('.bm-svg');if(ns){ns.style.transformOrigin='center';ns.style.transform='rotate(14deg) scale(.9)';ns.style.opacity='0';requestAnimationFrame(()=>{ns.style.transition='transform .46s cubic-bezier(.34,1.12,.4,1),opacity .4s';ns.style.transform='none';ns.style.opacity='1';});}}
 }
 
@@ -7125,6 +7242,7 @@ D-1 vs ${topic.vn}: ${vLordDig?(vLordDig.score>=1?"Divisional confirms natal pro
     const transitSec=transitPromptSection(c,La,[resultH,person.h]);
     const _bvm=topic.vn&&topic.vn.match(/D-?(\d+)/), bbVN=_bvm?+_bvm[1]:null;
     const vargaFullSec=bbVN?vargaChartBlock(c,La,bbVN,topic.vn,[resultH]):"";
+    const d9FullSec=bbVN!==9?vargaChartBlock(c,La,9,"D-9 Navamsa",[resultH]):"";
     return `You are a classical Vedic astrologer trained in the tradition of Brihat Parashara Hora Shastra (BPHS), Saravali, Phala Deepika, and Jaimini Sutras. Your analysis is methodical, layered, and specific — you never generalise. You cite exact house numbers, planet names, degrees, nakshatras, and classical principles (with chapter references where you know them).
 
 USE ONLY THE PROVIDED DATA. Every position, dignity and divisional chart you need is computed below — never calculate, recall, or assume a placement yourself, and never derive a varga from memory (the relevant one is supplied in full). If something needed is absent, say "not provided" and lower confidence rather than inventing it. Treat D-1, D-9 and the topic's area-varga as CO-PRIMARY and reconcile all three before any verdict.
@@ -7195,6 +7313,7 @@ NAKSHATRA SUB-LAYER
 =======================================
 ${nakSec}${vargaSec}
 ${vargaFullSec}
+${d9FullSec}
 ${transitSec}
 =======================================
 ANALYSIS — address each layer in sequence:
@@ -7482,6 +7601,7 @@ Parivartana (sign exchange): ${parList.length?parList.join("; "):"none"}${shbSec
     const transitSec=transitPromptSection(c,La,goal.houses);
     const _vm=goal.vn&&goal.vn.match(/D-?(\d+)/), goalVN=_vm?+_vm[1]:null;
     const vargaChartSec=goalVN?vargaChartBlock(c,La,goalVN,goal.vn,goal.houses):"";
+    const d9ChartSec=goalVN!==9?vargaChartBlock(c,La,9,"D-9 Navamsa",goal.houses):"";
     return `You are an expert Vedic Astrologer (Jyotish Acharya) with deep mastery of Brihat Parashara Hora Shastra (BPHS), Jaimini Sutras, Phaladeepika, Brihat Jataka, Saravali, and Uttara Kalamrita. Deliver a structured, evidence-based, objective analysis of the stated goal using the South Indian chart data below, following the 10-step methodology exactly.
 
 CRITICAL FOUNDATIONAL GUARDRAILS
@@ -7533,8 +7653,7 @@ BHAVAT BHAVAM — supporting "house-from-house"
 (the Xth house from house X sustains/feeds it)
 =======================================
 ${bbSec}
-${vargaChartSec?`${vargaChartSec}
-`:`[No area-varga prescribed for this goal — judge promise from D-1 and D-9 only.]\n`}
+${vargaChartSec?`${vargaChartSec}\n`:""}${d9ChartSec}
 ${dSec?`=======================================
 VIMSHOTTARI DASHA 2025–2030
 (★ = connected to goal houses by lordship or placement)
