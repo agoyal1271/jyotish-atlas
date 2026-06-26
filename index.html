@@ -2145,13 +2145,19 @@ ${dusthContent}
   // STEP 9: Timing — filtered by functional rules, not just kendra presence
   const h10Planets=planetsInH(10);
   // A planet is PRIMARY if it rules a trikona or H10, or is AK/AmK, or is in H10, or is exalted/own in a good house
-  // A planet is MIXED if it only rules dusthanas with no trikona/H10 lordship
+  // Nodes (Ra/Ke) own no signs so ruledH returns []; handle them separately.
+  // A node is always a timing activator — it amplifies its occupied house and acts through its dispositor.
+  const isNode=k=>k==='Ra'||k==='Ke';
+  // Jaimini karaka rank for this chart (all 8)
+  const ckAll=[];try{charaKarakas(d1c).forEach((o,i)=>ckAll.push(o.k));}catch(e){}
+  const ckRank=k=>ckAll.indexOf(k); // -1 if not found; lower index = higher karaka rank
+
   const classifyActivator=k=>{
+    if(isNode(k)) return 'node'; // always include nodes separately
     const ruled=ruledH(k);
     const rulesTrik=ruled.some(h=>[1,5,9].includes(h));
     const rules10=ruled.includes(10);
     const ruled8or12=ruled.some(h=>[8,12].includes(h));
-    const ruled6=ruled.includes(6);
     const isAKAmK=(k===AK||k===AmK);
     const inH10=h10Planets.includes(k);
     const dig=digOf(k,sigOf(k));
@@ -2160,39 +2166,52 @@ ${dusthContent}
     if(ruled8or12&&!rulesTrik&&!rules10) return 'mixed';
     return 'neutral';
   };
-  // Core activators: lagna lord, 10th lord, AmK, AK, planets in H10
+
+  // Core: lagna lord, 10th lord, AmK, AK, H10 occupants, qualified kendra planets
   const d10activators=[lagLord, h10lord, AmK, AK, ...h10Planets].filter((k,i,a)=>k&&a.indexOf(k)===i);
-  // Also add any kendra planet that is primary-classified (own/exalted in kendra, or rules trikona)
   const qualifiedKendra=kendraPlanets.flatMap(x=>x.pl).filter(k=>classifyActivator(k)==='primary');
   const allActivators=[...new Set([...d10activators,...qualifiedKendra])];
-  // Mixed planets (dusthana lords in kendras — present but not peak activators)
-  const mixedK=kendraPlanets.flatMap(x=>x.pl).filter(k=>!allActivators.includes(k));
+  // Mixed: dusthana lords sitting in kendras — foundation colouring, not career peak
+  const mixedK=kendraPlanets.flatMap(x=>x.pl).filter(k=>!allActivators.includes(k)&&!isNode(k));
+  // Nodes — always shown, with house + dispositor context
+  const nodeInfo=k=>{
+    const h=hOf(k); if(!h) return '';
+    const dispSi=sigOf(k), dispLord=dispSi!=null?SIGN_LORD[dispSi]:null;
+    const dispH=dispLord?hOf(dispLord):null;
+    const ckNote=ckRank(k)>=0?` · Jaimini karaka rank ${ckRank(k)+1} (${['AK','AmK','BK','MK','PiK','PK','GK','DK'][ckRank(k)]||''})`:'';
+    return `H${h} (${nameH(h)}) — amplifies ${nameH(h)} career themes · acts through dispositor ${dispLord?NM[dispLord]:'?'}${dispH?' in H'+dispH:''}${ckNote}`;
+  };
 
-  // Label reasons
   const why=k=>{const rs=[];
     if(k===lagLord) rs.push('lagna lord');
     if(k===h10lord) rs.push('10th lord');
     if(k===AmK) rs.push('Amātyakāraka — primary career planet');
     if(k===AK) rs.push('Ātmakāraka — soul planet');
-    if(planetsInH(10).includes(k)) rs.push('sits in H10');
-    const ruled=ruledH(k).filter(h=>[1,5,9].includes(h));
-    if(ruled.length) rs.push(`lord of trikona H${ruled.join('/')}`);
+    if(h10Planets.includes(k)) rs.push('sits in H10');
+    const trikRuled=ruledH(k).filter(h=>[1,5,9].includes(h));
+    if(trikRuled.length) rs.push(`lord of trikona H${trikRuled.join('/')}`);
     const dig=digOf(k,sigOf(k));
     if(dig&&dig.score>=2) rs.push('exalted in D-10');
     else if(dig&&dig.score>=1.5) rs.push('own sign in D-10');
     return rs.join(' · ');
   };
-  const whyMixed=k=>{const ruled=ruledH(k);const dh=ruled.filter(h=>[6,8,12].includes(h));return `rules H${dh.join('/')} (dusthana lord) — activates career foundation themes but is NOT a peak career timing planet`;};
+  const whyMixed=k=>{const dh=ruledH(k).filter(h=>[6,8,12].includes(h));return `rules H${dh.join('/')} (dusthana lord) — colours the kendra it occupies but daśā is NOT a career peak period`;};
 
   steps.push({num:9,title:'Daśā timing — when D-10 gets activated',
-    verdict:`Primary: ${allActivators.map(k=>pill(k)).join(' ')}${mixedK.length?' · Mixed: '+mixedK.map(k=>`<span style="color:#e7b94e">${NM[k]}</span>`).join(', '):''}`,
-    body:`<p>Career breakthroughs happen during daśā/antardaśā of planets that are <b>functionally significant</b> in D-10. The rule is strict: a planet in a kendra only qualifies if it <em>also</em> rules a trikona (H1/5/9) or the 10th, or is the AK/AmK, or is exalted/own-sign in a good house. Simply sitting in H4 while ruling only the 12th or 6th makes a planet a <b>mixed</b> activator, not a primary one.</p>
-<p><b>Primary career activators:</b></p>
+    verdict:`Primary: ${allActivators.map(k=>pill(k)).join(' ')} · Nodes: ${['Ra','Ke'].filter(k=>hOf(k)).map(k=>pill(k)).join(' ')}${mixedK.length?' · Mixed: '+mixedK.map(k=>`<span style="color:#e7b94e">${NM[k]}</span>`).join(', '):''}`,
+    body:`<p>Career breakthroughs happen during daśā/antardaśā of planets that are <b>functionally significant</b> in D-10. Three tiers:</p>
 <ul>
-${allActivators.map(k=>{const h=hOf(k),d=digOf(k,sigOf(k));return`<li>${pill(k)} — H${h} in D-10 · <b>${why(k)}</b>${d&&d.score>=2?' · <span style="color:#4fd0c0">Exalted</span>':d&&d.score>=1.5?' · <span style="color:#4fd0c0">Own sign</span>':d&&d.score<=-2?' · <span style="color:#ef6a5a">Debilitated — effort required</span>':''}</li>`;}).join('')}
+<li><b>Primary</b> — rules a trikona or H10, or is AK/AmK, or sits in H10, or is exalted/own-sign in a good house</li>
+<li><b>Nodes (Rahu/Ketu)</b> — always timing activators; they own no signs but amplify the house they occupy and deliver through their dispositor chain</li>
+<li><b>Mixed</b> — in a kendra but rules only dusthanas; activates that house's foundation theme, not career peak</li>
 </ul>
-${mixedK.length?`<p><b>Mixed / foundation-layer activators</b> (present in kendras but as dusthana lords — their daśā activates that kendra house's foundation theme, not career peak):</p><ul>${mixedK.map(k=>`<li><span style="color:#e7b94e">${NM[k]}</span> — ${whyMixed(k)}</li>`).join('')}</ul>`:''}
-<p><b>Rule of thumb:</b> When a primary activator also transits (gochara) a kendra or trikona of D-10 during its own daśā — external, visible career results follow. Cross-check with D-1 dasha and gochara for confirmation.</p>`
+<p><b>Primary career activators:</b></p>
+<ul>${allActivators.map(k=>{const h=hOf(k),d=digOf(k,sigOf(k));return`<li>${pill(k)} H${h} · ${why(k)}${d&&d.score>=2?' · <span style="color:#4fd0c0">Exalted</span>':d&&d.score>=1.5?' · <span style="color:#4fd0c0">Own sign</span>':d&&d.score<=-2?' · <span style="color:#ef6a5a">Debilitated</span>':''}</li>`;}).join('')}</ul>
+<p><b>Nodes — always in the timing picture:</b></p>
+<ul>${['Ra','Ke'].filter(k=>hOf(k)).map(k=>`<li>${pill(k)} — ${nodeInfo(k)}</li>`).join('')}</ul>
+<p>Rahu and Ketu don't own signs but they powerfully amplify whatever house they occupy in D-10. Rahu expands and intensifies — foreign clients, unconventional breakthroughs, outsider opportunities. Ketu sharpens and purifies — past-life expertise and instinctive mastery in its occupied domain. During node daśā/antardaśā, check D-10 house themes and the dispositor's strength for the flavour of results.</p>
+${mixedK.length?`<p><b>Mixed (dusthana lords in kendras):</b></p><ul>${mixedK.map(k=>`<li><span style="color:#e7b94e">${NM[k]}</span> — ${whyMixed(k)}</li>`).join('')}</ul>`:''}
+<p><b>Rule of thumb:</b> When a primary or node planet also transits a kendra/trikona of D-10 during its own daśā, external career results follow. Cross-check with D-1 daśā and gochara for confirmation.</p>`
   });
 
   // Build accordion HTML
