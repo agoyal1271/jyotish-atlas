@@ -2193,8 +2193,7 @@ function renderBhavaMandala(c,La,N,motion){
     const a1=sa(i),a2=a1+30,isLa=(i===La);
     sv+=`<path d="${sec(ROo,ROi,a1,a2)}" fill="${isLa?'rgba(122,162,255,0.32)':ELF[EL[i]]}" stroke="${isLa?'rgba(150,185,255,0.9)':'rgba(120,150,225,0.32)'}" stroke-width="${isLa?2:1}"/>`;
     const gp=pol((ROo+ROi)/2,a1+15);
-    sv+=`<text x="${gp.x}" y="${gp.y-7}" text-anchor="middle" dominant-baseline="central" font-size="20" fill="${isLa?'#dce8ff':'rgba(206,222,255,0.92)'}">${SG[i]}</text>`;
-    sv+=`<text x="${gp.x}" y="${gp.y+9}" text-anchor="middle" dominant-baseline="central" font-size="7.5" font-weight="600" fill="${EL_COL[EL[i]]}" opacity="0.85">${EL_NAME[EL[i]]}</text>`;
+    sv+=`<text x="${gp.x}" y="${gp.y}" text-anchor="middle" dominant-baseline="central" font-size="22" fill="${isLa?'#dce8ff':'rgba(206,222,255,0.92)'}">${SG[i]}</text>`;
   }
   // sector dividers (sign edge → centre)
   for(let i=0;i<12;i++){const a=sa(i),o=pol(ROo,a),n=pol(RC,a);sv+=`<line x1="${o.x}" y1="${o.y}" x2="${n.x}" y2="${n.y}" stroke="rgba(120,150,225,0.15)" stroke-width="1"/>`;}
@@ -2306,10 +2305,11 @@ function renderBhavaMandala(c,La,N,motion){
   sv+=`<text x="${CX}" y="${CY-9}" text-anchor="middle" dominant-baseline="central" font-size="10" letter-spacing="1.5" fill="rgba(175,198,255,0.8)">ASC</text>`;
   sv+=`<text x="${CX}" y="${CY+9}" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="bold" fill="#e7c14e">${typeof SIGN3!=='undefined'?SIGN3[La]:La}</text>`;
 
-  // ---- Outer sign names ----
+  // ---- Outer sign names + element ----
   for(let i=0;i<12;i++){
     const tp=pol(RL,sa(i)+15),isLa=(i===La);
-    sv+=`<text x="${tp.x}" y="${tp.y}" text-anchor="middle" dominant-baseline="central" font-size="10.5" fill="${isLa?'rgba(150,185,255,0.95)':'rgba(152,172,222,0.62)'}">${SN[i]}</text>`;
+    sv+=`<text x="${tp.x}" y="${tp.y-5}" text-anchor="middle" dominant-baseline="central" font-size="10.5" fill="${isLa?'rgba(150,185,255,0.95)':'rgba(152,172,222,0.62)'}">${SN[i]}</text>`;
+    sv+=`<text x="${tp.x}" y="${tp.y+7}" text-anchor="middle" dominant-baseline="central" font-size="8.5" font-weight="600" fill="${EL_COL[EL[i]]}" opacity="0.82">${EL_NAME[EL[i]]}</text>`;
   }
   sv+=`</svg>`;
 
