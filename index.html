@@ -5682,6 +5682,61 @@ function buildVarga(c,fn){
   return{lagna,planets};
 }
 
+/* ===== Full divisional chart, rendered as a prompt block =====
+   The single biggest accuracy fix for the AI prompts: instead of telling the model
+   "cross-check D-10 for career" without data (forcing it to hallucinate the varga),
+   we compute and inject the EXACT divisional chart — varga lagna + lord, every planet's
+   varga sign/house/dignity/vargottama, and each goal house read from the varga lagna
+   with its occupants + lord condition — plus the D-1/D-9/area-varga reconciliation rule.
+   Used by all three prompt builders (Life Outlook, Bhavat Bhavam, Prompt Builder). */
+function vargaChartBlock(c,La,N,vName,d1GoalHouses){
+  if(!c||!c.La||!N||N===1) return "";
+  const tag="D-"+N, PORD=["Su","Mo","Ma","Me","Ju","Ve","Sa","Ra","Ke"];
+  const vLa=vargaSign(c.La.sign,c.La.deg||0,N);
+  const vpos={}; for(const k of PORD){const p=c.planets[k]; if(p) vpos[k]=vargaSign(p.sign,p.deg,N);}
+  const digShortF=k=>{ if(k==="Ra"||k==="Ke") return "node"; const d=dignityOf(k,vpos[k]); return d?d.full.split("·")[0].trim():"—"; };
+  const houseIn=vs=>((vs-vLa+12)%12)+1;
+  const clsOf=h=>{const t=houseType(h);return t.kendra&&t.trikona?"Kendra-Trikona":t.kendra?"Kendra":t.trikona?"Trikona":t.dusthana?"Dusthana ⚠":t.upachaya?"Upachaya":"Maraka";};
+  // Varga lagna lord — overall delivery strength of this varga
+  const vLaLord=SIGN_LORD[vLa], vLaLordSign=vpos[vLaLord];
+  const vLaLordTxt=vLaLordSign!=null?`${SIGNS[vLaLordSign]} [${dignityOf(vLaLord,vLaLordSign).full.split("·")[0].trim()}] H${houseIn(vLaLordSign)} (${clsOf(houseIn(vLaLordSign))})`:"position unknown";
+  // Planet table
+  let tbl="";
+  for(const k of PORD){ const vs=vpos[k]; if(vs==null) continue;
+    const same=c.planets[k]&&vs===c.planets[k].sign;
+    const vgTag=same?(N===9?"★ VARGOTTAMA":"★ same sign as Rāśi (strengthened)"):"";
+    tbl+=`${GBYK[k].name.padEnd(9)} ${SIGNS[vs].padEnd(13)} H${String(houseIn(vs)).padEnd(3)} ${digShortF(k).padEnd(13)} ${vgTag}\n`;
+  }
+  // Each D-1 goal house, re-read from the varga lagna (the bhava repeats in the varga)
+  let goalSec="";
+  for(const h of (d1GoalHouses||[])){
+    const vhs=(vLa+h-1)%12, lord=SIGN_LORD[vhs], ls=vpos[lord];
+    const occ=PORD.filter(k=>vpos[k]===vhs).map(k=>GBYK[k].name);
+    const lordTxt=ls!=null?`${SIGNS[ls]} [${dignityOf(lord,ls).full.split("·")[0].trim()}] H${houseIn(ls)} (${clsOf(houseIn(ls))})`:"position unknown";
+    goalSec+=`  ${tag} H${h} [${SIGNS[vhs]}] — lord ${GBYK[lord].name} in ${lordTxt} · occupants: ${occ.length?occ.join(", "):"none"}\n`;
+  }
+  // Cross-varga verdict on each goal-house lord: strong in D-1 but weak here = promise undermined
+  let reconcile="";
+  for(const h of (d1GoalHouses||[])){
+    const d1lord=SIGN_LORD[(La+h-1)%12], lp=c.planets[d1lord];
+    if(!lp) continue;
+    const d1dig=dignityOf(d1lord,lp.sign).score, vSign=vargaSign(lp.sign,lp.deg,N), vdig=dignityOf(d1lord,vSign).score;
+    if(d1dig>=1&&vdig<=-1) reconcile+=`  ⚠ H${h} lord ${GBYK[d1lord].name}: STRONG in D-1 but WEAK in ${tag} (${SIGNS[vSign]}) — natal promise is UNDERMINED; delivery partial/delayed.\n`;
+    else if(d1dig<=-1&&vdig>=1) reconcile+=`  ↑ H${h} lord ${GBYK[d1lord].name}: weak in D-1 but RECOVERS in ${tag} (${SIGNS[vSign]}) — Neecha-bhanga-like rescue; result improves with maturity.\n`;
+  }
+  return `=======================================
+${vName} — FULL DIVISIONAL CHART  (computed by the app — use these EXACT positions; never re-derive or assume a varga)
+${vName} Lagna: ${SIGNS[vLa]} · lord ${GBYK[vLaLord].name} in ${vLaLordTxt}
+=======================================
+Planet    ${tag}-Sign       House  Dignity        Vargottama / note
+--------  -------------  -----  -------------  -----------------
+${tbl}
+Goal houses read INSIDE ${tag} (counted from the ${tag} Lagna — this is how the varga is judged, NOT by carrying the D-1 house over):
+${goalSec}${reconcile?`\nPromise-vs-delivery flags (D-1 ⇄ ${tag}):\n${reconcile}`:""}
+RECONCILIATION RULE: treat ${N===9?"D-1 and D-9":"D-1, D-9 and "+tag} as co-primary. A result is RELIABLE only when ${N===9?"both":"all three"} agree. Where the ${tag} lagna-lord or a ${tag} goal-house lord is debilitated or in a Dusthana while D-1 looks strong, the natal promise is undermined — state this explicitly and lower the confidence rating.
+`;
+}
+
 /* ===== ARUDHA & INDU LAGNA ===== */
 function computeAL(c,La){
   const lord=SIGN_LORD[La], lp=c.planets[lord];
@@ -7023,7 +7078,11 @@ D-1 vs ${topic.vn}: ${vLordDig?(vLordDig.score>=1?"Divisional confirms natal pro
 `;
     }
     const transitSec=transitPromptSection(c,La,[resultH,person.h]);
+    const _bvm=topic.vn&&topic.vn.match(/D-?(\d+)/), bbVN=_bvm?+_bvm[1]:null;
+    const vargaFullSec=bbVN?vargaChartBlock(c,La,bbVN,topic.vn,[resultH]):"";
     return `You are a classical Vedic astrologer trained in the tradition of Brihat Parashara Hora Shastra (BPHS), Saravali, Phala Deepika, and Jaimini Sutras. Your analysis is methodical, layered, and specific — you never generalise. You cite exact house numbers, planet names, degrees, nakshatras, and classical principles (with chapter references where you know them).
+
+USE ONLY THE PROVIDED DATA. Every position, dignity and divisional chart you need is computed below — never calculate, recall, or assume a placement yourself, and never derive a varga from memory (the relevant one is supplied in full). If something needed is absent, say "not provided" and lower confidence rather than inventing it. Treat D-1, D-9 and the topic's area-varga as CO-PRIMARY and reconcile all three before any verdict.
 
 ANALYTICAL FRAMEWORK — always work through these layers in sequence:
   Layer 1 · KARAKA — natural and functional significator of the question
@@ -7090,6 +7149,7 @@ SAV (H${resultH}): ${resultSav}/48  (${resultSav>=30?"strong — transits throug
 NAKSHATRA SUB-LAYER
 =======================================
 ${nakSec}${vargaSec}
+${vargaFullSec}
 ${transitSec}
 =======================================
 ANALYSIS — address each layer in sequence:
@@ -7375,15 +7435,19 @@ Dig Bala (directional strength): ${digList.length?digList.join(", "):"none at fu
 Parivartana (sign exchange): ${parList.length?parList.join("; "):"none"}${shbSec?`\nShadbala · Ishta/Kashta Phala (from JHora):\n${shbSec}`:"\n(Shadbala/Ishta-Kashta not in pasted data — assess strength from dignity, dig bala, avastha, combustion)"}`;
 
     const transitSec=transitPromptSection(c,La,goal.houses);
+    const _vm=goal.vn&&goal.vn.match(/D-?(\d+)/), goalVN=_vm?+_vm[1]:null;
+    const vargaChartSec=goalVN?vargaChartBlock(c,La,goalVN,goal.vn,goal.houses):"";
     return `You are an expert Vedic Astrologer (Jyotish Acharya) with deep mastery of Brihat Parashara Hora Shastra (BPHS), Jaimini Sutras, Phaladeepika, Brihat Jataka, Saravali, and Uttara Kalamrita. Deliver a structured, evidence-based, objective analysis of the stated goal using the South Indian chart data below, following the 10-step methodology exactly.
 
 CRITICAL FOUNDATIONAL GUARDRAILS
-1. MULTI-FACTOR VERIFICATION — never predict from a single factor. Every conclusion must be cross-verified by at least three independent indicators (Natal Promise + Dasha Activation + Transit Trigger + Divisional Support).
-2. CONTRADICTION BALANCE — explicitly quantify evidence before concluding (e.g., "3 supportive vs 2 limiting factors").
-3. EPISTEMIC HUMILITY — frame insights as analytical interpretations, karmic tendencies and potential trends, not absolute facts.
-4. LOGICAL PROGRESSION — reason step-by-step; never jump straight to predictions.
+1. USE ONLY THE PROVIDED DATA — every position, dignity, divisional chart, dasha and transit you need is computed and supplied below. NEVER calculate, assume, or "recall" a placement yourself, and never derive a divisional (varga) chart from memory — the relevant one is given in full. If a factor you want is genuinely absent, say "not provided" and lower your confidence rather than inventing it. Inventing placements is the #1 cause of wrong readings.
+2. MULTI-FACTOR VERIFICATION — never predict from a single factor. Every conclusion must be cross-verified by at least three independent indicators (Natal Promise + Dasha Activation + Transit Trigger + Divisional Support).
+3. CO-PRIMARY VARGA RECONCILIATION — D-1, D-9 and the goal's area-varga (${goal.vn||"D-9"}) are CO-PRIMARY. Reconcile all three BEFORE any verdict. A planet strong in D-1 but debilitated/dusthana in the varga means the promise is undermined — state it; do not average it away. Rate a result "reliable / high confidence" ONLY when D-1, D-9 and the area-varga agree.
+4. CONTRADICTION BALANCE — explicitly quantify evidence before concluding (e.g., "3 supportive vs 2 limiting factors"). State contradictions plainly; never flatten them.
+5. EPISTEMIC HUMILITY — frame insights as analytical interpretations, karmic tendencies and potential trends, not absolute facts.
+6. LOGICAL PROGRESSION — reason step-by-step through the 10 steps; never jump straight to predictions.
 
-DISTINGUISH throughout: PROMISE (lifelong natal guarantee) vs FRUCTIFICATION (dasha/transit timing). State contradictions plainly. Cite BPHS principles where applicable.
+DISTINGUISH throughout: PROMISE (lifelong natal guarantee, read from D-1 + divisionals) vs FRUCTIFICATION (dasha/transit timing). Cite BPHS principles where applicable.
 
 =======================================
 BIRTH DATA
@@ -7424,6 +7488,8 @@ BHAVAT BHAVAM — supporting "house-from-house"
 (the Xth house from house X sustains/feeds it)
 =======================================
 ${bbSec}
+${vargaChartSec?`${vargaChartSec}
+`:`[No area-varga prescribed for this goal — judge promise from D-1 and D-9 only.]\n`}
 ${dSec?`=======================================
 VIMSHOTTARI DASHA 2025–2030
 (★ = connected to goal houses by lordship or placement)
@@ -7480,9 +7546,16 @@ STEP 5 · NAKSHATRA-LEVEL ANALYSIS
    karmic/soul themes, and whether they align with the goal.
 
 STEP 6 · DIVISIONAL (VARGA) CORRELATION
-   Cross-check D-1 against the relevant varga${goal.vn?` (${goal.vn})`:""}: Career=D9+D10,
-   Marriage=D9, Children=D7, Wealth=D2+D9, Property=D4, Spirituality=D20, Karma=D60.
-   Do NOT finalise a prediction without divisional support.
+   ${goalVN?`The FULL ${goal.vn} chart is supplied above — read it directly; do NOT re-derive it.
+   Work through it concretely: (a) the ${goal.vn} Lagna and its lord = overall delivery strength of
+   this life-area; (b) each goal house counted from the ${goal.vn} Lagna — its lord's dignity, house
+   and occupants; (c) which planets are vargottama (same sign D-1 & D-9) → reinforced.
+   Then RECONCILE: for every goal-house lord state D-1 dignity vs ${goal.vn} dignity. Honour the
+   promise-vs-delivery flags listed in the block (strong-in-D1-but-weak-in-varga = undermined).`
+   :`No single area-varga is prescribed for this goal — confirm promise from D-1 and the D-9 vargottama
+   list above. Reference the standard mapping: Career=D9+D10, Marriage=D9, Children=D7, Wealth=D2+D9,
+   Property=D4, Education=D24, Spirituality=D20, Karma=D60.`}
+   Do NOT finalise a prediction without divisional support; never substitute a varga you were not given.
 
 STEP 7 · DASHA (TIMING) ANALYSIS
    For the running and upcoming Mahadasha→Antardasha→Pratyantardasha (data above): evaluate each
@@ -8321,8 +8394,8 @@ function toggleTheme(){
     L.push(`Native essentials — Lagna ${SIGNS[La]} (${lagNak.n}), lord ${GBYK[ll].name}${llP?` H${houseFromSigns(La,llP.sign)} ${digShort(dignityOf(ll,llP.sign))}`:""}; Moon ${mo?`${SIGNS[mo.sign]} ${moNak.n}`:"—"}; current daśā ${dashaNow}.`);
     L.push(`\nPrimary houses (D-1):`);
     t.houses.forEach(h=>L.push(houseBlock(c,La,h,sav)));
-    L.push(`\nDivisional confirmation (promise vs delivery):`);
-    t.vargas.forEach(v=>{if(v.N===1)return;L.push(`D-${v.N} (${v.why}):\n${vargaHouse(c,La,v.N,t.houses[0])}`);});
+    L.push(`\nDivisional confirmation (promise vs delivery) — full charts, use these EXACT positions:`);
+    t.vargas.forEach(v=>{if(v.N===1)return;L.push(`(${v.why})\n${vargaChartBlock(c,La,v.N,"D-"+v.N,t.houses)}`);});
     L.push(`\nKāraka condition:`);
     t.karakas.forEach(k=>{const p=c.planets[k];if(!p){L.push(`   ${GBYK[k].name}: not in chart`);return;}L.push(`   ${GBYK[k].name}: H${houseFromSigns(La,p.sign)} ${SIGNS[p.sign]} ${Math.floor(p.deg)}° · ${digShort(dignityOf(k,p.sign))} · ${avLine(k,c)}`);});
     if(t.special.length){L.push(`\nSpecial / Jaimini:`);L.push(specialBlock(c,La,t.special));}
