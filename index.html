@@ -1250,11 +1250,9 @@ html.light .bm-pcard{background:rgba(240,244,255,0.7)}
 .bm-hc-lord{font-size:11px;margin-top:3px;color:var(--muted)}
 .bm-hc-link{color:var(--muted)}
 .bm-hc-pl{font-size:11px;margin-top:3px;color:var(--ink)}
-/* Planet side panel */
-.bm-outer{display:flex;align-items:flex-start;justify-content:center;gap:0}
-.bm-wheel-col{flex:0 1 616px;min-width:0;display:flex;flex-direction:column;align-items:center}
-.bm-planet-panel{flex:0 0 220px;width:220px;margin-left:14px;position:sticky;top:80px;align-self:flex-start;opacity:0;pointer-events:none;transform:translateX(-10px);transition:opacity .2s,transform .22s cubic-bezier(.34,1.1,.5,1)}
-.bm-planet-panel.open{opacity:1;pointer-events:auto;transform:none}
+/* Planet side panel — fixed overlay; does not affect SVG layout */
+.bm-planet-panel{position:fixed;right:22px;top:50%;transform:translateY(-50%) translateX(18px);width:232px;z-index:310;opacity:0;pointer-events:none;transition:opacity .2s,transform .22s cubic-bezier(.34,1.1,.5,1);max-height:85vh;overflow-y:auto}
+.bm-planet-panel.open{opacity:1;pointer-events:auto;transform:translateY(-50%)}
 .bm-pp-inner{background:rgba(10,14,34,0.97);border:1px solid rgba(90,115,210,0.35);border-radius:13px;padding:15px 13px 14px;font-size:12px;color:var(--muted);position:relative;box-shadow:0 6px 28px rgba(0,0,0,.45)}
 html.light .bm-pp-inner{background:rgba(237,242,255,0.98);border-color:rgba(90,110,200,0.22);box-shadow:0 4px 20px rgba(0,0,0,.12)}
 .bm-pp-close{position:absolute;top:7px;right:9px;background:none;border:none;font-size:17px;cursor:pointer;color:var(--muted);line-height:1;padding:1px 4px;border-radius:4px}
@@ -1270,10 +1268,9 @@ html.light .bm-pp-inner{background:rgba(237,242,255,0.98);border-color:rgba(90,1
 .bm-vg-lab{font-size:10px;color:var(--muted);font-weight:600;white-space:nowrap}
 .bm-vg-val{font-size:11px;font-weight:700;white-space:nowrap}
 .bm-pp-asp-row{font-size:11px;line-height:1.7;color:var(--ink)}
-@media(max-width:1010px){
-  .bm-outer{flex-direction:column;align-items:center;gap:0}
-  .bm-planet-panel{position:fixed;right:14px;top:50%;left:auto;margin:0;transform:translateY(-50%) translateX(10px);z-index:320;width:min(256px,88vw);max-height:86vh;overflow-y:auto}
-  .bm-planet-panel.open{transform:translateY(-50%)}
+@media(max-width:560px){
+  .bm-planet-panel{right:8px;width:calc(100vw - 16px);top:auto;bottom:14px;transform:translateY(16px);max-height:76vh}
+  .bm-planet-panel.open{transform:none}
 }
 html.light .bm-hcell{background:rgba(240,244,255,0.7);border-color:rgba(80,100,200,0.16)}
 
@@ -2359,7 +2356,7 @@ function renderBhavaMandala(c,La,N,motion){
   const caption=`<div class="bm-caption">Showing <b>D-${N} · ${vName}</b>${N===1?' — the birth chart':' — divisional chart'} · lens: <b>${(LENSES.find(l=>l[0]===layer)||[,'Lordship'])[1]}</b>. ${LENS_DESC[layer]}. The coloured <b>aura</b> behind each sign always shows the net aspect load. <span style="color:#9db4ff">Blue</span> kendra · <span style="color:#7fe0a0">green</span> trikona · <span style="color:#f0a890">amber</span> dusthana · gold = Lagna.</div>`;
   const traceDefault={lord:'▶ Click any house to trace where its lord sits',graha:'▶ Click a planet to see what it aspects, or a house to see what aspects it',rashi:'▶ Click a house to see which signs cast rāśi dṛṣṭi on it',all:'▶ Click a house, or a planet, to isolate its relationships'}[layer];
 
-  ct.innerHTML=`${tabs}${lensRow}<div class="bm-outer"><div class="bm-wheel-col"><div class="bm-container">${sv}</div>${aspLegend}<div class="bm-trace" id="bmTrace">${traceDefault}</div>${caption}</div><div class="bm-planet-panel" id="bmPlanetPanel"></div></div><div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div>`;
+  ct.innerHTML=`${tabs}${lensRow}<div class="bm-container">${sv}</div>${aspLegend}<div class="bm-trace" id="bmTrace">${traceDefault}</div>${caption}<div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div><div class="bm-planet-panel" id="bmPlanetPanel"></div>`;
   if(motion){const ns=ct.querySelector('.bm-svg');if(ns){ns.style.transformOrigin='center';ns.style.transform='rotate(14deg) scale(.9)';ns.style.opacity='0';requestAnimationFrame(()=>{ns.style.transition='transform .46s cubic-bezier(.34,1.12,.4,1),opacity .4s';ns.style.transform='none';ns.style.opacity='1';});}}
 }
 
