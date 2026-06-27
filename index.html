@@ -862,6 +862,22 @@
   .dp-vbadge.vd-difficult{background:#200a0a;color:#ff5a4a;border:1px solid rgba(255,80,60,.4)}
   .dp-vtier{font-size:18px;font-weight:800;margin-bottom:3px}
   .dp-vscore{font-size:10.5px;opacity:.8;line-height:1.4}
+  /* "Why this verdict" — ranked ± drivers */
+  .dp-why{padding:13px 20px 14px;border-bottom:1px solid var(--line);background:var(--panel2)}
+  .dp-why-head{font-size:13px;font-weight:700;margin-bottom:9px;display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+  .dp-why-total{font-size:10.5px;font-weight:600;color:var(--muted);letter-spacing:.04em}
+  .dp-why-row{display:flex;align-items:flex-start;gap:7px;flex-wrap:wrap;margin-bottom:7px}
+  .dp-why-tag{flex:0 0 auto;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:3px 8px;border-radius:6px;margin-top:1px}
+  .dp-why-tag.up{background:rgba(47,125,87,.18);color:var(--exalt)}
+  .dp-why-tag.down{background:rgba(187,59,40,.16);color:var(--debil)}
+  .dp-why-item{font-size:11.5px;padding:3px 9px;border-radius:7px;border:1px solid var(--line);background:var(--panel);line-height:1.35}
+  .dp-why-item.up{border-color:rgba(47,125,87,.35)}
+  .dp-why-item.down{border-color:rgba(187,59,40,.32)}
+  .dp-why-item b{font-variant-numeric:tabular-nums}
+  .dp-why-item.up b{color:var(--exalt)}
+  .dp-why-item.down b{color:var(--debil)}
+  .dp-why-note{font-size:10px;color:var(--muted);margin-top:3px;line-height:1.45}
+  html.light .dp-why{background:var(--panel2)}
   .dp-hinfo{flex:1;min-width:200px}
   .dp-period-title{font-size:17px;font-weight:800;margin-bottom:4px}
   .dp-period-sub{font-size:12px;color:var(--muted);margin-bottom:7px}
@@ -5433,6 +5449,48 @@ function dpAnalyze(){
       <div class="dp-topic-conn"><b>Dasha activation:</b> ${conn}.</div></div>`;
   }
 
+  // ---- "Why this verdict" — surface the actual ± drivers behind the score ----
+  const whyParts=[];
+  const pushF=(label,val)=>{ if(val!=null&&Math.abs(val)>=0.12) whyParts.push({label,val}); };
+  [['MD',mahaK,l1M,l2M],['AD',antarK,l1A,l2A]].forEach(([role,k,l1,l2])=>{
+    if(!l1||!l1.p||(role==='AD'&&mahaK===antarK)) return;
+    const tag=`${NM(k)} (${role})`;
+    pushF(`${tag} · D-1 ${l1.mool?'mūlatrikoṇa':l1.d1.full.split('·')[0].trim().toLowerCase()}`, l1.digScore);
+    pushF(`${tag} · D-9 navāṁśa`, l1.d9Mod);
+    pushF(`${tag} · dispositor`, l1.dispMod);
+    pushF(`${tag} · Iṣṭa vs Kaṣṭa phala`, l1.ishtaMod);
+    pushF(`${tag} · ${(k==='Ra'||k==='Ke')?'delivers via dispositor/conjunction':'delivery'}`, l1.nodeMod);
+    pushF(`${tag} · node in upachaya`, l1.nodeUpaMod);
+    pushF(`${tag} · combustion`, l1.combustMod);
+    pushF(`${tag} · grahaṇa (eclipse)`, l1.grahanMod);
+    pushF(`${tag} · retrograde (Cheṣṭā)`, l1.retroMod);
+    pushF(`${tag} · Ātma/Amātya-kāraka`, l1.akMod);
+    if(l2){
+      pushF(`${tag} · functional ${(l2.fn.label||'').toLowerCase()}`, l2.fnScore);
+      pushF(`${tag} · house quality (H${l2.house})`, l2.hq);
+      pushF(`${tag} · Rāja-yoga placement`, l2.rajaMod);
+    }
+  });
+  pushF(`Maha×Antar relationship (${rel.relCat})`, rel.relScore);
+  if(nakBond) pushF(`Nakṣatra bond ${NM(mahaK)}↔${NM(antarK)}`, nakBond.score);
+  pushF('Transit Jupiter · gochara', l3.juScore);
+  pushF((l3.saG&&l3.saG.satSpecial==='sade-sati')?'Sade Sati · Saturn transit':'Transit Saturn · gochara', l3.saScore);
+  pushF('Transit Rahu · gochara', l3.raScore);
+  if(l3.taraScore) pushF('Transit nakṣatra tārā', l3.taraScore);
+  if(l4.score) pushF('Yogas in play', l4.score);
+  if(topicA) pushF(`Focus · ${topicA.t.label}`, topicA.score);
+  if(antarDamp) pushF('AD lord debilitated (no Neecha Bhanga)', antarDamp);
+
+  const _wUp=whyParts.filter(x=>x.val>0).sort((a,b)=>b.val-a.val).slice(0,5);
+  const _wDn=whyParts.filter(x=>x.val<0).sort((a,b)=>a.val-b.val).slice(0,5);
+  const _wFmt=x=>`<span class="dp-why-item ${x.val>0?'up':'down'}">${x.label} <b>${x.val>0?'+':''}${x.val.toFixed(2)}</b></span>`;
+  const whyHtml=(_wUp.length||_wDn.length)?`<div class="dp-why">
+    <div class="dp-why-head">Why this period is <b>${verdict.label}</b><span class="dp-why-total">net score ${total.toFixed(2)}</span></div>
+    ${_wUp.length?`<div class="dp-why-row"><span class="dp-why-tag up">▲ lifted by</span>${_wUp.map(_wFmt).join('')}</div>`:''}
+    ${_wDn.length?`<div class="dp-why-row"><span class="dp-why-tag down">▼ tempered by</span>${_wDn.map(_wFmt).join('')}</div>`:''}
+    <div class="dp-why-note">Natal factors are avasthā-scaled &amp; lord-weighted before reaching the score; transit, relationship &amp; nakṣatra factors enter directly. Ranked by raw magnitude — the leading drivers, not every term.</div>
+  </div>`:'';
+
   const resultEl=document.getElementById('dpResult'); if(!resultEl) return;
   document.getElementById('dpTransitNote').textContent=transitNote;
   resultEl.innerHTML=`
@@ -5444,6 +5502,7 @@ function dpAnalyze(){
       <div class="dp-summary">${sumParts}</div>
     </div>
   </div>
+  ${whyHtml}
   <div class="dp-body">
     <div>
       <div class="dp-section-title">Layer 1 + 2 · Natal Foundation &amp; Functional Quality</div>
