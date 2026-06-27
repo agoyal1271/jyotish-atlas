@@ -4802,8 +4802,17 @@ function dpLayer1(k,c,La){
   // is the layer an astrologer reads when a 9th-lord AK at 28° still feels "flat". Kumāra
   // (the commonest stage) ≈ neutral so the overall distribution isn't shifted.
   const base=digScore+d9Mod+combustMod+dispMod+aspMod*0.4+ishtaMod+nodeMod+akMod+retroMod;
-  const AV_MULT={'Yuvā':1.1,'Kumāra':1.0,'Vṛddha':0.8,'Bāla':0.7,'Mṛta':0.45};
-  let avMult=1; try{avMult=AV_MULT[baladiAvastha(p.sign,p.deg).n]??1;}catch(e){}
+  const AV_MULT={'Yuvā':1.1,'Kumāra':1.0,'Vṛddha':0.8,'Bāla':0.7,'Mṛta':0.35}; // Mṛta deepened 0.45→0.35
+  // Jāgradādi (wakefulness) now MODULATES delivery alongside Bālādi — previously computed for
+  // display only. An asleep (Suṣupti) planet (e.g. a benefic in an enemy's sign) cannot deliver
+  // its promise cleanly; an awake (Jāgrat) one lands results. Kept gentle so it refines, not
+  // dominates — dignity still leads. jagradadiAvastha(d1.score) reproduces the classical avasthā.
+  const JAG_MULT={'Jāgrat':1.05,'Svapna':0.9,'Suṣupti':0.65};
+  let avMult=1;
+  try{
+    avMult=AV_MULT[baladiAvastha(p.sign,p.deg).n]??1;
+    avMult*=JAG_MULT[jagradadiAvastha(d1.score).n]??1;
+  }catch(e){}
   const hk=houseFromSigns(La,p.sign);
   // Grahaṇa dosha — a luminary conjunct a node (eclipse) loses lustre.
   const grahanMod=((k==='Su'||k==='Mo')&&['Ra','Ke'].some(nk=>c.planets[nk]&&c.planets[nk].sign===p.sign))?-0.5:0;
@@ -5278,7 +5287,9 @@ function dpAnalyze(){
   // planet cannot deliver its dignity/yoga, however good it looks. The bhukti (AD) lord is
   // weighted more than the MD lord (it rules the sub-period).
   const _avNat=(l1,l2)=>{const s=(l1?l1.score:0)+(l2?l2.score:0); return s>0?s*(l1?l1.avMult:1):s;};
-  const natalScore=_avNat(l1M,l2M)*0.6+(l1A?_avNat(l1A,l2A):0)*0.4;
+  // FIX: AD (bhukti) lord now weighted MORE than MD, matching the comment above and classical
+  // practice — the sub-period lord rules the period's flavour (was reversed: 0.6 MD / 0.4 AD).
+  const natalScore=_avNat(l1M,l2M)*0.45+(l1A?_avNat(l1A,l2A):0)*0.55;
   const nakScore=nakBond?nakBond.score:0;
   // Aspects (graha drishti, benefic/malefic) on each dasha lord — read BEFORE transit.
   const aspM=dpAspectsOn(c,La,c.planets[mahaK]?c.planets[mahaK].sign:La);
@@ -5525,7 +5536,9 @@ function lpComputePeriodScore(c,La,allBAV,maha,antar){
   // planet cannot deliver its dignity/yoga, however good it looks. The bhukti (AD) lord is
   // weighted more than the MD lord (it rules the sub-period).
   const _avNat=(l1,l2)=>{const s=(l1?l1.score:0)+(l2?l2.score:0); return s>0?s*(l1?l1.avMult:1):s;};
-  const natalScore=_avNat(l1M,l2M)*0.6+(l1A?_avNat(l1A,l2A):0)*0.4;
+  // FIX: AD (bhukti) lord now weighted MORE than MD, matching the comment above and classical
+  // practice — the sub-period lord rules the period's flavour (was reversed: 0.6 MD / 0.4 AD).
+  const natalScore=_avNat(l1M,l2M)*0.45+(l1A?_avNat(l1A,l2A):0)*0.55;
   // include the Maha×Antar relationship and nakshatra bond so the Life Predictor
   // timeline agrees with the Dasha Prediction Engine for the same period
   const rel=dpRelation(mahaK,antarK,c), nak=dpNakBond(mahaK,antarK,c);
