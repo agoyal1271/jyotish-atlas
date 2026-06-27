@@ -4811,13 +4811,15 @@ function dpLayer1(k,c,La){
   let avMult=1;
   try{
     avMult=AV_MULT[baladiAvastha(p.sign,p.deg).n]??1;
-    avMult*=JAG_MULT[jagradadiAvastha(d1.score).n]??1;
+    // Nodes have no sign dignity, so jagradadiAvastha(d1.score=0) mis-tags them 'Svapna'.
+    // Their wakefulness is carried via dispositor/conjunction (nodeMod) — skip the multiplier.
+    if(k!=='Ra'&&k!=='Ke') avMult*=JAG_MULT[jagradadiAvastha(d1.score).n]??1;
   }catch(e){}
   const hk=houseFromSigns(La,p.sign);
   // Grahaṇa dosha — a luminary conjunct a node (eclipse) loses lustre.
   const grahanMod=((k==='Su'||k==='Mo')&&['Ra','Ke'].some(nk=>c.planets[nk]&&c.planets[nk].sign===p.sign))?-0.5:0;
-  // Nodes thrive in upachaya houses (3/6/11) — Rahu in the 6th is classically strong.
-  const nodeUpaMod=((k==='Ra'||k==='Ke')&&[3,6,11].includes(hk))?0.45:0;
+  // Nodes thrive in upachaya houses (3/6/11) — Rahu in the 6th is classically strong (Shatrujit).
+  const nodeUpaMod=((k==='Ra'||k==='Ke')&&[3,6,11].includes(hk))?0.7:0;
 
   return{
     k,p,d1,d9,d9s,vg,mool,nb,combust,retro,
@@ -4848,7 +4850,11 @@ function dpLayer2(k,c,La){
   else if(fn.tier==='malefic')  fnScore=fn.label.includes('8th')?-1:-0.6;
   else fnScore=0;
 
-  const hq=[1,4,7,10].includes(house)?0.5:[5,9].includes(house)?0.5:[6,8,12].includes(house)?-0.5:0;
+  // A node (Ra/Ke) in an upachaya (3/6/11) is a STRENGTH (Shatrujit), not a dusthana liability —
+  // don't apply the generic 6/8/12 penalty to Rahu/Ketu sitting in the 6th.
+  const isNode=(k==='Ra'||k==='Ke');
+  const hq=(isNode&&[3,6,11].includes(house))?0.5
+          :[1,4,7,10].includes(house)?0.5:[5,9].includes(house)?0.5:[6,8,12].includes(house)?-0.5:0;
 
   // Trikona lord in a kendra (or kendra lord in a trikona) — a classical auspicious /
   // Raja-Yoga-forming placement (e.g. 9th lord of fortune in the 10th of karma).
