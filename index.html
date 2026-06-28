@@ -2592,11 +2592,10 @@ function renderBhavaMandala(c,La,N,motion){
   sv+=`<text x="${CX}" y="${CY-9}" text-anchor="middle" dominant-baseline="central" font-size="10" letter-spacing="1.5" fill="rgba(175,198,255,0.8)">ASC</text>`;
   sv+=`<text x="${CX}" y="${CY+9}" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="bold" fill="#e7c14e">${typeof SIGN3!=='undefined'?SIGN3[La]:La}</text>`;
 
-  // ---- Outer sign names + element ----
+  // ---- Outer sign names (single line; element shown in house grid below) ----
   for(let i=0;i<12;i++){
     const tp=pol(RL,sa(i)+15),isLa=(i===La);
-    sv+=`<text x="${tp.x}" y="${tp.y-5}" text-anchor="middle" dominant-baseline="central" font-size="10.5" fill="${isLa?'rgba(150,185,255,0.95)':'rgba(152,172,222,0.62)'}">${SN[i]}</text>`;
-    sv+=`<text x="${tp.x}" y="${tp.y+7}" text-anchor="middle" dominant-baseline="central" font-size="8.5" font-weight="600" fill="${EL_COL[EL[i]]}" opacity="0.82">${EL_NAME[EL[i]]}</text>`;
+    sv+=`<text x="${tp.x}" y="${tp.y}" text-anchor="middle" dominant-baseline="central" font-size="10.5" fill="${isLa?'rgba(150,185,255,0.95)':'rgba(152,172,222,0.62)'}">${SN[i]}</text>`;
   }
   sv+=`</svg>`;
 
