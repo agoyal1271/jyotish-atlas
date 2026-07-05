@@ -359,7 +359,7 @@
   .row-emblem .emblem{width:18px;height:18px;flex-shrink:0}
 
   /* ---- modal ---- */
-  .modal{position:fixed;inset:0;background:rgba(24,19,16,.76);display:none;align-items:center;justify-content:center;z-index:60;padding:18px}
+  .modal{position:fixed;inset:0;background:rgba(24,19,16,.76);display:none;align-items:center;justify-content:center;z-index:100;padding:18px}
   .modal.show{display:flex}
   .modal .card{background:var(--panel);border:1px solid var(--line);border-radius:18px;max-width:660px;width:100%;padding:24px;box-shadow:var(--shadow-2)}
   #addModalTitle.display{font-size:clamp(26px,4vw,34px);line-height:1.08;margin:0 0 6px}
@@ -1528,6 +1528,7 @@ html.light .brand{color:var(--ink)!important}
   .jm-topics-menu{position:absolute;right:20px;margin-top:6px;background:var(--panel2);border:1px solid var(--line);
     border-radius:var(--r);box-shadow:var(--shadow-2);padding:12px;max-width:min(560px,92vw);
     display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 18px;z-index:61}
+  .jm-topics-menu[hidden]{display:none}
   .jm-topics-ch{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold2);margin-bottom:4px;font-weight:700}
   .jm-topics-item{display:block;width:100%;text-align:left;background:none;border:none;color:var(--ink);
     padding:5px 6px;border-radius:7px;font-size:13px;cursor:pointer}
