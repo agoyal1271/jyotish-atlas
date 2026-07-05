@@ -1490,6 +1490,88 @@ html.light .brand{color:var(--ink)!important}
   .glossary-tip .gt-title{font-weight:700;margin-bottom:4px;font-size:13.5px}
   .glossary-tip .gt-skt{color:var(--muted);font-weight:400}
   .glossary-tip .gt-body{color:var(--muted)}
+
+  /* ══ Guided Journey chrome ══ */
+  html.jm-guided #hero, html.jm-guided .hero-zones, html.jm-guided #siteNav,
+  html.jm-guided .nav-toggle { display:none !important; }
+  html:not(.jm-guided) #jmBar { display:none; }
+  html:not(.jm-guided) .jm-stephead, html:not(.jm-guided) .jm-stepnav { display:none; }
+  html:not(.jm-guided) #starthere { display:none; }
+  /* one step at a time in guided mode */
+  html.jm-guided .jm-step { display:none; }
+  html.jm-guided .jm-step.jm-active { display:block; animation:jmFade .35s var(--ease); }
+  @keyframes jmFade { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+
+  .jm-bar{position:sticky;top:0;z-index:60;background:var(--bg2);border-bottom:1px solid var(--line);
+    box-shadow:var(--shadow-1);backdrop-filter:saturate(1.1) blur(6px)}
+  .jm-bar-inner{max-width:1180px;margin:0 auto;display:flex;align-items:center;gap:14px;
+    padding:10px 20px;flex-wrap:wrap}
+  .jm-home{background:none;border:none;color:var(--gold2);font-weight:700;font-size:15px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;font-family:var(--font-display)}
+  .jm-rail{display:flex;gap:4px;flex:1;flex-wrap:wrap;justify-content:center}
+  .jm-chapchip{display:inline-flex;align-items:center;gap:6px;background:none;border:1px solid transparent;
+    color:var(--muted);border-radius:999px;padding:5px 11px;font-size:12.5px;cursor:pointer;font-weight:600;
+    transition:all var(--dur) var(--ease)}
+  .jm-chapchip:hover{color:var(--ink);border-color:var(--line)}
+  .jm-chapchip .jm-dot{width:7px;height:7px;border-radius:50%;background:var(--line);transition:background var(--dur)}
+  .jm-chapchip.is-done{color:var(--exalt)}
+  .jm-chapchip.is-done .jm-dot{background:var(--exalt)}
+  .jm-chapchip.is-active{color:#0b0e1a;background:var(--gold);border-color:var(--gold)}
+  .jm-chapchip.is-active .jm-dot{background:#0b0e1a}
+  .jm-bar-right{display:flex;gap:8px;align-items:center}
+  .jm-topics-btn,.jm-explore-btn{background:var(--panel);border:1px solid var(--line);color:var(--muted);
+    border-radius:10px;padding:7px 12px;font-size:12.5px;cursor:pointer;font-weight:600}
+  .jm-topics-btn:hover,.jm-explore-btn:hover{color:var(--ink);border-color:var(--gold)}
+  .jm-progress{height:3px;background:var(--line)}
+  .jm-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--terracotta));width:0;
+    transition:width .4s var(--ease)}
+  .jm-topics-menu{position:absolute;right:20px;margin-top:6px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:var(--r);box-shadow:var(--shadow-2);padding:12px;max-width:min(560px,92vw);
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 18px;z-index:61}
+  .jm-topics-ch{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold2);margin-bottom:4px;font-weight:700}
+  .jm-topics-item{display:block;width:100%;text-align:left;background:none;border:none;color:var(--ink);
+    padding:5px 6px;border-radius:7px;font-size:13px;cursor:pointer}
+  .jm-topics-item:hover{background:var(--panel)}
+
+  .jm-stephead{margin:0 0 18px}
+  .jm-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .jm-chip{font-size:11.5px;font-weight:700;border-radius:999px;padding:4px 11px;border:1px solid var(--line)}
+  .jm-chip-ch{color:var(--gold2);border-color:var(--gold2)}
+  .jm-chip-lvl{color:var(--muted)}
+  .jm-tldr{background:var(--panel);border-left:3px solid var(--gold);border-radius:8px;padding:12px 15px;
+    font-size:15px;line-height:1.5;color:var(--ink)}
+  .jm-tldr b{color:var(--gold2)}
+
+  .jm-stepnav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:42px;
+    padding-top:22px;border-top:1px dashed var(--line)}
+  .jm-prev{background:none;border:1px solid var(--line);color:var(--muted);border-radius:11px;padding:11px 16px;
+    font-size:13.5px;cursor:pointer;font-weight:600}
+  .jm-prev:hover{color:var(--ink);border-color:var(--gold)}
+  .jm-next{background:var(--gold);color:#0b0e1a;border:none;border-radius:11px;padding:12px 22px;
+    font-size:14px;cursor:pointer;font-weight:700;box-shadow:var(--shadow-1)}
+  .jm-next:hover{filter:brightness(1.06)}
+  .jm-finish{background:var(--exalt)}
+
+  /* Start Here */
+  #starthere .jm-welcome{text-align:center;max-width:660px;margin:0 auto 8px}
+  #starthere .jm-intent{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px;margin:28px 0}
+  .jm-intent-card{text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:var(--r);
+    padding:20px;cursor:pointer;transition:all var(--dur) var(--ease);color:var(--ink)}
+  .jm-intent-card:hover{border-color:var(--gold);transform:translateY(-3px);box-shadow:var(--shadow-2)}
+  .jm-intent-card .ic-emoji{font-size:26px}
+  .jm-intent-card h4{margin:10px 0 6px;font-size:17px}
+  .jm-intent-card p{color:var(--muted);font-size:13.5px;margin:0}
+  .jm-howto{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;margin-top:14px;color:var(--muted);font-size:13px}
+  .jm-howto span{display:inline-flex;align-items:center;gap:7px}
+
+  @media(max-width:720px){
+    .jm-bar-inner{gap:8px;padding:8px 12px}
+    .jm-rail{order:3;width:100%;justify-content:flex-start;overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .jm-home span{display:none}
+    .jm-topics-menu{right:8px;left:8px;max-width:none}
+    .jm-stepnav{flex-direction:column-reverse;align-items:stretch}
+    .jm-next{text-align:center}
+  }
 </style>
 </head>
 <body>
@@ -1564,6 +1646,33 @@ html.light .brand{color:var(--ink)!important}
     <a class="hero-zone-link" href="#charts"><div class="ec-zone-card"><h4>My Charts</h4><p>Load real charts, inspect Vargas and dasha timelines, and generate focused prompts.</p></div></a>
     <a class="hero-zone-link" href="#quiz"><div class="ec-zone-card"><h4>Practice</h4><p>Reinforce the principles with quick recall rounds and application-style questions.</p></div></a>
   </div>
+
+  <section id="starthere" class="section-reveal jm-step">
+    <div class="jm-welcome">
+      <div class="eyebrow">Welcome</div>
+      <h2 class="display">Learn to read the sky — one idea at a time</h2>
+      <p class="lead">No prior knowledge needed. This is a guided tour: each screen teaches a single idea, in plain language, before moving on. Hover any <span style="border-bottom:1px dotted var(--gold2)">planet, sign or nakshatra</span> anywhere to see what it means.</p>
+    </div>
+    <div class="jm-intent">
+      <button type="button" class="jm-intent-card" data-jm-guided="1" data-go="1">
+        <div class="ic-emoji">🌱</div><h4>I’m brand new</h4>
+        <p>Start from the very beginning — the three simple building blocks every horoscope is made of.</p>
+      </button>
+      <button type="button" class="jm-intent-card" data-jm-guided="1" data-go="8">
+        <div class="ic-emoji">🔭</div><h4>I have my birth chart</h4>
+        <p>Skip ahead — load your chart and get a plain-English, planet-by-planet reading.</p>
+      </button>
+      <button type="button" class="jm-intent-card" data-explore="1">
+        <div class="ic-emoji">🧭</div><h4>Just let me explore</h4>
+        <p>Open everything at once in the full, scrollable reference. You can switch back anytime.</p>
+      </button>
+    </div>
+    <div class="jm-howto">
+      <span>🧭 Move with <b>Next</b> / <b>←</b> <b>→</b></span>
+      <span>📊 Jump anywhere via <b>Topics</b></span>
+      <span>⤢ <b>Explore all</b> shows the classic full view</span>
+    </div>
+  </section>
 
   <section id="why" class="section-reveal">
     <div class="eyebrow">The core idea</div>
@@ -3304,6 +3413,195 @@ const Glossary=(function(){
 })();
 
 Glossary.init();
+
+/* ══════════════════════════════════════════════════════════════════════
+   GUIDED JOURNEY — a chaptered, one-step-at-a-time learning experience
+   layered over the existing sections. No content is rewritten: every step
+   IS an existing <section>; this controller decides which one is visible,
+   adds a plain-language "In one line" header, a progress rail, and prev/
+   next wayfinding. An "Explore all" toggle restores the full single-scroll
+   for power users. First-time visitors land in guided mode; progress is
+   remembered in localStorage.
+   ══════════════════════════════════════════════════════════════════════ */
+window.Journey=(function(){
+  const CHAPTERS=[
+    {k:'start',    label:'Start'},
+    {k:'alphabet', label:'Alphabet'},
+    {k:'grammar',  label:'Grammar'},
+    {k:'chart',    label:'Your Chart'},
+    {k:'timing',   label:'Timing'},
+    {k:'lab',      label:'Lab'},
+    {k:'check',    label:'Checkpoint'}
+  ];
+  const STEPS=[
+    {id:'starthere',    ch:'start'},
+    {id:'why',          ch:'alphabet', t:'The Big Picture',    lvl:'Beginner',   min:'2 min', tldr:'A whole horoscope is built from just three small sets — planets, signs, houses — plus a few strength rules. You <b>derive</b> meanings, you don’t memorize them.'},
+    {id:'grahas',       ch:'alphabet', t:'The 9 Grahas',       lvl:'Beginner',   min:'4 min', tldr:'Meet the nine “actors” — the Sun, Moon and planets. Each stands for a part of life: soul, mind, drive, love, discipline…'},
+    {id:'rashis',       ch:'alphabet', t:'The 12 Rashis',      lvl:'Beginner',   min:'4 min', tldr:'The twelve signs are the “costumes” — they flavour <i>how</i> a planet acts (bold Aries vs. steady Taurus).'},
+    {id:'bhavas',       ch:'alphabet', t:'The 12 Bhavas',      lvl:'Beginner',   min:'4 min', tldr:'The twelve houses are the “stages” — <i>where</i> in life a planet’s story plays out (money, home, career…).'},
+    {id:'nakshatras',   ch:'alphabet', t:'The 27 Nakshatras',  lvl:'Beginner',   min:'5 min', tldr:'Zoom in: each sign splits into finer “lunar mansions” that add personality — and drive the timing system (dashas).'},
+    {id:'synth',        ch:'grammar',  t:'The Synthesizer',    lvl:'Core skill', min:'5 min', tldr:'Now combine them: pick a planet + sign + house and watch a full reading assemble itself. This is the grammar in action.'},
+    {id:'bbavam',       ch:'grammar',  t:'Bhavat Bhavam',      lvl:'Intermediate',min:'4 min',tldr:'A pro shortcut: read one house “from” another to decode how two life-areas relate.'},
+    {id:'charts',       ch:'chart',    t:'Load Your Chart',    lvl:'Applied',    min:'3 min', tldr:'Add a real birth chart. Everything you just learned now runs on actual data.'},
+    {id:'d1guide',      ch:'chart',    t:'Rāśi Guide',         lvl:'Applied',    min:'6 min', tldr:'Your chart explained planet by planet — dignity, dispositor, nakshatra and a classical reading, in plain steps.'},
+    {id:'outlook',      ch:'chart',    t:'Life Outlook',       lvl:'Applied',    min:'4 min', tldr:'The practical question — when are the good windows? A year-by-year outlook.'},
+    {id:'lifepredictor',ch:'timing',   t:'Life Predictor',     lvl:'Advanced',   min:'5 min', tldr:'A full-life timeline of dasha periods and what each tends to activate.'},
+    {id:'promptbuilder',ch:'timing',   t:'Prompt Builder',     lvl:'Power tool', min:'3 min', tldr:'Turn your chart into a clean, focused prompt for an AI reading.'},
+    {id:'arudhas',      ch:'lab',      t:'Graha Arudhas',      lvl:'Expert',     min:'5 min', tldr:'A Jaimini technique: the “image” a house projects to the world.'},
+    {id:'compare',      ch:'lab',      t:'Compare Charts',     lvl:'Expert',     min:'3 min', tldr:'Put two charts side by side.'},
+    {id:'quiz',         ch:'check',    t:'Practice Quiz',      lvl:'Checkpoint', min:'5 min', tldr:'Check your understanding with a few quick rounds. No pressure — it’s how it sticks.'}
+  ];
+  const chLabel=k=>{const c=CHAPTERS.find(c=>c.k===k);return c?c.label:k;};
+  const chIndex=k=>CHAPTERS.findIndex(c=>c.k===k);
+  const firstStepOf=k=>STEPS.findIndex(s=>s.ch===k);
+
+  let idx=0, mode='guided', bar=null, built=false;
+  const LS_MODE='jm.mode', LS_STEP='jm.step';
+
+  function el(id){return document.getElementById(id);}
+  function sectionOf(i){return el(STEPS[i].id);}
+
+  // ── one-time DOM scaffolding ──
+  function build(){
+    if(built) return; built=true;
+
+    // tag each step section; inject its plain-language header + prev/next footer
+    STEPS.forEach((s,i)=>{
+      const sec=el(s.id); if(!sec) return;
+      sec.classList.add('jm-step');
+      sec.dataset.jmIdx=i;
+      if(s.id!=='starthere'){
+        const head=document.createElement('div');
+        head.className='jm-stephead';
+        head.innerHTML=`<div class="jm-badges"><span class="jm-chip jm-chip-ch">${chLabel(s.ch)}</span>`+
+          (s.lvl?`<span class="jm-chip jm-chip-lvl">${s.lvl}${s.min?' · '+s.min:''}</span>`:'')+`</div>`+
+          (s.tldr?`<div class="jm-tldr"><b>In one line:</b> ${s.tldr}</div>`:'');
+        sec.insertBefore(head, sec.firstChild);
+      }
+      const nav=document.createElement('div');
+      nav.className='jm-stepnav';
+      const prev=i>0?STEPS[i-1]:null, next=i<STEPS.length-1?STEPS[i+1]:null;
+      let h='';
+      h+=prev?`<button type="button" class="jm-prev" data-go="${i-1}">← ${prev.t||'Back'}</button>`:'<span></span>';
+      if(next) h+=`<button type="button" class="jm-next" data-go="${i+1}">Next: ${next.t} →</button>`;
+      else h+=`<button type="button" class="jm-next jm-finish" data-explore="1">Finish — explore freely ⤢</button>`;
+      nav.innerHTML=h;
+      sec.appendChild(nav);
+    });
+
+    // sticky journey bar at the top of #main
+    const main=el('main'); if(!main) return;
+    bar=document.createElement('div');
+    bar.id='jmBar'; bar.className='jm-bar';
+    const railHtml=CHAPTERS.map(c=>`<button type="button" class="jm-chapchip" data-ch="${c.k}"><span class="jm-dot"></span>${c.label}</button>`).join('');
+    const topicsHtml=CHAPTERS.map(c=>{
+      const items=STEPS.map((s,i)=>({s,i})).filter(o=>o.s.ch===c.k);
+      if(!items.length) return '';
+      return `<div class="jm-topics-group"><div class="jm-topics-ch">${c.label}</div>`+
+        items.map(o=>`<button type="button" class="jm-topics-item" data-go="${o.i}">${o.s.t||'Start Here'}</button>`).join('')+`</div>`;
+    }).join('');
+    bar.innerHTML=`<div class="jm-bar-inner">
+        <button type="button" class="jm-home" title="Back to start">◆ <span>JyotishAtlas</span></button>
+        <div class="jm-rail">${railHtml}</div>
+        <div class="jm-bar-right">
+          <button type="button" class="jm-topics-btn">Topics ▾</button>
+          <button type="button" class="jm-explore-btn">Explore all ⤢</button>
+        </div>
+      </div>
+      <div class="jm-progress"><div class="jm-progress-fill"></div></div>
+      <div class="jm-topics-menu" hidden>${topicsHtml}</div>`;
+    main.insertBefore(bar, main.firstChild);
+
+    // events (delegated)
+    bar.addEventListener('click', e=>{
+      const t=e.target.closest('button'); if(!t) return;
+      if(t.classList.contains('jm-home')){ go(0); return; }
+      if(t.classList.contains('jm-explore-btn')){ setMode('explore'); return; }
+      if(t.classList.contains('jm-topics-btn')){ toggleTopics(); return; }
+      if(t.dataset.go!=null){ go(+t.dataset.go); closeTopics(); return; }
+      if(t.dataset.ch){ go(firstStepOf(t.dataset.ch)); return; }
+    });
+    document.addEventListener('click', e=>{
+      const t=e.target.closest('button');
+      if(t&&(t.dataset.go!=null||t.dataset.explore||t.dataset.jmGuided)){
+        if(t.dataset.explore){ setMode('explore'); return; }
+        if(t.dataset.jmGuided){ setMode('guided'); if(t.dataset.go!=null) go(+t.dataset.go); return; }
+        if(t.dataset.go!=null&&!t.closest('#jmBar')){ setMode('guided'); go(+t.dataset.go); }
+      } else if(bar && !e.target.closest('.jm-topics-menu') && !e.target.closest('.jm-topics-btn')){
+        closeTopics();
+      }
+    });
+    // keyboard prev/next when not typing
+    document.addEventListener('keydown', e=>{
+      if(mode!=='guided') return;
+      const tag=(document.activeElement&&document.activeElement.tagName)||'';
+      if(/INPUT|TEXTAREA|SELECT/.test(tag)) return;
+      if(e.key==='ArrowRight'&&idx<STEPS.length-1){ go(idx+1); }
+      else if(e.key==='ArrowLeft'&&idx>0){ go(idx-1); }
+      else if(e.key==='Escape'){ closeTopics(); }
+    });
+  }
+
+  function toggleTopics(){ const m=bar.querySelector('.jm-topics-menu'); if(m) m.hidden=!m.hidden; }
+  function closeTopics(){ const m=bar&&bar.querySelector('.jm-topics-menu'); if(m) m.hidden=true; }
+
+  function paint(){
+    // active section
+    STEPS.forEach((s,i)=>{ const sec=el(s.id); if(sec) sec.classList.toggle('jm-active', i===idx); });
+    const active=sectionOf(idx); if(active) active.classList.add('visible');
+    // rail
+    const curCh=STEPS[idx].ch, curChI=chIndex(curCh);
+    if(bar){
+      bar.querySelectorAll('.jm-chapchip').forEach(chip=>{
+        const ci=chIndex(chip.dataset.ch);
+        chip.classList.toggle('is-active', chip.dataset.ch===curCh);
+        chip.classList.toggle('is-done', ci<curChI);
+      });
+      const fill=bar.querySelector('.jm-progress-fill');
+      if(fill) fill.style.width=Math.round((idx/(STEPS.length-1))*100)+'%';
+    }
+  }
+
+  function go(i){
+    if(mode!=='guided') setMode('guided',true);
+    idx=Math.max(0,Math.min(STEPS.length-1,i));
+    paint();
+    try{ localStorage.setItem(LS_STEP,String(idx)); }catch(e){}
+    // scroll to just under the sticky bar
+    const main=el('main');
+    const y=(main?main.getBoundingClientRect().top+window.scrollY:0)+ (bar?bar.offsetHeight:0) - 8;
+    window.scrollTo({top:Math.max(0,y),behavior:'smooth'});
+  }
+
+  function setMode(m, silent){
+    mode=m;
+    document.documentElement.classList.toggle('jm-guided', m==='guided');
+    try{ localStorage.setItem(LS_MODE,m); }catch(e){}
+    if(m==='guided'){ if(!silent) paint(); }
+    else { closeTopics(); }
+  }
+
+  function init(){
+    try{
+      build();
+      let savedMode=null, savedStep=0;
+      try{ savedMode=localStorage.getItem(LS_MODE); savedStep=parseInt(localStorage.getItem(LS_STEP)||'0',10)||0; }catch(e){}
+      mode=(savedMode==='explore')?'explore':'guided';
+      idx=Math.max(0,Math.min(STEPS.length-1,savedStep));
+      document.documentElement.classList.toggle('jm-guided', mode==='guided');
+      if(mode==='guided') paint();
+    }catch(e){ /* fail open: leave the classic scroll intact */ console.error('Journey init:',e); }
+  }
+
+  return {
+    init,
+    go(id){ const i=typeof id==='number'?id:STEPS.findIndex(s=>s.id===id); if(i>=0){ setMode('guided',true); go(i); } },
+    explore(){ setMode('explore'); },
+    guided(){ setMode('guided'); }
+  };
+})();
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',window.Journey.init); else window.Journey.init();
+
 
 NAK.forEach(n=>{
   if(!n.interp){
