@@ -1511,6 +1511,7 @@ html.light .brand{color:var(--ink)!important}
       <summary class="nav-zone-trigger">My Charts</summary>
       <div class="nav-zone-menu">
         <a href="#charts">My Charts</a>
+        <a href="#d1guide">Rāśi Guide (D-1)</a>
         <a href="#promptbuilder">Prompt Builder</a>
         <a href="#outlook">Life Outlook</a>
         <a href="#lifepredictor">Life Predictor</a>
@@ -1765,6 +1766,13 @@ html.light .brand{color:var(--ink)!important}
     </div>
   </section>
 
+  <section id="d1guide" class="section-reveal">
+    <div class="eyebrow">Read your birth chart, graha by graha</div>
+    <h2 class="display">Rāśi Guide (D-1)</h2>
+    <p class="lead">For the active chart: where the lagna sits, and for every planet — its dignity, its dispositor, the nakshatra it occupies, and the classical planet-in-house reading chosen for <i>your</i> lagna. Sourced from <b>Bhrigu Sutram</b> and <b>Wisdom of Nakshatras</b>, cited line by line.</p>
+    <div class="d10-guide"><div id="d1gBody"><p class="note">No chart loaded yet. Add a chart in <a href="#charts">My Charts</a> to see its Rāśi guide.</p></div></div>
+  </section>
+
   <section id="promptbuilder" class="section-reveal">
     <div class="eyebrow">The refined reading engine</div>
     <h2 class="display">Prompt Builder</h2>
@@ -1999,6 +2007,245 @@ html.light .brand{color:var(--ink)!important}
 function d10Toggle(el){const s=el.closest('.d10-step');s.classList.toggle('open');}
 
 // Build the 9-step D-10 reading panel from the D-1 chart object and D-1 lagna
+/* ══════════════════════════════════════════════════════════════════════
+   RĀŚI GUIDE (D-1) — planet · dispositor · nakshatra · planet-in-house
+   Sources, every line traceable:
+   • Bhrigu Sutram — tr. & comm. Dr. Gouri Shankar Kapoor (Ranjan Publ.)
+     Part I Ch I (planet dignities), Ch II (house significations),
+     Part II Ch I–VIII (Effects of each graha in the 12 houses).
+   • Wisdom of Nakshatras — Dr. K. Parvathi Kumar (Dhanishta, 2019).
+   Base texts are faithful distillations of the numbered Sutras; the
+   functional-lordship correction is the book's own Comments principle.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Part I Ch II — significations of the twelve houses (pp.25-27). */
+const BH_HOUSE_SIG=[
+  "Body, stature, health, vitality, personality, honour, dignity, longevity, the general structure of life; head & upper face.",
+  "Wealth, family, speech, food, right eye, nails, teeth, memory — also a maraka (death-dealing) house; some hold education too.",
+  "Courage, valour, younger siblings, short travels, communication, writing, hands, throat, nervous system.",
+  "Mother, home & native place, land, vehicles, buildings, ancestral property, academic education, water, milk.",
+  "Children, intellect, morals, mantra-tantra, high learning, wisdom, riches — 9th-to-9th, a house of fortune (Bhagya).",
+  "Sickness, enemies, debts, service, employees, maternal uncle, litigation — a dusthana yet an upachaya.",
+  "Spouse, marriage, partnerships, conjugal & sexual life, foreign influence — a maraka (danger to life).",
+  "Longevity, house of death, inheritance, legacies, accidents, chronic disease, misfortune — the worst dusthana.",
+  "Faith, Dharma, fortune (Bhagya), father, preceptor, higher learning, pilgrimage, long journeys — most auspicious.",
+  "Karma, profession, honour, name & fame, status, authority, Government, thighs — planet gains directional strength.",
+  "Gains, income, wishes fulfilled, elder siblings, prosperity — an upachaya where malefics prosper.",
+  "Loss, expenditure, separation, foreign lands, the bed (pleasures), imprisonment, Moksha — a dusthana."
+];
+
+/* Part I Ch I — exact dignities (pp.13-24). */
+const BH_DIGNITY={
+  Su:{own:"Leo",ex:"Aries (highest 10°)",de:"Libra (lowest 10°)",mt:"Leo 0–20°",sw:"Leo 20–30°",fr:"Moon, Mars, Jupiter",en:"Venus, Saturn",nu:"Mercury",p:"p.14"},
+  Mo:{own:"Cancer",ex:"Taurus (highest 3°)",de:"Scorpio (lowest 3°)",mt:"Taurus 3–30°",sw:"whole of Cancer",fr:"Sun, Mercury (per Parāśara; the book is silent on Moon's friendships)",en:"—",nu:"Mars, Jupiter, Venus, Saturn",p:"p.15"},
+  Ma:{own:"Aries, Scorpio",ex:"Capricorn (highest 28°)",de:"Cancer (lowest 28°)",mt:"Aries 0–12°",sw:"Aries 12–30°, whole of Scorpio",fr:"Sun, Moon, Jupiter",en:"Mercury",nu:"Venus, Saturn",p:"p.17"},
+  Me:{own:"Gemini, Virgo",ex:"Virgo (highest 15°)",de:"Pisces (lowest 15°)",mt:"Virgo 16–20°",sw:"Virgo 21–30°, whole of Gemini",fr:"Sun, Venus",en:"Moon",nu:"Mars, Jupiter, Saturn",p:"p.18"},
+  Ju:{own:"Sagittarius, Pisces",ex:"Cancer (highest 5°)",de:"Capricorn (lowest 5°)",mt:"Sagittarius 0–5°",sw:"Sagittarius 5–30°, whole of Pisces",fr:"Sun, Moon, Mars",en:"Mercury, Venus",nu:"Saturn",p:"p.20"},
+  Ve:{own:"Taurus, Libra",ex:"Pisces (highest 27°)",de:"Virgo (lowest 27°)",mt:"Libra 0–20°",sw:"Libra 20–30°, whole of Taurus",fr:"Mercury, Saturn",en:"Sun, Moon",nu:"Mars, Jupiter",p:"p.21"},
+  Sa:{own:"Capricorn, Aquarius",ex:"Libra (highest 20°)",de:"Aries (lowest 20°)",mt:"Aquarius 0–20°",sw:"Aquarius 20–30°, whole of Capricorn",fr:"Mercury, Venus",en:"Sun, Moon, Mars",nu:"Jupiter",p:"p.22"},
+  Ra:{own:"— (shadow planet, owns no sign)",ex:"Taurus (per Uttara Kalāmṛta; controversial)",de:"Scorpio",mt:"Gemini (per Uttara Kalāmṛta)",sw:"—",fr:"—",en:"—",nu:"acts like Saturn; casts effect by dispositor, conjunction or aspect",p:"p.24"},
+  Ke:{own:"— (shadow planet, owns no sign)",ex:"Scorpio (per Uttara Kalāmṛta; controversial)",de:"Taurus",mt:"Virgo (per Uttara Kalāmṛta)",sw:"—",fr:"—",en:"—",nu:"acts like Mars; casts effect by dispositor, conjunction or aspect",p:"p.24"}
+};
+
+/* Part II — Effects of each graha in the twelve houses.
+   {s:citation, t:base sutra, d:dignity variants, f:functional/comment correction, y:yoga} */
+const BH_SUN=[
+ {s:"Sutras 1–21, p.31",t:"Good health but bilious constitution and eye trouble; wise, of good conduct, highly intelligent, speaks little, wanders from the native place, happy.",d:"Exalted (Aries)→name & fame, learned if benefics aspect. Debilitated (Libra)→dignified yet devoid of learning & power. Own (Leo)→lordship over territory.",f:"The Sun in the 1st is 12th to the 2nd (sight), so consensus is it afflicts the eyes.",y:""},
+ {s:"Sutras 22–32, p.34",t:"Diseases of the mouth; in the 25th year, wrath of Government and loss of wealth. With Mercury→stammer (combustion).",d:"Not felt if in Aries/Leo. If the 2nd lord is exalted→succinct, learned, good eyesight, Rājayoga.",f:"2nd is Dhana-bhāva; the Sun (Govt.) afflicting it brings loss by the king.",y:"Rājayoga if 2nd lord exalted outside 3/6/8/12."},
+ {s:"Sutras 33–42, p.36",t:"No younger brothers, elder brothers do not survive; bodily trouble in the 4th/5th/8th/12th years; valourous, good reputation, enjoys wealth.",d:"With malefic→cruel deeds, two mothers, brave fighter. With benefic→brothers prosperous. Malefic+malefic aspect→family destroyed.",f:"3rd is 2nd-to-2nd (maraka for family); benefic aspect (from 9th)→family grows, wealth, happiness.",y:""},
+ {s:"Sutras 43–50, p.38",t:"Defective limbs, proud, opposed to the public, hot constitution; in the 32nd year rises — respected, learned, high position, valourous — yet not well off financially.",d:"4th lord strong / own / in kendra-trikona→fine conveyances. 4th lord ill-placed→low conveyance, no land, lives in others' houses.",f:"The Sun harms the mother & domestic peace unless own-sign or benefic; the book warns Sun-in-4th 'plays havoc.'",y:""},
+ {s:"Sutras 51–58, p.40",t:"Poor, bulky; in the 7th year the father faces death, grave illness or misfortune; wise & brilliant but few children; devotee of the Sun God.",d:"5th lord strong→sons survive. With Rahu/Ketu→loss of children by the Serpent's curse; with Mars→loss by enemy (cancelled by Jupiter/Venus aspect).",f:"Functional benefic in the 5th for Taurus (4L), Leo (1L), Libra (11L), Scorpio (10L), Sagittarius (9L, exalted) — then wealthy, learned, respected.",y:""},
+ {s:"Sutras 59–68, p.42",t:"Backward caste, many enemies yet very well off; in the 20th year eye disease; wanders in jungles, chants mantras, good reputation but mental worry; father of weak constitution.",d:"6th lord + benefic→good health but more enemies. 6th lord weak→enemies destroyed. In own Leo→only good.",f:"6th is upachaya — the malefic Sun brings name, fame and wealth here.",y:""},
+ {s:"Sutras 69–74, p.44",t:"Late marriage, disrespects the opposite sex, relations outside marriage, more than one wife; in the 25th year travels far; witty, non-vegetarian, unstable mind, unfair to wife.",d:"In own Leo→one wife. With enemy / debilitated / malefic→many wives or women.",f:"The Sun is hot & virile; in the 7th (Kāma) it over-inflames unless dignified.",y:""},
+ {s:"Sutras 75–82, p.45",t:"Few children, eye disease, head injury in the 10th year (averted by benefic aspect); meagre wealth, cattle destroyed, chronic ailments — but famous.",d:"8th lord with strong planets→owns land of choice. Exalted / own→long-lived.",f:"From the 8th the Sun aspects the 2nd (wealth & sight), so both suffer.",y:""},
+ {s:"Sutras 83–87, p.47",t:"Devotee of the Sun & the gods, religious-minded but not very fortunate, inimical to the father.",d:"Exalted / own→wife, children, wealth, father long-lived, devoted to preceptor. Debilitated / enemy / malefic aspect→loss of father.",f:"For Leo lagna the 1st lord exalts in the 9th, and own-Leo puts the 9th lord in the 9th — a powerful Rāja yoga.",y:"Rāja yoga (Leo lagna)."},
+ {s:"Sutras 88–95, p.48",t:"Distinctive educational achievement by the 18th year, famous, a capable learner; if three planets aspect, liked by Govt., pious, brave, good reputation.",d:"Exalted (Cancer lagna→2L in 10th, Dhana yoga; e.g. Motilal Nehru) / own (10L in 10th, Rāja yoga)→powerful & famous, builds reservoirs, temples, cow-shelters. Malefic→career obstruction, evil deeds, immoral.",f:"The Sun gains directional strength in the 10th (Karma).",y:"Dhana / Rāja yoga when exalted or own."},
+ {s:"Sutras 96–102, p.50",t:"Substantial income from agriculture; conveyances in the 25th year; gains wealth by diplomatic speech; a serious fever; cordial with employees.",d:"With malefic→heavy expenditure, no conveyance. Own / exalted→immense wealth. With the 4th (or 2/1/9) lord→income at many places, very fortunate.",f:"11th is upachaya; the Sun aspects the 5th, lending diplomacy.",y:""},
+ {s:"Sutras 103–110, p.52",t:"Appendicitis in the 36th year; wastes money, sinful, loss of wealth, accused of cow-slaughter, lives away from the native land.",d:"With strong auspicious planet→blessings of God, bed comforts. With the 6th lord→leprosy (recovers if benefic aspects). In own Leo→Vipreet Rāja yoga.",f:"12th is a house of loss in every respect.",y:"Vipreet Rāja yoga if own Leo."}
+];
+const BH_MOON=[
+ {s:"Sutras 1–8, p.54",t:"Very handsome but unsteady in mind, some bodily trouble, happy near water; many travels in the 15th year.",d:"In Aries/Taurus/Cancer→versed in shāstras, wealthy, happy, soft-spoken, strong build (but not very intelligent). Benefic aspect→powerful, wise, healthy, eloquent, wealthy.",f:"Waxing/full Moon gives the good results in full; Jupiter in the 7th from the Moon→Gajakesari yoga.",y:"Gajakesari if Jupiter 7th from Moon."},
+ {s:"Sutras 9–14, p.56",t:"Handsome, glorious, wealthy, easily satisfied; in the 18th year a distinguished professional rise by the king's favour.",d:"With malefic→uneducated. With benefic / full Moon→highly educated & wealthy.",f:"Not good if the Moon is 6/8/12 lord — Aquarius, Sagittarius or Leo lagna.",y:""},
+ {s:"Sutras 15–18, p.58",t:"Average number of sisters, rheumatic trouble, negligible agriculture, unfortunate; Govt. penalty & loss of wealth in the 24th year, loses cattle; a backbiter but intelligent, good brothers.",d:"Improves if in Taurus (5L exalted) or Cancer (own, aspecting the 9th).",f:"",y:""},
+ {s:"Sutras 19–24, p.59",t:"Crowned like a king (high Govt. status), owns conveyances, agricultural & financial prosperity — but the mother is sickly; abundant milk yet nursed by other women; fond of women other than the wife.",d:"Full / own Cancer→mother long-lived, many conveyances. Waning→mother short-lived, no conveyance.",f:"From the 4th the Moon aspects the 10th; king-like for Pisces (5L), Scorpio (9L), Libra (10L) lagna.",y:""},
+ {s:"Sutras 25–32, p.60",t:"Pleases deities by worship; the wife is good-looking, quick-tempered, with a birthmark between the breasts; cattle wealth, two wives, abundant milk, sāttvic, hard-working; many daughters and one son.",d:"Benefic→does good to others. Full Moon→feeds others, powerful, glorious, pious, fortunate, learned — a Rājayogi.",f:"5th = Mantra-siddhi & Bhagya; a female fruitful planet here gives more daughters.",y:""},
+ {s:"Sutras 33–40, p.62",t:"Poor, of diseased body; in the 36th year illicit relations with a widow.",d:"With malefic→sinful. With Rahu/Ketu→no wealth, dangerous enemies, quarrelsome, no brothers, stomach ailments, danger from water. Waning→wholly malefic.",f:"Benefic influence→strong constitution, free of disease.",y:""},
+ {s:"Sutras 41–46, p.63",t:"Soft-spoken; wife in the 32nd year; an eye defect, fond of women, surgery through women, Govt. favours.",d:"7th lord powerful→two wives. Waning→loss of wife. Full / own→one wife and all comforts.",f:"A benefic Moon (royal) brings fame from Government.",y:""},
+ {s:"Sutras (ka–gha), p.64",t:"Little comfort from conveyances; watery places endanger life; separated from relations on account of the wife.",d:"Own / exalted→long-lived. Waning→medium span.",f:"8th is the house of longevity; a watery planet here → risk of drowning.",y:""},
+ {s:"Sutras 47–53, p.66",t:"Highly learned & charitable, builds ponds and cow-shelters, fortunate in prosperous children.",d:"Full→very fortunate, father long-lived. With malefic / in malefic house→unfortunate, early loss of parents.",f:"Own in the 9th→Rāja yoga; Taurus/Virgo lagna→exalted as 11L, highly beneficial.",y:"Rāja yoga if own in 9th."},
+ {s:"Sutras 54–60, p.67",t:"High academic attainment, brilliant, pious, famous, kind-hearted; 10th lord strong→highly virtuous.",d:"With malefic aspect→illicit relations with a widow in the 27th year, public bitterness, sinful, obstacles.",f:"From the 10th the Moon aspects the 4th (academics); own Cancer for Libra lagna→Rāja yoga.",y:"Rāja yoga (Libra lagna)."},
+ {s:"Sutras 61–69, p.68",t:"Highly learned, sons, helpful to others; father of many sons by 50; praiseworthy qualities; acquires wealth without much effort.",d:"11th lord weak→expenditure; strong→gains. With Venus→conveyances, lands, protector of others.",f:"Cancer→own in 11th; Taurus (Cancer lagna)→exalted lagna-lord in 11th, Dhana yoga.",y:"Dhana yoga (Cancer lagna)."},
+ {s:"Sutras 70–71, p.70",t:"Deprived of good food, wasteful, angry, earns by questionable means, venereal disease, no grain.",d:"With benefic→learned, kind, good friends, heaven after death. With malefic→hell.",f:"Own Cancer wards off most of the ill.",y:""}
+];
+const BH_MARS=[
+ {s:"Sutras 1–9, p.72",t:"Wound / boil marks, stout body, big navel, reddish hands; strong, of angry temper, extraordinarily valourous, wealthy, unstable, of wicked disposition.",d:"Own (Aries/Scorpio) / exalted (Capricorn)→healthy, strong, Govt. honours, long-lived. With malefic / enemy→short-lived, few children, ugly, rheumatism, eye disease.",f:"Own/exalted in the 1st Kendra→Ruchaka yoga; yogakāraka for Cancer & Leo lagna.",y:"Ruchaka yoga if own/exalted."},
+ {s:"Sutras 10–15, p.74",t:"No education but gains wealth. With the 6th lord→eye trouble (cataract, blindness) unless a benefic aspects.",d:"Own / exalted→well educated, good eyesight. With / aspected by malefic→eye trouble.",f:"Aries→2/9L, Scorpio→2/7L (wealth via wife), Capricorn exalted→5L: powerful Dhana yogas.",y:"Dhana yoga (own/exalted)."},
+ {s:"Sutras 16–25, p.75",t:"No younger siblings; the wife may be of questionable character (unless a benefic aspects); financial gains.",d:"With Rahu/Ketu→association with prostitutes, inimical to brothers. Own / exalted→brothers long-lived, patient, brave in battle.",f:"Mars is kāraka of brothers; own or benefic overrides the 'Kārako Bhāva Nāśāya' loss.",y:""},
+ {s:"Sutras 26–33, p.77",t:"Domestic disturbance; the father may die in the 8th year, the mother is always ill; no land, poor, a dilapidated house, lives away, inimical to relatives.",d:"Own / exalted + benefic / friendly→conveyances, lands, mother long-lived. Debilitated (Cancer) + malefic / 8th lord→early loss of mother.",f:"Own/exalted in the 4th Kendra→Ruchaka + Dhana yoga; from the 4th, Mars aspects the 10th (father's maraka).",y:"Ruchaka + Dhana yoga if own/exalted."},
+ {s:"Sutras 34–45, p.79",t:"Poor, few or no children, immoral, in the Govt.'s bad books; cuts or wounds in the 6th year; a liar but shrewd.",d:"Own (Aries/Scorpio)→children, feeds others, high Govt. post but enemy trouble. With malefic / 8th lord→loss of children, mental disorder; may adopt.",f:"Scorpio (Cancer lagna, yogakāraka 5/10L)→children & high position; exalted Capricorn (Virgo lagna, 3/8L)→not good.",y:""},
+ {s:"Sutras 46–53, p.81",t:"Famous, successful, defeats enemies, children, marriage & conveyances in the 27th year, enemies cease.",d:"With malefic→results full but rheumatism & pains. In Mercury's sign (Gemini/Virgo)→leprosy (recovers if benefic aspects).",f:"6th is an upachaya (malefics strong here) yet also a dusthana — a benefic-house lord placed in the 6th is spoiled.",y:""},
+ {s:"Sutras 54–65, p.84",t:"Ill health and, unless dignified, loss of wife; under malefic (Saturn/Rahu/Ketu) association, sexual perversions.",d:"Own / exalted / benefic aspect→one marriage held; the confusing text is best read as loss of wife only when afflicted.",f:"Kendra — own/exalted→Ruchaka; Jupiter's aspect greatly mitigates. (This is the classic Kuja/Maṅgala 7th.)",y:"Ruchaka yoga if own/exalted."},
+ {s:"Sutras 66–71, p.87",t:"Eye disease, not long-lived, father dies early, urinary disease, few children, rheumatism — yet a happy married life.",d:"Benefic→good health, long-lived. Malefic / malefic house→consumption, urinary trouble; medium span. 8th lord powerful→full longevity.",f:"From the 8th, Mars aspects the 2nd (eyes); 12th-to-9th afflicts the father.",y:""},
+ {s:"Sutras 72–74, p.88",t:"Early loss of the father; unfortunate.",d:"Exalted / own→(only if Saturn/Rahu/Ketu associate) illicit relations with the preceptor's wife.",f:"As lagna/5th/9th/2-9 lord (Aries, Scorpio, Sagittarius, Cancer, Leo, Pisces)→powerful Rāja yoga instead.",y:"Rāja yoga for those lagnas."},
+ {s:"Sutras 75–85, p.89",t:"Acclaimed by the people; particularly fortunate & prosperous, meditative, devoted to the preceptor; earns from the 18th year.",d:"Malefic→career obstruction, sinful. With the 9th/10th lord→installed as king or heir; with Jupiter→conveyances, lands, glory.",f:"Directional strength in the 10th; own→10L in 10th, Rāja yoga; Kendra→Ruchaka.",y:"Rāja + Ruchaka yoga if own/exalted."},
+ {s:"Sutras 86–89, p.91",t:"Prosperous through dexterity, engaged in manifold activities.",d:"With the 11th lord→a king. With two benefics→rules a large kingdom, brother prosperous.",f:"11th upachaya; exalted Capricorn (Pisces lagna, 2/9L)→very powerful Dhana yoga. (Aspect on the 5th warns of loss of children.)",y:"Dhana yoga (Pisces lagna)."},
+ {s:"Sutras 90–91, p.92",t:"Want of finance, rheumatic & bilious disease; with a malefic, false vanity.",d:"May give some good in own sign; otherwise spoils the houses it owns.",f:"12th is a house of loss.",y:""}
+];
+const BH_MERCURY=[
+ {s:"Sutras 1–17, p.93",t:"Educated, early marriage, a devout listener of scripture, fond of travel, inclined to Mantra-Tantra with power to exorcise; soft-spoken, learned, forgiving, kind; pilgrimage in the 27th year, great wealth, academic distinction.",d:"With malefic→skin disease, bilious trouble, jaundice. Exalted (Virgo) / own→happiness from brothers, heaven; debilitated (Pisces) / malefic→hell, loss of left eye (with Saturn).",f:"Own/exalted in the 1st Kendra→Bhadra yoga (e.g. Dr. Radhakrishnan). Mercury is convertible — it turns malefic under malefic aspect.",y:"Bhadra yoga if own/exalted."},
+ {s:"Sutras 18–24, p.96",t:"Good number of children, talkative, versed in shāstras, determined, contented, wealthy, of good qualities; academic distinction & wealth in the 15th year.",d:"With malefic / debilitated→uneducated, windy trouble. With Jupiter→proficient in mathematics.",f:"Taurus/Leo→own 2L; Gemini/Virgo/Sagittarius/Pisces→powerful Dhana yogas.",y:"Dhana yoga (those lagnas)."},
+ {s:"Sutras 25–31, p.97",t:"Good brothers, very happy; a son and lands in the 15th year; wealthy, high morals, of good qualities.",d:"3rd lord strong→long-lived, tolerant, brothers long-lived; weak→brothers suffer, timid.",f:"From the 3rd, Mercury aspects the 9th (morals, children); 3rd = 8th-to-8th (longevity).",y:""},
+ {s:"Sutras 32–37, p.99",t:"Very active hands, patient, broad-eyed, happiness from parents, learned, happy; wealth (as a gift) & many conveyances in the 16th year.",d:"4th lord strong→a palanquin. With Rahu/Ketu/Saturn→no conveyance, no land, bitterness, deceitful.",f:"Kendra — own/exalted→Bhadra yoga.",y:"Bhadra yoga if own/exalted."},
+ {s:"Sutras 38–40, p.100",t:"Maternal uncle suffers a throat disease; happiness from the mother, difficulty in children (a sexless planet), highly intelligent, soft-spoken, wise.",d:"5th lord + malefic / weak→loss of children→adopts a son, sinful, believes in mantras.",f:"Children come if the 5th lord and Jupiter are strong.",y:""},
+ {s:"Sutras 41–47, p.101",t:"Respected by the king, but obstacles in education; showy, proud, skilled in controversy; great Govt. favour in the 30th year; writes letters & books.",d:"In Mars's sign→blue leprosy / skin disease. With Saturn + Rahu/Ketu→rheumatism, community quarrels.",f:"Mixed results — the evil predominates.",y:""},
+ {s:"Sutras 48–56, p.102",t:"Happiness from the mother, conveyances, religious, broad-minded, wide reputation, Govt. respect.",d:"With benefic→a good wife (but non-vegetarian). 7th lord strong→one wife; weak / malefic→loss of wife (female chart: loss of husband, leprosy).",f:"Kendra→Bhadra yoga; Jupiter/Venus in 6/7/8→Lagnādhi yoga (minister, ruler).",y:"Bhadra / Lagnādhi yoga."},
+ {s:"Sutras 57–63, p.104",t:"Good longevity, a large area of land, honour & wide fame in the 25th year (the book's claim of seven children the author himself doubts).",d:"8th lord strong / exalted + benefic→full span; debilitated + malefic→short life.",f:"From the 8th, Mercury aspects the 2nd — so the native should also be wealthy; 2L in 8th is not harmful.",y:""},
+ {s:"Sutras 64–66, p.105",t:"Many children, learned in the Vedas & Shāstras, fond of music, patient, religious, glorious, wealthy, fortunate; father long-lived, cultured, meditative.",d:"",f:"Own→a powerful Rāja yoga (e.g. Paul Reynaud); many lagnas give Dhana yogas here.",y:"Rāja yoga if own."},
+ {s:"Sutras 67–70, p.107",t:"Successful through virtuous deeds, patient, wide reputation, a great thinker (the 28th-year eye trouble the author finds doubtful).",d:"Own / exalted / with Jupiter→many religious rites. Enemy / malefic→stupid, sinful, of bad conduct.",f:"Own/exalted in the 10th→Rāja + Bhadra + Amala yoga (e.g. Deen Dayal Upadhyaya).",y:"Rāja / Bhadra / Amala yoga."},
+ {s:"Sutras 71–75, p.109",t:"Performs many auspicious ceremonies, wealth from many sources; children after 21, wealthy, kind-hearted.",d:"With malefic→loss of wealth through sin. Own / exalted→wealthy by virtuous deeds.",f:"Leo→2/11L; a very good disposition for wealth.",y:""},
+ {s:"Sutras 76–81, p.110",t:"Learned, fond of distributing gifts & charity.",d:"With malefic→unstable mind, bitterness towards the king. With benefic→religious charity but meagre education.",f:"12th is the house of loss; the one good is charity.",y:""}
+];
+const BH_JUPITER=[
+ {s:"Sutras 1–6, p.111",t:"Own (Sagittarius/Pisces)→a good speaker versed in shāstras, the three Vedas, children, happy, long-lived, learned. Exalted (Cancer)→all fully, with Mahārāja yoga in the 16th year.",d:"Enemy / malefic / debilitated (Capricorn)→sinful, unstable, medium span, childless, ungrateful, forsakes relations, miserable.",f:"Directional strength — the ideal house; own/exalted→Hamsa yoga (e.g. Sanjeeva Reddy).",y:"Hamsa yoga if own/exalted."},
+ {s:"Sutras 7–12, p.114",t:"Rich, intelligent, his forecasts come true; financial & agricultural prosperity in the 16th year, powerful.",d:"With malefic→education obstacles, a thief, liar, vulgar speech. Debilitated + malefic→drunkard, immoral, destroyer of family, childless.",f:"Scorpio (2/5L), Aquarius (2/11L), Gemini exalted (7/10L)→Dhana yogas (e.g. Abraham Lincoln).",y:"Dhana yoga (those lagnas)."},
+ {s:"Sutras 13–18, p.116",t:"Very miserly, good brothers, clever, determined; forsakes relations, travels in the 38th year.",d:"3rd lord strong→brothers long-lived; with malefic→loss of brothers, impatient, idiot, poor.",f:"From the 3rd, Jupiter aspects the 7th, 9th & 11th — a happy marriage and gains.",y:""},
+ {s:"Sutras 19–23, p.117",t:"Happy, wise, of good conduct, highly intelligent; a landlord, abundant milk.",d:"4th lord strong / with Venus-Moon / benefic vargas→conveyances, lands, a spacious house. With malefic→no land, lives in others' house, loss of mother.",f:"Own/exalted→Hamsa yoga; with the Moon→Gajakesari yoga.",y:"Hamsa / Gajakesari yoga."},
+ {s:"Sutras 24–31, p.118",t:"Highly intelligent, broad-eyed, a good conversationalist, glorious, feeds others, loves family; a commander by the king's favour in the 18th year; good and prosperous children.",d:"5th lord weak / malefic / debilitated→loss of children or one issue, wealth loss by penalty. With Rahu/Ketu→loss of children unless a benefic aspects.",f:"Sagittarius (5L in 5th), Pisces exalted (1/10L), Scorpio (2/5L)→powerful.",y:"Powerful trikona yogas."},
+ {s:"Sutras 32–34, p.120",t:"Destroys enemies, family grows, grandchildren, wound marks on the body.",d:"Benefic→free of disease; malefic→rheumatism, cold diseases; in Saturn's sign + Rahu/Ketu→the worst diseases.",f:"6th is a dusthana — Jupiter as a good-house lord placed here is spoiled.",y:""},
+ {s:"Sutras 35–37, p.121",t:"Highly educated (though worried), big gains; the wife is learned, chaste and devoted.",d:"7th lord weak / with Rahu-Ketu-Saturn-Mars→illicit relations. Benefic / own / exalted→one devoted wife, wealth through her, respect in the 34th year.",f:"Kendra→Hamsa yoga; Uttara Kalāmṛta: Jupiter is good even as 3rd/12th lord.",y:"Hamsa yoga if own/exalted."},
+ {s:"Sutras 38–43, p.123",t:"Short-lived, given to undesirable activity; with malefic→sinful.",d:"8th lord + benefic in the 8th→long-lived; weak→short-lived. Own / exalted→long-lived, disease-free, saintly, learned, versed in the Vedas.",f:"8th dusthana spoils the houses Jupiter owns; but its aspect on the 2nd brings wealth if the 2nd is Sagittarius/Pisces.",y:""},
+ {s:"Sutras 44–45, p.125",t:"Religious & charitable deeds, meditation, pious, wealthy; religious ceremonies in the 35th year; father long-lived, righteous, honoured, a protector of many.",d:"",f:"Own→9L in the 9th, Rāja yoga; exalted Cancer (Scorpio lagna, 2/5L)→extremely powerful (e.g. Mujibur Rehman).",y:"Rāja yoga if own/exalted."},
+ {s:"Sutras 46–49, p.126",t:"Religious, performs righteous deeds, studies the Gītā, very able, wide reputation, respected by the masses.",d:"10th lord strong→high religious sacrifice; malefic→career obstacles, evil deeds, financial suffering.",f:"Own→Rāja yoga; Hamsa & Amala yoga; even exalted Cancer for Libra lagna gives yoga (Bhāvārtha Ratnākara).",y:"Rāja / Hamsa / Amala yoga."},
+ {s:"Sutras 50–53, p.128",t:"Learned, wealthy, big gains; conveyances in the 32nd year, wide reputation.",d:"With benefics + malefics→elephants, pronounced luck. With the Moon→effortless financial gains.",f:"Aquarius (2/11L), Virgo exalted (4/7L)→Dhana yogas (e.g. C.D. Deshmukh). Aspect on the 5th blesses children.",y:"Dhana yoga (those lagnas)."},
+ {s:"Sutras 54–58, p.130",t:"Poor, studious, few children, proficient in mathematics but of loose character.",d:"Benefic / own / exalted→heaven after death; malefic→hell, spends on religion.",f:"12th is evil and spoils the houses Jupiter owns; but 12L-in-12th / 6L-in-6th / 8L-in-8th→Vipreet Rāja yoga.",y:"Vipreet Rāja yoga (as 12/6/8 lord)."}
+];
+const BH_VENUS=[
+ {s:"Sutras 1–13, p.132",t:"Proficient in mathematics, long-lived, loved by the wife, fond of ornaments, dress & beauty, liked by women, wealthy, learned.",d:"With benefic→golden luster, many ornaments. Malefic / debilitated (Virgo)→thief, cheat, rheumatic disease; with Rahu→hydrocele. Own (Taurus/Libra)→Mahārāja yoga.",f:"Yogakāraka for Virgo, Capricorn, Aquarius lagna; own/exalted Kendra→Mālavya yoga (e.g. Stalin).",y:"Mālavya yoga if own/exalted."},
+ {s:"Sutras 14–19, p.134",t:"Wealthy, with family, good food, attractive eyes, humble, kind, helpful; a beautiful wife in the 32nd year.",d:"2nd lord weak / in 6-8-12→eye trouble. With the Moon (while 2L in 6/8/12)→night-blind, no family, squanders wealth.",f:"Aries (2/7L), Virgo (2/9L), Aquarius exalted (4/9L)→Dhana yogas.",y:"Dhana yoga (those lagnas)."},
+ {s:"Sutras 20–22, p.135",t:"Very miserly, tolerant, good brothers, success by determined effort; later, fewer brothers, with diminishing gains for each.",d:"3rd lord strong / own / exalted→more brothers; in 6-8-12 / with malefic→loss of brothers.",f:"A feminine planet — should give more sisters; for Virgo/Aquarius lagna it is the 9th lord aspecting its own 9th, giving prosperity.",y:""},
+ {s:"Sutras 23–28, p.136",t:"Handsome, intelligent, happiness from brothers, happy, forgiving; horse-drawn conveyances in the 30th year, abundant milk.",d:"4th lord strong→horses, palanquin, gold. 4th lord malefic / enemy / debilitated→no land, mother in distress, other women.",f:"Kendra→Mālavya yoga; Virgo/Capricorn/Aquarius→Dhana yogas.",y:"Mālavya yoga if own/exalted."},
+ {s:"Sutras 29–33, p.138",t:"Full of wisdom, a minister or commander, sees the grandmother alive, a young wife & children, Govt. honours, a clever minister, a happy wife.",d:"Malefic / debilitated→dull-headed, wanting children. Benefic / own / exalted→very wise, worldly, children & conveyances.",f:"Yogakāraka for Virgo/Capricorn/Aquarius; a female planet→more daughters.",y:""},
+ {s:"Sutras 34–36, p.139",t:"Good relations, destroys enemies (the book's 'children & grandchildren' the author doubts), wasteful expenditure, deceitful, diseases.",d:"6th lord strong→more relations & enemies; malefic / debilitated / with Moon→loss of relations, enemies destroyed.",f:"Bhāvārtha Ratnākara: Venus in the 6th gives the same wealth-yoga as in the 12th.",y:""},
+ {s:"Sutras 37–44, p.140",t:"Fond of kissing, highly sexed, wealthy, drawn to other women, conveyances, efficient, with a family.",d:"Malefic / debilitated→loss of wife then remarriage; many malefics→many marriages, no children. Benefic / own / exalted (Pisces)→wealth via in-laws, influential through the wife, surrounded by women.",f:"Kendra→Mālavya yoga; Jupiter's aspect→both chaste, a very happy marriage.",y:"Mālavya yoga if own/exalted."},
+ {s:"Sutras 45–48, p.142",t:"Happy; the mother has throat trouble in the 4th year; less than medium span, sickly; a devoted wife but the native is discontented.",d:"With benefic→full span; with malefic→short-lived.",f:"8th = longevity; a great benefic aspecting the 2nd should give long life & wealth (Phaladīpikā/Sārāvalī favour this).",y:""},
+ {s:"Sutras 49–58, p.143",t:"Religious, meditative, auspicious signs in the foot (lotus, conch, ankuśa), all comforts, children; father long-lived.",d:"Malefic aspect→early loss of father, or illicit relations with the preceptor's wife, or loss of wealth. Benefic / own / exalted→Mahārāja yoga.",f:"With the 4th/7th lord→exceedingly fortunate; own 9L in 9th→Rāja yoga (e.g. Jamshedji Tata).",y:"Rāja / Mahārāja yoga."},
+ {s:"Sutras 59–61, p.144",t:"Full of glory; with malefic→obstacles in undertakings.",d:"With Mercury + Jupiter + Moon→many conveyances, religious ceremonies, world reputation, many Rāja yogas, fortunate, talkative.",f:"Virgo/Capricorn/Aquarius/Cancer→Dhana yogas; own 10L in 10th→Rāja; Kendra→Mālavya + Amala (e.g. Zakir Husain).",y:"Rāja / Mālavya / Amala yoga."},
+ {s:"Sutras 62–64, p.146",t:"Learned, very wealthy, owner of lands, kind-hearted.",d:"With benefic→conveyances; with malefic→wealth by questionable means; debilitated / with malefic / as 6-8-12 lord→no gains.",f:"Virgo/Capricorn/Aquarius/Cancer→Dhana yogas; Taurus→exalted lagna-lord in the 11th.",y:"Dhana yoga (those lagnas)."},
+ {s:"Sutras 65–68, p.147",t:"Extreme poverty (per the book).",d:"With malefic→sexual indulgence, hell. With benefic→very wealthy, bed comforts, heaven.",f:"Bhāvārtha Ratnākara: Venus in the 12th gives the same wealth-yoga as in the 6th — most authorities predict wealth.",y:""}
+];
+const BH_SATURN=[
+ {s:"Sutras 1–7, p.149",t:"Rheumatic & bilious disease. Exalted (Libra)→lordship over a village or town, financial & agricultural prosperity. Own (Capricorn/Aquarius)→a rich father.",d:"In the sign of the 4th/10th lord→very fortunate, Mahārāja yoga. Aspected by the Moon→lives by begging (cancelled by Jupiter/Venus aspect).",f:"Good only in Libra/Sagittarius/Pisces/Capricorn/Aquarius lagna; Kendra→Śaśa yoga (e.g. Khrushchev).",y:"Śaśa yoga if own/exalted."},
+ {s:"Sutras 8–9, p.152",t:"Financial stringency, two wives (the first dies, he remarries).",d:"With malefic→foul with women, in charge of a Maṭha, no lands, eye trouble.",f:"Well off if it is the 2nd lord of a good house — Aries (10/11L), Taurus (9/10L), Libra (4/5L), Capricorn (1/2L).",y:""},
+ {s:"Sutras 10–13, p.153",t:"Loss of / no younger brothers; earns by undesirable trades.",d:"Own / exalted→good brothers; with malefic→inimical to brothers.",f:"An upachaya — the malefic Saturn makes the native courageous & wealthy.",y:""},
+ {s:"Sutras 14–21, p.154",t:"Loss of the mother, then a step-mother — unless Saturn is own/exalted, when he owns horses & palanquins.",d:"As lagna-lord in the 4th→mother long-lived, all comforts, happy. With the 8th lord→loss of mother & happiness.",f:"Aries/Taurus/Libra→Dhana yogas; Kendra own/exalted→Śaśa yoga.",y:"Śaśa yoga if own/exalted."},
+ {s:"Sutras 22–26, p.155",t:"Childless, very poor, in inferior trades, adopts a daughter.",d:"Own→daughters. Jupiter's aspect→two wives (one issueless, one daughters). Strong→affairs with many women.",f:"Aries/Taurus/Libra→powerful Dhana yogas.",y:""},
+ {s:"Sutras 27–31, p.156",t:"Little learning, enemies destroyed, full financial & agricultural prosperity. With Mars→travels far, a moderate Rāja yoga.",d:"As 8th lord in the 6th→Ariṣṭa (short life), rheumatism, injury marks.",f:"6th is a dusthana — a good-house lord here is spoiled; but 6/8/12 lord in the 6th→favourable.",y:"Moderate Rāja yoga with Mars."},
+ {s:"Sutras 32–36, p.157",t:"A lean-bodied wife, bodily affliction, sorrowful.",d:"Own / exalted / with Ketu→intimacy with many women. With Mars / Venus→sexual perversions.",f:"Aries/Taurus/Libra→Dhana yogas; Kendra→Śaśa yoga — the native is of questionable, not necessarily perverse, character.",y:"Śaśa yoga if own/exalted."},
+ {s:"Sutras 37–40, p.158",t:"A 75-year span, poor, intimacy with low-caste women, serves others.",d:"Own / exalted→still longer life. 8th lord in enemy / debilitated→short life, food scarcity.",f:"Saturn in the 8th gives long life (Bhāvārtha Ratnākara) — the one house where a malefic lengthens longevity.",y:""},
+ {s:"Sutras 41–43, p.159",t:"Sinful, yet repairs dilapidated religious buildings; builds bathing-ghats & cow-shelters in the 39th year.",d:"Own / exalted→father long-lived; weak / malefic→father short-lived.",f:"Taurus/Gemini (own 9L in 9th)→Rāja yoga; Libra (4/5L), Capricorn (1/2L), Aquarius exalted→favourable.",y:"Rāja yoga (Taurus/Gemini lagna)."},
+ {s:"Sutras 44–45, p.160",t:"Bathes in the Ganges in the 25th year, stingy, of bilious constitution.",d:"With malefic→career obstacles; with benefic→successful in undertakings.",f:"Aries/Taurus (own 10L / 9-10L)→Rāja yoga; Libra (4/5L), Capricorn exalted (1/2L), Aquarius (1L); Kendra→Śaśa.",y:"Rāja / Śaśa yoga (own/exalted)."},
+ {s:"Sutras 46–48, p.161",t:"Very wealthy (though with obstacles), owner of landed property, a Govt. favourite.",d:"Own / exalted→learned, Mahābhāgya yoga, all conveyances.",f:"11th upachaya — malefics fare well; Aries/Taurus/Libra/Sagittarius-exalted/Capricorn/Aquarius→Dhana yogas.",y:"Dhana / Mahābhāgya yoga."},
+ {s:"Sutras 49–53, p.163",t:"Sinful, an affliction in some part of the body.",d:"With malefic→defective eyesight, hell. With benefic→happy, good eyesight, heaven.",f:"12/6/8 lord in the 12th→Vipreet Rāja yoga.",y:"Vipreet Rāja yoga (as 12/6/8 lord)."}
+];
+/* Rahu & Ketu — the author gives identical effects for both (Ch VIII). */
+const BH_NODE=[
+ {s:"Sutras 1–4, p.164",t:"The wife may bear a still-born child; in Aries/Taurus/Cancer→kind-hearted, fond of enjoyment; under malefic aspect→marks on the face.",d:"",f:"",y:""},
+ {s:"Sutras 5–6, p.165",t:"Poor, bodily disease, loss of children, dark complexion; with malefic→a mark on the lips.",d:"",f:"",y:""},
+ {s:"Sutras 7–8, p.165",t:"Abundance of oil-seeds (mustard, til); with benefic→a mark on the neck.",d:"",f:"An upachaya — the shadow node tends to prosper here.",y:""},
+ {s:"Sutras 9–10, p.166",t:"Many ornaments, two wives, serves others; with malefic→the mother in distress (not if a benefic aspects).",d:"",f:"",y:""},
+ {s:"Sutras 11–13, p.167",t:"No / loss of children by the Serpent's curse — children follow Nāga-pratimā worship; windy disease, sinful, Govt. wrath, lives in undesirable places.",d:"",f:"",y:""},
+ {s:"Sutras 14–16, p.167",t:"Tolerant and very happy; with the Moon→contact with royal-family women, poor, a thief.",d:"",f:"An upachaya — enemies are overcome.",y:""},
+ {s:"Sutras 17–21, p.168",t:"Two wives (the first dies, the second has a tumour); with malefic→Gaṇḍa-mālā disease (not if a benefic); with benefic→one wife.",d:"",f:"",y:""},
+ {s:"Sutras 22–23, p.169",t:"Very sickly; a 32-year span, extended to 45 with a benefic, or 60 if the 8th lord is strong / exalted.",d:"",f:"8th = longevity.",y:""},
+ {s:"Sutra 24, p.169",t:"Childless, intimacy with low-born women, dependent for livelihood, irreligious.",d:"",f:"",y:""},
+ {s:"Sutras 25–28, p.170",t:"Contact with widows, lives in slums (good places if a benefic aspects); interested in poetry.",d:"",f:"Directional strength in the 10th.",y:""},
+ {s:"Sutras 29–30, p.171",t:"Blessed with children and wealthy.",d:"",f:"An upachaya — the node gives gains here.",y:""},
+ {s:"Sutras 31–32, p.171",t:"Few children, eye trouble; hell after death.",d:"",f:"",y:""}
+];
+const BH={Su:BH_SUN,Mo:BH_MOON,Ma:BH_MARS,Me:BH_MERCURY,Ju:BH_JUPITER,Ve:BH_VENUS,Sa:BH_SATURN,Ra:BH_NODE,Ke:BH_NODE};
+const BH_NODE_PRINCIPLE="Rāhu & Ketu own no sign. They give the results of any planet they conjoin or that aspects them; alone and unaspected, they take on the lord of the house they occupy. In a Trikoṇa/Kendra, or with a kona/kendra lord, they turn strongly auspicious. (Bhrigu Sutram, Part I p.24 & Part II Ch VIII, p.172, after Uttara Kalāmṛta.)";
+
+function renderD1Guide(c, La){
+  const host=document.getElementById('d1gBody');
+  if(!host) return;
+  if(!c||!c.planets){ host.innerHTML='<p class="note">No chart loaded yet. Add a chart above to see its Rāśi (D-1) guide.</p>'; return; }
+  const PO=['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke'];
+  const NM={Su:'Sun',Mo:'Moon',Ma:'Mars',Me:'Mercury',Ju:'Jupiter',Ve:'Venus',Sa:'Saturn',Ra:'Rahu',Ke:'Ketu'};
+  const PC={Su:'#ffb030',Mo:'#c8d8ff',Ma:'#ef6a5a',Me:'#4fd0c0',Ju:'#e7b94e',Ve:'#ffb0d0',Sa:'#8060c0',Ra:'#6040a0',Ke:'#909090'};
+  const esc=s=>String(s==null?'':s);
+  const digTag=d=>{if(!d)return'';if(d.score>=2)return'<span class="d10-tag good">Exalted</span>';if(d.score>=1.5)return'<span class="d10-tag good">Own sign</span>';if(d.score>=1)return'<span class="d10-tag neu">Friend’s sign</span>';if(d.score<=-2)return'<span class="d10-tag bad">Debilitated</span>';if(d.score<=-1)return'<span class="d10-tag warn">Enemy’s sign</span>';return'<span class="d10-tag neu">Neutral</span>';};
+  const rulesFrom=k=>{const a=[];for(let h=1;h<=12;h++){if(SIGN_LORD[(La+h-1)%12]===k)a.push(ORD(h));}return a;};
+
+  // ── Lagna header ──
+  const laNi=nakInfo(La*30+(c.La&&c.La.deg||0));
+  const laR=RASHIS[La];
+  const llK=SIGN_LORD[La], llp=c.planets[llK], llH=llp?houseFromSigns(La,llp.sign):null, llDig=llp?dignityOf(llK,llp.sign):null;
+  let html=`<div class="chapref" style="margin:0 0 14px">📖 Rāśi (D-1) guide — planet · dispositor · nakshatra · planet-in-house. Interpretation from <b>Bhrigu Sutram</b> (tr. Dr. G.S. Kapoor); nakshatra attributes from <b>Wisdom of Nakshatras</b> (Dr. K. Parvathi Kumar). Every reading is chosen for <i>your</i> lagna by the book's own functional-lordship rule, and cited to its Sūtra & page.</div>`;
+  html+=`<div class="d10-step open" style="margin-bottom:14px"><div class="d10-step-hd" onclick="d10Toggle(this)">
+      <span class="d10-pill" style="color:var(--gold2);border-color:var(--gold2)33">Lagna</span>
+      <b style="margin-left:6px">${esc(laR.name)} rises</b>
+      <span style="color:var(--muted);margin-left:8px">${esc(laR.elem)} · ${esc(laR.skt)} · nakshatra ${esc(laNi.n)} p${laNi.pada}</span>
+      <span class="d10-schevron">▾</span></div>
+    <div class="d10-step-body">
+      <p><b>House 1 signifies:</b> ${esc(BH_HOUSE_SIG[0])} <span class="chapref" style="display:inline;border:0;padding:0">Bhrigu Sutram, Part I Ch II, p.25.</span></p>
+      <p><b>Lagna lord — ${esc(GBYK[llK].name)}</b> — sits in <b>${esc(SIGNS[llp?llp.sign:La])}</b>, the <b>${llH?ORD(llH):'—'} house</b> ${digTag(llDig)}. Its own planet-in-house reading (in the ${esc(GBYK[llK].name)} card below) describes how this person meets the world.</p>
+      <p style="color:var(--muted);font-size:13px">Lagna in <b>${esc(laNi.n)}</b>, pada ${laNi.pada} — star of ${esc(laNi.d)}, ${esc(laNi.g)}; shakti: ${esc(laNi.sh)}. <i>Wisdom of Nakshatras.</i></p>
+    </div></div>`;
+
+  // ── Per-graha cards ──
+  PO.forEach(k=>{
+    const p=c.planets[k]; if(!p) return;
+    const h=houseFromSigns(La,p.sign);
+    const dig=dignityOf(k,p.sign);
+    const ni=nakInfo(p.sign*30+p.deg);
+    const isNode=(k==='Ra'||k==='Ke');
+    const dispK=SIGN_LORD[p.sign];
+    const dp=c.planets[dispK], dispH=dp?houseFromSigns(La,dp.sign):null, dispDig=dp?dignityOf(dispK,dp.sign):null;
+    // second hop
+    const disp2K=dp?SIGN_LORD[dp.sign]:null, dp2=disp2K?c.planets[disp2K]:null, disp2H=dp2?houseFromSigns(La,dp2.sign):null;
+    const bh=(BH[k]&&BH[k][h-1])||null;
+    const dg=BH_DIGNITY[k];
+    const rules=isNode?[]:rulesFrom(k);
+    const nlK=ni.l, nlp=c.planets[nlK], nlH=nlp?houseFromSigns(La,nlp.sign):null;
+
+    html+=`<div class="d10-step"><div class="d10-step-hd" onclick="d10Toggle(this)">
+        <span class="d10-pill" style="color:${PC[k]};border-color:${PC[k]}33">${esc(NM[k])}</span>
+        <span style="margin-left:6px">in <b>${esc(SIGNS[p.sign])}</b> · <b>${ORD(h)} house</b></span>
+        ${digTag(dig)}${p.retro?'<span class="d10-tag warn">retro</span>':''}
+        <span class="d10-schevron">▾</span></div>
+      <div class="d10-step-body">`;
+
+    // 1 · dignity (Part I Ch I)
+    html+=`<div style="margin-bottom:10px"><b>Dignity</b> — ${esc(dig.full)}. <span style="color:var(--muted);font-size:13px">Owns ${esc(dg.own)}; exalted ${esc(dg.ex)}, debilitated ${esc(dg.de)}${dg.mt!=='—'?`; mūlatrikoṇa ${esc(dg.mt)}`:''}. Friends: ${esc(dg.fr)}; enemies: ${esc(dg.en)}. <i>Bhrigu Sutram Part I Ch I, ${esc(dg.p)}.</i></span></div>`;
+
+    // 2 · dispositor chain
+    if(isNode){
+      html+=`<div style="margin-bottom:10px"><b>Dispositor</b> — as a shadow planet, ${esc(NM[k])} acts through <b>${esc(GBYK[dispK].name)}</b>, lord of ${esc(SIGNS[p.sign])}${dp?`, who sits in the <b>${ORD(dispH)} house</b> (${esc(SIGNS[dp.sign])}) ${digTag(dispDig)}`:''}. <span style="color:var(--muted);font-size:13px">${esc(BH_NODE_PRINCIPLE)}</span></div>`;
+    } else {
+      let chain=`<b>${esc(GBYK[k].name)}</b> in ${esc(SIGNS[p.sign])} → dispositor <b>${esc(GBYK[dispK].name)}</b>`;
+      if(dp){ chain+=` in the <b>${ORD(dispH)} house</b> (${esc(SIGNS[dp.sign])}) ${digTag(dispDig)}`;
+        if(disp2K&&disp2K!==dispK&&dp2){ chain+=` → its dispositor <b>${esc(GBYK[disp2K].name)}</b> in the ${ORD(disp2H)} house`; } }
+      html+=`<div style="margin-bottom:10px"><b>Dispositor chain</b> — ${chain}. <span style="color:var(--muted);font-size:13px">The strength & house of the dispositor colours how ${esc(NM[k])} delivers its results here.</span></div>`;
+    }
+
+    // 3 · nakshatra
+    html+=`<div style="margin-bottom:10px"><b>Nakshatra</b> — <b>${esc(ni.n)}</b>, pada ${ni.pada} · lord <b>${esc(GBYK[nlK].name)}</b>${nlH?` (in the ${ORD(nlH)} house)`:''} · deity ${esc(ni.d)} · ${esc(ni.g)}. <span style="color:var(--muted);font-size:13px">Shakti: ${esc(ni.sh)}. The star-lord ${esc(GBYK[nlK].name)} runs this planet's Vimśottarī daśā — the bridge from meaning to timing. <i>Wisdom of Nakshatras.</i></span></div>`;
+
+    // 4 · Bhrigu planet-in-house
+    if(bh){
+      html+=`<div class="chapref" style="margin-top:8px"><b>${esc(NM[k])} in the ${ORD(h)} house</b> — ${esc(bh.t)}`;
+      if(bh.d) html+=`<br><b style="color:var(--gold2)">By dignity:</b> ${esc(bh.d)}`;
+      if(!isNode&&rules.length) html+=`<br><b style="color:var(--gold2)">For your ${esc(laR.name)} lagna,</b> ${esc(NM[k])} rules the ${rules.join(' & ')} house${rules.length>1?'s':''}${bh.f?` — ${esc(bh.f)}`:'.'}`;
+      else if(bh.f) html+=`<br><b style="color:var(--gold2)">Note:</b> ${esc(bh.f)}`;
+      if(bh.y) html+=`<br><b style="color:var(--exalt)">Yoga:</b> ${esc(bh.y)}`;
+      html+=`<br><span style="color:var(--muted);font-size:12px">📖 Bhrigu Sutram, ${esc(NM[k])} in the ${ORD(h)} House, ${esc(bh.s)}.</span></div>`;
+    }
+    html+=`</div></div>`;
+  });
+  host.innerHTML=html;
+}
+
+
 function renderD10Guide(d1c, d1La){
   const PO=['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke'];
   const NM={Su:'Sun',Mo:'Moon',Ma:'Mars',Me:'Mercury',Ju:'Jupiter',Ve:'Venus',Sa:'Saturn',Ra:'Rahu',Ke:'Ketu'};
@@ -6087,6 +6334,7 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
 
     // Special Lagnas
     try{renderSpecialLagnas(c,La,allBAV.SAV);}catch(e){console.error("renderSpecialLagnas:",e);}
+    try{renderD1Guide(c,La);}catch(e){console.error("renderD1Guide:",e);}
 
     // Chart Story
     const story=generateStory(c,La,bavForVerdict,allBAV);
