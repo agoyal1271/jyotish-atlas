@@ -1769,7 +1769,7 @@ html.light .brand{color:var(--ink)!important}
   <section id="d1guide" class="section-reveal">
     <div class="eyebrow">Read your birth chart, graha by graha</div>
     <h2 class="display">Rāśi Guide (D-1)</h2>
-    <p class="lead">For the active chart: where the lagna sits, and for every planet — its dignity, its dispositor, the nakshatra it occupies, and the classical planet-in-house reading chosen for <i>your</i> lagna. Sourced from <b>Bhrigu Sutram</b> and <b>Wisdom of Nakshatras</b>, cited line by line.</p>
+    <p class="lead">For the active chart: where the lagna sits, and for every planet — its dignity, its dispositor, the nakshatra it occupies, the classical planet-in-house reading chosen for <i>your</i> lagna, and how <b>D-9 (Navāṃśa)</b> confirms, undermines, or redeems that D-1 promise. Interpretation sourced from <b>Bhrigu Sutram</b> and <b>Wisdom of Nakshatras</b>, cited line by line; D-1×D-9 synthesis is classical Parāśarī principle.</p>
     <div class="d10-guide"><div id="d1gBody"><p class="note">No chart loaded yet. Add a chart in <a href="#charts">My Charts</a> to see its Rāśi guide.</p></div></div>
   </section>
 
@@ -2165,7 +2165,7 @@ const BH_NODE=[
 const BH={Su:BH_SUN,Mo:BH_MOON,Ma:BH_MARS,Me:BH_MERCURY,Ju:BH_JUPITER,Ve:BH_VENUS,Sa:BH_SATURN,Ra:BH_NODE,Ke:BH_NODE};
 const BH_NODE_PRINCIPLE="Rāhu & Ketu own no sign. They give the results of any planet they conjoin or that aspects them; alone and unaspected, they take on the lord of the house they occupy. In a Trikoṇa/Kendra, or with a kona/kendra lord, they turn strongly auspicious. (Bhrigu Sutram, Part I p.24 & Part II Ch VIII, p.172, after Uttara Kalāmṛta.)";
 
-function renderD1Guide(c, La){
+function renderD1Guide(c, La, allBAV){
   const host=document.getElementById('d1gBody');
   if(!host) return;
   if(!c||!c.planets){ host.innerHTML='<p class="note">No chart loaded yet. Add a chart above to see its Rāśi (D-1) guide.</p>'; return; }
@@ -2176,11 +2176,16 @@ function renderD1Guide(c, La){
   const digTag=d=>{if(!d)return'';if(d.score>=2)return'<span class="d10-tag good">Exalted</span>';if(d.score>=1.5)return'<span class="d10-tag good">Own sign</span>';if(d.score>=1)return'<span class="d10-tag neu">Friend’s sign</span>';if(d.score<=-2)return'<span class="d10-tag bad">Debilitated</span>';if(d.score<=-1)return'<span class="d10-tag warn">Enemy’s sign</span>';return'<span class="d10-tag neu">Neutral</span>';};
   const rulesFrom=k=>{const a=[];for(let h=1;h<=12;h++){if(SIGN_LORD[(La+h-1)%12]===k)a.push(ORD(h));}return a;};
 
+  // ── D-9 (Navāṃśa) lagna — needed for every planet's promise-check below ──
+  const d1LaDeg=(c.La&&c.La.deg)||0;
+  const d9La=vargaSign(La,d1LaDeg,9);
+  const laVg=(La===d9La);
+
   // ── Lagna header ──
-  const laNi=nakInfo(La*30+(c.La&&c.La.deg||0));
+  const laNi=nakInfo(La*30+d1LaDeg);
   const laR=RASHIS[La];
   const llK=SIGN_LORD[La], llp=c.planets[llK], llH=llp?houseFromSigns(La,llp.sign):null, llDig=llp?dignityOf(llK,llp.sign):null;
-  let html=`<div class="chapref" style="margin:0 0 14px">📖 Rāśi (D-1) guide — planet · dispositor · nakshatra · planet-in-house. Interpretation from <b>Bhrigu Sutram</b> (tr. Dr. G.S. Kapoor); nakshatra attributes from <b>Wisdom of Nakshatras</b> (Dr. K. Parvathi Kumar). Every reading is chosen for <i>your</i> lagna by the book's own functional-lordship rule, and cited to its Sūtra & page.</div>`;
+  let html=`<div class="chapref" style="margin:0 0 14px">📖 Rāśi (D-1) guide — planet · dispositor · nakshatra · planet-in-house · D-9 promise-check. Planet-in-house from <b>Bhrigu Sutram</b> (tr. Dr. G.S. Kapoor); nakshatra attributes from <b>Wisdom of Nakshatras</b> (Dr. K. Parvathi Kumar) — each cited to its Sūtra/page. The D-1×D-9 synthesis (Vargottama, promise vs. delivery, BAV) is classical Parāśarī principle, applied by this app's own engine — not drawn from either book.</div>`;
   html+=`<div class="d10-step open" style="margin-bottom:14px"><div class="d10-step-hd" onclick="d10Toggle(this)">
       <span class="d10-pill" style="color:var(--gold2);border-color:var(--gold2)33">Lagna</span>
       <b style="margin-left:6px">${esc(laR.name)} rises</b>
@@ -2190,6 +2195,7 @@ function renderD1Guide(c, La){
       <p><b>House 1 signifies:</b> ${esc(BH_HOUSE_SIG[0])} <span class="chapref" style="display:inline;border:0;padding:0">Bhrigu Sutram, Part I Ch II, p.25.</span></p>
       <p><b>Lagna lord — ${esc(GBYK[llK].name)}</b> — sits in <b>${esc(SIGNS[llp?llp.sign:La])}</b>, the <b>${llH?ORD(llH):'—'} house</b> ${digTag(llDig)}. Its own planet-in-house reading (in the ${esc(GBYK[llK].name)} card below) describes how this person meets the world.</p>
       <p style="color:var(--muted);font-size:13px">Lagna in <b>${esc(laNi.n)}</b>, pada ${laNi.pada} — star of ${esc(laNi.d)}, ${esc(laNi.g)}; shakti: ${esc(laNi.sh)}. <i>Wisdom of Nakshatras.</i></p>
+      <p style="color:var(--muted);font-size:13px">D-9 lagna falls in <b>${esc(RASHIS[d9La].name)}</b>${laVg?' — <span class="d10-tag good">Vargottama lagna</span>, the identity holds steady across the outer (D-1) and inner (D-9) charts':''}.</p>
     </div></div>`;
 
   // ── Per-graha cards ──
@@ -2208,10 +2214,18 @@ function renderD1Guide(c, La){
     const rules=isNode?[]:rulesFrom(k);
     const nlK=ni.l, nlp=c.planets[nlK], nlH=nlp?houseFromSigns(La,nlp.sign):null;
 
+    // D-9 placement + D1×D9 synthesis (reuses the app's existing combinedVerdict engine)
+    const d9Sign=vargaSign(p.sign,p.deg,9);
+    const d9H=houseFromSigns(d9La,d9Sign);
+    const d9Dig=dignityOf(k,d9Sign);
+    const vg=(p.sign===d9Sign);
+    const bavScore=(allBAV&&allBAV[k]&&allBAV[k][p.sign]!=null)?allBAV[k][p.sign]:null;
+    let verdict=null; try{ verdict=combinedVerdict(dig,d9Dig,vg,{house:h,planet:k,bavScore}); }catch(e){}
+
     html+=`<div class="d10-step"><div class="d10-step-hd" onclick="d10Toggle(this)">
         <span class="d10-pill" style="color:${PC[k]};border-color:${PC[k]}33">${esc(NM[k])}</span>
         <span style="margin-left:6px">in <b>${esc(SIGNS[p.sign])}</b> · <b>${ORD(h)} house</b></span>
-        ${digTag(dig)}${p.retro?'<span class="d10-tag warn">retro</span>':''}
+        ${digTag(dig)}${p.retro?'<span class="d10-tag warn">retro</span>':''}${vg?'<span class="d10-tag good">Vargottama</span>':''}
         <span class="d10-schevron">▾</span></div>
       <div class="d10-step-body">`;
 
@@ -2231,7 +2245,14 @@ function renderD1Guide(c, La){
     // 3 · nakshatra
     html+=`<div style="margin-bottom:10px"><b>Nakshatra</b> — <b>${esc(ni.n)}</b>, pada ${ni.pada} · lord <b>${esc(GBYK[nlK].name)}</b>${nlH?` (in the ${ORD(nlH)} house)`:''} · deity ${esc(ni.d)} · ${esc(ni.g)}. <span style="color:var(--muted);font-size:13px">Shakti: ${esc(ni.sh)}. The star-lord ${esc(GBYK[nlK].name)} runs this planet's Vimśottarī daśā — the bridge from meaning to timing. <i>Wisdom of Nakshatras.</i></span></div>`;
 
-    // 4 · Bhrigu planet-in-house
+    // 4 · D-9 promise-check — D-1 is the daily-delivery mechanism, D-9 is the soul's deeper karmic support
+    html+=`<div style="margin-bottom:10px"><b>D-9 (Navāṃśa) — promise check</b> — falls in <b>${esc(SIGNS[d9Sign])}</b>, the <b>${ORD(d9H)} house</b> from the D-9 lagna, ${digTag(d9Dig)}${vg?' <span class="d10-tag good">Vargottama</span>':''}.`;
+    if(verdict){
+      html+=`<br><span style="color:${verdict.col}">${esc(verdict.g)} <b>${esc(verdict.t)}</b></span><br><span style="color:var(--muted);font-size:13px">${verdict.x}</span>`;
+    }
+    html+=`</div>`;
+
+    // 5 · Bhrigu planet-in-house
     if(bh){
       html+=`<div class="chapref" style="margin-top:8px"><b>${esc(NM[k])} in the ${ORD(h)} house</b> — ${esc(bh.t)}`;
       if(bh.d) html+=`<br><b style="color:var(--gold2)">By dignity:</b> ${esc(bh.d)}`;
@@ -6334,7 +6355,7 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
 
     // Special Lagnas
     try{renderSpecialLagnas(c,La,allBAV.SAV);}catch(e){console.error("renderSpecialLagnas:",e);}
-    try{renderD1Guide(c,La);}catch(e){console.error("renderD1Guide:",e);}
+    try{renderD1Guide(c,La,allBAV);}catch(e){console.error("renderD1Guide:",e);}
 
     // Chart Story
     const story=generateStory(c,La,bavForVerdict,allBAV);
