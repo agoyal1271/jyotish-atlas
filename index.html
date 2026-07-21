@@ -1430,6 +1430,52 @@ html.light .brand{color:var(--ink)!important}
   .empty-rich .er-ic{font-size:34px;opacity:.6;margin-bottom:8px}
   .empty-rich .er-title{font-weight:700;color:var(--ink);margin-bottom:4px}
 
+  /* ── Prashna Kundli ── */
+  .pr-verdict{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;border:1px solid var(--line);margin-bottom:16px}
+  .pr-verdict.fav{background:color-mix(in srgb,var(--exalt) 12%,var(--panel2));border-color:color-mix(in srgb,var(--exalt) 40%,var(--line))}
+  .pr-verdict.mix{background:color-mix(in srgb,var(--gold) 10%,var(--panel2));border-color:color-mix(in srgb,var(--gold) 36%,var(--line))}
+  .pr-verdict.obs{background:color-mix(in srgb,var(--debil) 12%,var(--panel2));border-color:color-mix(in srgb,var(--debil) 40%,var(--line))}
+  .pr-verdict .pv-ic{font-size:26px;line-height:1}
+  .pr-verdict .pv-t{font-weight:800;font-size:15px}
+  .pr-verdict.fav .pv-t{color:var(--exalt)} .pr-verdict.mix .pv-t{color:var(--gold2)} .pr-verdict.obs .pv-t{color:var(--debil)}
+  .pr-verdict .pv-s{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .pr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-bottom:14px}
+  .pr-card{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:13px 15px}
+  .pr-card h5{margin:0 0 7px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--gold2);font-weight:700}
+  .pr-card .pr-big{font-size:15px;font-weight:700;color:var(--ink)}
+  .pr-card .pr-row{font-size:12.5px;color:var(--muted);margin-top:5px;line-height:1.5}
+  .pr-card .pr-row b{color:var(--ink);font-weight:600}
+  .pr-fac{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;padding:5px 0;border-bottom:1px dashed var(--line)}
+  .pr-fac:last-child{border-bottom:0}
+  .pr-fac .f-v.pos{color:var(--exalt);font-weight:700} .pr-fac .f-v.neg{color:var(--debil);font-weight:700} .pr-fac .f-v.neu{color:var(--muted)}
+  .pr-planets{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 4px}
+  .pr-pchip{font-size:11.5px;padding:3px 9px;border-radius:7px;background:var(--panel);border:1px solid var(--line);color:var(--ink)}
+  .pr-pchip .rr{color:var(--debil);font-weight:700}
+
+  /* ── Life Journal ── */
+  .jr-form{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+  .jr-ev{display:flex;gap:13px;align-items:flex-start;padding:13px 6px;border-bottom:1px solid var(--line)}
+  .jr-ev .jr-ic{font-size:22px;line-height:1.2;flex:none;width:30px;text-align:center}
+  .jr-ev .jr-main{flex:1;min-width:0}
+  .jr-ev .jr-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .jr-ev .jr-ttl{font-weight:700;color:var(--ink);font-size:14px}
+  .jr-ev .jr-date{font-size:12px;color:var(--muted);white-space:nowrap}
+  .jr-ev .jr-sig{margin-top:6px;display:flex;flex-wrap:wrap;gap:6px}
+  .jr-tag{font-size:11px;padding:2px 9px;border-radius:20px;border:1px solid var(--line);background:var(--panel2);color:var(--muted)}
+  .jr-tag.maha{border-color:color-mix(in srgb,var(--gold) 44%,var(--line));color:var(--gold2)}
+  .jr-tag.antar{border-color:color-mix(in srgb,var(--friend) 40%,var(--line));color:var(--friend)}
+  .jr-tag.ss{border-color:color-mix(in srgb,var(--debil) 46%,var(--line));color:var(--debil)}
+  .jr-ev .jr-del{flex:none;background:none;border:0;color:var(--muted);cursor:pointer;font-size:15px;padding:2px 6px;border-radius:6px}
+  .jr-ev .jr-del:hover{color:var(--debil);background:color-mix(in srgb,var(--debil) 12%,transparent)}
+  .jr-ins{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:6px 0 18px}
+  .jr-ins-card{background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:14px 16px}
+  .jr-ins-card h5{margin:0 0 10px;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--gold2);font-weight:700}
+  .jr-bar-row{display:flex;align-items:center;gap:9px;margin:5px 0;font-size:12.5px}
+  .jr-bar-row .lbl{flex:none;width:64px;color:var(--ink)}
+  .jr-bar-row .track{flex:1;height:9px;background:var(--panel);border-radius:5px;overflow:hidden}
+  .jr-bar-row .fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--terracotta));border-radius:5px}
+  .jr-bar-row .ct{flex:none;width:22px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+
   /* Count-up emphasis */
   .gcard .n.counting{color:var(--gold2)}
 
@@ -1612,6 +1658,7 @@ html.light .brand{color:var(--ink)!important}
         <a href="#synth">Synthesizer</a>
         <a href="#bbavam">Bhavat Bhavam</a>
         <a href="#arudhas">Graha Arudhas</a>
+        <a href="#prashna">Prashna Kundli</a>
         <a href="#compare">Compare</a>
       </div>
     </details>
@@ -1623,6 +1670,7 @@ html.light .brand{color:var(--ink)!important}
         <a href="#promptbuilder">Prompt Builder</a>
         <a href="#outlook">Life Outlook</a>
         <a href="#lifepredictor">Life Predictor</a>
+        <a href="#journal">Life Journal</a>
       </div>
     </details>
     <details class="nav-zone" data-zone="practice">
@@ -2061,6 +2109,85 @@ html.light .brand{color:var(--ink)!important}
       </div>
       <div id="cmpEmpty" class="empty-rich"><div class="er-ic">⚖️</div><div class="er-title">Select two charts</div><div>Save at least two charts in My Charts, then choose them above.</div></div>
       <div id="cmpResult" style="display:none"></div>
+    </div>
+  </section>
+
+  <section id="prashna" class="section-reveal">
+    <div class="eyebrow">Horary · praśna</div>
+    <h2 class="display">Prashna Kundli</h2>
+    <p class="sub">No birth chart? Ask a question and cast a chart for the <b>exact moment and place</b> you ask it — the classical horary method. The rising sign, the Moon, and the house of your matter carry the answer. Cast it the instant the question feels most alive in your mind.</p>
+    <div class="panel ec-zone-card" style="padding:22px">
+      <div class="ol-controls">
+        <div class="bb-sel-grp" style="flex:1;min-width:240px">
+          <label for="prQ">Your question</label>
+          <input type="text" id="prQ" class="bb-sel" placeholder="e.g. Will I get the job I interviewed for?" style="width:100%">
+        </div>
+        <div class="bb-sel-grp">
+          <label for="prTopic">What is it about?</label>
+          <select id="prTopic" class="bb-sel"></select>
+        </div>
+      </div>
+      <div class="ol-controls">
+        <div class="bb-sel-grp">
+          <label>Moment</label>
+          <select id="prWhen" class="bb-sel"><option value="now">Right now</option><option value="custom">A specific time…</option></select>
+        </div>
+        <div class="bb-sel-grp pr-custom" style="display:none">
+          <label for="prDate">Date &amp; time</label>
+          <input type="datetime-local" id="prDate" class="bb-sel">
+        </div>
+        <div class="bb-sel-grp">
+          <label for="prPlace">Place</label>
+          <select id="prPlace" class="bb-sel"></select>
+        </div>
+        <div class="bb-sel-grp pr-geo" style="display:none">
+          <label for="prLat">Latitude °N</label>
+          <input type="number" id="prLat" class="bb-sel" step="0.01" placeholder="28.61" style="min-width:110px">
+        </div>
+        <div class="bb-sel-grp pr-geo" style="display:none">
+          <label for="prLon">Longitude °E</label>
+          <input type="number" id="prLon" class="bb-sel" step="0.01" placeholder="77.21" style="min-width:110px">
+        </div>
+        <div class="bb-sel-grp pr-geo" style="display:none">
+          <label for="prOff">UTC offset</label>
+          <input type="number" id="prOff" class="bb-sel" step="0.25" placeholder="5.5" style="min-width:100px">
+        </div>
+      </div>
+      <button type="button" id="prCast" class="ec-btn-primary" style="margin-top:4px">✦ Cast the chart</button>
+      <div id="prResult" style="margin-top:18px"></div>
+      <div class="chapref">📖 Praśna technique — the querent &amp; outcome are read from the Lagna &amp; its lord, the mind from the Moon, and the matter from its significator house (BPHS / Prashna Marga principle). The Lagna is computed from local sidereal time, obliquity &amp; latitude; planets from this app's own ephemeris; both made sidereal with the Lahiri ayanāṃśa. Horary is an aid to reflection — treat the leaning as an indication, not a verdict.</div>
+    </div>
+  </section>
+
+  <section id="journal" class="section-reveal">
+    <div class="eyebrow">Your data loop · patterns over time</div>
+    <h2 class="display">Life Journal</h2>
+    <p class="sub">Log real events from your life — a job change, a move, a marriage, an illness, a windfall. Each one is tagged with the <b>Mahādaśā / Antardaśā</b> and the slow-planet transits that were running that day, so your own patterns emerge across the years. This is a journal for noticing, not a proof engine.</p>
+    <div class="panel ec-zone-card" style="padding:22px">
+      <div class="ol-controls">
+        <div class="bb-sel-grp">
+          <label for="jrChart">Chart</label>
+          <select id="jrChart" class="bb-sel"><option value="">No charts yet</option></select>
+        </div>
+      </div>
+      <div id="jrForm" class="jr-form" style="display:none">
+        <div class="bb-sel-grp">
+          <label for="jrDate">When did it happen?</label>
+          <input type="date" id="jrDate" class="bb-sel">
+        </div>
+        <div class="bb-sel-grp">
+          <label for="jrCat">Kind of event</label>
+          <select id="jrCat" class="bb-sel"></select>
+        </div>
+        <div class="bb-sel-grp" style="flex:1;min-width:200px">
+          <label for="jrTitle">What happened?</label>
+          <input type="text" id="jrTitle" class="bb-sel" placeholder="e.g. Started new job at…" style="width:100%">
+        </div>
+        <button type="button" id="jrAdd" class="ec-btn-primary" style="align-self:flex-end">+ Log event</button>
+      </div>
+      <div id="jrEmpty" class="empty-rich"><div class="er-ic">📓</div><div class="er-title">Pick a chart to start your journal</div><div>Choose a saved chart above, then log the real events of your life to see the dasha &amp; transit signatures behind them.</div></div>
+      <div id="jrInsights"></div>
+      <div id="jrList"></div>
     </div>
   </section>
 
@@ -2981,13 +3108,17 @@ function renderBhavaMandala(c,La,N,motion){
     const si=+siKey, arr=occ[si];
     arr.forEach(k=>{
       const p=c.planets[k],v=PV[k],pos=planetPos[k],hh=22, nm=SHORT[k]||k;
+      const dig=dignityOf(k,si);
+      const digGlyph=dig.score>=2?'⬆':dig.score<=-2?'⬇':dig.score>=1.5?'●':'';
+      const digCol=dig.score>=2?'#6fbf86':dig.score<=-2?'#e2705a':dig.score>=1.5?'#e9bf6a':null;
       const degStr=showDeg?`${p.deg.toFixed(0)}°${p.retro?'ʳ':''}`:(p.retro?'ʳ':'');
-      const label=nm+(degStr?' '+degStr:''), w=Math.max(42,label.length*6.3+16);
-      const tip=showDeg?`${GBYK[k].name} · ${SN[si]} ${p.deg.toFixed(1)}°${p.retro?' (retrograde)':''}`:`${GBYK[k].name} · ${SN[si]} (D-${N})${p.retro?' · retrograde':''}`;
+      const label=nm+(degStr?' '+degStr:'')+(digGlyph?' '+digGlyph:''), w=Math.max(42,label.length*6.3+16);
+      const tip=(showDeg?`${GBYK[k].name} · ${SN[si]} ${p.deg.toFixed(1)}°${p.retro?' (retrograde)':''}`:`${GBYK[k].name} · ${SN[si]} (D-${N})${p.retro?' · retrograde':''}`)+` · ${dig.full}`;
       const degTsp=degStr?`<tspan font-size="9.5" dx="2.5" fill="rgba(206,220,252,0.9)">${degStr}</tspan>`:'';
+      const digTsp=digGlyph?`<tspan font-size="9.5" dx="2.5" fill="${digCol}">${digGlyph}</tspan>`:'';
       sv+=`<g class="bm-pill" data-pk="${k}" style="cursor:pointer" onclick="bmFocusPlanet('${k}')">`+
-        `<rect x="${pos.x-w/2}" y="${pos.y-hh/2}" width="${w}" height="${hh}" rx="11" fill="rgba(9,12,26,0.97)" stroke="${v.col}" stroke-width="1.6"><title>${tip} — click to see what it aspects</title></rect>`+
-        `<text x="${pos.x}" y="${pos.y}" text-anchor="middle" dominant-baseline="central" style="pointer-events:none"><tspan font-size="11" font-weight="700" fill="${v.col}">${nm}</tspan>${degTsp}</text>`+
+        `<rect x="${pos.x-w/2}" y="${pos.y-hh/2}" width="${w}" height="${hh}" rx="11" fill="rgba(9,12,26,0.97)" stroke="${digCol||v.col}" stroke-width="${digCol?2.2:1.6}"${dig.score<=-2?' stroke-dasharray="3,2"':''}><title>${tip} — click to see what it aspects</title></rect>`+
+        `<text x="${pos.x}" y="${pos.y}" text-anchor="middle" dominant-baseline="central" style="pointer-events:none"><tspan font-size="11" font-weight="700" fill="${v.col}">${nm}</tspan>${degTsp}${digTsp}</text>`+
         `</g>`;
     });
   });
@@ -3046,7 +3177,7 @@ function renderBhavaMandala(c,La,N,motion){
     rashi:`<b style="color:#9682eb">violet chords</b> = Jaimini rāśi dṛṣṭi (movable↔fixed, dual↔dual). Click a house to see which signs aspect it`,
     all:`all three layers at once — lordship lines, benefic/malefic aspect arrows, and rāśi-dṛṣṭi chords`
   };
-  const aspLegend=`<div class="bm-asplegend"><span><i class="dot" style="background:rgba(90,210,150,.5)"></i>house aura: net benefic aspect</span><span><i class="dot" style="background:rgba(235,95,80,.5)"></i>net malefic aspect</span><span><i style="border-top-color:#5fd0a0"></i>benefic dṛṣṭi</span><span><i style="border-top-color:#ef6a5a"></i>malefic dṛṣṭi</span><span><i style="border-top-color:#9682eb"></i>rāśi dṛṣṭi</span></div>`;
+  const aspLegend=`<div class="bm-asplegend"><span><i class="dot" style="background:rgba(90,210,150,.5)"></i>house aura: net benefic aspect</span><span><i class="dot" style="background:rgba(235,95,80,.5)"></i>net malefic aspect</span><span><i style="border-top-color:#5fd0a0"></i>benefic dṛṣṭi</span><span><i style="border-top-color:#ef6a5a"></i>malefic dṛṣṭi</span><span><i style="border-top-color:#9682eb"></i>rāśi dṛṣṭi</span><span style="color:#6fbf86">⬆ exalted</span><span style="color:#e9bf6a">● own sign</span><span style="color:#e2705a">⬇ debilitated</span></div>`;
   const caption=`<div class="bm-caption">Showing <b>D-${N} · ${vName}</b>${N===1?' — the birth chart':' — divisional chart'} · lens: <b>${(LENSES.find(l=>l[0]===layer)||[,'Lordship'])[1]}</b>. ${LENS_DESC[layer]}. The coloured <b>aura</b> behind each sign always shows the net aspect load. <span style="color:#9db4ff">Blue</span> kendra · <span style="color:#7fe0a0">green</span> trikona · <span style="color:#f0a890">amber</span> dusthana · gold = Lagna.</div>`;
   const traceDefault={lord:'▶ Click any house to trace where its lord sits',graha:'▶ Click a planet to see what it aspects, or a house to see what aspects it',rashi:'▶ Click a house to see which signs cast rāśi dṛṣṭi on it',all:'▶ Click a house, or a planet, to isolate its relationships'}[layer];
 
@@ -3462,9 +3593,11 @@ window.Journey=(function(){
     {id:'charts',       ch:'chart',    t:'Load Your Chart',    lvl:'Applied',    min:'3 min', tldr:'Add a real birth chart. Everything you just learned now runs on actual data.'},
     {id:'d1guide',      ch:'chart',    t:'Rāśi Guide',         lvl:'Applied',    min:'6 min', tldr:'Your chart explained planet by planet — dignity, dispositor, nakshatra and a classical reading, in plain steps.'},
     {id:'outlook',      ch:'chart',    t:'Life Outlook',       lvl:'Applied',    min:'4 min', tldr:'The practical question — when are the good windows? A year-by-year outlook.'},
+    {id:'journal',      ch:'chart',    t:'Life Journal',       lvl:'Applied',    min:'4 min', tldr:'Log real events and see which dasha &amp; transit was running — build your own pattern library over time.'},
     {id:'lifepredictor',ch:'timing',   t:'Life Predictor',     lvl:'Advanced',   min:'5 min', tldr:'A full-life timeline of dasha periods and what each tends to activate.'},
     {id:'promptbuilder',ch:'timing',   t:'Prompt Builder',     lvl:'Power tool', min:'3 min', tldr:'Turn your chart into a clean, focused prompt for an AI reading.'},
     {id:'arudhas',      ch:'lab',      t:'Graha Arudhas',      lvl:'Expert',     min:'5 min', tldr:'A Jaimini technique: the “image” a house projects to the world.'},
+    {id:'prashna',      ch:'lab',      t:'Prashna Kundli',     lvl:'Expert',     min:'4 min', tldr:'Horary: cast a chart for the moment you ask a question, and read the answer from the rising sign &amp; Moon.'},
     {id:'compare',      ch:'lab',      t:'Compare Charts',     lvl:'Expert',     min:'3 min', tldr:'Put two charts side by side.'},
     {id:'quiz',         ch:'check',    t:'Practice Quiz',      lvl:'Checkpoint', min:'5 min', tldr:'Check your understanding with a few quick rounds. No pressure — it’s how it sticks.'}
   ];
@@ -5107,6 +5240,84 @@ function getTransitPlanets(date){
   return{pos,ayan};
 }
 
+/* ---- Ascendant & moment-chart (for Praśna / any date+place) ----
+   Adds the one piece the transit ephemeris lacks: the rising sign, which needs
+   time + latitude + longitude. Formulae: Meeus "Astronomical Algorithms" 2nd ed.
+   — GMST ch.12 (12.4), mean obliquity ch.22 (22.2), ascendant the standard
+   spherical-trig rising-point solution. Sidereal via the same Lahiri ayanāṃśa. */
+function meanObliquity(T){ return 23.439291-0.0130042*T-1.64e-7*T*T+5.04e-7*T*T*T; }
+function gmstDeg(jd){
+  const T=(jd-2451545.0)/36525;
+  const g=280.46061837+360.98564736629*(jd-2451545.0)+3.87933e-4*T*T-T*T*T/38710000.0;
+  return rv(g);
+}
+// Tropical ascendant longitude (deg) for a UT moment at geo latitude/longitude (E+).
+function tropAscendant(date,latDeg,lonEastDeg){
+  const jd=jdFromDate(date),T=(jd-2451545.0)/36525;
+  const ramc=rv(gmstDeg(jd)+lonEastDeg)*D2R;      // local sidereal time as an angle
+  const eps=meanObliquity(T)*D2R, ph=latDeg*D2R;
+  const asc=Math.atan2(Math.cos(ramc),-(Math.sin(ramc)*Math.cos(eps)+Math.tan(ph)*Math.sin(eps)))/D2R;
+  return rv(asc);
+}
+// Build a JS Date (UT instant) from civil local components + UTC offset in hours.
+function momentFromLocal(y,mo,d,hh,mi,offsetHours){
+  return new Date(Date.UTC(y,mo-1,d,hh,mi,0)-offsetHours*3600*1000);
+}
+// Planet series here is unperturbed 2-body Kepler (see note above getTransitPlanets) —
+// accurate well inside a sign near J2000, but the error grows the further a date sits
+// from 2000. Empirically checked against Swiss Ephemeris across 1950–2050: Sun/Moon/
+// nodes stay <0.02°; the five classical planets grow from ~0.1–0.3° near-present to
+// ~0.7–0.9° fifty years out. cuspMargin() turns that into a safety band so any planet
+// landing within it of a sign boundary gets flagged rather than silently trusted.
+function cuspMarginDeg(jd){ const T=(jd-2451545.0)/36525; return Math.min(1.5,0.2+1.3*Math.abs(T)); }
+function nearCusp(deg,marginDeg){ return deg<marginDeg||deg>(30-marginDeg); }
+
+// Full sidereal chart {La,planets} for a moment + place — Lagna + all nine grahas,
+// with a real retrograde flag derived from motion over ±6h. Reuses getTransitPlanets.
+function computeChartForMoment(date,latDeg,lonEastDeg){
+  const {pos,ayan}=getTransitPlanets(date);
+  const ascTrop=tropAscendant(date,latDeg,lonEastDeg);
+  const ascSid=rv(ascTrop-ayan);
+  const La={sign:Math.floor(ascSid/30),deg:ascSid%30};
+  const later=getTransitPlanets(new Date(date.getTime()+6*3600*1000)).pos;
+  const jd=jdFromDate(date), margin=cuspMarginDeg(jd);
+  const planets={};
+  for(const k of ['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke']){
+    if(!pos[k]) continue;
+    let retro=false;
+    if(k==='Ra'||k==='Ke') retro=true;                 // mean nodes are always retrograde
+    else if(k!=='Su'&&k!=='Mo'&&later[k]){ let dv=later[k].lon-pos[k].lon; if(dv>180)dv-=360; if(dv<-180)dv+=360; retro=dv<0; }
+    const near=(k!=='Su'&&k!=='Mo'&&k!=='Ra'&&k!=='Ke')?nearCusp(pos[k].deg,margin):false;
+    planets[k]={sign:pos[k].sign,deg:pos[k].deg,retro,near};
+  }
+  return {La,planets,ayan,ascTrop,ascSid,jd};
+}
+// Which Mahā/Antar-daśā is running at a millisecond timestamp.
+function dashaAt(dashas,ms){
+  if(!dashas||!dashas.mahas) return null;
+  for(const md of dashas.mahas){
+    if(md.start<=ms&&(md.end==null||md.end>=ms)){
+      let antar=null;
+      for(const a of (md.antars||[])) if(a.start<=ms&&(a.end==null||a.end>=ms)){antar=a.lord;break;}
+      return {maha:md.lord,antar};
+    }
+  }
+  return null;
+}
+// Slow-planet transit signature (Ju/Sa/Ra/Ke houses + Sade-sati) at a moment.
+function transitSigAt(date,La,moonSign){
+  const {pos}=getTransitPlanets(date), out={slow:{}};
+  const margin=cuspMarginDeg(jdFromDate(date));
+  for(const k of ['Ju','Sa','Ra','Ke']){
+    if(!pos[k]) continue;
+    out.slow[k]={sign:pos[k].sign,hLa:houseFromSigns(La,pos[k].sign),hMo:moonSign!=null?houseFromSigns(moonSign,pos[k].sign):null,
+      near:(k==='Ju'||k==='Sa')?nearCusp(pos[k].deg,margin):false};
+  }
+  const saH=out.slow.Sa?out.slow.Sa.hMo:null;
+  out.sadeSati=[12,1,2].includes(saH); out.dhaiya=[4,8].includes(saH);
+  return out;
+}
+
 // BPHS Gochara: good houses counted from natal Moon
 // Source: BPHS ch. on Gochara; confirmed in Phaladeepika
 const GCH_GOOD={
@@ -6685,6 +6896,107 @@ function renderLifePredictor(c,La,allBAV,targetId){
 }
 
 
+// ── Indu Lagna sign data — wealth domain by sign ──
+const IL_SIGN_DATA=[
+  {domain:"bold enterprise, technical initiative, and first-mover advantage",note:"Wealth flows through competitive action, engineering, real estate, construction, or any domain where speed and courage produce a decisive financial advantage. You accumulate through initiative before others have acted."},
+  {domain:"steady accumulation, land, luxury, and durable tangible assets",note:"Prosperity builds through patient investment in land, luxury goods, creative or agricultural industries, and financial assets with tangible, enduring value. Quality and consistency are your primary wealth instruments."},
+  {domain:"communication, commerce, multiple income streams, and intellectual services",note:"Wealth flows through trading, writing, consulting, and business networks. Versatility, information advantage, and the ability to manage multiple income channels simultaneously drive financial growth throughout life."},
+  {domain:"family business, emotional intelligence, hospitality, and real estate",note:"Prosperity accumulates through family enterprises, maternal inheritance, emotional intelligence applied commercially, real estate, or hospitality industries. Nurturing and public connection naturally generate financial return."},
+  {domain:"authority, creative enterprise, governmental connections, and leadership roles",note:"Wealth through confident, large-scale ventures backed by solar authority. Creative and speculative investments succeed through boldness and governmental backing. Leadership roles attract financial recognition."},
+  {domain:"analytical precision, health services, and detailed financial management",note:"Wealth through technical excellence, healthcare, detailed accounting, or data-driven service industries. Medical, analytical, and systematically excellent professions are the primary financial channels for this native."},
+  {domain:"partnerships, luxury goods, creative arts, diplomacy, and joint ventures",note:"Prosperity through alliances, co-ventures, luxury or aesthetic industries, and financial dealings requiring charm and refinement. Partnerships and joint financial instruments are the most natural wealth-building vehicles."},
+  {domain:"research, inheritance, joint assets, insurance, and transformative industries",note:"Wealth through deep investment in complex domains — research, insurance, mining, surgery, or psychological services. Hidden financial instruments, joint assets, and inherited wealth are primary sources of prosperity."},
+  {domain:"higher learning, publishing, law, international business, and advisory roles",note:"Fortune through teaching, publishing, law, or international commerce. Philosophical, advisory, or dharmic professions attract abundant prosperity, especially through foreign connections and cross-cultural financial ventures."},
+  {domain:"disciplined corporate authority, government positions, and long-term structural investment",note:"Wealth earned through patient, structured effort — corporate leadership, government roles, engineering, or long-term institutional investment. Prosperity arrives more slowly but becomes immovable and institutionally respected."},
+  {domain:"technology, innovation, humanitarian networks, and forward-looking financial instruments",note:"Prosperity through technology ventures, innovative financial instruments, social enterprises, or group investments. Unconventional, forward-looking approaches to wealth generation outperform traditional methods."},
+  {domain:"spiritual services, creative arts, international trade, healing, and hidden wealth",note:"Wealth through spiritual services, creative arts, international commerce, or healing professions. Hidden generosity and spiritual merit attract unexpected financial abundance; foreign connections are particularly rewarding."}
+];
+
+// ── Upapada Lagna sign data — marriage/spouse nature by sign ──
+const UL_SIGN_DATA=[
+  {nature:"active, pioneering, and fiercely independent",note:"The marriage dynamic carries Martian energy — assertive, driven, and courageously initiating. The spouse or the relationship requires independence, mutual respect for boldness, and space for individual initiative. Dynamic and energising."},
+  {nature:"stable, sensual, and materially grounded",note:"The marriage carries Taurean energy — enduring, comfort-oriented, and built on tangible mutual investment. The spouse values loyalty, beauty, and steady material building. A relationship of lasting, sensory richness and practical stability."},
+  {nature:"intellectually vibrant, communicative, and socially versatile",note:"The marriage carries Mercurial energy — intellectually stimulating, communicative, and socially dynamic. The spouse is sharp, versatile, and engaging. The relationship thrives on shared ideas, wit, and evolving intellectual partnership."},
+  {nature:"nurturing, emotionally deep, and domestically devoted",note:"The marriage carries lunar energy — protective, emotionally resonant, and family-oriented. The spouse or partnership dynamic centres on nurturing, emotional attunement, and creating a deeply personal domestic sanctuary."},
+  {nature:"dignified, authoritative, and creatively expressive",note:"The marriage carries solar energy — the spouse carries authority, confidence, and creative expression. The relationship has a regal, dignified quality. Partnership may involve a leader, artist, or government-connected individual."},
+  {nature:"analytically precise, service-oriented, and practically focused",note:"The marriage carries Mercurial precision — the spouse is analytical, detail-oriented, and service-minded. The relationship is built on practical competence, mutual usefulness, and a shared commitment to structured, excellent functioning."},
+  {nature:"harmonious, diplomatically balanced, and aesthetically refined",note:"The marriage carries Venusian balance — the partnership is characterised by charm, mutual fairness, and aesthetic refinement. The spouse is diplomatic, artistically inclined, and deeply oriented toward relational harmony and beauty."},
+  {nature:"intensely deep, transformative, and powerfully bonded",note:"The marriage carries Scorpionic energy — the partnership is deep, magnetically bonded, and often transformative for both parties. The spouse is intense, perceptive, and strategically powerful. Deep mutual loyalty and psychological depth define the union."},
+  {nature:"philosophically expansive, dharmic, and freedom-loving",note:"The marriage carries Jupiterian expansion — the spouse is wise, dharmic, and philosophically oriented. The relationship is spacious, optimistic, and built on shared higher values. Adventure, learning, and spiritual growth are central themes."},
+  {nature:"disciplined, responsible, and built for long-term commitment",note:"The marriage carries Saturnine structure — the spouse is serious, responsible, and committed to long-term partnership. The relationship may begin later in life or with some delay, but once formed, it carries exceptional durability and mutual respect."},
+  {nature:"unconventional, socially conscious, and intellectually independent",note:"The marriage carries Aquarian energy — the spouse or relationship is ahead of its time, unconventional, and driven by humanitarian or collective ideals. Partnership may be unusual by social standards but genuinely progressive and mutually liberating."},
+  {nature:"compassionately fluid, spiritually attuned, and creatively imaginative",note:"The marriage carries Piscean fluidity — the spouse is imaginative, spiritually sensitive, and compassionately giving. The relationship has a mystical, transcendent quality. Boundaries are porous; deep empathy and shared spiritual life are the union's strengths."}
+];
+
+// ── Planets in Indu Lagna — wealth effects ──
+const PLANET_IN_IL={
+  Su:"The Sun in the wealth seat amplifies financial authority and governmental support for wealth. Income through leadership, executive roles, or government-linked enterprises. Wealth carries prestige but may fluctuate with political and authority dynamics.",
+  Mo:"The Moon in IL creates fluctuating but populace-driven wealth — income from public-facing businesses, hospitality, emotional services, or the masses. Wealth grows with public favour and emotional resonance; financial highs and lows track with life's emotional cycles.",
+  Ma:"Mars in IL generates wealth through vigorous enterprise, real estate, technical industries, or competition. Financial gains through boldness and first-mover initiative. Income is earned actively and can be substantial, though financial expenditure through risk must be managed.",
+  Me:"Mercury in IL produces wealth through commerce, communication, consultancy, and multiple simultaneous income channels. Financial intelligence and analytical precision make this a strong placement — income through intellectual services, trade, and documentation.",
+  Ju:"Jupiter in the wealth seat is among the most auspicious financial placements possible. Wealth flows through dharmic professions, teaching, advisory roles, and good fortune. Financial abundance arrives with relatively little friction when Jupiter's dasha runs.",
+  Ve:"Venus in IL brings wealth through creative arts, luxury goods, beauty, and harmonious enterprises. Aesthetic refinement generates income. Financial gains through partnerships, creative collaboration, and any domain associated with Venusian pleasure and beauty.",
+  Sa:"Saturn in IL builds wealth slowly and methodically through sustained effort, structured investment, and service to institutions. Financial prosperity arrives later in life but becomes exceptionally stable. Wealth through labour, engineering, or long-term asset building.",
+  Ra:"Rahu in IL amplifies wealth desires and creates unconventional income sources. Wealth through foreign channels, technology, or unprecedented ventures. Financial gains can be large and sudden, though instability and overreach must be consciously managed.",
+  Ke:"Ketu in IL de-materialises the wealth seat — financial attachment is weak, and wealth may arrive unexpectedly or through spiritual and non-conventional means. Past-life merit may create hidden financial resources that surface unexpectedly."
+};
+
+// ── Planets in Upapada Lagna — marriage/partner effects ──
+const PLANET_IN_UL={
+  Su:"The Sun in the marriage seat confers a spouse of authority, dignity, and strong social standing. The partner is confident and leader-like. Marriage carries a solar, formal quality — respect and status are key pillars. There may be a tendency toward dominance in the partnership.",
+  Mo:"The Moon in UL brings a deeply nurturing, emotionally accessible, and publicly popular partner. Marriage is emotionally fulfilling and centred on family and domestic life. The spouse carries a warm, receptive nature and may be beloved in their social circle.",
+  Ma:"Mars in UL brings an energetic, driven, and assertive partner. Marriage may involve some friction or bold energy between partners. The spouse is technically skilled, courageous, and action-oriented. Mutual respect for independence keeps the partnership vital.",
+  Me:"Mercury in UL brings an intellectually sharp, communicative, and commercially oriented partner. Marriage is characterised by wit, shared ideas, and engaging verbal exchange. The spouse may be in business, writing, or analytics. Intellectual compatibility is essential.",
+  Ju:"Jupiter in UL is highly auspicious for marriage — the partner is wise, educated, generous, and dharmic. The marriage is spiritually elevating and mutually beneficial. This is a blessing on the partnership and on the institution of marriage in the native's life.",
+  Ve:"Venus in UL is one of the strongest indicators of a beautiful, harmonious, and aesthetically refined marriage. The spouse is charming, artistically gifted, and relationally graceful. The partnership is loving, pleasurable, and socially admired.",
+  Sa:"Saturn in UL brings a serious, responsible, and dutiful partner — possibly older, more experienced, or carrying significant responsibilities. Marriage may take time to establish but proves extremely durable. The partnership deepens through disciplined mutual commitment.",
+  Ra:"Rahu in UL brings an unconventional, boundary-crossing, or foreign partner. The marriage may be unusual, cross-cultural, or socially unexpected. The spouse is ambitious, magnetic, and outside the native's usual social circle.",
+  Ke:"Ketu in UL creates a spiritualising or de-materialising influence on the marriage — the partnership may have a past-life flavour, a spiritual quality, or involve significant detachment. One partner may prioritise inner life over conventional partnership roles."
+};
+
+// ── AL Sign public-persona data (for each of 12 signs) ──
+const AL_SIGN_DATA=[
+  {persona:"dynamic, pioneering, and action-driven",traits:"bold initiative, courage, and competitive energy",archetype:"warrior, entrepreneur, or trailblazer",impression:"The world perceives you as someone who acts first — a self-starter whose energy is unmistakably assertive. People associate your name with initiative and the courage to begin what others only contemplate."},
+  {persona:"stable, prosperous, and materially grounded",traits:"reliability, aesthetic refinement, and quiet authority",archetype:"connoisseur, builder, or trusted steward",impression:"Others perceive you as someone who accumulates resources and possesses refined taste. Your public image is steady and dependable — people associate you with tangible wealth, quality, and enduring value."},
+  {persona:"sharp, communicative, and intellectually versatile",traits:"quick wit, analytical intelligence, and networking skill",archetype:"consultant, writer, strategist, or connector",impression:"The world sees you as highly intelligent and articulate — someone who can discuss anything with fluency. Your public brand is built on ideas, communication, and the ability to synthesise complexity into clarity."},
+  {persona:"nurturing, emotionally resonant, and publicly popular",traits:"care, emotional depth, and protective instincts",archetype:"nurturer, public caretaker, or community builder",impression:"Others experience you as warm and relatably human. Your public image carries a maternal, protective quality that draws loyalty — people feel cared for in your presence and naturally speak well of you."},
+  {persona:"regal, commanding, and magnetically visible",traits:"confidence, creative authority, and natural leadership",archetype:"leader, performer, sovereign, or creative director",impression:"The world perceives you as naturally authoritative. You carry a solar, kingly presence that commands attention and respect in public settings — people notice when you enter a room."},
+  {persona:"meticulous, analytical, and professionally precise",traits:"discipline, service orientation, and intellectual accuracy",archetype:"expert, analyst, craftsperson, or critical thinker",impression:"Others see you as a capable and detail-oriented professional. Your public reputation rests on competence, reliability, and a discerning eye for systems and quality — you are the person others call when precision matters."},
+  {persona:"diplomatic, balanced, and aesthetically sophisticated",traits:"charm, fairness, relationship skill, and cultural refinement",archetype:"diplomat, advisor, mediator, or creative professional",impression:"The world perceives you as charming, fair, and cultivated. Your public image is built on harmonious relationships and aesthetic intelligence — others seek you out as someone who brings balance to difficult situations."},
+  {persona:"intense, penetrating, and transformative",traits:"depth, strategic power, occult intelligence, and fearlessness",archetype:"investigator, strategist, transformer, or power broker",impression:"Others sense hidden depth and strategic intelligence in you. Your public image carries an intense, magnetic quality — people feel there is always more beneath the surface, which makes you both intriguing and formidable."},
+  {persona:"philosophical, expansive, and visionary",traits:"optimism, higher wisdom, teaching ability, and adventurous spirit",archetype:"teacher, philosopher, adventurer, or thought leader",impression:"The world sees you as someone with a big-picture vision and philosophical authority. Your public brand is associated with knowledge, dharma, and an inspiring worldview that makes others feel larger for knowing you."},
+  {persona:"disciplined, authoritative, and achievement-oriented",traits:"ambition, structural thinking, hard work, and earned prestige",archetype:"executive, institution-builder, or public authority figure",impression:"Others perceive you as serious, capable, and built for positions of authority. Your public image is associated with professional mastery and earned status — you are the person people expect to be in charge."},
+  {persona:"visionary, unconventional, and socially conscious",traits:"innovation, humanitarian ideals, group intelligence, and independence",archetype:"innovator, networker, social reformer, or futurist",impression:"The world perceives you as someone ahead of their time — independent-thinking and progressive. Your public brand is associated with collective movements, technology, or social causes that others have yet to catch up with."},
+  {persona:"imaginative, spiritual, and compassionately fluid",traits:"intuition, empathy, artistic depth, and mystical awareness",archetype:"mystic, artist, healer, or compassionate visionary",impression:"Others experience you as ethereal, sensitive, and deeply imaginative. Your public image carries a spiritual or artistic quality — you are difficult to categorise but deeply resonant, and people sense something beyond the ordinary in you."}
+];
+
+// ── Planet in AL interpretations ──
+const PLANET_IN_AL={
+  Su:"The Sun sitting directly in your AL bestows solar authority and a commanding public presence. Society perceives you as confident, dignified, and naturally suited for positions of leadership and governmental recognition. Your professional image shines brightly — though others may also perceive a degree of pride, self-certainty, or a commanding expect of status.",
+  Mo:"The Moon in your AL creates a highly relatable and emotionally accessible public image. Society connects with your warmth and popularity — you attract genuine public affection. Your visible fortunes wax and wane with cycles, and your reputation is closely tied to public mood and emotional resonance. You are the public's favourite when the Moon is well-placed.",
+  Ma:"Mars in your AL gives you a dynamic, action-oriented public image. Society perceives you as brave, technically skilled, and energetically driven. Your professional sphere often involves initiative, technical excellence, or direct competitive leadership — the public sees you as someone who gets things done and does not shrink from conflict.",
+  Me:"Mercury in your AL builds an intellectual and communicative public brand. Society perceives you as sharp, versatile, and analytically gifted. Your reputation is built on ideas, articulate expression, and the ability to navigate complex information with ease — people seek you out as an advisor, strategist, or communicator of skill.",
+  Ju:"Jupiter in your AL is one of the most auspicious influences possible. Society perceives you as wise, principled, generous, and inherently trustworthy. Your public image radiates dharmic authority and good judgment — opportunities and goodwill arrive without excessive effort, and people extend grace and respect to you by default.",
+  Ve:"Venus sitting directly in your AL creates a highly charismatic, attractive, and polished public presence. Society perceives you as charming, sophisticated, and naturally graceful. You are well-liked in professional circles, and your public image benefits from an inherent aesthetic appeal that draws cooperation, artistic recognition, and warm regard from those in power.",
+  Sa:"Saturn in your AL adds gravitas, discipline, and long-term durability to your public image. Society perceives you as serious, capable, and someone who earns everything through sustained effort. Reputation builds slowly but becomes immovable over time. Early life may bring public friction or underestimation; later life commands deep, enduring respect.",
+  Ra:"Rahu in your AL gives your public persona an unconventional, ambitious, and boundary-crossing quality. Society perceives you as foreign, trend-setting, or operating outside normal categories — often misunderstood or even controversial early, but deeply magnetic and influential in the long run. Fame, when it arrives, can be sudden and large.",
+  Ke:"Ketu in your AL creates a spiritualising or de-materialising influence on your public image. Society finds you difficult to categorise. Ketu here often indicates withdrawal from conventional status-seeking and gives your public profile a mysterious, otherworldly quality — fame arrives unexpectedly or in unconventional, non-material domains."
+};
+
+// ── Planet aspecting AL interpretations ──
+const PLANET_ASPECT_AL={
+  Su:d=>`${GBYK.Su.gl} Sun (H${d}) aspects your AL — solar authority, governmental recognition, and paternal dignity reinforce your public image from the background.`,
+  Mo:d=>`${GBYK.Mo.gl} Moon (H${d}) aspects your AL — emotional resonance, public popularity, and social networking amplify your external profile.`,
+  Ma:d=>`${GBYK.Ma.gl} Mars (H${d}) aspects your AL — competitive drive, technical courage, and bold leadership add an active, forceful dimension to your public image.`,
+  Me:d=>`${GBYK.Me.gl} Mercury (H${d}) aspects your AL — intellectual sharpness, communication skill, and analytical precision reinforce your public reputation for intelligence.`,
+  Ju:d=>`${GBYK.Ju.gl} Jupiter (H${d}) aspects your AL — wisdom, dharmic authority, and expansive generosity significantly elevate your public standing. Jupiter's aspect is among the most auspicious modifications an Arudha can receive.`,
+  Ve:d=>`${GBYK.Ve.gl} Venus (H${d}) aspects your AL — charm, aesthetic refinement, and relational grace amplify your public appeal and make cooperation with influential people come naturally.`,
+  Sa:d=>`${GBYK.Sa.gl} Saturn (H${d}) aspects your AL — discipline, longevity, and earned authority cast a long, serious shadow over your public image. Reputation is hard-won but lasting; the world demands proof before granting recognition.`,
+  Ra:d=>`${GBYK.Ra.gl} Rahu (H${d}) aspects your AL — unconventional ambition, foreign connections, and boundary-crossing themes colour your public profile, amplifying it in unusual or unexpected directions.`,
+  Ke:d=>`${GBYK.Ke.gl} Ketu (H${d}) aspects your AL — a spiritualising or de-materialising influence. This can detach you from conventional status-seeking and give your public profile a mysterious or transcendent quality.`
+};
+
+
 /* ===== MY CHARTS (parse + persist + apply) ===== */
 (function(){
   const LS="jyotish_charts_v1";
@@ -7078,106 +7390,6 @@ function computeUL(c,La){
   else if(ul===(h12sign+6)%12){ul=(h12sign+3)%12;rule="Result fell on the 7th from the 12th → moved to the 4th from it";}
   return{sign:ul,lord,lordSign:ls,dist,rule,h12sign};
 }
-
-// ── Indu Lagna sign data — wealth domain by sign ──
-const IL_SIGN_DATA=[
-  {domain:"bold enterprise, technical initiative, and first-mover advantage",note:"Wealth flows through competitive action, engineering, real estate, construction, or any domain where speed and courage produce a decisive financial advantage. You accumulate through initiative before others have acted."},
-  {domain:"steady accumulation, land, luxury, and durable tangible assets",note:"Prosperity builds through patient investment in land, luxury goods, creative or agricultural industries, and financial assets with tangible, enduring value. Quality and consistency are your primary wealth instruments."},
-  {domain:"communication, commerce, multiple income streams, and intellectual services",note:"Wealth flows through trading, writing, consulting, and business networks. Versatility, information advantage, and the ability to manage multiple income channels simultaneously drive financial growth throughout life."},
-  {domain:"family business, emotional intelligence, hospitality, and real estate",note:"Prosperity accumulates through family enterprises, maternal inheritance, emotional intelligence applied commercially, real estate, or hospitality industries. Nurturing and public connection naturally generate financial return."},
-  {domain:"authority, creative enterprise, governmental connections, and leadership roles",note:"Wealth through confident, large-scale ventures backed by solar authority. Creative and speculative investments succeed through boldness and governmental backing. Leadership roles attract financial recognition."},
-  {domain:"analytical precision, health services, and detailed financial management",note:"Wealth through technical excellence, healthcare, detailed accounting, or data-driven service industries. Medical, analytical, and systematically excellent professions are the primary financial channels for this native."},
-  {domain:"partnerships, luxury goods, creative arts, diplomacy, and joint ventures",note:"Prosperity through alliances, co-ventures, luxury or aesthetic industries, and financial dealings requiring charm and refinement. Partnerships and joint financial instruments are the most natural wealth-building vehicles."},
-  {domain:"research, inheritance, joint assets, insurance, and transformative industries",note:"Wealth through deep investment in complex domains — research, insurance, mining, surgery, or psychological services. Hidden financial instruments, joint assets, and inherited wealth are primary sources of prosperity."},
-  {domain:"higher learning, publishing, law, international business, and advisory roles",note:"Fortune through teaching, publishing, law, or international commerce. Philosophical, advisory, or dharmic professions attract abundant prosperity, especially through foreign connections and cross-cultural financial ventures."},
-  {domain:"disciplined corporate authority, government positions, and long-term structural investment",note:"Wealth earned through patient, structured effort — corporate leadership, government roles, engineering, or long-term institutional investment. Prosperity arrives more slowly but becomes immovable and institutionally respected."},
-  {domain:"technology, innovation, humanitarian networks, and forward-looking financial instruments",note:"Prosperity through technology ventures, innovative financial instruments, social enterprises, or group investments. Unconventional, forward-looking approaches to wealth generation outperform traditional methods."},
-  {domain:"spiritual services, creative arts, international trade, healing, and hidden wealth",note:"Wealth through spiritual services, creative arts, international commerce, or healing professions. Hidden generosity and spiritual merit attract unexpected financial abundance; foreign connections are particularly rewarding."}
-];
-
-// ── Upapada Lagna sign data — marriage/spouse nature by sign ──
-const UL_SIGN_DATA=[
-  {nature:"active, pioneering, and fiercely independent",note:"The marriage dynamic carries Martian energy — assertive, driven, and courageously initiating. The spouse or the relationship requires independence, mutual respect for boldness, and space for individual initiative. Dynamic and energising."},
-  {nature:"stable, sensual, and materially grounded",note:"The marriage carries Taurean energy — enduring, comfort-oriented, and built on tangible mutual investment. The spouse values loyalty, beauty, and steady material building. A relationship of lasting, sensory richness and practical stability."},
-  {nature:"intellectually vibrant, communicative, and socially versatile",note:"The marriage carries Mercurial energy — intellectually stimulating, communicative, and socially dynamic. The spouse is sharp, versatile, and engaging. The relationship thrives on shared ideas, wit, and evolving intellectual partnership."},
-  {nature:"nurturing, emotionally deep, and domestically devoted",note:"The marriage carries lunar energy — protective, emotionally resonant, and family-oriented. The spouse or partnership dynamic centres on nurturing, emotional attunement, and creating a deeply personal domestic sanctuary."},
-  {nature:"dignified, authoritative, and creatively expressive",note:"The marriage carries solar energy — the spouse carries authority, confidence, and creative expression. The relationship has a regal, dignified quality. Partnership may involve a leader, artist, or government-connected individual."},
-  {nature:"analytically precise, service-oriented, and practically focused",note:"The marriage carries Mercurial precision — the spouse is analytical, detail-oriented, and service-minded. The relationship is built on practical competence, mutual usefulness, and a shared commitment to structured, excellent functioning."},
-  {nature:"harmonious, diplomatically balanced, and aesthetically refined",note:"The marriage carries Venusian balance — the partnership is characterised by charm, mutual fairness, and aesthetic refinement. The spouse is diplomatic, artistically inclined, and deeply oriented toward relational harmony and beauty."},
-  {nature:"intensely deep, transformative, and powerfully bonded",note:"The marriage carries Scorpionic energy — the partnership is deep, magnetically bonded, and often transformative for both parties. The spouse is intense, perceptive, and strategically powerful. Deep mutual loyalty and psychological depth define the union."},
-  {nature:"philosophically expansive, dharmic, and freedom-loving",note:"The marriage carries Jupiterian expansion — the spouse is wise, dharmic, and philosophically oriented. The relationship is spacious, optimistic, and built on shared higher values. Adventure, learning, and spiritual growth are central themes."},
-  {nature:"disciplined, responsible, and built for long-term commitment",note:"The marriage carries Saturnine structure — the spouse is serious, responsible, and committed to long-term partnership. The relationship may begin later in life or with some delay, but once formed, it carries exceptional durability and mutual respect."},
-  {nature:"unconventional, socially conscious, and intellectually independent",note:"The marriage carries Aquarian energy — the spouse or relationship is ahead of its time, unconventional, and driven by humanitarian or collective ideals. Partnership may be unusual by social standards but genuinely progressive and mutually liberating."},
-  {nature:"compassionately fluid, spiritually attuned, and creatively imaginative",note:"The marriage carries Piscean fluidity — the spouse is imaginative, spiritually sensitive, and compassionately giving. The relationship has a mystical, transcendent quality. Boundaries are porous; deep empathy and shared spiritual life are the union's strengths."}
-];
-
-// ── Planets in Indu Lagna — wealth effects ──
-const PLANET_IN_IL={
-  Su:"The Sun in the wealth seat amplifies financial authority and governmental support for wealth. Income through leadership, executive roles, or government-linked enterprises. Wealth carries prestige but may fluctuate with political and authority dynamics.",
-  Mo:"The Moon in IL creates fluctuating but populace-driven wealth — income from public-facing businesses, hospitality, emotional services, or the masses. Wealth grows with public favour and emotional resonance; financial highs and lows track with life's emotional cycles.",
-  Ma:"Mars in IL generates wealth through vigorous enterprise, real estate, technical industries, or competition. Financial gains through boldness and first-mover initiative. Income is earned actively and can be substantial, though financial expenditure through risk must be managed.",
-  Me:"Mercury in IL produces wealth through commerce, communication, consultancy, and multiple simultaneous income channels. Financial intelligence and analytical precision make this a strong placement — income through intellectual services, trade, and documentation.",
-  Ju:"Jupiter in the wealth seat is among the most auspicious financial placements possible. Wealth flows through dharmic professions, teaching, advisory roles, and good fortune. Financial abundance arrives with relatively little friction when Jupiter's dasha runs.",
-  Ve:"Venus in IL brings wealth through creative arts, luxury goods, beauty, and harmonious enterprises. Aesthetic refinement generates income. Financial gains through partnerships, creative collaboration, and any domain associated with Venusian pleasure and beauty.",
-  Sa:"Saturn in IL builds wealth slowly and methodically through sustained effort, structured investment, and service to institutions. Financial prosperity arrives later in life but becomes exceptionally stable. Wealth through labour, engineering, or long-term asset building.",
-  Ra:"Rahu in IL amplifies wealth desires and creates unconventional income sources. Wealth through foreign channels, technology, or unprecedented ventures. Financial gains can be large and sudden, though instability and overreach must be consciously managed.",
-  Ke:"Ketu in IL de-materialises the wealth seat — financial attachment is weak, and wealth may arrive unexpectedly or through spiritual and non-conventional means. Past-life merit may create hidden financial resources that surface unexpectedly."
-};
-
-// ── Planets in Upapada Lagna — marriage/partner effects ──
-const PLANET_IN_UL={
-  Su:"The Sun in the marriage seat confers a spouse of authority, dignity, and strong social standing. The partner is confident and leader-like. Marriage carries a solar, formal quality — respect and status are key pillars. There may be a tendency toward dominance in the partnership.",
-  Mo:"The Moon in UL brings a deeply nurturing, emotionally accessible, and publicly popular partner. Marriage is emotionally fulfilling and centred on family and domestic life. The spouse carries a warm, receptive nature and may be beloved in their social circle.",
-  Ma:"Mars in UL brings an energetic, driven, and assertive partner. Marriage may involve some friction or bold energy between partners. The spouse is technically skilled, courageous, and action-oriented. Mutual respect for independence keeps the partnership vital.",
-  Me:"Mercury in UL brings an intellectually sharp, communicative, and commercially oriented partner. Marriage is characterised by wit, shared ideas, and engaging verbal exchange. The spouse may be in business, writing, or analytics. Intellectual compatibility is essential.",
-  Ju:"Jupiter in UL is highly auspicious for marriage — the partner is wise, educated, generous, and dharmic. The marriage is spiritually elevating and mutually beneficial. This is a blessing on the partnership and on the institution of marriage in the native's life.",
-  Ve:"Venus in UL is one of the strongest indicators of a beautiful, harmonious, and aesthetically refined marriage. The spouse is charming, artistically gifted, and relationally graceful. The partnership is loving, pleasurable, and socially admired.",
-  Sa:"Saturn in UL brings a serious, responsible, and dutiful partner — possibly older, more experienced, or carrying significant responsibilities. Marriage may take time to establish but proves extremely durable. The partnership deepens through disciplined mutual commitment.",
-  Ra:"Rahu in UL brings an unconventional, boundary-crossing, or foreign partner. The marriage may be unusual, cross-cultural, or socially unexpected. The spouse is ambitious, magnetic, and outside the native's usual social circle.",
-  Ke:"Ketu in UL creates a spiritualising or de-materialising influence on the marriage — the partnership may have a past-life flavour, a spiritual quality, or involve significant detachment. One partner may prioritise inner life over conventional partnership roles."
-};
-
-// ── AL Sign public-persona data (for each of 12 signs) ──
-const AL_SIGN_DATA=[
-  {persona:"dynamic, pioneering, and action-driven",traits:"bold initiative, courage, and competitive energy",archetype:"warrior, entrepreneur, or trailblazer",impression:"The world perceives you as someone who acts first — a self-starter whose energy is unmistakably assertive. People associate your name with initiative and the courage to begin what others only contemplate."},
-  {persona:"stable, prosperous, and materially grounded",traits:"reliability, aesthetic refinement, and quiet authority",archetype:"connoisseur, builder, or trusted steward",impression:"Others perceive you as someone who accumulates resources and possesses refined taste. Your public image is steady and dependable — people associate you with tangible wealth, quality, and enduring value."},
-  {persona:"sharp, communicative, and intellectually versatile",traits:"quick wit, analytical intelligence, and networking skill",archetype:"consultant, writer, strategist, or connector",impression:"The world sees you as highly intelligent and articulate — someone who can discuss anything with fluency. Your public brand is built on ideas, communication, and the ability to synthesise complexity into clarity."},
-  {persona:"nurturing, emotionally resonant, and publicly popular",traits:"care, emotional depth, and protective instincts",archetype:"nurturer, public caretaker, or community builder",impression:"Others experience you as warm and relatably human. Your public image carries a maternal, protective quality that draws loyalty — people feel cared for in your presence and naturally speak well of you."},
-  {persona:"regal, commanding, and magnetically visible",traits:"confidence, creative authority, and natural leadership",archetype:"leader, performer, sovereign, or creative director",impression:"The world perceives you as naturally authoritative. You carry a solar, kingly presence that commands attention and respect in public settings — people notice when you enter a room."},
-  {persona:"meticulous, analytical, and professionally precise",traits:"discipline, service orientation, and intellectual accuracy",archetype:"expert, analyst, craftsperson, or critical thinker",impression:"Others see you as a capable and detail-oriented professional. Your public reputation rests on competence, reliability, and a discerning eye for systems and quality — you are the person others call when precision matters."},
-  {persona:"diplomatic, balanced, and aesthetically sophisticated",traits:"charm, fairness, relationship skill, and cultural refinement",archetype:"diplomat, advisor, mediator, or creative professional",impression:"The world perceives you as charming, fair, and cultivated. Your public image is built on harmonious relationships and aesthetic intelligence — others seek you out as someone who brings balance to difficult situations."},
-  {persona:"intense, penetrating, and transformative",traits:"depth, strategic power, occult intelligence, and fearlessness",archetype:"investigator, strategist, transformer, or power broker",impression:"Others sense hidden depth and strategic intelligence in you. Your public image carries an intense, magnetic quality — people feel there is always more beneath the surface, which makes you both intriguing and formidable."},
-  {persona:"philosophical, expansive, and visionary",traits:"optimism, higher wisdom, teaching ability, and adventurous spirit",archetype:"teacher, philosopher, adventurer, or thought leader",impression:"The world sees you as someone with a big-picture vision and philosophical authority. Your public brand is associated with knowledge, dharma, and an inspiring worldview that makes others feel larger for knowing you."},
-  {persona:"disciplined, authoritative, and achievement-oriented",traits:"ambition, structural thinking, hard work, and earned prestige",archetype:"executive, institution-builder, or public authority figure",impression:"Others perceive you as serious, capable, and built for positions of authority. Your public image is associated with professional mastery and earned status — you are the person people expect to be in charge."},
-  {persona:"visionary, unconventional, and socially conscious",traits:"innovation, humanitarian ideals, group intelligence, and independence",archetype:"innovator, networker, social reformer, or futurist",impression:"The world perceives you as someone ahead of their time — independent-thinking and progressive. Your public brand is associated with collective movements, technology, or social causes that others have yet to catch up with."},
-  {persona:"imaginative, spiritual, and compassionately fluid",traits:"intuition, empathy, artistic depth, and mystical awareness",archetype:"mystic, artist, healer, or compassionate visionary",impression:"Others experience you as ethereal, sensitive, and deeply imaginative. Your public image carries a spiritual or artistic quality — you are difficult to categorise but deeply resonant, and people sense something beyond the ordinary in you."}
-];
-
-// ── Planet in AL interpretations ──
-const PLANET_IN_AL={
-  Su:"The Sun sitting directly in your AL bestows solar authority and a commanding public presence. Society perceives you as confident, dignified, and naturally suited for positions of leadership and governmental recognition. Your professional image shines brightly — though others may also perceive a degree of pride, self-certainty, or a commanding expect of status.",
-  Mo:"The Moon in your AL creates a highly relatable and emotionally accessible public image. Society connects with your warmth and popularity — you attract genuine public affection. Your visible fortunes wax and wane with cycles, and your reputation is closely tied to public mood and emotional resonance. You are the public's favourite when the Moon is well-placed.",
-  Ma:"Mars in your AL gives you a dynamic, action-oriented public image. Society perceives you as brave, technically skilled, and energetically driven. Your professional sphere often involves initiative, technical excellence, or direct competitive leadership — the public sees you as someone who gets things done and does not shrink from conflict.",
-  Me:"Mercury in your AL builds an intellectual and communicative public brand. Society perceives you as sharp, versatile, and analytically gifted. Your reputation is built on ideas, articulate expression, and the ability to navigate complex information with ease — people seek you out as an advisor, strategist, or communicator of skill.",
-  Ju:"Jupiter in your AL is one of the most auspicious influences possible. Society perceives you as wise, principled, generous, and inherently trustworthy. Your public image radiates dharmic authority and good judgment — opportunities and goodwill arrive without excessive effort, and people extend grace and respect to you by default.",
-  Ve:"Venus sitting directly in your AL creates a highly charismatic, attractive, and polished public presence. Society perceives you as charming, sophisticated, and naturally graceful. You are well-liked in professional circles, and your public image benefits from an inherent aesthetic appeal that draws cooperation, artistic recognition, and warm regard from those in power.",
-  Sa:"Saturn in your AL adds gravitas, discipline, and long-term durability to your public image. Society perceives you as serious, capable, and someone who earns everything through sustained effort. Reputation builds slowly but becomes immovable over time. Early life may bring public friction or underestimation; later life commands deep, enduring respect.",
-  Ra:"Rahu in your AL gives your public persona an unconventional, ambitious, and boundary-crossing quality. Society perceives you as foreign, trend-setting, or operating outside normal categories — often misunderstood or even controversial early, but deeply magnetic and influential in the long run. Fame, when it arrives, can be sudden and large.",
-  Ke:"Ketu in your AL creates a spiritualising or de-materialising influence on your public image. Society finds you difficult to categorise. Ketu here often indicates withdrawal from conventional status-seeking and gives your public profile a mysterious, otherworldly quality — fame arrives unexpectedly or in unconventional, non-material domains."
-};
-
-// ── Planet aspecting AL interpretations ──
-const PLANET_ASPECT_AL={
-  Su:d=>`${GBYK.Su.gl} Sun (H${d}) aspects your AL — solar authority, governmental recognition, and paternal dignity reinforce your public image from the background.`,
-  Mo:d=>`${GBYK.Mo.gl} Moon (H${d}) aspects your AL — emotional resonance, public popularity, and social networking amplify your external profile.`,
-  Ma:d=>`${GBYK.Ma.gl} Mars (H${d}) aspects your AL — competitive drive, technical courage, and bold leadership add an active, forceful dimension to your public image.`,
-  Me:d=>`${GBYK.Me.gl} Mercury (H${d}) aspects your AL — intellectual sharpness, communication skill, and analytical precision reinforce your public reputation for intelligence.`,
-  Ju:d=>`${GBYK.Ju.gl} Jupiter (H${d}) aspects your AL — wisdom, dharmic authority, and expansive generosity significantly elevate your public standing. Jupiter's aspect is among the most auspicious modifications an Arudha can receive.`,
-  Ve:d=>`${GBYK.Ve.gl} Venus (H${d}) aspects your AL — charm, aesthetic refinement, and relational grace amplify your public appeal and make cooperation with influential people come naturally.`,
-  Sa:d=>`${GBYK.Sa.gl} Saturn (H${d}) aspects your AL — discipline, longevity, and earned authority cast a long, serious shadow over your public image. Reputation is hard-won but lasting; the world demands proof before granting recognition.`,
-  Ra:d=>`${GBYK.Ra.gl} Rahu (H${d}) aspects your AL — unconventional ambition, foreign connections, and boundary-crossing themes colour your public profile, amplifying it in unusual or unexpected directions.`,
-  Ke:d=>`${GBYK.Ke.gl} Ketu (H${d}) aspects your AL — a spiritualising or de-materialising influence. This can detach you from conventional status-seeking and give your public profile a mysterious or transcendent quality.`
-};
 
 // ── Standard BPHS Graha Drishti: which planets aspect a given sign ──
 function planetsAspecting(c,targetSign){
@@ -9780,6 +9992,255 @@ function toggleTheme(){
   refreshCharts();
 })();
 
+/* ===== PRASHNA KUNDLI (horary) ===== */
+(function(){
+  const PR_TOPICS=[
+    {id:'general',   label:'General / open question',  houses:[1]},
+    {id:'marriage',  label:'Marriage / partnership',   houses:[7]},
+    {id:'love',      label:'Love / romance',           houses:[5,7]},
+    {id:'career',    label:'Career / job',             houses:[10,6]},
+    {id:'wealth',    label:'Money / wealth',           houses:[2,11]},
+    {id:'property',  label:'Property / home / vehicle',houses:[4]},
+    {id:'children',  label:'Children / fertility',     houses:[5]},
+    {id:'health',    label:'Health / illness',         houses:[1,6,8]},
+    {id:'education',  label:'Education / exam',         houses:[4,5]},
+    {id:'dispute',   label:'Dispute / litigation',     houses:[6]},
+    {id:'travel',    label:'Travel / relocation',      houses:[3,12]},
+    {id:'lost',      label:'Lost object / person',     houses:[2,7,11]}
+  ];
+  const PLACES=[
+    {id:'delhi',  name:'New Delhi',      lat:28.61,lon:77.21, off:5.5},
+    {id:'mumbai', name:'Mumbai',         lat:19.08,lon:72.88, off:5.5},
+    {id:'blr',    name:'Bengaluru',      lat:12.97,lon:77.59, off:5.5},
+    {id:'kolkata',name:'Kolkata',        lat:22.57,lon:88.36, off:5.5},
+    {id:'chennai',name:'Chennai',        lat:13.08,lon:80.27, off:5.5},
+    {id:'hyd',    name:'Hyderabad',      lat:17.39,lon:78.49, off:5.5},
+    {id:'sf',     name:'San Francisco',  lat:37.77,lon:-122.42,off:-8},
+    {id:'nyc',    name:'New York',       lat:40.71,lon:-74.01, off:-5},
+    {id:'london', name:'London',         lat:51.51,lon:-0.13,  off:0},
+    {id:'custom', name:'Custom / other…',lat:null, lon:null,   off:null}
+  ];
+  const PO=['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke'];
+  const $=id=>document.getElementById(id);
+  const topicSel=$('prTopic'),whenSel=$('prWhen'),placeSel=$('prPlace'),
+        dateEl=$('prDate'),latEl=$('prLat'),lonEl=$('prLon'),offEl=$('prOff'),
+        qEl=$('prQ'),resEl=$('prResult'),castBtn=$('prCast');
+  if(!topicSel||!castBtn) return;
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  PR_TOPICS.forEach(t=>topicSel.add(new Option(t.label,t.id)));
+  PLACES.forEach(p=>placeSel.add(new Option(p.name,p.id)));
+  const browserOff=-new Date().getTimezoneOffset()/60;
+
+  function syncCustom(){
+    const cust=placeSel.value==='custom';
+    document.querySelectorAll('#prashna .pr-geo').forEach(e=>e.style.display=cust?'':'none');
+    if(!cust){const p=PLACES.find(x=>x.id===placeSel.value); if(p){latEl.value=p.lat;lonEl.value=p.lon;offEl.value=p.off;}}
+    else if(!offEl.value&&offEl.value!==0) offEl.value=browserOff;
+  }
+  function syncWhen(){
+    const cust=whenSel.value==='custom';
+    document.querySelectorAll('#prashna .pr-custom').forEach(e=>e.style.display=cust?'':'none');
+    if(cust&&!dateEl.value){const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());dateEl.value=d.toISOString().slice(0,16);}
+  }
+  placeSel.value='delhi'; syncCustom();
+  whenSel.addEventListener('change',syncWhen); placeSel.addEventListener('change',syncCustom); syncWhen();
+
+  function currentMoment(){
+    const lat=parseFloat(latEl.value),lon=parseFloat(lonEl.value),off=parseFloat(offEl.value);
+    if(isNaN(lat)||isNaN(lon)||isNaN(off)) return {err:'Enter a latitude, longitude and UTC offset for the place.'};
+    let date, label;
+    if(whenSel.value==='now'){ date=new Date(); }
+    else {
+      const v=dateEl.value; if(!v) return {err:'Pick a date & time.'};
+      const [dp,tp]=v.split('T'); const [y,mo,d]=dp.split('-').map(Number); const [hh,mi]=tp.split(':').map(Number);
+      date=momentFromLocal(y,mo,d,hh,mi,off);
+    }
+    label=new Date(date.getTime()+off*3600000).toISOString().slice(0,16).replace('T',' ')+` (UTC${off>=0?'+':''}${off})`;
+    const place=PLACES.find(p=>p.id===placeSel.value); const placeName=place&&place.id!=='custom'?place.name:`${lat}°, ${lon}°`;
+    return {date,lat,lon,off,label,placeName};
+  }
+
+  function factors(c,La,topic){
+    const F=[]; let score=0;
+    const add=(label,val,note)=>{F.push({label,val,note});score+=val;};
+    const dg=d=>d?d.full.split('·')[0].trim():'';
+    // Lagna & its lord — the querent and their grip on the matter
+    const llK=SIGN_LORD[La],llp=c.planets[llK];
+    if(llp){const dgn=dignityOf(llK,llp.sign),lh=houseFromSigns(La,llp.sign);
+      add(`Lagna lord ${GBYK[llK].name}`,Math.sign(dgn.score),`${dg(dgn)} · sits H${lh}`);
+      if([6,8,12].includes(lh)) add(`Lagna lord in dusthana (H${lh})`,-1,'the querent’s position is weakened');}
+    // Moon — the mind / the living question
+    const mo=c.planets.Mo;
+    if(mo){const md=dignityOf('Mo',mo.sign),mh=houseFromSigns(La,mo.sign);
+      add('Moon (the mind)',Math.sign(md.score),`${dg(md)} · H${mh}`);}
+    // Matter house(s)
+    topic.houses.forEach(h=>{
+      const si=(La+h-1)%12,lord=SIGN_LORD[si],lp=c.planets[lord];
+      if(lp){const ld=dignityOf(lord,lp.sign),lh=houseFromSigns(La,lp.sign);
+        add(`H${h} lord ${GBYK[lord].name}`,Math.sign(ld.score),`${dg(ld)} · sits H${lh}`);
+        if([6,8,12].includes(lh)) add(`H${h} lord in dusthana (H${lh})`,-1,'the matter itself is under strain');}
+      PO.filter(k=>c.planets[k]&&c.planets[k].sign===si).forEach(k=>{
+        const ben=isBeneficPlanet(k,c); add(`${GBYK[k].name} sits in H${h}`,ben?1:-1,ben?'benefic occupant':'malefic occupant');});
+      let asp=null; try{asp=dpAspectsOn(c,La,si);}catch(e){}
+      if(asp){ if(asp.ben.length) add(`H${h} benefic aspect`,1,asp.ben.map(a=>GBYK[a.k].name).join(', ')+' → supports');
+               if(asp.mal.length) add(`H${h} malefic aspect`,-1,asp.mal.map(a=>GBYK[a.k].name).join(', ')+' → obstructs'); }
+    });
+    return {F,score};
+  }
+
+  function render(c,La,mom,topic){
+    const {F,score}=factors(c,La,topic);
+    const cls=score>=2?'fav':score<=-1.5?'obs':'mix';
+    const vt=cls==='fav'?'Indications lean favourable':cls==='obs'?'Indications lean toward obstacles':'Indications are mixed';
+    const vic=cls==='fav'?'✓':cls==='obs'?'✕':'∼';
+    const vs=cls==='fav'?'The rising sign, the Moon and the matter’s house mostly support the question — but timing and effort still matter.':cls==='obs'?'The significators are weak or afflicted — the matter faces resistance; act with care and patience.':'Support and friction are balanced — the outcome hinges on effort and the finer timing; re-cast if the question was unclear in your mind.';
+
+    // Lagna / Moon feature cards
+    const laR=RASHIS[La],laNi=nakInfo(La*30+c.La.deg),llK=SIGN_LORD[La],llp=c.planets[llK];
+    const mo=c.planets.Mo,moNi=mo?nakInfo(mo.sign*30+mo.deg):null;
+    let cards=`<div class="pr-grid">`;
+    cards+=`<div class="pr-card"><h5>Praśna Lagna (the querent)</h5><div class="pr-big">${esc(laR.name)} rising</div>`+
+      `<div class="pr-row">Lagna in <b>${esc(laNi.n)}</b> pada ${laNi.pada}. Lord <b>${GBYK[llK].name}</b>${llp?` in H${houseFromSigns(La,llp.sign)}, ${esc(dignityOf(llK,llp.sign).full.split('·')[0].trim())}`:''}.</div></div>`;
+    if(mo) cards+=`<div class="pr-card"><h5>The Moon (the mind)</h5><div class="pr-big">${esc(RASHIS[mo.sign].name)} · H${houseFromSigns(La,mo.sign)}</div>`+
+      `<div class="pr-row">In <b>${esc(moNi.n)}</b> pada ${moNi.pada}, ${esc(dignityOf('Mo',mo.sign).full.split('·')[0].trim())}. This is the emotional signature of the question at the moment you asked it.</div></div>`;
+    const th=topic.houses.map(h=>`H${h} (${BHAVAS[h-1].en})`).join(' & ');
+    cards+=`<div class="pr-card"><h5>The matter</h5><div class="pr-big">${esc(th)}</div>`+
+      `<div class="pr-row">${topic.houses.map(h=>{const si=(La+h-1)%12,lord=SIGN_LORD[si],lp=c.planets[lord];return `H${h} = ${esc(RASHIS[si].name)}, lord <b>${GBYK[lord].name}</b>${lp?` in H${houseFromSigns(La,lp.sign)}`:''}`;}).join('<br>')}</div></div>`;
+    cards+=`</div>`;
+
+    // Factor ledger
+    let led=`<div class="pr-card" style="margin-bottom:14px"><h5>Why — the significators weighed</h5>`;
+    led+=F.map(f=>`<div class="pr-fac"><span>${esc(f.label)} <span style="color:var(--muted)">· ${esc(f.note)}</span></span><span class="f-v ${f.val>0?'pos':f.val<0?'neg':'neu'}">${f.val>0?'+ favours':f.val<0?'− hinders':'neutral'}</span></div>`).join('');
+    led+=`</div>`;
+
+    // Planet strip
+    let strip=`<div class="pr-planets">`+PO.filter(k=>c.planets[k]).map(k=>{const p=c.planets[k];return `<span class="pr-pchip"${p.near?' title="Within the ephemeris’ error margin of the next sign — re-check independently if this placement matters"':''}>${GBYK[k].name} ${p.deg.toFixed(0)}° ${SIGN3[p.sign]} · H${houseFromSigns(La,p.sign)}${p.retro?' <span class="rr">℞</span>':''}${p.near?' <span class="rr">≈cusp</span>':''}</span>`;}).join('')+`</div>`;
+
+    resEl.innerHTML=
+      `<div class="pr-verdict ${cls}"><div class="pv-ic">${vic}</div><div><div class="pv-t">${vt}</div><div class="pv-s">${vs}</div></div></div>`+
+      `<div class="bm-sec" style="padding-left:0">Chart cast for ${esc(mom.label)} · ${esc(mom.placeName)}</div>`+
+      cards+led+
+      `<div class="bm-sec" style="padding-left:0">All nine grahas at this moment</div>`+strip+
+      `<button type="button" class="ol-ai-btn ol-ai-btn-cl" id="prToChart" style="margin-top:12px">Open as full chart & wheel →</button>`;
+
+    document.getElementById('prToChart').onclick=()=>{
+      const nm='Praśna · '+mom.label.split(' (')[0];
+      JA.importChart&&JA.importChart({name:nm,La:c.La,planets:c.planets,birthDate:null,dashas:null});
+      JA.toast&&JA.toast('Praśna chart added to My Charts','ok');
+      const el=document.getElementById('charts'); el&&el.scrollIntoView({behavior:'smooth'});
+    };
+  }
+
+  castBtn.onclick=()=>{
+    const mom=currentMoment();
+    if(mom.err){resEl.innerHTML=`<div class="pr-verdict obs"><div class="pv-ic">!</div><div><div class="pv-t">${esc(mom.err)}</div></div></div>`;return;}
+    let c; try{ c=computeChartForMoment(mom.date,mom.lat,mom.lon); }catch(e){resEl.innerHTML=`<div class="pr-verdict obs"><div class="pv-t">Couldn’t compute the chart — ${esc(e.message)}</div></div>`;return;}
+    const topic=PR_TOPICS.find(t=>t.id===topicSel.value)||PR_TOPICS[0];
+    render(c,c.La.sign,mom,topic);
+  };
+})();
+
+/* ===== LIFE JOURNAL (personal data loop) ===== */
+(function(){
+  const LS='jyotish_journal_v1', LSC='jyotish_charts_v1';
+  const CATS=[
+    {id:'career',      label:'Career / job',           ic:'💼'},
+    {id:'wealth',      label:'Money / finance',        ic:'💰'},
+    {id:'relationship',label:'Relationship / marriage', ic:'💍'},
+    {id:'family',      label:'Family / children',      ic:'👪'},
+    {id:'health',      label:'Health',                 ic:'🩺'},
+    {id:'move',        label:'Move / travel',          ic:'✈️'},
+    {id:'education',    label:'Education',              ic:'🎓'},
+    {id:'spiritual',   label:'Spiritual / loss',       ic:'🕉️'},
+    {id:'other',       label:'Other',                  ic:'✦'}
+  ];
+  const $=id=>document.getElementById(id);
+  const chartSel=$('jrChart'),form=$('jrForm'),emptyD=$('jrEmpty'),listD=$('jrList'),insD=$('jrInsights'),
+        dateEl=$('jrDate'),catSel=$('jrCat'),titleEl=$('jrTitle'),addBtn=$('jrAdd');
+  if(!chartSel||!addBtn) return;
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  CATS.forEach(c=>catSel.add(new Option(`${c.ic} ${c.label}`,c.id)));
+  const catOf=id=>CATS.find(c=>c.id===id)||CATS[CATS.length-1];
+
+  function getCharts(){try{return JSON.parse(localStorage.getItem(LSC))||[];}catch(e){return[];}}
+  function loadJ(){try{return JSON.parse(localStorage.getItem(LS))||{};}catch(e){return{};}}
+  function saveJ(j){localStorage.setItem(LS,JSON.stringify(j));}
+  const fmtDate=ms=>new Date(ms).toLocaleDateString('en',{day:'numeric',month:'short',year:'numeric'});
+
+  // Resolve a chart's dasha table, computing it on the fly if needed.
+  function dashasFor(c){
+    if(c.dashas&&c.dashas.mahas) return c.dashas;
+    if(c.birthDate&&c.planets&&c.planets.Mo){try{return computeVimDashas(c.planets.Mo,c.birthDate);}catch(e){}}
+    return null;
+  }
+
+  function activeChart(){const cs=getCharts();const i=+chartSel.value;return (i>=0&&cs[i])?cs[i]:null;}
+
+  function renderList(c){
+    const j=loadJ(), key=c.name, evs=(j[key]||[]).slice().sort((a,b)=>b.ms-a.ms);
+    const dashas=dashasFor(c), La=c.La.sign, moonSign=c.planets.Mo?c.planets.Mo.sign:null;
+    if(!evs.length){ listD.innerHTML=`<div class="empty-rich" style="padding:22px"><div class="er-ic">🌱</div><div>No events logged yet for <b>${esc(c.name)}</b>. Add your first one above.</div></div>`; insD.innerHTML=''; return; }
+
+    // Aggregate insights (only meaningful with a dasha table)
+    if(dashas){
+      const byMaha={},byAntar={};
+      evs.forEach(ev=>{const d=dashaAt(dashas,ev.ms); if(d){byMaha[d.maha]=(byMaha[d.maha]||0)+1; if(d.antar)byAntar[d.antar]=(byAntar[d.antar]||0)+1;}});
+      const bars=obj=>{const en=Object.entries(obj).sort((a,b)=>b[1]-a[1]); if(!en.length)return '<div class="pr-row" style="color:var(--muted)">—</div>'; const mx=Math.max(...en.map(e=>e[1])); return en.map(([k,v])=>`<div class="jr-bar-row"><span class="lbl">${GBYK[k]?GBYK[k].name:k}</span><span class="track"><span class="fill" style="width:${Math.round(v/mx*100)}%"></span></span><span class="ct">${v}</span></div>`).join('');};
+      insD.innerHTML=`<div class="jr-ins">`+
+        `<div class="jr-ins-card"><h5>Events by Mahādaśā lord</h5>${bars(byMaha)}</div>`+
+        `<div class="jr-ins-card"><h5>Events by Antardaśā lord</h5>${bars(byAntar)}</div>`+
+        `</div><div class="pr-row" style="color:var(--muted);margin:-6px 0 14px">A handful of events isn’t statistical proof — this is a lens for noticing your own recurring signatures, not a validation engine.</div>`;
+    } else {
+      insD.innerHTML=`<div class="pr-row" style="color:var(--muted);margin-bottom:12px">Add this chart’s <b>birth date</b> (in My Charts) or paste its Vimśottarī table to tag each event with the running daśā.</div>`;
+    }
+
+    listD.innerHTML=evs.map(ev=>{
+      const cat=catOf(ev.cat);
+      let tags='';
+      if(dashas){const d=dashaAt(dashas,ev.ms); if(d){tags+=`<span class="jr-tag maha">${GBYK[d.maha].name} MD</span>`; if(d.antar)tags+=`<span class="jr-tag antar">${GBYK[d.antar].name} AD</span>`;}}
+      try{
+        const sig=transitSigAt(new Date(ev.ms),La,moonSign);
+        if(sig.sadeSati) tags+=`<span class="jr-tag ss">Sade Sati</span>`;
+        else if(sig.dhaiya) tags+=`<span class="jr-tag ss">Śani Dhaiyā</span>`;
+        if(sig.slow.Ju) tags+=`<span class="jr-tag" title="${sig.slow.Ju.near?'Near a sign cusp — this era’s ephemeris has ~0.5–0.9° error, so the house could be off by one':''}">Jupiter → H${sig.slow.Ju.hLa}${sig.slow.Ju.near?' ≈cusp':''}</span>`;
+        if(sig.slow.Sa) tags+=`<span class="jr-tag" title="${sig.slow.Sa.near?'Near a sign cusp — this era’s ephemeris has ~0.5–0.9° error, so the house could be off by one':''}">Saturn → H${sig.slow.Sa.hLa}${sig.slow.Sa.near?' ≈cusp':''}</span>`;
+      }catch(e){}
+      return `<div class="jr-ev"><div class="jr-ic">${cat.ic}</div><div class="jr-main">`+
+        `<div class="jr-top"><span class="jr-ttl">${esc(ev.title||cat.label)}</span><span class="jr-date">${fmtDate(ev.ms)}</span></div>`+
+        `<div class="jr-sig">${tags||'<span class="jr-tag">no daśā data</span>'}</div></div>`+
+        `<button type="button" class="jr-del" data-id="${ev.id}" title="Delete">✕</button></div>`;
+    }).join('');
+    listD.querySelectorAll('.jr-del').forEach(b=>b.onclick=()=>{
+      const j=loadJ(); j[key]=(j[key]||[]).filter(e=>e.id!==b.dataset.id); saveJ(j); renderList(c);
+    });
+  }
+
+  function refresh(){
+    const cs=getCharts(), prev=chartSel.value;
+    chartSel.innerHTML='';
+    if(!cs.length){chartSel.add(new Option('(no charts)',''));form.style.display='none';emptyD.style.display='';listD.innerHTML='';insD.innerHTML='';return;}
+    cs.forEach((c,i)=>chartSel.add(new Option(c.name,i)));
+    if(prev!==''&&+prev<cs.length) chartSel.value=prev;
+    const c=activeChart();
+    if(!c){emptyD.style.display='';form.style.display='none';listD.innerHTML='';insD.innerHTML='';return;}
+    emptyD.style.display='none'; form.style.display='flex';
+    if(!dateEl.value){const d=new Date();dateEl.value=d.toISOString().slice(0,10);}
+    renderList(c);
+  }
+
+  addBtn.onclick=()=>{
+    const c=activeChart(); if(!c)return;
+    const v=dateEl.value; if(!v){JA.toast&&JA.toast('Pick a date','warn');return;}
+    const ms=new Date(v+'T12:00:00').getTime();
+    const j=loadJ(); const key=c.name; (j[key]=j[key]||[]).push({id:'e'+Date.now()+Math.random().toString(36).slice(2,6),ms,cat:catSel.value,title:titleEl.value.trim()});
+    saveJ(j); titleEl.value=''; renderList(c); JA.toast&&JA.toast('Event logged','ok');
+  };
+  chartSel.addEventListener('change',refresh);
+  const _prev=JA.onChartsChange; JA.onChartsChange=()=>{_prev&&_prev();refresh();};
+  refresh();
+})();
+
 /* == SELFTEST == */
 function runSelfTest(){
   const A=[]; const ok=(n,c)=>A.push({test:n,pass:!!c});
@@ -9798,6 +10259,26 @@ function runSelfTest(){
   ok("Sun exalts Aries / falls Libra / owns Leo", GBYK.Su.exalt===0 && GBYK.Su.debil===6 && GBYK.Su.own.includes(4));
   ok("Jupiter exalts Cancer / falls Capricorn",   GBYK.Ju.exalt===3 && GBYK.Ju.debil===9);
   ok("dignityOf Sun-in-Aries truthy", !!dignityOf("Su",0));
+  // Ascendant sanity — equator, LST=0 (RAMC=0) ⇒ 0° Cancer rises (tropical 90°).
+  // gmst=0 at lon 0 needs a JD where GMST≈0; instead test the pure trig via a known RAMC.
+  (function(){
+    const eps=meanObliquity(0)*D2R;
+    const asc=rv(Math.atan2(Math.cos(0),-(Math.sin(0)*Math.cos(eps)+Math.tan(0)*Math.sin(eps)))/D2R);
+    ok("ascendant trig: RAMC0 φ0 ⇒ 90° (0° Cancer)", Math.abs(asc-90)<0.001);
+  })();
+  ok("meanObliquity J2000 ≈ 23.4393", Math.abs(meanObliquity(0)-23.439291)<1e-4);
+  // Ecliptic longitude round-trip through the moment-chart builder is finite & in range.
+  (function(){
+    const c=computeChartForMoment(new Date(Date.UTC(2020,0,1,6,0,0)),28.61,77.21);
+    ok("moment chart: Lagna sign 0..11", c.La.sign>=0&&c.La.sign<12);
+    ok("moment chart: 9 planets", Object.keys(c.planets).length===9);
+    ok("moment chart: nodes retrograde", c.planets.Ra.retro===true&&c.planets.Ke.retro===true);
+  })();
+  // Cusp-margin safety band — widens with distance from J2000, capped at 1.5°.
+  ok("cuspMargin at J2000 ≈ 0.2°", Math.abs(cuspMarginDeg(2451545.0)-0.2)<1e-9);
+  ok("cuspMargin 50y out ≈ 0.85°", Math.abs(cuspMarginDeg(2451545.0+50*365.25)-0.85)<0.01);
+  ok("cuspMargin caps at 1.5°", cuspMarginDeg(2451545.0+500*365.25)===1.5);
+  ok("nearCusp flags both edges", nearCusp(0.5,1)===true && nearCusp(29.7,1)===true && nearCusp(15,1)===false);
   const failed=A.filter(x=>!x.pass);
   if(console.table) console.table(A);
   return {total:A.length, failed:failed.length, fails:failed.map(f=>f.test)};
