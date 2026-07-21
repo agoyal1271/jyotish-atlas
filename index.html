@@ -1475,6 +1475,13 @@ html.light .brand{color:var(--ink)!important}
   .jr-bar-row .track{flex:1;height:9px;background:var(--panel);border-radius:5px;overflow:hidden}
   .jr-bar-row .fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--terracotta));border-radius:5px}
   .jr-bar-row .ct{flex:none;width:22px;text-align:right;color:var(--muted);font-variant-numeric:tabular-nums}
+  .jr-fit{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);font-size:12px;color:var(--muted);line-height:1.5}
+  .jr-fit b{color:var(--ink);font-weight:600}
+  .jr-fit-badge{display:inline-block;padding:1px 9px;border-radius:20px;font-size:10.5px;font-weight:700;margin-right:7px;vertical-align:1px}
+  .jr-fit-badge.good{background:color-mix(in srgb,var(--exalt) 16%,transparent);color:var(--exalt)}
+  .jr-fit-badge.neu{background:color-mix(in srgb,var(--neutral) 18%,transparent);color:var(--muted)}
+  .jr-fit-badge.warn{background:color-mix(in srgb,var(--gold) 16%,transparent);color:var(--gold2)}
+  .jr-fit-badge.bad{background:color-mix(in srgb,var(--debil) 16%,transparent);color:var(--debil)}
 
   /* Count-up emphasis */
   .gcard .n.counting{color:var(--gold2)}
@@ -2188,6 +2195,19 @@ html.light .brand{color:var(--ink)!important}
       <div id="jrEmpty" class="empty-rich"><div class="er-ic">📓</div><div class="er-title">Pick a chart to start your journal</div><div>Choose a saved chart above, then log the real events of your life to see the dasha &amp; transit signatures behind them.</div></div>
       <div id="jrInsights"></div>
       <div id="jrList"></div>
+      <div id="jrAiWrap" class="ol-ai-wrap" style="margin-top:18px;display:none">
+        <div class="ol-ai-hdr">
+          <b>✦ Check the fit with AI</b>
+          <span>Every logged event, its computed house/lord/varga signature, and the daśā running that day — bundled so an LLM can judge whether the classical theory actually explains what happened, or whether it's a stretch.</span>
+        </div>
+        <textarea class="ol-prompt-ta" id="jrPromptText" readonly style="height:260px"></textarea>
+        <div class="ol-ai-btns">
+          <button class="ol-ai-btn ol-ai-btn-cp" onclick="JA.copyOnly('jrPromptText')">Copy prompt</button>
+          <button class="ol-ai-btn ol-ai-btn-cl" onclick="JA.jrCopyOpen('https://claude.ai')">Copy &amp; open Claude.ai →</button>
+          <button class="ol-ai-btn ol-ai-btn-gm" onclick="JA.jrCopyOpen('https://gemini.google.com')">Copy &amp; open Gemini →</button>
+          <span class="ol-ai-note">Prompt is copied to clipboard — just paste ⌘V</span>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -10141,6 +10161,60 @@ function toggleTheme(){
   };
 })();
 
+/* ===== JOURNAL TOPIC FIT — does the house/lord in D-1 + the topic's varga, plus the
+   running daśā, actually connect to this kind of event? Same design as dpTopicAnalysis
+   (promise vs delivery, dasha-lord connection) but scoped to the Journal's own category
+   set and left standalone so it can't regress Life Predictor / Outlook. ===== */
+const JOURNAL_TOPIC={
+  career:      {house:10, varga:10, vlabel:'D-10 Daśāṁśa · career'},
+  wealth:      {house:2,  varga:2,  vlabel:'D-2 Horā · wealth'},
+  relationship:{house:7,  varga:9,  vlabel:'D-9 Navāṁśa · marriage/partnership'},
+  family:      {house:5,  varga:7,  vlabel:'D-7 Saptāṁśa · children/family'},
+  health:      {house:1,  varga:30, vlabel:'D-30 Triṁśāṁśa · adversity/health'},
+  move:        {house:4,  varga:4,  vlabel:'D-4 Catuthāṁśa · home/property'},
+  education:   {house:5,  varga:24, vlabel:'D-24 Siddhāṁśa · education'},
+  spiritual:   {house:12, varga:20, vlabel:'D-20 Viṃśāṁśa · spiritual life'},
+  other:       {house:1,  varga:1,  vlabel:'D-1 Rāśi · general'}
+};
+function journalTopicFit(c,La,house,vargaN,mahaK,antarK){
+  const hs=(La+house-1)%12, lord=SIGN_LORD[hs], lp=c.planets[lord];
+  const d1Dig=lp?dignityOf(lord,lp.sign):null, lordH=lp?houseFromSigns(La,lp.sign):null;
+  const occ=Object.entries(c.planets).filter(([k,p])=>p&&p.sign===hs).map(([k])=>k);
+  let asp=null; try{asp=dpAspectsOn(c,La,hs);}catch(e){}
+  const vLa=vargaSign(c.La.sign,c.La.deg||0,vargaN);
+  const vhs=(vLa+house-1)%12, vlord=SIGN_LORD[vhs], vlp=c.planets[vlord];
+  const vlordSign=vlp?vargaSign(vlp.sign,vlp.deg,vargaN):null;
+  const vDig=vlordSign!=null?dignityOf(vlord,vlordSign):null;
+  const lordsConnect=[...new Set([mahaK,antarK].filter(Boolean))].map(k=>{
+    const con=[];
+    if(SIGN_LORD[hs]===k) con.push('rules it');
+    if(c.planets[k]&&c.planets[k].sign===hs) con.push('sits in it');
+    if(asp&&asp.ben.some(a=>a.k===k)) con.push('aspects (benefic)');
+    else if(asp&&asp.mal.some(a=>a.k===k)) con.push('aspects (malefic)');
+    return {k,con};
+  }).filter(x=>x.con.length);
+  let undermined=false, recovered=false;
+  if(d1Dig&&vDig){
+    if(d1Dig.score>=1&&vDig.score<=-1) undermined=true;
+    else if(d1Dig.score<=-1&&vDig.score>=1) recovered=true;
+  }
+  let score=0;
+  if(d1Dig) score+=d1Dig.score>=1.5?0.5:d1Dig.score>=1?0.3:d1Dig.score<=-2?-0.5:d1Dig.score<=-1?-0.25:0;
+  if(vDig)  score+=vDig.score>=1.5?0.4:vDig.score>=1?0.25:vDig.score<=-2?-0.4:vDig.score<=-1?-0.2:0;
+  if(undermined) score-=0.3; else if(recovered) score+=0.3;
+  if(asp) score+=asp.score*0.4;
+  if(mahaK||antarK) score+=lordsConnect.length?0.4:-0.2;
+  return {house,hs,lord,lp,d1Dig,lordH,occ,vargaN,vhs,vlord,vlp,vDig,lordsConnect,undermined,recovered,
+    score:Math.max(-1.6,Math.min(1.6,score))};
+}
+function journalFitLabel(score){
+  if(score>=1.0)   return {label:'Strong classical fit',    cls:'good'};
+  if(score>=0.35)  return {label:'Supportive fit',          cls:'good'};
+  if(score>=-0.35) return {label:'Mixed / unclear',         cls:'neu'};
+  if(score>=-1.0)  return {label:'Weak fit',                cls:'warn'};
+  return                 {label:'No clear classical fit',   cls:'bad'};
+}
+
 /* ===== LIFE JOURNAL (personal data loop) ===== */
 (function(){
   const LS='jyotish_journal_v1', LSC='jyotish_charts_v1';
@@ -10180,7 +10254,7 @@ function toggleTheme(){
   function renderList(c){
     const j=loadJ(), key=c.name, evs=(j[key]||[]).slice().sort((a,b)=>b.ms-a.ms);
     const dashas=dashasFor(c), La=c.La.sign, moonSign=c.planets.Mo?c.planets.Mo.sign:null;
-    if(!evs.length){ listD.innerHTML=`<div class="empty-rich" style="padding:22px"><div class="er-ic">🌱</div><div>No events logged yet for <b>${esc(c.name)}</b>. Add your first one above.</div></div>`; insD.innerHTML=''; return; }
+    if(!evs.length){ listD.innerHTML=`<div class="empty-rich" style="padding:22px"><div class="er-ic">🌱</div><div>No events logged yet for <b>${esc(c.name)}</b>. Add your first one above.</div></div>`; insD.innerHTML=''; const w=$('jrAiWrap'); if(w)w.style.display='none'; return; }
 
     // Aggregate insights (only meaningful with a dasha table)
     if(dashas){
@@ -10196,7 +10270,7 @@ function toggleTheme(){
     }
 
     listD.innerHTML=evs.map(ev=>{
-      const cat=catOf(ev.cat);
+      const cat=catOf(ev.cat), fit=eventFit(c,La,ev,dashas);
       let tags='';
       if(dashas){const d=dashaAt(dashas,ev.ms); if(d){tags+=`<span class="jr-tag maha">${GBYK[d.maha].name} MD</span>`; if(d.antar)tags+=`<span class="jr-tag antar">${GBYK[d.antar].name} AD</span>`;}}
       try{
@@ -10208,22 +10282,54 @@ function toggleTheme(){
       }catch(e){}
       return `<div class="jr-ev"><div class="jr-ic">${cat.ic}</div><div class="jr-main">`+
         `<div class="jr-top"><span class="jr-ttl">${esc(ev.title||cat.label)}</span><span class="jr-date">${fmtDate(ev.ms)}</span></div>`+
-        `<div class="jr-sig">${tags||'<span class="jr-tag">no daśā data</span>'}</div></div>`+
+        `<div class="jr-sig">${tags||'<span class="jr-tag">no daśā data</span>'}</div>`+
+        (fit?`<div class="jr-fit"><span class="jr-fit-badge ${fit.lbl.cls}">${fit.lbl.label}</span>${fit.text}</div>`:'')+
+        `</div>`+
         `<button type="button" class="jr-del" data-id="${ev.id}" title="Delete">✕</button></div>`;
     }).join('');
     listD.querySelectorAll('.jr-del').forEach(b=>b.onclick=()=>{
       const j=loadJ(); j[key]=(j[key]||[]).filter(e=>e.id!==b.dataset.id); saveJ(j); renderList(c);
     });
+    refreshAiPrompt(c,evs,dashas);
+  }
+
+  // Mechanical house/lord/varga fit-check for one event — does the topic's D-1 lord,
+  // its varga lord, and the daśā running that day actually connect to this life-area?
+  function eventFit(c,La,ev,dashas){
+    const topic=JOURNAL_TOPIC[ev.cat]||JOURNAL_TOPIC.other;
+    const d=dashas?dashaAt(dashas,ev.ms):null;
+    let fit; try{ fit=journalTopicFit(c,La,topic.house,topic.varga,d?d.maha:null,d?d.antar:null); }catch(e){ return null; }
+    const lbl=journalFitLabel(fit.score);
+    const lordName=GBYK[fit.lord].name;
+    const d1Str=fit.d1Dig?fit.d1Dig.full.split('·')[0].trim():'—';
+    const vStr=fit.vDig?fit.vDig.full.split('·')[0].trim():'—';
+    const connectStr=fit.lordsConnect.length
+      ? fit.lordsConnect.map(x=>`${GBYK[x.k].name} ${x.con.join(' & ')}`).join(', ')
+      : (d?'neither daśā lord connects to this house':'no daśā data for timing');
+    const noteBits=[];
+    if(fit.undermined) noteBits.push('D-1 promise undermined by a weak varga');
+    if(fit.recovered)  noteBits.push('weak D-1 recovered by a strong varga (Nīcabhaṅga-like)');
+    const note=noteBits.length?` · ${noteBits.join('; ')}`:'';
+    return {lbl, text:`H${fit.house} (${topic.vlabel.split('·')[1].trim()}) lord <b>${lordName}</b> — D-1: ${d1Str} · ${topic.vlabel.split('·')[0].trim()}: ${vStr}${note} · ${connectStr}`};
+  }
+
+  // ---- Build the "check with AI" prompt from every logged event + its computed fit ----
+  function refreshAiPrompt(c,evs,dashas){
+    const wrap=$('jrAiWrap'), ta=$('jrPromptText');
+    if(!wrap||!ta) return;
+    if(!evs.length){wrap.style.display='none';return;}
+    wrap.style.display='block';
+    ta.value=(JA.buildJournalPrompt||function(){return'';})(c,c.La.sign,dashas,evs,ev=>catOf(ev.cat));
   }
 
   function refresh(){
     const cs=getCharts(), prev=chartSel.value;
     chartSel.innerHTML='';
-    if(!cs.length){chartSel.add(new Option('(no charts)',''));form.style.display='none';emptyD.style.display='';listD.innerHTML='';insD.innerHTML='';return;}
+    if(!cs.length){chartSel.add(new Option('(no charts)',''));form.style.display='none';emptyD.style.display='';listD.innerHTML='';insD.innerHTML='';const w0=$('jrAiWrap');if(w0)w0.style.display='none';return;}
     cs.forEach((c,i)=>chartSel.add(new Option(c.name,i)));
     if(prev!==''&&+prev<cs.length) chartSel.value=prev;
     const c=activeChart();
-    if(!c){emptyD.style.display='';form.style.display='none';listD.innerHTML='';insD.innerHTML='';return;}
+    if(!c){emptyD.style.display='';form.style.display='none';listD.innerHTML='';insD.innerHTML='';const w1=$('jrAiWrap');if(w1)w1.style.display='none';return;}
     emptyD.style.display='none'; form.style.display='flex';
     if(!dateEl.value){const d=new Date();dateEl.value=d.toISOString().slice(0,10);}
     renderList(c);
@@ -10238,6 +10344,90 @@ function toggleTheme(){
   };
   chartSel.addEventListener('change',refresh);
   const _prev=JA.onChartsChange; JA.onChartsChange=()=>{_prev&&_prev();refresh();};
+
+  JA.jrCopyOpen=function(url){
+    const txt=document.getElementById('jrPromptText').value;
+    const go=()=>{JA.toast&&JA.toast('Prompt copied to clipboard','ok');window.open(url,'_blank');};
+    if(navigator.clipboard){navigator.clipboard.writeText(txt).then(go).catch(go);}
+    else{
+      const ta=document.createElement('textarea');ta.value=txt;ta.style.cssText='position:fixed;opacity:0';
+      document.body.appendChild(ta);ta.select();try{document.execCommand('copy');}catch(e){}
+      document.body.removeChild(ta);go();
+    }
+  };
+
+  JA.buildJournalPrompt=function(c,La,dashas,evs,catOfFn){
+    const esc2=s=>String(s==null?'':s);
+    const lagNak=c.La?nakInfo(La*30+c.La.deg):null;
+    let planetsSec='';
+    for(const k of['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke']){
+      const p=c.planets[k]; if(!p) continue;
+      const dig=dignityOf(k,p.sign), hno=houseFromSigns(La,p.sign), ni=nakInfo(p.sign*30+p.deg);
+      planetsSec+=`${GBYK[k].name.padEnd(9)} H${String(hno).padEnd(2)} ${SIGNS[p.sign].padEnd(13)} ${Math.floor(p.deg).toString().padStart(2)}°  ${dig.full.split('·')[0].trim().padEnd(14)} ${p.retro?'[R]':'    '}  ${ni.n} P${ni.pada}\n`;
+    }
+    let dashaSec='(no daśā data — add this chart’s birth date in My Charts for daśā timing)';
+    if(dashas&&dashas.mahas){
+      dashaSec=dashas.mahas.map(md=>`${GBYK[md.lord].name.padEnd(9)} ${new Date(md.start).toISOString().slice(0,10)} → ${md.end?new Date(md.end).toISOString().slice(0,10):'…'}`).join('\n');
+    }
+    const fmtD=ms=>new Date(ms).toISOString().slice(0,10);
+    let eventsSec='';
+    evs.slice().sort((a,b)=>a.ms-b.ms).forEach((ev,i)=>{
+      const cat=catOfFn(ev);
+      const topic=JOURNAL_TOPIC[ev.cat]||JOURNAL_TOPIC.other;
+      const d=dashas?dashaAt(dashas,ev.ms):null;
+      let fit=null; try{ fit=journalTopicFit(c,La,topic.house,topic.varga,d?d.maha:null,d?d.antar:null); }catch(e){}
+      let sig=null; try{ sig=transitSigAt(new Date(ev.ms),La,c.planets.Mo?c.planets.Mo.sign:null); }catch(e){}
+      eventsSec+=`\n${i+1}. ${fmtD(ev.ms)} — [${cat.label}] "${esc2(ev.title)||'(untitled)'}"\n`;
+      eventsSec+=`   Topic house: H${topic.house} · varga: ${topic.vlabel}\n`;
+      if(fit){
+        const d1Str=fit.d1Dig?fit.d1Dig.full:'unknown', vStr=fit.vDig?fit.vDig.full:'unknown';
+        eventsSec+=`   H${fit.house} lord ${GBYK[fit.lord].name}: D-1 ${d1Str} (H${fit.lordH||'?'})${fit.vlp?`, in the topic varga: ${vStr}`:''}\n`;
+        if(fit.undermined) eventsSec+=`   ⚠ D-1 promise undermined by the varga (weak delivery despite natal strength)\n`;
+        if(fit.recovered)  eventsSec+=`   ↑ D-1 weakness recovered by the varga (Nīcabhaṅga-like)\n`;
+      }
+      if(d) eventsSec+=`   Daśā running: ${GBYK[d.maha].name} Mahādaśā${d.antar?` / ${GBYK[d.antar].name} Antardaśā`:''}\n`;
+      if(fit&&fit.lordsConnect.length) eventsSec+=`   Daśā-lord connection to H${fit.house}: ${fit.lordsConnect.map(x=>`${GBYK[x.k].name} ${x.con.join(' & ')}`).join(', ')}\n`;
+      else if(d) eventsSec+=`   Daśā-lord connection to H${fit.house}: none found — neither lord rules, occupies, or aspects this house\n`;
+      if(sig){
+        if(sig.sadeSati) eventsSec+=`   Sade Sātī active (Saturn transiting 12th/1st/2nd from natal Moon)\n`;
+        else if(sig.dhaiya) eventsSec+=`   Śani Dhaiyā active (Saturn transiting 4th/8th from natal Moon)\n`;
+      }
+    });
+    return `You are a classical Vedic astrologer trained in Brihat Parashara Hora Shastra (BPHS), evaluating retrospective correlation — not making predictions. Your job is to be a skeptical, precise reviewer, not a cheerleader for the tradition.
+
+USE ONLY THE PROVIDED DATA. Every position, dignity, daśā date and house/lord connection you need is computed below — never calculate, recall, or assume a placement yourself. If something needed is absent, say "not provided."
+
+TASK: For each logged event below, judge whether the classical signature (house, lord's dignity in D-1 and the relevant varga, and whether the running daśā lord actually connects to that house) plausibly explains what happened — including matching the DIRECTION of the event (was it a gain or a loss, a joyful or a difficult event) against a favorable or unfavorable signature, not just "a planet was involved." Then give an honest overall verdict: across all the events, does there seem to be a real, specific correlation for THIS person's chart, or does the fit look generic/coincidental/confirmation-biased? Explicitly flag any event where the signature contradicts the outcome (e.g. a strong/benefic signature on a hardship, or a weak/afflicted one on a happy event) — those mismatches are the most important thing to surface, not the hits.
+
+=======================================
+BIRTH DATA
+=======================================
+${c.name}${c.birthDate?'\nBorn: '+c.birthDate:''}
+Lagna: ${SIGNS[La]}${c.La?` ${Math.floor(c.La.deg)}°`:''}${lagNak?` · ${lagNak.n} nakshatra, Pada ${lagNak.pada}`:''}
+
+=======================================
+FULL PLANETARY TABLE — D-1 RĀŚI
+=======================================
+Planet    House  Sign           Deg   Dignity         R/S   Nakshatra
+${planetsSec}
+=======================================
+VIMŚOTTARĪ MAHĀDAŚĀ SEQUENCE
+=======================================
+${dashaSec}
+
+=======================================
+LOGGED EVENTS (chronological) — ${evs.length} total
+=======================================
+${eventsSec}
+=======================================
+YOUR ANALYSIS
+=======================================
+1. Go through each event in order and state: does the signature (house/lord/varga/daśā-connection) match the DIRECTION and NATURE of what was logged? One or two sentences per event.
+2. Flag any outright mismatches (signature says one thing, event says the opposite) — be specific about which ones.
+3. Across all events, is there a real pattern for this specific chart (e.g. "career events reliably track Mercury periods"), or is the fit weak/generic/inconsistent?
+4. Give an honest confidence rating (low/medium/high) on whether this journal, so far, shows genuine signal — and say plainly if the sample is too small to conclude anything.`;
+  };
+
   refresh();
 })();
 
@@ -10279,6 +10469,21 @@ function runSelfTest(){
   ok("cuspMargin 50y out ≈ 0.85°", Math.abs(cuspMarginDeg(2451545.0+50*365.25)-0.85)<0.01);
   ok("cuspMargin caps at 1.5°", cuspMarginDeg(2451545.0+500*365.25)===1.5);
   ok("nearCusp flags both edges", nearCusp(0.5,1)===true && nearCusp(29.7,1)===true && nearCusp(15,1)===false);
+  // Journal topic-fit — mechanical house/lord/varga check used by the Life Journal.
+  (function(){
+    ok("JOURNAL_TOPIC has all 9 categories", ['career','wealth','relationship','family','health','move','education','spiritual','other'].every(k=>!!JOURNAL_TOPIC[k]));
+    // Synthetic chart: Aries lagna, Mercury (H10 lord = Gemini's lord via SIGN_LORD) own-sign in H10.
+    const testC={La:{sign:0,deg:5},planets:{
+      Su:{sign:4,deg:10,retro:false}, Mo:{sign:3,deg:5,retro:false}, Ma:{sign:0,deg:15,retro:false},
+      Me:{sign:2,deg:12,retro:false}, Ju:{sign:8,deg:5,retro:false}, Ve:{sign:6,deg:18,retro:false},
+      Sa:{sign:6,deg:22,retro:false}, Ra:{sign:1,deg:14,retro:true}, Ke:{sign:7,deg:14,retro:true}
+    }};
+    // H10 from Aries lagna = Capricorn(9); lord Saturn. Saturn sits in Libra(6)=H7, not H10.
+    const fit=journalTopicFit(testC,0,10,10,'Me','Sa');
+    ok("journalTopicFit returns a house/lord/score shape", fit.house===10 && !!fit.lord && typeof fit.score==='number');
+    ok("journalFitLabel maps score to a label+class", ['good','neu','warn','bad'].includes(journalFitLabel(fit.score).cls));
+    ok("journalTopicFit finds Saturn as H10 lord's dasha connection (rules it)", fit.lordsConnect.some(x=>x.k==='Sa'&&x.con.includes('rules it')));
+  })();
   const failed=A.filter(x=>!x.pass);
   if(console.table) console.table(A);
   return {total:A.length, failed:failed.length, fails:failed.map(f=>f.test)};
