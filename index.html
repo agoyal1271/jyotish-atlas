@@ -10277,8 +10277,8 @@ function journalFitLabel(score){
         const sig=transitSigAt(new Date(ev.ms),La,moonSign);
         if(sig.sadeSati) tags+=`<span class="jr-tag ss">Sade Sati</span>`;
         else if(sig.dhaiya) tags+=`<span class="jr-tag ss">Śani Dhaiyā</span>`;
-        if(sig.slow.Ju) tags+=`<span class="jr-tag" title="${sig.slow.Ju.near?'Near a sign cusp — this era’s ephemeris has ~0.5–0.9° error, so the house could be off by one':''}">Jupiter → H${sig.slow.Ju.hLa}${sig.slow.Ju.near?' ≈cusp':''}</span>`;
-        if(sig.slow.Sa) tags+=`<span class="jr-tag" title="${sig.slow.Sa.near?'Near a sign cusp — this era’s ephemeris has ~0.5–0.9° error, so the house could be off by one':''}">Saturn → H${sig.slow.Sa.hLa}${sig.slow.Sa.near?' ≈cusp':''}</span>`;
+        if(sig.slow.Ju) tags+=`<span class="jr-tag" title="Transiting Jupiter was in ${SIGNS[sig.slow.Ju.sign]} on this date — counted as House ${sig.slow.Ju.hLa} from your natal ascendant. This is the transit position, not your natal Jupiter's house.${sig.slow.Ju.near?' Near a sign cusp — this era’s ephemeris has ~0.5–0.9° error, so the house could be off by one.':''}">Transit Jupiter → H${sig.slow.Ju.hLa}${sig.slow.Ju.near?' ≈cusp':''}</span>`;
+        if(sig.slow.Sa) tags+=`<span class="jr-tag" title="Transiting Saturn was in ${SIGNS[sig.slow.Sa.sign]} on this date — counted as House ${sig.slow.Sa.hLa} from your natal ascendant. This is the transit position, not your natal Saturn's house.${sig.slow.Sa.near?' Near a sign cusp — this era’s ephemeris has ~0.5–0.9° error, so the house could be off by one.':''}">Transit Saturn → H${sig.slow.Sa.hLa}${sig.slow.Sa.near?' ≈cusp':''}</span>`;
       }catch(e){}
       return `<div class="jr-ev"><div class="jr-ic">${cat.ic}</div><div class="jr-main">`+
         `<div class="jr-top"><span class="jr-ttl">${esc(ev.title||cat.label)}</span><span class="jr-date">${fmtDate(ev.ms)}</span></div>`+
