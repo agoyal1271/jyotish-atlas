@@ -1855,7 +1855,7 @@ html.light .brand{color:var(--ink)!important}
   <section id="charts" class="section-reveal">
     <div class="eyebrow">Apply it to a real chart</div>
     <h2 class="display">My Charts</h2>
-    <p class="sub">Paste any natal chart (the planetary table from JHora / Parashara's Light — exactly like your <code>.txt</code> files) and the whole chart gets the D-1 → D-9 + lord treatment. Click any row to open it in the Synthesizer. Charts are saved in your browser.</p>
+    <p class="sub">Paste any natal chart (the planetary table from JHora / Parashara's Light — from a <code>.txt</code> or text-based <code>.pdf</code> file) and the whole chart gets the D-1 → D-9 + lord treatment. Click any row to open it in the Synthesizer. Charts are saved in your browser.</p>
     <div class="charts-layout">
       <div class="charts-sidebar">
         <div class="cs-head">My Charts</div>
@@ -2230,7 +2230,7 @@ html.light .brand{color:var(--ink)!important}
     <p class="note" style="margin:0 0 12px">Paste the planetary longitude table from your chart software — the lines listing <b>Lagna, Sun … Ketu</b> with sign &amp; degree. The parser reads the rest.</p>
     <input type="text" id="chartName" placeholder="Name (e.g. Mine, or a relative's)"/>
     <div style="display:flex;gap:12px;align-items:center;margin:12px 0">
-      <label class="btn ec-btn-primary upload-trigger" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px">📁 Upload a .txt file<input type="file" id="chartFile" accept=".txt,text/plain" style="display:none"></label>
+      <label class="btn ec-btn-primary upload-trigger" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px">📁 Upload .txt or .pdf<input type="file" id="chartFile" accept=".txt,.pdf,text/plain,application/pdf" style="display:none"></label>
       <span class="note">…or paste the text below ↓</span>
     </div>
     <textarea id="chartText" placeholder="Lagna     14 Vi 41' 55.19&quot; Hast  2  Vi  Ta&#10;Sun - BK  14 Le 14' 38.67&quot; PPha  1  Le  Le&#10;Moon - GK  5 Ar 26' 42.40&quot; Aswi  2  Ar  Ta&#10;..."></textarea>
@@ -2260,6 +2260,7 @@ html.light .brand{color:var(--ink)!important}
 <div id="toastWrap" aria-live="polite" aria-atomic="false"></div>
 <button type="button" id="backToTop" title="Back to top" aria-label="Back to top">↑</button>
 
+<script src="./pdf.min.js"></script>
 <script>
 "use strict";
 
@@ -7057,6 +7058,43 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
     }
     return out;
   }
+
+  function pdfPageToText(items){
+    const lines=[];
+    for(const item of items){
+      if(!item||!item.str||!item.transform) continue;
+      const x=item.transform[4], y=item.transform[5];
+      let line=lines.find(entry=>Math.abs(entry.y-y)<2);
+      if(!line){line={y,items:[]};lines.push(line);}
+      line.items.push({x,str:item.str});
+    }
+    return lines
+      .sort((a,b)=>b.y-a.y)
+      .map(line=>line.items.sort((a,b)=>a.x-b.x).map(item=>item.str).join(" ").trim())
+      .filter(Boolean)
+      .join("\n");
+  }
+
+  async function extractPdfText(file){
+    if(!window.pdfjsLib) throw new Error("The PDF reader could not be loaded.");
+    pdfjsLib.GlobalWorkerOptions.workerSrc=new URL("pdf.worker.min.js",document.baseURI).href;
+    const task=pdfjsLib.getDocument({data:await file.arrayBuffer()});
+    const pdf=await task.promise, pages=[];
+    try{
+      for(let pageNo=1;pageNo<=pdf.numPages;pageNo++){
+        const page=await pdf.getPage(pageNo);
+        const content=await page.getTextContent();
+        pages.push(pdfPageToText(content.items));
+        page.cleanup();
+      }
+    }finally{
+      await pdf.destroy();
+    }
+    const text=pages.join("\n\n").trim();
+    if(!text) throw new Error("No selectable text was found. Scanned PDFs need OCR before they can be imported.");
+    return text;
+  }
+  JA.pdfPageToText=pdfPageToText;
   function load(){ try{return JSON.parse(localStorage.getItem(LS))||[]}catch(e){return[]} }
   function save(a){ localStorage.setItem(LS,JSON.stringify(a)); }
 
@@ -7230,11 +7268,26 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
     if(e.key==="Escape"&&modal.classList.contains("show"))closeModal();
   });
   document.getElementById("fillDemo").onclick=e=>{e.preventDefault();nameEl.value="Demo chart";textEl.value=DEMO;};
-  document.getElementById("chartFile").onchange=e=>{
+  document.getElementById("chartFile").onchange=async e=>{
     const f=e.target.files[0]; if(!f)return;
-    const rd=new FileReader();
-    rd.onload=()=>{textEl.value=rd.result; if(!nameEl.value.trim())nameEl.value=f.name.replace(/\.[^.]+$/,""); msg.style.color="var(--muted)"; msg.textContent="File loaded — click “Parse & save”."; e.target.value="";};
-    rd.readAsText(f);
+    const isPdf=f.type==="application/pdf"||/\.pdf$/i.test(f.name);
+    const isText=f.type==="text/plain"||/\.txt$/i.test(f.name);
+    msg.style.color="var(--muted)";
+    msg.textContent=isPdf?"Reading PDF…":"Reading text file…";
+    try{
+      if(!isPdf&&!isText) throw new Error("Choose a .txt or .pdf chart file.");
+      textEl.value=isPdf?await extractPdfText(f):await f.text();
+      if(!nameEl.value.trim())nameEl.value=f.name.replace(/\.[^.]+$/,"");
+      msg.textContent=isPdf
+        ?"PDF text loaded — click “Parse & save”."
+        :"File loaded — click “Parse & save”.";
+    }catch(err){
+      textEl.value="";
+      msg.style.color="var(--debil)";
+      msg.textContent=err&&err.message?err.message:"This file could not be read.";
+    }finally{
+      e.target.value="";
+    }
   };
   document.getElementById("addFirst").onclick=e=>{e.preventDefault();openModal(e.currentTarget);};
   document.getElementById("demoFirst").onclick=e=>{e.preventDefault();charts.push({name:"Demo chart",...parse(DEMO)});active=charts.length-1;save(charts);draw();JA.onChartsChange&&JA.onChartsChange();JA.toast&&JA.toast("Demo chart loaded","ok");};
