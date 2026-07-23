@@ -1465,17 +1465,13 @@ html.light .brand{color:var(--ink)!important}
   .birth-result:hover{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 8%,var(--panel2))}
   .birth-selected{padding:9px 11px;border-radius:8px;background:color-mix(in srgb,var(--exalt) 10%,var(--panel2));border:1px solid color-mix(in srgb,var(--exalt) 35%,var(--line));font-size:12px;color:var(--muted)}
   .birth-selected b{color:var(--ink)}
-  .kundali-panel{margin-bottom:14px}
-  .kundali-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  .kundali-panel{margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;background:linear-gradient(120deg,color-mix(in srgb,var(--gold) 9%,var(--panel)),var(--panel))}
+  .kundali-head{display:flex;align-items:flex-start;gap:12px;flex:1;min-width:260px}
+  .kundali-mark{width:42px;height:42px;border-radius:11px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--gold) 14%,var(--panel2));border:1px solid color-mix(in srgb,var(--gold) 36%,var(--line));color:var(--gold);font-size:20px}
   .kundali-head h4{margin:0 0 4px}
   .kundali-actions{display:flex;gap:8px;flex-wrap:wrap}
-  .kundali-layout{display:grid;grid-template-columns:minmax(280px,520px) 1fr;gap:18px;align-items:center}
-  .kundali-svg{width:100%;max-width:520px;margin:auto}
-  .kundali-svg svg{display:block;width:100%;height:auto}
-  .kundali-profile{display:grid;gap:9px}
-  .kundali-kv{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:12.5px;color:var(--muted)}
-  .kundali-kv b{display:block;color:var(--ink);font-size:13px;margin-bottom:2px}
-  @media(max-width:760px){.birth-grid{grid-template-columns:1fr}.birth-field.full{grid-column:auto}.kundali-layout{grid-template-columns:1fr}}
+  .hero-kundali-note{font-size:12px;color:var(--muted);margin-top:11px;display:flex;align-items:center;gap:7px}
+  @media(max-width:760px){.birth-grid{grid-template-columns:1fr}.birth-field.full{grid-column:auto}.kundali-panel{align-items:flex-start}.kundali-actions{width:100%}.kundali-actions>*{flex:1}}
 
   /* ── Life Journal ── */
   .jr-form{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--line)}
@@ -1729,9 +1725,11 @@ html.light .brand{color:var(--ink)!important}
       <h1 class="display hero-h">The <span class="em">grammar</span><br>of the heavens</h1>
       <p class="hero-lede">Nine Grahas, twelve Rashis, twelve Bhavas — not a list to memorize, but a language to read. Learn the alphabet, then synthesize any chart.</p>
       <div class="hero-cta">
-        <a class="ec-btn-primary" href="#grahas">Begin with the Grahas →</a>
-        <a class="ec-btn-ghost" href="#charts">Upload my chart</a>
+        <button type="button" class="ec-btn-primary" id="heroCreateKundali">✦ Create my Kundali</button>
+        <a class="ec-btn-ghost" href="#grahas">Begin learning</a>
+        <a class="ec-btn-ghost" href="#charts">Import a chart</a>
       </div>
+      <div class="hero-kundali-note"><span>●</span> Birth details stay in this browser. Only a birthplace search query leaves the page.</div>
     </div>
     <div class="hero-emblem" id="heroEmblem"></div>
   </section>
@@ -1753,9 +1751,9 @@ html.light .brand{color:var(--ink)!important}
         <div class="ic-emoji">🌱</div><h4>I’m brand new</h4>
         <p>Start from the very beginning — the three simple building blocks every horoscope is made of.</p>
       </button>
-      <button type="button" class="jm-intent-card" data-jm-guided="1" data-go="8">
-        <div class="ic-emoji">🔭</div><h4>I have my birth chart</h4>
-        <p>Skip ahead — load your chart and get a plain-English, planet-by-planet reading.</p>
+      <button type="button" class="jm-intent-card" id="startCreateKundali">
+        <div class="ic-emoji">✦</div><h4>Create my Kundali</h4>
+        <p>Enter your birth details now and get a downloadable report with divisional charts.</p>
       </button>
       <button type="button" class="jm-intent-card" data-explore="1">
         <div class="ic-emoji">🧭</div><h4>Just let me explore</h4>
@@ -1893,15 +1891,12 @@ html.light .brand{color:var(--ink)!important}
       <div id="chartView" style="display:none">
       <div class="kundali-panel panel ec-zone-card" id="kundaliPanel">
         <div class="kundali-head">
-          <div><h4>North Indian Kundali · D-1 Rāśi</h4><div class="note" id="kundaliSummary"></div></div>
-          <div class="kundali-actions">
-            <button type="button" class="ghost ec-btn-ghost" id="downloadKundaliSvg">Download SVG</button>
-            <button type="button" class="btn ec-btn-primary" id="printKundali">Print / Save PDF</button>
-          </div>
+          <div class="kundali-mark">◇</div>
+          <div><h4>Your Kundali report is ready</h4><div class="note" id="kundaliSummary"></div></div>
         </div>
-        <div class="kundali-layout">
-          <div class="kundali-svg" id="kundaliSvg"></div>
-          <div class="kundali-profile" id="kundaliProfile"></div>
+        <div class="kundali-actions">
+          <button type="button" class="ghost ec-btn-ghost" id="downloadKundaliSvg">Download D-1 SVG</button>
+          <button type="button" class="btn ec-btn-primary" id="printKundali">Open full PDF report</button>
         </div>
       </div>
       <div class="chart-view-toggle">
@@ -5412,8 +5407,9 @@ function kundaliLines(items,maxChars){
   if(current)lines.push(current);
   return lines.slice(0,4);
 }
-function buildNorthIndianKundaliSvg(c){
+function buildNorthIndianKundaliSvg(c,options={}){
   const La=c.La.sign;
+  const print=!!options.print,showDegrees=options.showDegrees!==false&&c.showDegrees!==false;
   const slots=[
     null,
     {x:300,sy:92,py:125,a:"middle",m:20},{x:145,sy:42,py:70,a:"middle",m:15},
@@ -5427,7 +5423,7 @@ function buildNorthIndianKundaliSvg(c){
   for(const k of ["Su","Mo","Ma","Me","Ju","Ve","Sa","Ra","Ke"]){
     const p=c.planets[k];if(!p)continue;
     const h=houseFromSigns(La,p.sign);
-    occupants[h].push(`${k}${p.retro?"℞":""} ${p.deg.toFixed(1)}°`);
+    occupants[h].push(`${k}${p.retro?"℞":""}${showDegrees?` ${p.deg.toFixed(1)}°`:""}`);
   }
   let labels="";
   for(let h=1;h<=12;h++){
@@ -5440,47 +5436,156 @@ function buildNorthIndianKundaliSvg(c){
       labels+=`</text>`;
     }
   }
+  const palette=print
+    ?{bg:"#fffdf9",border:"#292330",line:"#6e6677",sign:"#8b5a16",house:"#77717d",planet:"#17131c"}
+    :{bg:"#11162f",border:"#e7b94e",line:"#7884bd",sign:"#e7b94e",house:"#9aa4ca",planet:"#f2f0ff"};
   return `<svg viewBox="0 0 600 600" role="img" aria-label="North Indian Kundali for ${kundaliEscape(c.name)}" xmlns="http://www.w3.org/2000/svg">
-    <style>.k-bg{fill:#11162f;stroke:#e7b94e;stroke-width:3}.k-line{fill:none;stroke:#7884bd;stroke-width:2}.k-sign{fill:#e7b94e;font:700 18px Inter,Arial,sans-serif}.k-house{fill:#9aa4ca;font-size:11px;font-weight:500}.k-planets{fill:#f2f0ff;font:600 14px Inter,Arial,sans-serif}</style>
+    <style>.k-bg{fill:${palette.bg};stroke:${palette.border};stroke-width:3}.k-line{fill:none;stroke:${palette.line};stroke-width:2}.k-sign{fill:${palette.sign};font:700 18px Inter,Arial,sans-serif}.k-house{fill:${palette.house};font-size:11px;font-weight:500}.k-planets{fill:${palette.planet};font:600 14px Inter,Arial,sans-serif}</style>
     <rect class="k-bg" x="2" y="2" width="596" height="596" rx="8"/>
     <path class="k-line" d="M2 2L598 598M598 2L2 598M300 2L598 300L300 598L2 300Z"/>
     ${labels}
   </svg>`;
 }
-function kundaliProfileHtml(c){
-  const bd=c.birthDetails||{},ni=c.planets.Mo?nakInfo(c.planets.Mo.sign*30+c.planets.Mo.deg):null;
-  const rows=[
-    ["Name",c.name],
-    ["Birth",bd.date&&bd.time?`${bd.date} · ${bd.time}`:(c.birthDate||"Not provided")],
-    ["Place",bd.place||"Imported chart"],
-    ["Timezone",bd.timezone?`${bd.timezone}${bd.offsetLabel?" · "+bd.offsetLabel:""}`:"Not provided"],
-    ["Lagna",`${SIGNS[c.La.sign]} · ${c.La.deg.toFixed(2)}°`],
-    ["Janma Nakshatra",ni?`${ni.n} · Pada ${ni.pada}`:"Not available"]
-  ];
-  return rows.map(([k,v])=>`<div class="kundali-kv"><b>${kundaliEscape(k)}</b>${kundaliEscape(v)}</div>`).join("");
+const KUNDALI_REPORT_VARGAS=[
+  [1,"D-1","Rāśi"],[2,"D-2","Horā"],[3,"D-3","Drekkāṇa"],[7,"D-7","Saptāṁśa"],
+  [9,"D-9","Navāṁśa"],[10,"D-10","Daśāṁśa"],[12,"D-12","Dvādaśāṁśa"],
+  [24,"D-24","Siddhāṁśa"],[27,"D-27","Bhāṁśa"],[30,"D-30","Triṁśāṁśa"],[60,"D-60","Ṣaṣṭyāṁśa"]
+];
+function reportDate(value){
+  if(value==null)return "Open";
+  const d=new Date(value);return isNaN(d.getTime())?"-":d.toISOString().slice(0,10);
+}
+function reportDms(value){
+  let d=Math.floor(value),mf=(value-d)*60,m=Math.floor(mf),s=Math.round((mf-m)*60);
+  if(s===60){s=0;m++;}if(m===60){m=0;d++;}
+  return `${d}° ${String(m).padStart(2,"0")}' ${String(s).padStart(2,"0")}"`;
+}
+function reportVargaChart(c,N){
+  const out={name:c.name,showDegrees:N===1,La:{sign:vargaSign(c.La.sign,c.La.deg||0,N),deg:N===1?c.La.deg:0},planets:{}};
+  for(const k of ["Su","Mo","Ma","Me","Ju","Ve","Sa","Ra","Ke"]){
+    const p=c.planets[k];if(!p)continue;
+    out.planets[k]={sign:vargaSign(p.sign,p.deg,N),deg:N===1?p.deg:0,retro:p.retro};
+  }
+  return out;
+}
+function reportPanchanga(c){
+  const su=c.planets.Su,mo=c.planets.Mo,bd=c.birthDetails||{};
+  if(!su||!mo)return {};
+  const sl=su.sign*30+su.deg,ml=mo.sign*30+mo.deg,elong=rv(ml-sl);
+  const baseTithi=["Pratipada","Dvitiya","Tritiya","Chaturthi","Panchami","Shashthi","Saptami","Ashtami","Navami","Dashami","Ekadashi","Dvadashi","Trayodashi","Chaturdashi"];
+  const ti=Math.floor(elong/12),paksha=ti<15?"Shukla":"Krishna";
+  const tithi=ti===14?"Purnima":ti===29?"Amavasya":`${paksha} ${baseTithi[ti%15]}`;
+  const yogaNames=["Vishkambha","Priti","Ayushman","Saubhagya","Shobhana","Atiganda","Sukarma","Dhriti","Shula","Ganda","Vriddhi","Dhruva","Vyaghata","Harshana","Vajra","Siddhi","Vyatipata","Variyana","Parigha","Shiva","Siddha","Sadhya","Shubha","Shukla","Brahma","Indra","Vaidhriti"];
+  const yoga=yogaNames[Math.floor(rv(sl+ml)/(360/27))];
+  const ki=Math.floor(elong/6),moving=["Bava","Balava","Kaulava","Taitila","Gara","Vanija","Vishti"];
+  const karana=ki===0?"Kimstughna":ki<=56?moving[(ki-1)%7]:["Shakuni","Chatushpada","Naga"][ki-57];
+  const weekdays=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  let weekday="-";if(bd.date){const wd=new Date(`${bd.date}T12:00:00Z`);if(!isNaN(wd.getTime()))weekday=weekdays[wd.getUTCDay()];}
+  return {tithi,yoga,karana,weekday,moonNak:nakInfo(ml),lagnaNak:nakInfo(c.La.sign*30+c.La.deg)};
+}
+function reportVargaMatrix(c,defs){
+  const bodies=[["La","Lagna"],["Su","Sun"],["Mo","Moon"],["Ma","Mars"],["Me","Mercury"],["Ju","Jupiter"],["Ve","Venus"],["Sa","Saturn"],["Ra","Rahu"],["Ke","Ketu"]];
+  const head=defs.map(v=>`<th title="${kundaliEscape(v.name)}">${kundaliEscape(v.tag)}</th>`).join("");
+  const rows=bodies.map(([k,name])=>{
+    const p=k==="La"?c.La:c.planets[k];if(!p)return "";
+    const cells=defs.map(v=>`<td>${kundaliEscape(SIGNS[vargaSign(p.sign,p.deg||0,v.N)].slice(0,3))}</td>`).join("");
+    return `<tr><th>${name}</th>${cells}</tr>`;
+  }).join("");
+  return `<table class="matrix"><thead><tr><th>Body</th>${head}</tr></thead><tbody>${rows}</tbody></table>`;
+}
+function reportChartGrid(c,defs,page,title){
+  const cards=defs.map(([N,tag,name])=>{
+    const vc=reportVargaChart(c,N);
+    return `<div class="varga-card"><div class="varga-title"><b>${tag}</b><span>${kundaliEscape(name)}</span></div>${buildNorthIndianKundaliSvg(vc,{print:true,showDegrees:false})}</div>`;
+  }).join("");
+  return `<section class="report-page"><div class="section-kicker">Divisional chart appendix</div><h2>${kundaliEscape(title)}</h2><div class="varga-grid">${cards}</div><div class="page-foot">Jyotish Atlas · ${kundaliEscape(c.name)}<span>${page}</span></div></section>`;
 }
 function printableKundaliHtml(c){
-  const rows=["Su","Mo","Ma","Me","Ju","Ve","Sa","Ra","Ke"].filter(k=>c.planets[k]).map(k=>{
+  const bd=c.birthDetails||{},pc=reportPanchanga(c),now=Date.now();
+  const generatedOn=new Intl.DateTimeFormat("en-CA",{year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
+  const birthLine=bd.date&&bd.time?`${bd.date} at ${bd.time}`:(c.birthDate?reportDate(c.birthDate):"Birth date not provided");
+  const ayan=c.birthDate&&!isNaN(new Date(c.birthDate).getTime())?`${lahiriAyanamsa(jdFromDate(new Date(c.birthDate))).toFixed(4)}° Lahiri`:"Lahiri";
+  const profile=[
+    ["Name",c.name],["Birth",birthLine],["Place",bd.place||"Imported chart"],
+    ["Timezone",bd.timezone?`${bd.timezone}${bd.offsetLabel?` (${bd.offsetLabel})`:""}`:"Not provided"],
+    ["Gender",bd.gender||"Not specified"],["Calculation",`${ayan} · whole-sign houses · mean nodes`]
+  ].map(([k,v])=>`<div class="fact"><span>${kundaliEscape(k)}</span><b>${kundaliEscape(v)}</b></div>`).join("");
+  const panchanga=[
+    ["Lagna",`${SIGNS[c.La.sign]} ${reportDms(c.La.deg)}`],
+    ["Lagna Nakshatra",pc.lagnaNak?`${pc.lagnaNak.n} · Pada ${pc.lagnaNak.pada}`:"-"],
+    ["Janma Nakshatra",pc.moonNak?`${pc.moonNak.n} · Pada ${pc.moonNak.pada}`:"-"],
+    ["Tithi",pc.tithi||"-"],["Yoga",pc.yoga||"-"],["Karana",pc.karana||"-"],["Vedic weekday",pc.weekday||"-"]
+  ].map(([k,v])=>`<div class="mini-fact"><span>${kundaliEscape(k)}</span><b>${kundaliEscape(v)}</b></div>`).join("");
+  const planetRows=["Su","Mo","Ma","Me","Ju","Ve","Sa","Ra","Ke"].filter(k=>c.planets[k]).map(k=>{
     const p=c.planets[k],h=houseFromSigns(c.La.sign,p.sign),ni=nakInfo(p.sign*30+p.deg);
-    return `<tr><td>${kundaliEscape(GBYK[k].name)}</td><td>${kundaliEscape(SIGNS[p.sign])} ${p.deg.toFixed(2)}°${p.retro?" ℞":""}</td><td>H${h}</td><td>${kundaliEscape(ni.n)} P${ni.pada}</td></tr>`;
+    const d9=vargaSign(p.sign,p.deg,9),d10=vargaSign(p.sign,p.deg,10);
+    let dig="-";try{dig=dignityOf(k,p.sign).full.split("·")[0].trim();}catch(e){}
+    return `<tr><th>${kundaliEscape(GBYK[k].name)}${p.retro?" ℞":""}</th><td>${kundaliEscape(SIGNS[p.sign])} ${reportDms(p.deg)}</td><td>H${h}</td><td>${kundaliEscape(ni.n)} · P${ni.pada}</td><td>${kundaliEscape(SIGNS[d9])}</td><td>${kundaliEscape(SIGNS[d10])}</td><td>${kundaliEscape(dig)}</td></tr>`;
   }).join("");
-  return `<!doctype html><html><head><meta charset="utf-8"><title>${kundaliEscape(c.name)} · Kundali</title><style>
-  body{font-family:Arial,sans-serif;color:#17141f;margin:24px}.head{text-align:center;margin-bottom:18px}.head h1{margin:0 0 5px;font-size:25px}.meta{color:#555;font-size:13px}
-  .chart{max-width:520px;margin:0 auto 22px}.chart svg{width:100%;height:auto}table{width:100%;border-collapse:collapse;font-size:12px}th,td{border:1px solid #bbb;padding:7px;text-align:left}th{background:#eee}
-  .note{margin-top:14px;color:#555;font-size:10px;line-height:1.5}@media print{body{margin:8mm}.actions{display:none}}</style></head><body>
-  <div class="actions"><button onclick="window.print()">Print / Save PDF</button></div><div class="head"><h1>${kundaliEscape(c.name)} · Janma Kundali</h1><div class="meta">${kundaliEscape((c.birthDetails&&`${c.birthDetails.date} ${c.birthDetails.time} · ${c.birthDetails.place}`)||c.birthDate||"")}</div></div>
-  <div class="chart">${buildNorthIndianKundaliSvg(c)}</div><table><thead><tr><th>Graha</th><th>Rāśi &amp; degree</th><th>Bhava</th><th>Nakshatra</th></tr></thead><tbody>${rows}</tbody></table>
-  <div class="note">Lahiri sidereal zodiac · whole-sign houses · mean lunar nodes. Generated locally by Jyotish Atlas using Astronomy Engine 2.1.19. For education; verify cusp-sensitive placements with professional software.</div>
-  <script>window.addEventListener("load",()=>setTimeout(()=>window.print(),250));<\/script></body></html>`;
+  const strengthRows=["Su","Mo","Ma","Me","Ju","Ve","Sa"].filter(k=>c.planets[k]).map(k=>{
+    const a=planetAvasthaStrength(k,c);
+    return `<tr><th>${kundaliEscape(GBYK[k].name)}</th><td>${kundaliEscape(a.d1.full.split("·")[0].trim())}</td><td>${kundaliEscape(a.d9.full.split("·")[0].trim())}</td><td>${kundaliEscape(a.d10.full.split("·")[0].trim())}</td><td>${kundaliEscape(a.bal.n)} (${kundaliEscape(a.bal.t)})</td><td>${a.pct}%</td></tr>`;
+  }).join("");
+  const karakaRows=charaKarakas(c).map(x=>`<tr><th>${kundaliEscape(x.ab)}</th><td>${kundaliEscape(GBYK[x.k].name)}</td><td>${reportDms(x.deg)}</td><td>${kundaliEscape(x.name)}</td></tr>`).join("");
+  const avPos={La:c.La.sign};for(const k of ["Su","Mo","Ma","Me","Ju","Ve","Sa"])if(c.planets[k])avPos[k]=c.planets[k].sign;
+  let avTable=`<div class="empty-report">Ashtakavarga requires all seven classical planets.</div>`;
+  try{
+    const avBodies=[["SAV",computeSAV(avPos)],...["Su","Mo","Ma","Me","Ju","Ve","Sa"].map(k=>[GBYK[k].name,computeBAV(k,avPos)])];
+    const avHead=SIGNS.map(s=>`<th>${kundaliEscape(s.slice(0,2))}</th>`).join("");
+    const avRows=avBodies.map(([name,vals])=>`<tr><th>${kundaliEscape(name)}</th>${vals.map(v=>`<td class="${v>=5?"av-high":v<=2?"av-low":""}">${v}</td>`).join("")}</tr>`).join("");
+    avTable=`<table class="matrix av"><thead><tr><th>Chart</th>${avHead}</tr></thead><tbody>${avRows}</tbody></table>`;
+  }catch(e){}
+  const coreDefs=VARGA_DEFS.slice(0,6),higherDefs=VARGA_DEFS.slice(6);
+  const dashaRows=(c.dashas&&c.dashas.mahas?c.dashas.mahas:[]).map(md=>{
+    const active=md.start<=now&&(md.end==null||md.end>=now);
+    const antars=(md.antars||[]).filter(a=>!md.start||a.end>=md.start).map(a=>`${GBYK[a.lord].name} ${reportDate(Math.max(a.start,md.start||a.start))}`).join(" · ");
+    return `<tr class="${active?"active-dasha":""}"><th>${kundaliEscape(GBYK[md.lord].name)}${active?" · current":""}</th><td>${reportDate(md.start)}</td><td>${reportDate(md.end)}</td><td>${kundaliEscape(antars||"Not available")}</td></tr>`;
+  }).join("");
+  const d1=reportVargaChart(c,1),d9=reportVargaChart(c,9);
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${kundaliEscape(c.name)} · Kundali Report</title><style>
+  :root{--ink:#211b26;--muted:#6d6571;--line:#d9d1c8;--gold:#9b671e;--paper:#fffdf9;--wash:#f4eee7;--green:#28664a;--red:#9e463f}
+  *{box-sizing:border-box}body{margin:0;background:#e9e5e0;color:var(--ink);font-family:Arial,Helvetica,sans-serif}.report-actions{position:sticky;top:0;z-index:5;padding:12px;text-align:center;background:#211b26}.report-actions button{background:#e7b94e;border:0;border-radius:8px;padding:10px 18px;font-weight:700;cursor:pointer}
+  .report-page{position:relative;width:210mm;min-height:297mm;margin:12px auto;padding:14mm 14mm 17mm;background:var(--paper);box-shadow:0 8px 28px rgba(30,20,24,.16);page-break-after:always;overflow:hidden}.report-page:last-of-type{page-break-after:auto}
+  .brand{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:800}.cover-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;border-bottom:2px solid var(--gold);padding-bottom:9px;margin-bottom:12px}.cover-head h1{font-family:Georgia,serif;font-size:27px;margin:3px 0}.cover-head p{margin:0;color:var(--muted);font-size:11px}.report-id{font-size:10px;color:var(--muted);text-align:right}.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0 12px}.fact,.mini-fact{border:1px solid var(--line);border-radius:7px;padding:7px 9px;background:#fff}.fact span,.mini-fact span{display:block;text-transform:uppercase;letter-spacing:.06em;font-size:7.5px;color:var(--muted);margin-bottom:3px}.fact b,.mini-fact b{font-size:10px;line-height:1.35}.panchanga{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px}.mini-fact{background:var(--wash)}
+  .chart-pair{display:grid;grid-template-columns:1fr 1fr;gap:11px}.chart-card,.varga-card{border:1px solid var(--line);border-radius:8px;padding:8px;background:#fff}.chart-card svg,.varga-card svg{display:block;width:100%;height:auto}.varga-title{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}.varga-title b{font-size:12px;color:var(--gold)}.varga-title span{font-size:9px;color:var(--muted)}.caption{font-size:8px;color:var(--muted);line-height:1.45;margin-top:8px}
+  .section-kicker{font-size:8px;text-transform:uppercase;letter-spacing:.16em;color:var(--gold);font-weight:800}.report-page h2{font-family:Georgia,serif;font-size:21px;margin:4px 0 12px}.report-page h3{font:700 12px Georgia,serif;margin:13px 0 6px;color:var(--gold)}
+  table{width:100%;border-collapse:collapse;font-size:8.5px}th,td{border:1px solid var(--line);padding:5px;text-align:left;vertical-align:top}thead th{background:var(--wash);color:#4e414c}tbody th{font-weight:700;background:#fbf8f4}.matrix th,.matrix td{text-align:center;padding:4px}.matrix tbody th{text-align:left}.two-col{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}.av{font-size:8px}.av-high{background:#e3f0e8;color:var(--green);font-weight:700}.av-low{background:#f7e6e2;color:var(--red)}.active-dasha th{color:var(--green)}.active-dasha{background:#e9f4ed}.dasha-table td:last-child{font-size:7.3px;line-height:1.45}
+  .varga-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.varga-grid .varga-card svg{max-height:108mm}.notes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}.note-box{border-left:3px solid var(--gold);background:var(--wash);padding:9px 11px;font-size:9px;line-height:1.5}.empty-report{padding:14px;border:1px dashed var(--line);color:var(--muted);font-size:9px}.page-foot{position:absolute;left:14mm;right:14mm;bottom:8mm;border-top:1px solid var(--line);padding-top:4px;font-size:7.5px;color:var(--muted);display:flex;justify-content:space-between}
+  @page{size:A4 portrait;margin:0}@media print{body{background:#fff}.report-actions{display:none}.report-page{margin:0;box-shadow:none;width:210mm;height:297mm;min-height:297mm}}
+  </style></head><body><div class="report-actions"><button onclick="window.print()">Print / Save PDF</button></div>
+  <section class="report-page"><div class="cover-head"><div><div class="brand">Jyotish Atlas</div><h1>${kundaliEscape(c.name)} · Janma Kundali</h1><p>A clear, calculation-led Vedic astrology report</p></div><div class="report-id">Generated ${generatedOn}<br>Lahiri sidereal zodiac</div></div>
+    <div class="facts">${profile}</div><div class="panchanga">${panchanga}</div>
+    <div class="chart-pair"><div class="chart-card"><div class="varga-title"><b>D-1 Rāśi</b><span>Life map</span></div>${buildNorthIndianKundaliSvg(d1,{print:true})}</div><div class="chart-card"><div class="varga-title"><b>D-9 Navāṁśa</b><span>Dharma and deeper strength</span></div>${buildNorthIndianKundaliSvg(d9,{print:true,showDegrees:false})}</div></div>
+    <div class="caption">Chart format inspired by the conventional North Indian presentation. Planetary calculations use Astronomy Engine with Lahiri ayanāṁśa, whole-sign houses and mean lunar nodes. D-60 and other fine divisions require a highly accurate birth time.</div>
+    <div class="page-foot">Jyotish Atlas · ${kundaliEscape(c.name)}<span>1</span></div></section>
+  <section class="report-page"><div class="section-kicker">Core calculations</div><h2>Planetary positions and strength</h2>
+    <table><thead><tr><th>Graha</th><th>Sidereal longitude</th><th>House</th><th>Nakshatra</th><th>D-9</th><th>D-10</th><th>D-1 dignity</th></tr></thead><tbody>${planetRows}</tbody></table>
+    <h3>Cross-varga strength and avasthā</h3><table><thead><tr><th>Planet</th><th>D-1</th><th>D-9</th><th>D-10</th><th>Bālādi state</th><th>Effective</th></tr></thead><tbody>${strengthRows}</tbody></table>
+    <h3>Jaimini Chara Kārakas · seven-planet scheme</h3><table><thead><tr><th>Role</th><th>Planet</th><th>Degree in sign</th><th>Full name</th></tr></thead><tbody>${karakaRows}</tbody></table>
+    <div class="page-foot">Jyotish Atlas · ${kundaliEscape(c.name)}<span>2</span></div></section>
+  <section class="report-page"><div class="section-kicker">Comparative strength</div><h2>Ashtakavarga and divisional matrix</h2>
+    <h3>Sarvashtakavarga and Bhinna Ashtakavarga</h3>${avTable}
+    <div class="caption">Higher SAV values generally show signs that receive more transit support. BAV rows show each classical planet's bindus by sign.</div>
+    <h3>Core divisions</h3>${reportVargaMatrix(c,coreDefs)}
+    <h3>Higher divisions</h3>${reportVargaMatrix(c,higherDefs)}
+    <div class="notes"><div class="note-box"><b>How to read this page</b><br>Use D-1 as the base promise, D-9 for deeper support and D-10 for career expression. The matrix shows sign placement, not a standalone prediction.</div><div class="note-box"><b>Precision note</b><br>Higher divisions magnify small birth-time errors. Confirm the recorded time before relying on D-24, D-30 or D-60.</div></div>
+    <div class="page-foot">Jyotish Atlas · ${kundaliEscape(c.name)}<span>3</span></div></section>
+  <section class="report-page"><div class="section-kicker">Timing</div><h2>Vimśottarī Daśā sequence</h2>
+    ${dashaRows?`<table class="dasha-table"><thead><tr><th>Mahādaśā</th><th>Start</th><th>End</th><th>Antardaśā starts</th></tr></thead><tbody>${dashaRows}</tbody></table>`:`<div class="empty-report">Daśā timing is unavailable because a birth date was not stored with this chart.</div>`}
+    <div class="notes"><div class="note-box"><b>Current period</b><br>The active Mahādaśā is highlighted. Read its planet's D-1 house, dignity, D-9 support and relevant divisional placement together.</div><div class="note-box"><b>Date convention</b><br>Dates use a 365.25-day Vimśottarī year and are intended for educational timing analysis. Professional tools can differ slightly by convention.</div></div>
+    <div class="page-foot">Jyotish Atlas · ${kundaliEscape(c.name)}<span>4</span></div></section>
+  ${reportChartGrid(c,KUNDALI_REPORT_VARGAS.slice(1,5),5,"Foundation and relationship divisions")}
+  ${reportChartGrid(c,KUNDALI_REPORT_VARGAS.slice(5,9),6,"Work, lineage and specialised divisions")}
+  ${reportChartGrid(c,KUNDALI_REPORT_VARGAS.slice(9),7,"Fine divisions and calculation notes").replace('<div class="page-foot">',`<div class="notes"><div class="note-box"><b>D-30 Triṁśāṁśa</b><br>Used for adversity, vulnerabilities and character under pressure.</div><div class="note-box"><b>D-60 Ṣaṣṭyāṁśa</b><br>Changes rapidly and should be used only with a rectified, highly accurate birth time.</div></div><div class="page-foot">`)}
+  <script>window.addEventListener("load",()=>setTimeout(()=>window.print(),450));<\/script></body></html>`;
 }
+JA.buildKundaliReportHtml=printableKundaliHtml;
 function renderKundaliPanel(c){
   const panel=document.getElementById("kundaliPanel");if(!panel)return;
-  document.getElementById("kundaliSvg").innerHTML=buildNorthIndianKundaliSvg(c);
-  document.getElementById("kundaliProfile").innerHTML=kundaliProfileHtml(c);
   const bd=c.birthDetails||{};
-  document.getElementById("kundaliSummary").textContent=bd.place?`${c.name} · ${bd.place} · Lahiri sidereal`:`${c.name} · Lahiri sidereal`;
+  document.getElementById("kundaliSummary").textContent=`${c.name}${bd.place?" · "+bd.place:""} · View charts in Bhava Mandala or save the detailed 7-page report.`;
   document.getElementById("downloadKundaliSvg").onclick=()=>{
-    const blob=new Blob([buildNorthIndianKundaliSvg(c)],{type:"image/svg+xml;charset=utf-8"});
+    const blob=new Blob([buildNorthIndianKundaliSvg(c,{print:true})],{type:"image/svg+xml;charset=utf-8"});
     const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`${String(c.name||"kundali").replace(/[^\w-]+/g,"-")}-kundali.svg`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
   };
   document.getElementById("printKundali").onclick=()=>{
@@ -7525,6 +7630,9 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
     if(trigger&&typeof trigger.focus==="function")trigger.focus();trigger=null;
   }
   JA.openBirthModal=openBirthModal;
+  const heroCreate=$("heroCreateKundali"),startCreate=$("startCreateKundali");
+  if(heroCreate)heroCreate.onclick=()=>openBirthModal(heroCreate);
+  if(startCreate)startCreate.onclick=()=>openBirthModal(startCreate);
   $("createFirst").onclick=e=>{e.preventDefault();openBirthModal(e.currentTarget);};
   $("birthCancel").onclick=closeBirthModal;
   modal.onclick=e=>{if(e.target===modal)closeBirthModal();};
@@ -10826,6 +10934,9 @@ function runSelfTest(){
     ok("Astronomy Engine: seven classical longitudes finite", ["Su","Mo","Ma","Me","Ju","Ve","Sa"].every(k=>Number.isFinite(astronomyTropicalLongitude(k,new Date(Date.UTC(2020,0,1,6,0,0))))));
     const svg=buildNorthIndianKundaliSvg({name:"Test",La:c.La,planets:c.planets});
     ok("Kundali SVG: all 12 houses rendered", (svg.match(/class="k-house"/g)||[]).length===12);
+    const report=printableKundaliHtml({name:"Test",La:c.La,planets:c.planets,birthDate:"2020-01-01T06:00:00.000Z",birthDetails:{date:"2020-01-01",time:"11:30",place:"New Delhi, India",timezone:"Asia/Kolkata"},dashas:computeVimDashas(c.planets.Mo,"2020-01-01T06:00:00.000Z")});
+    ok("Kundali report: seven print-ready pages", (report.match(/class="report-page"/g)||[]).length===7);
+    ok("Kundali report: D-60 and Ashtakavarga included", report.includes("D-60")&&report.includes("Ashtakavarga"));
   })();
   (function(){
     const converted=JA.localBirthToUtc("1990-05-15","14:30","Asia/Kolkata");
