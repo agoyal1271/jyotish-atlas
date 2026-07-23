@@ -2,7 +2,7 @@
 
 **A living, interactive primer to Parashara's grammar of Vedic astrology.**
 
-Open `index.html` in any modern browser — no server or install required. Chart calculation and saved charts work offline; birthplace search needs an internet connection.
+Open `index.html` in any modern browser — no server, no install, no internet required after the first load (the nakshatra profile cards are fully offline).
 
 ---
 
@@ -15,19 +15,18 @@ Open `index.html` in any modern browser — no server or install required. Chart
 | **12 Rashis** | Element, modality, ruler and body for each sign |
 | **12 Bhavas** | House significations and classical categories (Kendra, Trikona, Dusthana…) |
 | **Synthesizer** | Place a planet (D-1 sign + degree + house) → get the full layered reading including **D-9 Navamsa** (promise vs delivery), dignity, Nakshatra and Drishti. Switch to **Empty house** mode to read a house through its lord |
-| **My Charts** | Create a Kundali from birth details, or upload a `.txt` / text-based `.pdf` chart (JHora / Parashara's Light format). View and download a North Indian D-1 chart, then explore every planet's Nakshatra, vargas and combined verdict |
+| **My Charts** | Upload a `.txt` or text-based `.pdf` chart file (JHora / Parashara's Light format) → see every planet's D-1, **Nakshatra** (clickable), D-9 and combined verdict. Click a planet to open it in the Synthesizer. Click an empty house to analyze it through its lord |
 | **BAV** | **Bhinna Ashtakavarga** for all 7 planets + Sarvashtakavarga, computed from the natal positions. Colour-coded by strength (5+ green → 1 red), natal house outlined, best/worst transit houses surfaced |
 | **Practice** | Endless quiz drawn from the data — exaltations, lordships, karakas, house meanings |
 
 ---
 
-## Creating or adding your chart
+## Adding your chart
 
-1. Open the app → scroll to **My Charts**
-2. Click **✦ Create Kundali** and enter name, birth date, exact time and birthplace; or click **＋ Add chart** to import a `.txt` / `.pdf`
-3. For a created chart, select the birthplace result so coordinates and its IANA timezone are filled automatically
-4. The app calculates a Lahiri sidereal, whole-sign chart and saves it in your browser (localStorage)
-5. Use **Print / Save PDF** or **Download SVG** to keep the North Indian Kundali
+1. Open the app → scroll to **My Charts** → click **＋ Add chart**
+2. Either **📁 Upload a .txt or .pdf file** directly, or paste the planetary longitude table
+3. The parser reads the `Lagna`, `Sun … Ketu` lines with their sign and degree
+4. Chart is saved in your browser (localStorage) — survives reloads
 
 Compatible with JHora and Parashara's Light `.txt` exports and text-based PDFs. Image-only/scanned PDFs must be processed with OCR first.
 
@@ -35,16 +34,13 @@ Compatible with JHora and Parashara's Light `.txt` exports and text-based PDFs. 
 
 ## Technical notes
 
-- **Static and local** — open `index.html` directly; personal birth data and calculated charts stay in the browser
+- **Static and local** — open `index.html` directly; chart data never leaves the browser
 - **PDF support** — bundled PDF.js extracts text locally from PDFs (`pdf.min.js` + `pdf.worker.min.js`)
-- **Built-in Kundali generation** — bundled Astronomy Engine calculates accurate tropical planetary positions, which the app converts to Lahiri sidereal positions; `tz-lookup` resolves an IANA timezone from birthplace coordinates
-- **Place privacy** — place search uses OpenStreetMap Nominatim. Only the search words are transmitted; the name, birth date/time and calculated chart remain in the browser
-- **Chart settings** — Lahiri ayanāṃśa, sidereal zodiac, whole-sign houses and mean lunar nodes
-- **Built-in regression guard** — open `index.html#selftest` to run 27 checks covering Navamsa, chart generation, timezone conversion, Kundali rendering and core data invariants. It stays inert during normal use.
+- **Built-in regression guard** — open `index.html#selftest` to run 13 sanity checks (Navamsa + core data invariants). It stays inert during normal use.
 - **Navamsa (D-9)** computed from each planet's degree using the classical `NAV_START = [Aries, Capricorn, Libra, Cancer]` rule; validated against four real natal charts (0 errors)
 - **BAV tables** validated sign-by-sign against four natal charts (23/23 rows exact). Two commonly-printed table errors (Moon and Venus) were corrected via a four-chart constraint solver
 - **Nakshatra** computed as `floor(lon / 13°20')` with pada as `floor(remainder / 3°20') + 1`; validated 11/11 against chart files
-- **Bundled dependencies** — Astronomy Engine, `tz-lookup` and PDF.js are shipped locally; see `THIRD_PARTY_NOTICES.md`
+- **No external dependencies** except the Google Fonts fallback in the system font stack
 
 ---
 
@@ -60,8 +56,8 @@ Compatible with JHora and Parashara's Light `.txt` exports and text-based PDFs. 
 
 - [ ] Shad Bala / Shadbala strength meter
 - [ ] Yoga recognizer (Pancha Mahapurusha, Raja, Dhana)
-- [x] Vimsottari dasha clock
-- [x] Downloadable North Indian D-1 chart
+- [ ] Vimsottari dasha clock
+- [ ] North Indian chart diagram (clickable houses)
 - [ ] Combine with the **Yearly Astrological Days** transit calendar
 
 ---
