@@ -5934,6 +5934,38 @@ function mooltrikonaHouse(k,La){
   return houseFromSigns(La,m.s);
 }
 
+// ===== Panchadha Maitri — 5-fold compound friendship (BPHS Ch.6) =====
+// FRIEND{} above is naisargika (natural/permanent) friendship — a fixed table independent of
+// any chart. Classical practice also reads tatkalika (temporal) friendship: planets sitting in
+// the 2nd/3rd/4th/10th/11th/12th sign FROM a given planet, in THIS chart, are its temporal
+// friends; the rest (same sign, 5/6/7/8/9th) are temporal enemies. The two combine into 5
+// grades (great friend → great enemy), and it is the COMPOUND grade, not the natural one alone,
+// that BPHS uses to judge a planet's true relationship to a sign-lord or to another dasha lord.
+// dignityOf() intentionally keeps using natural-only friendship (documented in the README's
+// "Accuracy caveats" — it backs ~80 static reference/glossary panels app-wide where a
+// chart-independent read is expected). Here in the Dasha Prediction Engine, where every score is
+// already chart-specific, we compute the real compound grade and use it as a refinement.
+function temporalRelation(a,b,c){
+  const pa=c.planets[a],pb=c.planets[b]; if(!pa||!pb) return null;
+  const d=houseFromSigns(pa.sign,pb.sign); // sign-distance 1..12 counted from a to b
+  return [2,3,4,10,11,12].includes(d)?'friend':'enemy';
+}
+const PANCHADHA_GRADE={
+  'friend|friend':  {tier:'greatFriend',score: 1.5,label:'Adhi Mitra · great friend'},
+  'friend|enemy':   {tier:'neutral',    score: 0,  label:'Sama · neutral (natural friend, temporal enemy)'},
+  'neutral|friend': {tier:'friend',     score: 1,  label:'Mitra · friend'},
+  'neutral|enemy':  {tier:'enemy',      score:-1,  label:'Shatru · enemy'},
+  'enemy|friend':   {tier:'neutral',    score: 0,  label:'Sama · neutral (natural enemy, temporal friend)'},
+  'enemy|enemy':    {tier:'greatEnemy', score:-1.5,label:'Adhi Shatru · great enemy'}
+};
+function compoundRelation(a,b,c){
+  if(!a||!b||a===b||a==='Ra'||a==='Ke') return null;
+  const nat=FRIEND[a]; if(!nat) return null;
+  const natRel=nat.f.includes(b)?'friend':nat.e.includes(b)?'enemy':'neutral';
+  const temp=temporalRelation(a,b,c); if(!temp) return null;
+  return PANCHADHA_GRADE[`${natRel}|${temp}`]||null;
+}
+
 // Layer 1: natal foundation score for planet k
 function dpLayer1(k,c,La){
   const p=c.planets[k]; if(!p) return null;
@@ -5962,6 +5994,17 @@ function dpLayer1(k,c,La){
   const d9Mod=d9.score>=1.5?0.5:d9.score>=1?0.25:d9.score<=-2?(nb?0:-0.5):d9.score<=-1?-0.25:0;
   const combustMod=combust?-0.75:0;
   const dispMod=dispDig?(dispDig.score>=1.5?0.25:dispDig.score<=-2?-0.25:0):0;
+
+  // Panchadha Maitri refinement — when the planet sits in a friend's/enemy's/neutral sign
+  // (d1.score is 1, -1 or 0; exaltation/debilitation/own-sign already dominate and skip this),
+  // recheck the sign-lord relationship using the COMPOUND (natural + chart-specific temporal)
+  // grade instead of the natural-only table dignityOf() used. Half-weighted so it sharpens the
+  // read without overriding the base dignity call.
+  let compoundMod=0,compoundRel=null;
+  if(k!=='Ra'&&k!=='Ke'&&dispK&&dispK!==k&&Math.abs(d1.score)<=1){
+    compoundRel=compoundRelation(k,dispK,c);
+    if(compoundRel) compoundMod=(compoundRel.score-d1.score)*0.5;
+  }
 
   // Ishta/Kashta phala — auspicious vs distressing delivery (BPHS Shadbala). A planet can be
   // low on total Shadbala yet high on Ishta (gentle, benefic results) — captures "weak but pleasant".
@@ -5996,7 +6039,7 @@ function dpLayer1(k,c,La){
   // 'dead' (Mṛta) or 'infant' (Bāla) by degree cannot deliver no matter how dignified — this
   // is the layer an astrologer reads when a 9th-lord AK at 28° still feels "flat". Kumāra
   // (the commonest stage) ≈ neutral so the overall distribution isn't shifted.
-  const base=digScore+d9Mod+combustMod+dispMod+aspMod*0.4+ishtaMod+nodeMod+akMod+retroMod;
+  const base=digScore+d9Mod+combustMod+dispMod+aspMod*0.4+ishtaMod+nodeMod+akMod+retroMod+compoundMod;
   const AV_MULT={'Yuvā':1.1,'Kumāra':1.0,'Vṛddha':0.8,'Bāla':0.7,'Mṛta':0.35}; // Mṛta deepened 0.45→0.35
   // Jāgradādi (wakefulness) now MODULATES delivery alongside Bālādi — previously computed for
   // display only. An asleep (Suṣupti) planet (e.g. a benefic in an enemy's sign) cannot deliver
@@ -6018,7 +6061,7 @@ function dpLayer1(k,c,La){
 
   return{
     k,p,d1,d9,d9s,vg,mool,nb,combust,retro,
-    digScore,d9Mod,combustMod,dispMod,aspMod,ishtaMod,nodeMod,nodeNote,akMod,retroMod,avMult,grahanMod,nodeUpaMod,
+    digScore,d9Mod,combustMod,dispMod,aspMod,ishtaMod,nodeMod,nodeNote,akMod,retroMod,compoundMod,compoundRel,avMult,grahanMod,nodeUpaMod,
     score:base+grahanMod+nodeUpaMod,
     dispK,dispDig,house:hk
   };
@@ -6288,8 +6331,12 @@ function dpNakBond(mahaK,antarK,c){
 function dpRelation(mahaK,antarK,c){
   const fr=FRIEND[mahaK]||{f:[],e:[],n:[]};
   const nat=fr.f.includes(antarK)?'friend':fr.e.includes(antarK)?'enemy':'neutral';
+  // Compound (Panchadha) grade between the two dasha lords, using their actual chart placement —
+  // more precise than the natural-only table for deciding whether a 2-12/6-8 axis is genuinely
+  // the "most volatile" reading or is tempered/sharpened by how this specific chart sits.
+  const cr=compoundRelation(mahaK,antarK,c);
   const mp=c.planets[mahaK], ap=c.planets[antarK];
-  if(!mp||!ap) return{nat,hFrMaha:null,relScore:0,relVerdict:'—',relCat:'neutral',volatile:false};
+  if(!mp||!ap) return{nat,cr,hFrMaha:null,relScore:0,relVerdict:'—',relCat:'neutral',volatile:false};
   const h=houseFromSigns(mp.sign,ap.sign);
   let relScore,relVerdict,relCat,volatile=false;
   if(h===1||h===7){
@@ -6307,16 +6354,22 @@ function dpRelation(mahaK,antarK,c){
   } else if(h===2||h===12){
     relScore=-1;relCat='challenging';
     relVerdict=`H${h} — Dvirdwadash (2-12): loss, expense and transition relative to MD agenda`;
-    if(nat==='enemy'){volatile=true;relScore=-1.5;}
+    if(cr&&cr.tier==='greatEnemy'){volatile=true;relScore=-1.5;}
   } else if(h===6||h===8){
     relScore=-1.5;relCat='disruptive';
     relVerdict=`H${h} — Shashtashtaka (6-8): conflict and upheaval; even benefics cause friction here`;
-    if(nat==='enemy'){volatile=true;relScore=-2;}
+    if(cr&&cr.tier==='greatEnemy'){volatile=true;relScore=-2;}
   } else {
     relScore=0;relCat='neutral';
     relVerdict=`H${h} from MD lord — neutral distance`;
   }
-  return{nat,hFrMaha:h,difficult:[6,8,12].includes(h),supportive:[2,5,9,11].includes(h),
+  // A chart-specific great friendship softens an otherwise-difficult axis; a great enmity
+  // sharpens an otherwise-fine one. Kept small — the house-axis read still leads.
+  if(cr){
+    if(cr.tier==='greatFriend'&&relScore<0) relScore+=0.5;
+    else if(cr.tier==='greatEnemy'&&relScore>0) relScore-=0.5;
+  }
+  return{nat,cr,hFrMaha:h,difficult:[6,8,12].includes(h),supportive:[2,5,9,11].includes(h),
          relScore,relVerdict,relCat,volatile};
 }
 
@@ -6427,27 +6480,47 @@ function dpBuildAntarOpts(maha,defIdx){
   }).join('');
 }
 
+// Pratyantardasha (3rd Vimshottari tier) selector options — narrows the multi-year/month
+// antardasha window down to its several-week/month sub-windows for precise timing.
+// Falls back gracefully for dashas computed by an older app version / saved chart that
+// predates pratyantardasha data (no .pratyantars array on the antardasha object).
+function dpBuildPratyantarOpts(antar,defIdx){
+  if(!antar||!antar.pratyantars||!antar.pratyantars.length) return '<option value="0">Whole antardasha</option>';
+  const now=Date.now();
+  return antar.pratyantars.map((pd,i)=>{
+    const cur=pd.start<=now&&(pd.end==null||pd.end>=now);
+    return `<option value="${i}"${i===defIdx?' selected':''}>${GBYK[pd.lord].name}${cur?' ◉ now':''} · ${_fD(pd.start)}–${_fD(pd.end)}</option>`;
+  }).join('');
+}
+
 function dpAnalyze(){
   const c=_dpC,La=_dpLa,allBAV=_dpBAV; if(!c) return;
-  const mSel=document.getElementById('dpMahaSelect'), aSel=document.getElementById('dpAntarSelect');
+  const mSel=document.getElementById('dpMahaSelect'), aSel=document.getElementById('dpAntarSelect'), pSel=document.getElementById('dpPratyantarSelect');
   if(!mSel||!aSel) return;
   const mahaIdx=parseInt(mSel.value)||0;
   const antarIdx=parseInt(aSel.value)||0;
   const mahas=c.dashas.mahas;
   const selMaha=mahas[mahaIdx]; if(!selMaha) return;
   const selAntar=(selMaha.antars||[])[antarIdx]||null;
+  const selPraty=(pSel&&selAntar&&selAntar.pratyantars)?(selAntar.pratyantars[parseInt(pSel.value)||0]||null):null;
   const mahaK=selMaha.lord, antarK=selAntar?selAntar.lord:mahaK;
+  const pratyK=selPraty?selPraty.lord:antarK;
 
-  // Transit date: today for current period, midpoint for past/future
+  // Transit date: today for current period, midpoint for past/future. Snap to the selected
+  // Pratyantardasha (weeks/months) when available instead of the whole Antardasha (often
+  // years) — a single snapshot at the dead-center of a multi-year window can land on almost
+  // any phase of the Jupiter/Saturn transit cycle; anchoring to the narrower sub-period the
+  // user actually selected makes the transit read meaningfully more precise.
   const now=Date.now();
+  const snapSpan=selPraty||selAntar;
   let transitDate=new Date(), transitNote='Transit snapshot: today';
-  if(selAntar&&selAntar.start&&selAntar.end){
-    if(selAntar.end<now){
-      transitDate=new Date((selAntar.start+selAntar.end)/2);
-      transitNote=`Transit snapshot: ${_fD(transitDate.getTime())} (mid-period — historical view)`;
-    } else if(selAntar.start>now){
-      transitDate=new Date((selAntar.start+selAntar.end)/2);
-      transitNote=`Transit snapshot: ${_fD(transitDate.getTime())} (mid-period estimate — actual transits will vary)`;
+  if(snapSpan&&snapSpan.start&&snapSpan.end){
+    if(snapSpan.end<now){
+      transitDate=new Date((snapSpan.start+snapSpan.end)/2);
+      transitNote=`Transit snapshot: ${_fD(transitDate.getTime())} (mid-${selPraty?'pratyantardasha':'period'} — historical view)`;
+    } else if(snapSpan.start>now){
+      transitDate=new Date((snapSpan.start+snapSpan.end)/2);
+      transitNote=`Transit snapshot: ${_fD(transitDate.getTime())} (mid-${selPraty?'pratyantardasha':'period'} estimate — actual transits will vary)`;
     }
   }
 
@@ -6458,6 +6531,10 @@ function dpAnalyze(){
 
   const l1M=dpLayer1(mahaK,c,La), l1A=dpLayer1(antarK,c,La);
   const l2M=dpLayer2(mahaK,c,La), l2A=dpLayer2(antarK,c,La);
+  // Pratyantardasha lord (3rd Vimshottari tier) — only distinct from the AD lord after the
+  // period's own first sub-window (the 1st PD of every antardasha is the antardasha lord itself).
+  const l1P=(pratyK!==antarK)?dpLayer1(pratyK,c,La):null;
+  const l2P=(pratyK!==antarK)?dpLayer2(pratyK,c,La):null;
   const l3=dpLayer3(c,La,allBAV,gochara);
   const l4=dpLayer4(yogas,mahaK,antarK);
   const themes=dpThemeSpace(mahaK,antarK,c,La);
@@ -6472,8 +6549,12 @@ function dpAnalyze(){
   if(antarK==='Ke') wilds.push({text:'Ketu Antardasha: withdrawal, detachment, spiritual pull on the Mahadasha themes; loss that enables liberation'});
   const hasVR=yogas.some(y=>y.cat==='Viparita Raj Yoga'&&y.ps&&(y.ps.includes(mahaK)||y.ps.includes(antarK)));
   if(hasVR&&l3.score<0) wilds.push({text:'Viparita Raj Yoga present + difficult transits = classic trigger condition; hardship may catalyze the rise'});
-  // Volatile rule: natural enemies in Shashtashtaka or Dvirdwadash = most disruptive sub-period
-  if(rel.volatile) wilds.push({text:`${GBYK[mahaK].name} and ${GBYK[antarK].name} are natural enemies in a ${[6,8].includes(rel.hFrMaha)?'Shashtashtaka (6-8)':'Dvirdwadash (2-12)'} relationship — most volatile sub-period of the entire dasha; competing agendas amplify disruption`});
+  // Volatile rule: compound (pañcadhā — natural AND chart-specific temporal) great-enemies in
+  // Shashtashtaka or Dvirdwadash = most disruptive sub-period. Using the compound grade rather
+  // than natural friendship alone avoids over-flagging pairs whose enmity is actually softened
+  // by where they sit in THIS chart.
+  if(rel.volatile) wilds.push({text:`${GBYK[mahaK].name} and ${GBYK[antarK].name} are Adhi Shatru (great enemies — natural AND chart-placement enmity) in a ${[6,8].includes(rel.hFrMaha)?'Shashtashtaka (6-8)':'Dvirdwadash (2-12)'} relationship — most volatile sub-period of the entire dasha; competing agendas amplify disruption`});
+  if(l1P&&l1P.retro&&pratyK!==antarK) wilds.push({text:`${GBYK[pratyK].name} (Pratyantardasha lord) is retrograde — this sub-window's events may run non-linearly`});
   // Jupiter protection: transit Jupiter aspecting or occupying houses ruled by the AD lord
   if(tRes.pos.Ju&&l2A.fn.houses&&l2A.fn.houses.length){
     const juTrH=houseFromSigns(La,tRes.pos.Ju.sign);
@@ -6492,6 +6573,13 @@ function dpAnalyze(){
   // practice — the sub-period lord rules the period's flavour (was reversed: 0.6 MD / 0.4 AD).
   const natalScore=_avNat(l1M,l2M)*0.45+(l1A?_avNat(l1A,l2A):0)*0.55;
   const nakScore=nakBond?nakBond.score:0;
+  // Pratyantardasha lord — light-touch 3rd-tier contribution (l1P/l2P computed above, near
+  // l1M/l1A). Only non-zero when the PD lord differs from the AD lord (the 1st PD of every
+  // antardasha IS the antardasha lord itself, so its natal weight is already fully counted
+  // above; adding it again would double-count). Weighted well below MD/AD so it refines the
+  // finer window without swinging the verdict tier.
+  const pratyScore=l1P?_avNat(l1P,l2P)*0.25:0;
+  const pratyDamp=(l1P&&l1P.d1.score===-2&&!l1P.nb)?-0.4:0;
   // Aspects (graha drishti, benefic/malefic) on each dasha lord — read BEFORE transit.
   const aspM=dpAspectsOn(c,La,c.planets[mahaK]?c.planets[mahaK].sign:La);
   const aspA=(antarK!==mahaK&&c.planets[antarK])?dpAspectsOn(c,La,c.planets[antarK].sign):null;
@@ -6499,7 +6587,7 @@ function dpAnalyze(){
   const topicKey=(document.getElementById('dpTopicSelect')||{}).value||'general';
   const topicA=dpTopicAnalysis(c,La,topicKey,mahaK,antarK);
 
-  const total=natalScore+l3.score+l4.score+antarDamp+rel.relScore+nakScore+(topicA?topicA.score:0);
+  const total=natalScore+l3.score+l4.score+antarDamp+rel.relScore+nakScore+pratyScore+pratyDamp+(topicA?topicA.score:0);
   const verdict=dpVerdict(total,hardCap);
 
   function lordCard(l1,l2,role){
@@ -6516,6 +6604,10 @@ function dpAnalyze(){
     if(l1.dispDig&&l1.dispK!==k){
       const dCls=l1.dispDig.score>=1.5?'pos1':l1.dispDig.score<=-2?'neg1':'neu';
       rows.push(`<div class="dp-factor"><span class="dp-flabel">Dispositor</span><span class="dp-fval ${dCls}">${GBYK[l1.dispK].name}: ${l1.dispDig.full.split('·')[0].trim()}</span></div>`);
+    }
+    if(l1.compoundRel){
+      const cCls=l1.compoundRel.score>0?'pos1':l1.compoundRel.score<0?'neg1':'neu';
+      rows.push(`<div class="dp-factor"><span class="dp-flabel">Compound friendship</span><span class="dp-fval ${cCls}">${l1.compoundRel.label}</span></div>`);
     }
     if(l1.p.ishta!=null&&l1.p.kashta!=null){
       const iCls=l1.ishtaMod>0.1?'pos1':l1.ishtaMod<-0.1?'neg1':'neu';
@@ -6568,7 +6660,9 @@ function dpAnalyze(){
   const relCls=rel.relCat==='excellent'?'pos2':rel.relCat==='favorable'||rel.relCat==='productive'||rel.relCat==='harmonious'?'pos1':rel.relCat==='challenging'?'neg1':rel.relCat==='disruptive'?'neg2':'neu';
   const natCls=rel.nat==='friend'?'pos1':rel.nat==='enemy'?'neg1':'neu';
   const relText=rel.relVerdict;
-  const relH=rel.hFrMaha?` · <span class="dp-fval ${natCls}" style="display:inline-block">${rel.nat==='friend'?'Natural friends':rel.nat==='enemy'?'Natural enemies':'Neutral'}</span>`:'';
+  const crLbl={greatFriend:'Adhi Mitra · great friend',friend:'Mitra · friend',neutral:'Sama · neutral',enemy:'Shatru · enemy',greatEnemy:'Adhi Shatru · great enemy'};
+  const crCls={greatFriend:'pos2',friend:'pos1',neutral:'neu',enemy:'neg1',greatEnemy:'neg2'};
+  const relH=rel.hFrMaha?` · <span class="dp-fval ${natCls}" style="display:inline-block">${rel.nat==='friend'?'Natural friends':rel.nat==='enemy'?'Natural enemies':'Neutral'}</span>${rel.cr?` · <span class="dp-fval ${crCls[rel.cr.tier]}" style="display:inline-block">Compound: ${crLbl[rel.cr.tier]}</span>`:''}`:'';
 
   const peakHtml=`<div class="dp-peak ${l3.doubleTransit?'peak-on':'peak-off'}">
     ${l3.doubleTransit
@@ -6637,6 +6731,7 @@ function dpAnalyze(){
     pushF(`${tag} · D-1 ${l1.mool?'mūlatrikoṇa':l1.d1.full.split('·')[0].trim().toLowerCase()}`, l1.digScore);
     pushF(`${tag} · D-9 navāṁśa`, l1.d9Mod);
     pushF(`${tag} · dispositor`, l1.dispMod);
+    pushF(`${tag} · pañcadhā maitri (compound friendship)`, l1.compoundMod);
     pushF(`${tag} · Iṣṭa vs Kaṣṭa phala`, l1.ishtaMod);
     pushF(`${tag} · ${(k==='Ra'||k==='Ke')?'delivers via dispositor/conjunction':'delivery'}`, l1.nodeMod);
     pushF(`${tag} · node in upachaya`, l1.nodeUpaMod);
@@ -6659,6 +6754,8 @@ function dpAnalyze(){
   if(l4.score) pushF('Yogas in play', l4.score);
   if(topicA) pushF(`Focus · ${topicA.t.label}`, topicA.score);
   if(antarDamp) pushF('AD lord debilitated (no Neecha Bhanga)', antarDamp);
+  if(pratyScore) pushF(`Pratyantardasha lord ${NM(pratyK)} · natal`, pratyScore);
+  if(pratyDamp) pushF('PD lord debilitated (no Neecha Bhanga)', pratyDamp);
 
   const _wUp=whyParts.filter(x=>x.val>0).sort((a,b)=>b.val-a.val).slice(0,5);
   const _wDn=whyParts.filter(x=>x.val<0).sort((a,b)=>a.val-b.val).slice(0,5);
@@ -6676,8 +6773,8 @@ function dpAnalyze(){
   <div class="dp-hero">
     <div class="dp-vbadge ${verdict.cls}"><div class="dp-vtier">${verdict.label}</div><div class="dp-vscore">${verdict.sub}</div></div>
     <div class="dp-hinfo">
-      <div class="dp-period-title">${GBYK[mahaK].gl} ${GBYK[mahaK].name} / ${GBYK[antarK].gl} ${GBYK[antarK].name} Antardasha</div>
-      <div class="dp-period-sub">${selAntar?`${_fD(selAntar.start)} — ${_fD(selAntar.end)}`:''}</div>
+      <div class="dp-period-title">${GBYK[mahaK].gl} ${GBYK[mahaK].name} / ${GBYK[antarK].gl} ${GBYK[antarK].name}${selPraty?` / ${GBYK[pratyK].gl} ${GBYK[pratyK].name}`:''} ${selPraty?'Pratyantardasha':'Antardasha'}</div>
+      <div class="dp-period-sub">${selPraty?`${_fD(selPraty.start)} — ${_fD(selPraty.end)}`:selAntar?`${_fD(selAntar.start)} — ${_fD(selAntar.end)}`:''}</div>
       <div class="dp-summary">${sumParts}</div>
     </div>
   </div>
@@ -6720,15 +6817,22 @@ function renderDashaPrediction(c,La,allBAV){
 
   const mahas=c.dashas.mahas, now=Date.now();
 
-  // Find default period (current maha + antar)
-  let defMahaIdx=0, defAntarIdx=0;
+  // Find default period (current maha + antar + pratyantar)
+  let defMahaIdx=0, defAntarIdx=0, defPratyIdx=0;
   for(let i=0;i<mahas.length;i++){
     const md=mahas[i];
     if(md.start<=now&&(md.end==null||md.end>=now)){
       defMahaIdx=i;
       for(let j=0;j<(md.antars||[]).length;j++){
         const ad=md.antars[j];
-        if(ad.start<=now&&(ad.end==null||ad.end>=now)){defAntarIdx=j;break;}
+        if(ad.start<=now&&(ad.end==null||ad.end>=now)){
+          defAntarIdx=j;
+          for(let p=0;p<(ad.pratyantars||[]).length;p++){
+            const pd=ad.pratyantars[p];
+            if(pd.start<=now&&(pd.end==null||pd.end>=now)){defPratyIdx=p;break;}
+          }
+          break;
+        }
       }
       break;
     }
@@ -6745,6 +6849,7 @@ function renderDashaPrediction(c,La,allBAV){
   <div class="dp-selector">
     <div class="dp-sel-group"><div class="dp-sel-label">Mahadasha</div><select id="dpMahaSelect">${mahaOpts}</select></div>
     <div class="dp-sel-group"><div class="dp-sel-label">Antardasha</div><select id="dpAntarSelect">${dpBuildAntarOpts(mahas[defMahaIdx],defAntarIdx)}</select></div>
+    <div class="dp-sel-group"><div class="dp-sel-label">Pratyantardasha</div><select id="dpPratyantarSelect">${dpBuildPratyantarOpts((mahas[defMahaIdx].antars||[])[defAntarIdx],defPratyIdx)}</select></div>
     <div class="dp-sel-group"><div class="dp-sel-label">Focus</div><select id="dpTopicSelect">${Object.entries(DP_TOPICS).map(([k,t])=>`<option value="${k}">${t.label}</option>`).join('')}</select></div>
   </div>
   <div class="dp-transit-note" id="dpTransitNote"></div>
@@ -6754,9 +6859,16 @@ function renderDashaPrediction(c,La,allBAV){
   document.getElementById('dpMahaSelect').onchange=function(){
     const mi=parseInt(this.value)||0;
     document.getElementById('dpAntarSelect').innerHTML=dpBuildAntarOpts(mahas[mi],0);
+    document.getElementById('dpPratyantarSelect').innerHTML=dpBuildPratyantarOpts((mahas[mi].antars||[])[0],0);
     dpAnalyze();
   };
-  document.getElementById('dpAntarSelect').onchange=dpAnalyze;
+  document.getElementById('dpAntarSelect').onchange=function(){
+    const mi=parseInt(document.getElementById('dpMahaSelect').value)||0;
+    const ai=parseInt(this.value)||0;
+    document.getElementById('dpPratyantarSelect').innerHTML=dpBuildPratyantarOpts((mahas[mi].antars||[])[ai],0);
+    dpAnalyze();
+  };
+  document.getElementById('dpPratyantarSelect').onchange=dpAnalyze;
   document.getElementById('dpTopicSelect').onchange=dpAnalyze;
   dpAnalyze();
 }
@@ -6882,11 +6994,12 @@ function lpSyncToDPE(c,p){
       if(mahas[i].antars[j]===p.antar){mi=i;ai=j;break;}
     }
   }
-  const mSel=document.getElementById("dpMahaSelect"),aSel=document.getElementById("dpAntarSelect");
+  const mSel=document.getElementById("dpMahaSelect"),aSel=document.getElementById("dpAntarSelect"),pSel=document.getElementById("dpPratyantarSelect");
   if(!mSel||!aSel) return;
   mSel.value=String(mi);
   mSel.dispatchEvent(new Event("change"));
   aSel.value=String(ai);
+  if(pSel) pSel.innerHTML=dpBuildPratyantarOpts((mahas[mi].antars||[])[ai],0);
   dpAnalyze();
   panel.scrollIntoView({behavior:"smooth",block:"start"});
 }
@@ -8728,10 +8841,28 @@ function computeVimDashas(mo,birthDateStr){
     const si=DASHA_SEQ_K.indexOf(md.lord);
     for(let i=0;i<9;i++){
       const al=DASHA_SEQ_K[(si+i)%9],ay=md.fullYears*VIMY[al]/120,ae=addY(ac,ay);
-      md.antars.push({lord:al,start:ac,end:ae});ac=ae;
+      const antar={lord:al,start:ac,end:ae};
+      // Pratyantardasha (3rd Vimshottari tier) — subdivides the antardasha the same way the
+      // antardasha subdivides the mahadasha. This is the classical timing tier BPHS/most
+      // practitioners use to pin an event to a several-week/month window rather than the
+      // multi-year antardasha alone; without it the engine can only speak in year-scale terms.
+      antar.pratyantars=buildPratyantars(al,ac,ae,addY);
+      md.antars.push(antar);ac=ae;
     }
   }
   return{mahas};
+}
+function buildPratyantars(antarLord,antarStart,antarEnd,addY){
+  const MS=365.25*86400000;
+  const antarYears=(antarEnd-antarStart)/MS;
+  const si=DASHA_SEQ_K.indexOf(antarLord);
+  const pratyantars=[]; let pc=antarStart;
+  for(let i=0;i<9;i++){
+    const pl=DASHA_SEQ_K[(si+i)%9], py=antarYears*VIMY[pl]/120, pe=addY(pc,py);
+    pratyantars.push({lord:pl,start:pc,end:pe});
+    pc=pe;
+  }
+  return pratyantars;
 }
 
 /* ===== LIFE OUTLOOK ===== */
