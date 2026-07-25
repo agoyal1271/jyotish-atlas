@@ -1466,6 +1466,31 @@ html.light .brand{color:var(--ink)!important}
   .pr-pchip{font-size:11.5px;padding:3px 9px;border-radius:7px;background:var(--panel);border:1px solid var(--line);color:var(--ink)}
   .pr-pchip .rr{color:var(--debil);font-weight:700}
 
+  /* ── Birth details → Kundali ── */
+  .birth-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin:16px 0}
+  .birth-field{display:flex;flex-direction:column;gap:6px}
+  .birth-field.full{grid-column:1/-1}
+  .birth-field label{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  .birth-field input,.birth-field select{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--ink);padding:10px 11px;font:inherit}
+  .birth-place-row{display:flex;gap:8px}
+  .birth-place-row input{flex:1}
+  .birth-results{display:grid;gap:6px;margin-top:7px}
+  .birth-result{width:100%;text-align:left;background:var(--panel2);border:1px solid var(--line);border-radius:8px;color:var(--ink);padding:9px 11px;cursor:pointer;font:inherit;font-size:12.5px}
+  .birth-result:hover{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 8%,var(--panel2))}
+  .birth-selected{padding:9px 11px;border-radius:8px;background:color-mix(in srgb,var(--exalt) 10%,var(--panel2));border:1px solid color-mix(in srgb,var(--exalt) 35%,var(--line));font-size:12px;color:var(--muted)}
+  .birth-selected b{color:var(--ink)}
+  .kundali-panel{margin-bottom:14px}
+  .kundali-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  .kundali-head h4{margin:0 0 4px}
+  .kundali-actions{display:flex;gap:8px;flex-wrap:wrap}
+  .kundali-layout{display:grid;grid-template-columns:minmax(280px,520px) 1fr;gap:18px;align-items:center}
+  .kundali-svg{width:100%;max-width:520px;margin:auto}
+  .kundali-svg svg{display:block;width:100%;height:auto}
+  .kundali-profile{display:grid;gap:9px}
+  .kundali-kv{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:12.5px;color:var(--muted)}
+  .kundali-kv b{display:block;color:var(--ink);font-size:13px;margin-bottom:2px}
+  @media(max-width:760px){.birth-grid{grid-template-columns:1fr}.birth-field.full{grid-column:auto}.kundali-layout{grid-template-columns:1fr}}
+
   /* ── Life Journal ── */
   .jr-form{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--line)}
   .jr-ev{display:flex;gap:13px;align-items:flex-start;padding:13px 6px;border-bottom:1px solid var(--line)}
@@ -1521,7 +1546,7 @@ html.light .brand{color:var(--ink)!important}
   /* Print */
   @media print{
     #cosmos-bg,header.top,#readProgress,#backToTop,#toastWrap,#cmdPalette,nav.site-nav,
-    .chart-view-toggle,.chartbar,.charts-sidebar,#addModal,#nakModal,footer{display:none!important}
+    .chart-view-toggle,.chartbar,.charts-sidebar,#addModal,#birthModal,#nakModal,footer{display:none!important}
     #hero,#why,#promptbuilder,#bbavam,#arudhas,#outlook,#lifepredictor,#compare,#quiz{display:none!important}
     body{background:#fff!important;color:#111!important;padding-left:0!important}
     .wrap{max-width:none!important;padding:0 12mm!important}
@@ -1869,7 +1894,7 @@ html.light .brand{color:var(--ink)!important}
   <section id="charts" class="section-reveal">
     <div class="eyebrow">Apply it to a real chart</div>
     <h2 class="display">My Charts</h2>
-    <p class="sub">Paste any natal chart (the planetary table from JHora / Parashara's Light — exactly like your <code>.txt</code> files) and the whole chart gets the D-1 → D-9 + lord treatment. Click any row to open it in the Synthesizer. Charts are saved in your browser.</p>
+    <p class="sub">Create a Kundali directly from birth details, or import a JHora / Parashara's Light <code>.txt</code> or text-based <code>.pdf</code>. Every chart gets the full D-1 → D-9 + lord treatment and stays privately in this browser.</p>
     <div class="charts-layout">
       <div class="charts-sidebar">
         <div class="cs-head">My Charts</div>
@@ -1877,9 +1902,22 @@ html.light .brand{color:var(--ink)!important}
       </div>
       <div class="charts-main">
         <div id="chartEmpty" class="panel ec-zone-card" style="text-align:center;color:var(--muted);padding:34px;display:none">
-          No chart yet. <a href="#" id="addFirst"><b>＋ Add your chart</b></a> &nbsp;·&nbsp; <a href="#" id="demoFirst">load a demo</a>
+          No chart yet. <a href="#" id="createFirst"><b>✦ Create your Kundali</b></a> &nbsp;·&nbsp; <a href="#" id="addFirst">import a chart</a> &nbsp;·&nbsp; <a href="#" id="demoFirst">load a demo</a>
         </div>
-        <div id="chartView" style="display:none">
+      <div id="chartView" style="display:none">
+      <div class="kundali-panel panel ec-zone-card" id="kundaliPanel">
+        <div class="kundali-head">
+          <div><h4>North Indian Kundali · D-1 Rāśi</h4><div class="note" id="kundaliSummary"></div></div>
+          <div class="kundali-actions">
+            <button type="button" class="ghost ec-btn-ghost" id="downloadKundaliSvg">Download SVG</button>
+            <button type="button" class="btn ec-btn-primary" id="printKundali">Print / Save PDF</button>
+          </div>
+        </div>
+        <div class="kundali-layout">
+          <div class="kundali-svg" id="kundaliSvg"></div>
+          <div class="kundali-profile" id="kundaliProfile"></div>
+        </div>
+      </div>
       <div class="chart-view-toggle">
         <button type="button" class="cvt-btn active" id="btnGridView">⊞ Grid</button>
         <button type="button" class="cvt-btn" id="btnMandalaView">◎ Bhava Mandala</button>
@@ -2244,7 +2282,7 @@ html.light .brand{color:var(--ink)!important}
     <p class="note" style="margin:0 0 12px">Paste the planetary longitude table from your chart software — the lines listing <b>Lagna, Sun … Ketu</b> with sign &amp; degree. The parser reads the rest.</p>
     <input type="text" id="chartName" placeholder="Name (e.g. Mine, or a relative's)"/>
     <div style="display:flex;gap:12px;align-items:center;margin:12px 0">
-      <label class="btn ec-btn-primary upload-trigger" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px">📁 Upload a .txt file<input type="file" id="chartFile" accept=".txt,text/plain" style="display:none"></label>
+      <label class="btn ec-btn-primary upload-trigger" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px">📁 Upload .txt or .pdf<input type="file" id="chartFile" accept=".txt,.pdf,text/plain,application/pdf" style="display:none"></label>
       <span class="note">…or paste the text below ↓</span>
     </div>
     <textarea id="chartText" placeholder="Lagna     14 Vi 41' 55.19&quot; Hast  2  Vi  Ta&#10;Sun - BK  14 Le 14' 38.67&quot; PPha  1  Le  Le&#10;Moon - GK  5 Ar 26' 42.40&quot; Aswi  2  Ar  Ta&#10;..."></textarea>
@@ -2255,6 +2293,36 @@ html.light .brand{color:var(--ink)!important}
       <button class="btn ec-btn-primary" id="addSave">Parse &amp; save</button>
     </div>
     <p class="note" id="parseMsg" style="margin-top:10px;min-height:16px"></p>
+  </div>
+</div>
+
+<!-- CREATE-KUNDALI MODAL -->
+<div class="modal" id="birthModal" role="dialog" aria-modal="true" aria-labelledby="birthModalTitle" aria-hidden="true">
+  <div class="card" style="max-width:720px">
+    <h3 id="birthModalTitle" class="display">Create your Kundali</h3>
+    <p class="note" style="margin:0">Enter the birth details exactly as recorded. Place lookup determines coordinates and the historical timezone; the calculation runs locally in your browser. Only the place-search words are sent to OpenStreetMap—name, date, time and the generated chart are not transmitted.</p>
+    <div class="birth-grid">
+      <div class="birth-field"><label for="birthName">Name</label><input id="birthName" type="text" autocomplete="name" placeholder="Full name"></div>
+      <div class="birth-field"><label for="birthGender">Gender</label><select id="birthGender"><option value="">Prefer not to say</option><option>Female</option><option>Male</option><option>Non-binary</option><option value="Other">Other</option></select></div>
+      <div class="birth-field"><label for="birthDate">Date of birth</label><input id="birthDate" type="date" min="1900-01-01"></div>
+      <div class="birth-field"><label for="birthTime">Exact birth time</label><input id="birthTime" type="time" step="60"></div>
+      <div class="birth-field full">
+        <label for="birthPlace">Place of birth</label>
+        <div class="birth-place-row"><input id="birthPlace" type="search" placeholder="City, state, country"><button type="button" class="ghost ec-btn-ghost" id="birthPlaceSearch">Search place</button></div>
+        <div class="birth-results" id="birthPlaceResults"></div>
+        <div class="birth-selected" id="birthPlaceSelected" style="display:none"></div>
+        <span class="note">Place data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a></span>
+      </div>
+      <div class="birth-field"><label for="birthLat">Latitude</label><input id="birthLat" type="number" min="-90" max="90" step="0.000001" placeholder="28.6139"></div>
+      <div class="birth-field"><label for="birthLon">Longitude</label><input id="birthLon" type="number" min="-180" max="180" step="0.000001" placeholder="77.2090"></div>
+      <div class="birth-field full"><label for="birthTimezone">IANA timezone</label><input id="birthTimezone" type="text" placeholder="Asia/Kolkata"><span class="note">Filled automatically after selecting a place. You can correct it manually when needed.</span></div>
+    </div>
+    <div class="chapref">Settings: Lahiri ayanāṃśa · sidereal zodiac · whole-sign houses · mean lunar nodes. Planetary positions use the MIT-licensed Astronomy Engine; results close to a sign boundary are flagged for verification.</div>
+    <div class="row-actions">
+      <button class="ghost ec-btn-ghost" id="birthCancel">Cancel</button>
+      <button class="btn ec-btn-primary" id="birthCreate">Calculate &amp; save Kundali</button>
+    </div>
+    <p class="note" id="birthMsg" style="margin-top:10px;min-height:16px" aria-live="polite"></p>
   </div>
 </div>
 
@@ -2274,6 +2342,9 @@ html.light .brand{color:var(--ink)!important}
 <div id="toastWrap" aria-live="polite" aria-atomic="false"></div>
 <button type="button" id="backToTop" title="Back to top" aria-label="Back to top">↑</button>
 
+<script src="./astronomy.browser.min.js"></script>
+<script src="./tz.js"></script>
+<script src="./pdf.min.js"></script>
 <script>
 "use strict";
 
@@ -3875,7 +3946,10 @@ window.Journey=(function(){
     document.documentElement.classList.toggle('jm-guided', m==='guided');
     try{ localStorage.setItem(LS_MODE,m); }catch(e){}
     if(m==='guided'){ if(!silent) paint(); }
-    else { closeTopics(); }
+    else {
+      closeTopics();
+      document.querySelectorAll("section.section-reveal").forEach(sec=>sec.classList.add("visible"));
+    }
   }
 
   function init(){
@@ -3887,6 +3961,7 @@ window.Journey=(function(){
       idx=Math.max(0,Math.min(STEPS.length-1,savedStep));
       document.documentElement.classList.toggle('jm-guided', mode==='guided');
       if(mode==='guided') paint();
+      else document.querySelectorAll("section.section-reveal").forEach(sec=>sec.classList.add("visible"));
     }catch(e){ /* fail open: leave the classic scroll intact */ console.error('Journey init:',e); }
   }
 
@@ -5303,8 +5378,9 @@ function lahiriAyanamsa(jd){
 // Tropical ecliptic longitude → sidereal {lon,sign,deg}
 function tropToSid(trop,ayan){const s=((trop-ayan)%360+360)%360;return{lon:s,sign:Math.floor(s/30),deg:s%30};}
 
-/* ---- Self-contained ephemeris (Meeus "Astronomical Algorithms", 2nd ed.) ----
-   Accuracy: Sun ~0.01°, Moon ~0.3°, planets ~0.5–1°  — sufficient for sidereal signs (30° wide). */
+/* ---- Offline ephemeris fallback (Meeus "Astronomical Algorithms", 2nd ed.) ----
+   The primary path uses the bundled MIT-licensed Astronomy Engine. These compact
+   formulae remain as a graceful fallback if that optional asset cannot load. */
 const D2R=Math.PI/180;
 function rv(d){return((d%360)+360)%360;}
 // Iterative Kepler solver
@@ -5370,17 +5446,26 @@ function planetGeoLon(key,T){
   return rv(Math.atan2(p.y-e.y,p.x-e.x)/D2R);
 }
 
-// Self-contained: no CDN dependency, works offline
+const AE_BODY={
+  Su:"Sun",Mo:"Moon",Me:"Mercury",Ve:"Venus",Ma:"Mars",Ju:"Jupiter",Sa:"Saturn"
+};
+function astronomyTropicalLongitude(key,date){
+  if(!window.Astronomy||!Astronomy.Body||!AE_BODY[key]) return null;
+  const body=Astronomy.Body[AE_BODY[key]];
+  const ecl=Astronomy.Ecliptic(Astronomy.GeoVector(body,date,true));
+  return rv(ecl.elon);
+}
+
+// Self-contained and offline. Astronomy Engine is the primary high-accuracy path;
+// the Meeus/Kepler functions above are retained as a no-asset fallback.
 function getTransitPlanets(date){
   const jd=jdFromDate(date), T=(jd-2451545.0)/36525, ayan=lahiriAyanamsa(jd);
   const pos={};
-  pos.Su=tropToSid(ephSun(T),ayan);
-  pos.Mo=tropToSid(ephMoon(T),ayan);
-  pos.Me=tropToSid(planetGeoLon('Me',T),ayan);
-  pos.Ve=tropToSid(planetGeoLon('Ve',T),ayan);
-  pos.Ma=tropToSid(planetGeoLon('Ma',T),ayan);
-  pos.Ju=tropToSid(planetGeoLon('Ju',T),ayan);
-  pos.Sa=tropToSid(planetGeoLon('Sa',T),ayan);
+  const fallback={Su:ephSun(T),Mo:ephMoon(T),Me:planetGeoLon('Me',T),Ve:planetGeoLon('Ve',T),Ma:planetGeoLon('Ma',T),Ju:planetGeoLon('Ju',T),Sa:planetGeoLon('Sa',T)};
+  for(const k of Object.keys(fallback)){
+    const accurate=astronomyTropicalLongitude(k,date);
+    pos[k]=tropToSid(accurate==null?fallback[k]:accurate,ayan);
+  }
   const raT=rv(125.044522-1934.136261*T+2.0758e-3*T*T+T*T*T/450000);
   pos.Ra=tropToSid(raT,ayan);
   pos.Ke=tropToSid(rv(raT+180),ayan);
@@ -5410,13 +5495,14 @@ function tropAscendant(date,latDeg,lonEastDeg){
 function momentFromLocal(y,mo,d,hh,mi,offsetHours){
   return new Date(Date.UTC(y,mo-1,d,hh,mi,0)-offsetHours*3600*1000);
 }
-// Planet series here is unperturbed 2-body Kepler (see note above getTransitPlanets) —
-// accurate well inside a sign near J2000, but the error grows the further a date sits
-// from 2000. Empirically checked against Swiss Ephemeris across 1950–2050: Sun/Moon/
-// nodes stay <0.02°; the five classical planets grow from ~0.1–0.3° near-present to
-// ~0.7–0.9° fifty years out. cuspMargin() turns that into a safety band so any planet
-// landing within it of a sign boundary gets flagged rather than silently trusted.
-function cuspMarginDeg(jd){ const T=(jd-2451545.0)/36525; return Math.min(1.5,0.2+1.3*Math.abs(T)); }
+// Astronomy Engine is normally within one arcminute. Keep a wider 0.08° guard band
+// because the sidereal conversion and recorded birth time can still move a cusp case.
+// The fallback ephemeris uses the older date-sensitive safety band.
+function cuspMarginDeg(jd){
+  if(window.Astronomy) return 0.08;
+  const T=(jd-2451545.0)/36525;
+  return Math.min(1.5,0.2+1.3*Math.abs(T));
+}
 function nearCusp(deg,marginDeg){ return deg<marginDeg||deg>(30-marginDeg); }
 
 // Full sidereal chart {La,planets} for a moment + place — Lagna + all nine grahas,
@@ -5438,6 +5524,98 @@ function computeChartForMoment(date,latDeg,lonEastDeg){
     planets[k]={sign:pos[k].sign,deg:pos[k].deg,retro,near};
   }
   return {La,planets,ayan,ascTrop,ascSid,jd};
+}
+
+function kundaliEscape(value){
+  return String(value==null?"":value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+function kundaliLines(items,maxChars){
+  const lines=[];let current="";
+  for(const item of items){
+    if(!current){current=item;continue;}
+    if((current+" · "+item).length<=maxChars) current+=" · "+item;
+    else{lines.push(current);current=item;}
+  }
+  if(current)lines.push(current);
+  return lines.slice(0,4);
+}
+function buildNorthIndianKundaliSvg(c){
+  const La=c.La.sign;
+  const slots=[
+    null,
+    {x:300,sy:92,py:125,a:"middle",m:20},{x:145,sy:42,py:70,a:"middle",m:15},
+    {x:58,sy:185,py:215,a:"start",m:14},{x:145,sy:292,py:325,a:"middle",m:18},
+    {x:58,sy:392,py:422,a:"start",m:14},{x:145,sy:545,py:510,a:"middle",m:15},
+    {x:300,sy:500,py:455,a:"middle",m:20},{x:455,sy:545,py:510,a:"middle",m:15},
+    {x:542,sy:392,py:422,a:"end",m:14},{x:455,sy:292,py:325,a:"middle",m:18},
+    {x:542,sy:185,py:215,a:"end",m:14},{x:455,sy:42,py:70,a:"middle",m:15}
+  ];
+  const occupants=Array.from({length:13},()=>[]);
+  for(const k of ["Su","Mo","Ma","Me","Ju","Ve","Sa","Ra","Ke"]){
+    const p=c.planets[k];if(!p)continue;
+    const h=houseFromSigns(La,p.sign);
+    occupants[h].push(`${k}${p.retro?"℞":""} ${p.deg.toFixed(1)}°`);
+  }
+  let labels="";
+  for(let h=1;h<=12;h++){
+    const s=slots[h],sign=((La+h-1)%12)+1;
+    labels+=`<text x="${s.x}" y="${s.sy}" text-anchor="${s.a}" class="k-sign">${sign}<tspan class="k-house"> · H${h}</tspan></text>`;
+    const lines=kundaliLines(occupants[h],s.m);
+    if(lines.length){
+      labels+=`<text x="${s.x}" y="${s.py}" text-anchor="${s.a}" class="k-planets">`;
+      lines.forEach((line,i)=>{labels+=`<tspan x="${s.x}" dy="${i?20:0}">${kundaliEscape(line)}</tspan>`;});
+      labels+=`</text>`;
+    }
+  }
+  return `<svg viewBox="0 0 600 600" role="img" aria-label="North Indian Kundali for ${kundaliEscape(c.name)}" xmlns="http://www.w3.org/2000/svg">
+    <style>.k-bg{fill:#11162f;stroke:#e7b94e;stroke-width:3}.k-line{fill:none;stroke:#7884bd;stroke-width:2}.k-sign{fill:#e7b94e;font:700 18px Inter,Arial,sans-serif}.k-house{fill:#9aa4ca;font-size:11px;font-weight:500}.k-planets{fill:#f2f0ff;font:600 14px Inter,Arial,sans-serif}</style>
+    <rect class="k-bg" x="2" y="2" width="596" height="596" rx="8"/>
+    <path class="k-line" d="M2 2L598 598M598 2L2 598M300 2L598 300L300 598L2 300Z"/>
+    ${labels}
+  </svg>`;
+}
+function kundaliProfileHtml(c){
+  const bd=c.birthDetails||{},ni=c.planets.Mo?nakInfo(c.planets.Mo.sign*30+c.planets.Mo.deg):null;
+  const rows=[
+    ["Name",c.name],
+    ["Birth",bd.date&&bd.time?`${bd.date} · ${bd.time}`:(c.birthDate||"Not provided")],
+    ["Place",bd.place||"Imported chart"],
+    ["Timezone",bd.timezone?`${bd.timezone}${bd.offsetLabel?" · "+bd.offsetLabel:""}`:"Not provided"],
+    ["Lagna",`${SIGNS[c.La.sign]} · ${c.La.deg.toFixed(2)}°`],
+    ["Janma Nakshatra",ni?`${ni.n} · Pada ${ni.pada}`:"Not available"]
+  ];
+  return rows.map(([k,v])=>`<div class="kundali-kv"><b>${kundaliEscape(k)}</b>${kundaliEscape(v)}</div>`).join("");
+}
+function printableKundaliHtml(c){
+  const rows=["Su","Mo","Ma","Me","Ju","Ve","Sa","Ra","Ke"].filter(k=>c.planets[k]).map(k=>{
+    const p=c.planets[k],h=houseFromSigns(c.La.sign,p.sign),ni=nakInfo(p.sign*30+p.deg);
+    return `<tr><td>${kundaliEscape(GBYK[k].name)}</td><td>${kundaliEscape(SIGNS[p.sign])} ${p.deg.toFixed(2)}°${p.retro?" ℞":""}</td><td>H${h}</td><td>${kundaliEscape(ni.n)} P${ni.pada}</td></tr>`;
+  }).join("");
+  return `<!doctype html><html><head><meta charset="utf-8"><title>${kundaliEscape(c.name)} · Kundali</title><style>
+  body{font-family:Arial,sans-serif;color:#17141f;margin:24px}.head{text-align:center;margin-bottom:18px}.head h1{margin:0 0 5px;font-size:25px}.meta{color:#555;font-size:13px}
+  .chart{max-width:520px;margin:0 auto 22px}.chart svg{width:100%;height:auto}table{width:100%;border-collapse:collapse;font-size:12px}th,td{border:1px solid #bbb;padding:7px;text-align:left}th{background:#eee}
+  .note{margin-top:14px;color:#555;font-size:10px;line-height:1.5}@media print{body{margin:8mm}.actions{display:none}}</style></head><body>
+  <div class="actions"><button onclick="window.print()">Print / Save PDF</button></div><div class="head"><h1>${kundaliEscape(c.name)} · Janma Kundali</h1><div class="meta">${kundaliEscape((c.birthDetails&&`${c.birthDetails.date} ${c.birthDetails.time} · ${c.birthDetails.place}`)||c.birthDate||"")}</div></div>
+  <div class="chart">${buildNorthIndianKundaliSvg(c)}</div><table><thead><tr><th>Graha</th><th>Rāśi &amp; degree</th><th>Bhava</th><th>Nakshatra</th></tr></thead><tbody>${rows}</tbody></table>
+  <div class="note">Lahiri sidereal zodiac · whole-sign houses · mean lunar nodes. Generated locally by Jyotish Atlas using Astronomy Engine 2.1.19. For education; verify cusp-sensitive placements with professional software.</div>
+  <script>window.addEventListener("load",()=>setTimeout(()=>window.print(),250));<\/script></body></html>`;
+}
+function renderKundaliPanel(c){
+  const panel=document.getElementById("kundaliPanel");if(!panel)return;
+  document.getElementById("kundaliSvg").innerHTML=buildNorthIndianKundaliSvg(c);
+  document.getElementById("kundaliProfile").innerHTML=kundaliProfileHtml(c);
+  const bd=c.birthDetails||{};
+  document.getElementById("kundaliSummary").textContent=bd.place?`${c.name} · ${bd.place} · Lahiri sidereal`:`${c.name} · Lahiri sidereal`;
+  document.getElementById("downloadKundaliSvg").onclick=()=>{
+    const blob=new Blob([buildNorthIndianKundaliSvg(c)],{type:"image/svg+xml;charset=utf-8"});
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`${String(c.name||"kundali").replace(/[^\w-]+/g,"-")}-kundali.svg`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  };
+  document.getElementById("printKundali").onclick=()=>{
+    const w=window.open("","_blank");
+    if(!w){JA.toast&&JA.toast("Allow pop-ups to print this Kundali","warn");return;}
+    w.opener=null;
+    w.document.open();w.document.write(printableKundaliHtml(c));w.document.close();
+  };
 }
 // Which Mahā/Antar-daśā is running at a millisecond timestamp.
 function dashaAt(dashas,ms){
@@ -5883,6 +6061,38 @@ function mooltrikonaHouse(k,La){
   return houseFromSigns(La,m.s);
 }
 
+// ===== Panchadha Maitri — 5-fold compound friendship (BPHS Ch.6) =====
+// FRIEND{} above is naisargika (natural/permanent) friendship — a fixed table independent of
+// any chart. Classical practice also reads tatkalika (temporal) friendship: planets sitting in
+// the 2nd/3rd/4th/10th/11th/12th sign FROM a given planet, in THIS chart, are its temporal
+// friends; the rest (same sign, 5/6/7/8/9th) are temporal enemies. The two combine into 5
+// grades (great friend → great enemy), and it is the COMPOUND grade, not the natural one alone,
+// that BPHS uses to judge a planet's true relationship to a sign-lord or to another dasha lord.
+// dignityOf() intentionally keeps using natural-only friendship (documented in the README's
+// "Accuracy caveats" — it backs ~80 static reference/glossary panels app-wide where a
+// chart-independent read is expected). Here in the Dasha Prediction Engine, where every score is
+// already chart-specific, we compute the real compound grade and use it as a refinement.
+function temporalRelation(a,b,c){
+  const pa=c.planets[a],pb=c.planets[b]; if(!pa||!pb) return null;
+  const d=houseFromSigns(pa.sign,pb.sign); // sign-distance 1..12 counted from a to b
+  return [2,3,4,10,11,12].includes(d)?'friend':'enemy';
+}
+const PANCHADHA_GRADE={
+  'friend|friend':  {tier:'greatFriend',score: 1.5,label:'Adhi Mitra · great friend'},
+  'friend|enemy':   {tier:'neutral',    score: 0,  label:'Sama · neutral (natural friend, temporal enemy)'},
+  'neutral|friend': {tier:'friend',     score: 1,  label:'Mitra · friend'},
+  'neutral|enemy':  {tier:'enemy',      score:-1,  label:'Shatru · enemy'},
+  'enemy|friend':   {tier:'neutral',    score: 0,  label:'Sama · neutral (natural enemy, temporal friend)'},
+  'enemy|enemy':    {tier:'greatEnemy', score:-1.5,label:'Adhi Shatru · great enemy'}
+};
+function compoundRelation(a,b,c){
+  if(!a||!b||a===b||a==='Ra'||a==='Ke') return null;
+  const nat=FRIEND[a]; if(!nat) return null;
+  const natRel=nat.f.includes(b)?'friend':nat.e.includes(b)?'enemy':'neutral';
+  const temp=temporalRelation(a,b,c); if(!temp) return null;
+  return PANCHADHA_GRADE[`${natRel}|${temp}`]||null;
+}
+
 // Layer 1: natal foundation score for planet k
 function dpLayer1(k,c,La){
   const p=c.planets[k]; if(!p) return null;
@@ -5911,6 +6121,17 @@ function dpLayer1(k,c,La){
   const d9Mod=d9.score>=1.5?0.5:d9.score>=1?0.25:d9.score<=-2?(nb?0:-0.5):d9.score<=-1?-0.25:0;
   const combustMod=combust?-0.75:0;
   const dispMod=dispDig?(dispDig.score>=1.5?0.25:dispDig.score<=-2?-0.25:0):0;
+
+  // Panchadha Maitri refinement — when the planet sits in a friend's/enemy's/neutral sign
+  // (d1.score is 1, -1 or 0; exaltation/debilitation/own-sign already dominate and skip this),
+  // recheck the sign-lord relationship using the COMPOUND (natural + chart-specific temporal)
+  // grade instead of the natural-only table dignityOf() used. Half-weighted so it sharpens the
+  // read without overriding the base dignity call.
+  let compoundMod=0,compoundRel=null;
+  if(k!=='Ra'&&k!=='Ke'&&dispK&&dispK!==k&&Math.abs(d1.score)<=1){
+    compoundRel=compoundRelation(k,dispK,c);
+    if(compoundRel) compoundMod=(compoundRel.score-d1.score)*0.5;
+  }
 
   // Ishta/Kashta phala — auspicious vs distressing delivery (BPHS Shadbala). A planet can be
   // low on total Shadbala yet high on Ishta (gentle, benefic results) — captures "weak but pleasant".
@@ -5945,7 +6166,7 @@ function dpLayer1(k,c,La){
   // 'dead' (Mṛta) or 'infant' (Bāla) by degree cannot deliver no matter how dignified — this
   // is the layer an astrologer reads when a 9th-lord AK at 28° still feels "flat". Kumāra
   // (the commonest stage) ≈ neutral so the overall distribution isn't shifted.
-  const base=digScore+d9Mod+combustMod+dispMod+aspMod*0.4+ishtaMod+nodeMod+akMod+retroMod;
+  const base=digScore+d9Mod+combustMod+dispMod+aspMod*0.4+ishtaMod+nodeMod+akMod+retroMod+compoundMod;
   const AV_MULT={'Yuvā':1.1,'Kumāra':1.0,'Vṛddha':0.8,'Bāla':0.7,'Mṛta':0.35}; // Mṛta deepened 0.45→0.35
   // Jāgradādi (wakefulness) now MODULATES delivery alongside Bālādi — previously computed for
   // display only. An asleep (Suṣupti) planet (e.g. a benefic in an enemy's sign) cannot deliver
@@ -5967,7 +6188,7 @@ function dpLayer1(k,c,La){
 
   return{
     k,p,d1,d9,d9s,vg,mool,nb,combust,retro,
-    digScore,d9Mod,combustMod,dispMod,aspMod,ishtaMod,nodeMod,nodeNote,akMod,retroMod,avMult,grahanMod,nodeUpaMod,
+    digScore,d9Mod,combustMod,dispMod,aspMod,ishtaMod,nodeMod,nodeNote,akMod,retroMod,compoundMod,compoundRel,avMult,grahanMod,nodeUpaMod,
     score:base+grahanMod+nodeUpaMod,
     dispK,dispDig,house:hk
   };
@@ -6237,8 +6458,12 @@ function dpNakBond(mahaK,antarK,c){
 function dpRelation(mahaK,antarK,c){
   const fr=FRIEND[mahaK]||{f:[],e:[],n:[]};
   const nat=fr.f.includes(antarK)?'friend':fr.e.includes(antarK)?'enemy':'neutral';
+  // Compound (Panchadha) grade between the two dasha lords, using their actual chart placement —
+  // more precise than the natural-only table for deciding whether a 2-12/6-8 axis is genuinely
+  // the "most volatile" reading or is tempered/sharpened by how this specific chart sits.
+  const cr=compoundRelation(mahaK,antarK,c);
   const mp=c.planets[mahaK], ap=c.planets[antarK];
-  if(!mp||!ap) return{nat,hFrMaha:null,relScore:0,relVerdict:'—',relCat:'neutral',volatile:false};
+  if(!mp||!ap) return{nat,cr,hFrMaha:null,relScore:0,relVerdict:'—',relCat:'neutral',volatile:false};
   const h=houseFromSigns(mp.sign,ap.sign);
   let relScore,relVerdict,relCat,volatile=false;
   if(h===1||h===7){
@@ -6256,16 +6481,22 @@ function dpRelation(mahaK,antarK,c){
   } else if(h===2||h===12){
     relScore=-1;relCat='challenging';
     relVerdict=`H${h} — Dvirdwadash (2-12): loss, expense and transition relative to MD agenda`;
-    if(nat==='enemy'){volatile=true;relScore=-1.5;}
+    if(cr&&cr.tier==='greatEnemy'){volatile=true;relScore=-1.5;}
   } else if(h===6||h===8){
     relScore=-1.5;relCat='disruptive';
     relVerdict=`H${h} — Shashtashtaka (6-8): conflict and upheaval; even benefics cause friction here`;
-    if(nat==='enemy'){volatile=true;relScore=-2;}
+    if(cr&&cr.tier==='greatEnemy'){volatile=true;relScore=-2;}
   } else {
     relScore=0;relCat='neutral';
     relVerdict=`H${h} from MD lord — neutral distance`;
   }
-  return{nat,hFrMaha:h,difficult:[6,8,12].includes(h),supportive:[2,5,9,11].includes(h),
+  // A chart-specific great friendship softens an otherwise-difficult axis; a great enmity
+  // sharpens an otherwise-fine one. Kept small — the house-axis read still leads.
+  if(cr){
+    if(cr.tier==='greatFriend'&&relScore<0) relScore+=0.5;
+    else if(cr.tier==='greatEnemy'&&relScore>0) relScore-=0.5;
+  }
+  return{nat,cr,hFrMaha:h,difficult:[6,8,12].includes(h),supportive:[2,5,9,11].includes(h),
          relScore,relVerdict,relCat,volatile};
 }
 
@@ -6376,27 +6607,47 @@ function dpBuildAntarOpts(maha,defIdx){
   }).join('');
 }
 
+// Pratyantardasha (3rd Vimshottari tier) selector options — narrows the multi-year/month
+// antardasha window down to its several-week/month sub-windows for precise timing.
+// Falls back gracefully for dashas computed by an older app version / saved chart that
+// predates pratyantardasha data (no .pratyantars array on the antardasha object).
+function dpBuildPratyantarOpts(antar,defIdx){
+  if(!antar||!antar.pratyantars||!antar.pratyantars.length) return '<option value="0">Whole antardasha</option>';
+  const now=Date.now();
+  return antar.pratyantars.map((pd,i)=>{
+    const cur=pd.start<=now&&(pd.end==null||pd.end>=now);
+    return `<option value="${i}"${i===defIdx?' selected':''}>${GBYK[pd.lord].name}${cur?' ◉ now':''} · ${_fD(pd.start)}–${_fD(pd.end)}</option>`;
+  }).join('');
+}
+
 function dpAnalyze(){
   const c=_dpC,La=_dpLa,allBAV=_dpBAV; if(!c) return;
-  const mSel=document.getElementById('dpMahaSelect'), aSel=document.getElementById('dpAntarSelect');
+  const mSel=document.getElementById('dpMahaSelect'), aSel=document.getElementById('dpAntarSelect'), pSel=document.getElementById('dpPratyantarSelect');
   if(!mSel||!aSel) return;
   const mahaIdx=parseInt(mSel.value)||0;
   const antarIdx=parseInt(aSel.value)||0;
   const mahas=c.dashas.mahas;
   const selMaha=mahas[mahaIdx]; if(!selMaha) return;
   const selAntar=(selMaha.antars||[])[antarIdx]||null;
+  const selPraty=(pSel&&selAntar&&selAntar.pratyantars)?(selAntar.pratyantars[parseInt(pSel.value)||0]||null):null;
   const mahaK=selMaha.lord, antarK=selAntar?selAntar.lord:mahaK;
+  const pratyK=selPraty?selPraty.lord:antarK;
 
-  // Transit date: today for current period, midpoint for past/future
+  // Transit date: today for current period, midpoint for past/future. Snap to the selected
+  // Pratyantardasha (weeks/months) when available instead of the whole Antardasha (often
+  // years) — a single snapshot at the dead-center of a multi-year window can land on almost
+  // any phase of the Jupiter/Saturn transit cycle; anchoring to the narrower sub-period the
+  // user actually selected makes the transit read meaningfully more precise.
   const now=Date.now();
+  const snapSpan=selPraty||selAntar;
   let transitDate=new Date(), transitNote='Transit snapshot: today';
-  if(selAntar&&selAntar.start&&selAntar.end){
-    if(selAntar.end<now){
-      transitDate=new Date((selAntar.start+selAntar.end)/2);
-      transitNote=`Transit snapshot: ${_fD(transitDate.getTime())} (mid-period — historical view)`;
-    } else if(selAntar.start>now){
-      transitDate=new Date((selAntar.start+selAntar.end)/2);
-      transitNote=`Transit snapshot: ${_fD(transitDate.getTime())} (mid-period estimate — actual transits will vary)`;
+  if(snapSpan&&snapSpan.start&&snapSpan.end){
+    if(snapSpan.end<now){
+      transitDate=new Date((snapSpan.start+snapSpan.end)/2);
+      transitNote=`Transit snapshot: ${_fD(transitDate.getTime())} (mid-${selPraty?'pratyantardasha':'period'} — historical view)`;
+    } else if(snapSpan.start>now){
+      transitDate=new Date((snapSpan.start+snapSpan.end)/2);
+      transitNote=`Transit snapshot: ${_fD(transitDate.getTime())} (mid-${selPraty?'pratyantardasha':'period'} estimate — actual transits will vary)`;
     }
   }
 
@@ -6407,6 +6658,10 @@ function dpAnalyze(){
 
   const l1M=dpLayer1(mahaK,c,La), l1A=dpLayer1(antarK,c,La);
   const l2M=dpLayer2(mahaK,c,La), l2A=dpLayer2(antarK,c,La);
+  // Pratyantardasha lord (3rd Vimshottari tier) — only distinct from the AD lord after the
+  // period's own first sub-window (the 1st PD of every antardasha is the antardasha lord itself).
+  const l1P=(pratyK!==antarK)?dpLayer1(pratyK,c,La):null;
+  const l2P=(pratyK!==antarK)?dpLayer2(pratyK,c,La):null;
   const l3=dpLayer3(c,La,allBAV,gochara);
   const l4=dpLayer4(yogas,mahaK,antarK);
   const themes=dpThemeSpace(mahaK,antarK,c,La);
@@ -6421,8 +6676,12 @@ function dpAnalyze(){
   if(antarK==='Ke') wilds.push({text:'Ketu Antardasha: withdrawal, detachment, spiritual pull on the Mahadasha themes; loss that enables liberation'});
   const hasVR=yogas.some(y=>y.cat==='Viparita Raj Yoga'&&y.ps&&(y.ps.includes(mahaK)||y.ps.includes(antarK)));
   if(hasVR&&l3.score<0) wilds.push({text:'Viparita Raj Yoga present + difficult transits = classic trigger condition; hardship may catalyze the rise'});
-  // Volatile rule: natural enemies in Shashtashtaka or Dvirdwadash = most disruptive sub-period
-  if(rel.volatile) wilds.push({text:`${GBYK[mahaK].name} and ${GBYK[antarK].name} are natural enemies in a ${[6,8].includes(rel.hFrMaha)?'Shashtashtaka (6-8)':'Dvirdwadash (2-12)'} relationship — most volatile sub-period of the entire dasha; competing agendas amplify disruption`});
+  // Volatile rule: compound (pañcadhā — natural AND chart-specific temporal) great-enemies in
+  // Shashtashtaka or Dvirdwadash = most disruptive sub-period. Using the compound grade rather
+  // than natural friendship alone avoids over-flagging pairs whose enmity is actually softened
+  // by where they sit in THIS chart.
+  if(rel.volatile) wilds.push({text:`${GBYK[mahaK].name} and ${GBYK[antarK].name} are Adhi Shatru (great enemies — natural AND chart-placement enmity) in a ${[6,8].includes(rel.hFrMaha)?'Shashtashtaka (6-8)':'Dvirdwadash (2-12)'} relationship — most volatile sub-period of the entire dasha; competing agendas amplify disruption`});
+  if(l1P&&l1P.retro&&pratyK!==antarK) wilds.push({text:`${GBYK[pratyK].name} (Pratyantardasha lord) is retrograde — this sub-window's events may run non-linearly`});
   // Jupiter protection: transit Jupiter aspecting or occupying houses ruled by the AD lord
   if(tRes.pos.Ju&&l2A.fn.houses&&l2A.fn.houses.length){
     const juTrH=houseFromSigns(La,tRes.pos.Ju.sign);
@@ -6441,6 +6700,13 @@ function dpAnalyze(){
   // practice — the sub-period lord rules the period's flavour (was reversed: 0.6 MD / 0.4 AD).
   const natalScore=_avNat(l1M,l2M)*0.45+(l1A?_avNat(l1A,l2A):0)*0.55;
   const nakScore=nakBond?nakBond.score:0;
+  // Pratyantardasha lord — light-touch 3rd-tier contribution (l1P/l2P computed above, near
+  // l1M/l1A). Only non-zero when the PD lord differs from the AD lord (the 1st PD of every
+  // antardasha IS the antardasha lord itself, so its natal weight is already fully counted
+  // above; adding it again would double-count). Weighted well below MD/AD so it refines the
+  // finer window without swinging the verdict tier.
+  const pratyScore=l1P?_avNat(l1P,l2P)*0.25:0;
+  const pratyDamp=(l1P&&l1P.d1.score===-2&&!l1P.nb)?-0.4:0;
   // Aspects (graha drishti, benefic/malefic) on each dasha lord — read BEFORE transit.
   const aspM=dpAspectsOn(c,La,c.planets[mahaK]?c.planets[mahaK].sign:La);
   const aspA=(antarK!==mahaK&&c.planets[antarK])?dpAspectsOn(c,La,c.planets[antarK].sign):null;
@@ -6448,7 +6714,7 @@ function dpAnalyze(){
   const topicKey=(document.getElementById('dpTopicSelect')||{}).value||'general';
   const topicA=dpTopicAnalysis(c,La,topicKey,mahaK,antarK);
 
-  const total=natalScore+l3.score+l4.score+antarDamp+rel.relScore+nakScore+(topicA?topicA.score:0);
+  const total=natalScore+l3.score+l4.score+antarDamp+rel.relScore+nakScore+pratyScore+pratyDamp+(topicA?topicA.score:0);
   const verdict=dpVerdict(total,hardCap);
 
   function lordCard(l1,l2,role){
@@ -6465,6 +6731,10 @@ function dpAnalyze(){
     if(l1.dispDig&&l1.dispK!==k){
       const dCls=l1.dispDig.score>=1.5?'pos1':l1.dispDig.score<=-2?'neg1':'neu';
       rows.push(`<div class="dp-factor"><span class="dp-flabel">Dispositor</span><span class="dp-fval ${dCls}">${GBYK[l1.dispK].name}: ${l1.dispDig.full.split('·')[0].trim()}</span></div>`);
+    }
+    if(l1.compoundRel){
+      const cCls=l1.compoundRel.score>0?'pos1':l1.compoundRel.score<0?'neg1':'neu';
+      rows.push(`<div class="dp-factor"><span class="dp-flabel">Compound friendship</span><span class="dp-fval ${cCls}">${l1.compoundRel.label}</span></div>`);
     }
     if(l1.p.ishta!=null&&l1.p.kashta!=null){
       const iCls=l1.ishtaMod>0.1?'pos1':l1.ishtaMod<-0.1?'neg1':'neu';
@@ -6517,7 +6787,9 @@ function dpAnalyze(){
   const relCls=rel.relCat==='excellent'?'pos2':rel.relCat==='favorable'||rel.relCat==='productive'||rel.relCat==='harmonious'?'pos1':rel.relCat==='challenging'?'neg1':rel.relCat==='disruptive'?'neg2':'neu';
   const natCls=rel.nat==='friend'?'pos1':rel.nat==='enemy'?'neg1':'neu';
   const relText=rel.relVerdict;
-  const relH=rel.hFrMaha?` · <span class="dp-fval ${natCls}" style="display:inline-block">${rel.nat==='friend'?'Natural friends':rel.nat==='enemy'?'Natural enemies':'Neutral'}</span>`:'';
+  const crLbl={greatFriend:'Adhi Mitra · great friend',friend:'Mitra · friend',neutral:'Sama · neutral',enemy:'Shatru · enemy',greatEnemy:'Adhi Shatru · great enemy'};
+  const crCls={greatFriend:'pos2',friend:'pos1',neutral:'neu',enemy:'neg1',greatEnemy:'neg2'};
+  const relH=rel.hFrMaha?` · <span class="dp-fval ${natCls}" style="display:inline-block">${rel.nat==='friend'?'Natural friends':rel.nat==='enemy'?'Natural enemies':'Neutral'}</span>${rel.cr?` · <span class="dp-fval ${crCls[rel.cr.tier]}" style="display:inline-block">Compound: ${crLbl[rel.cr.tier]}</span>`:''}`:'';
 
   const peakHtml=`<div class="dp-peak ${l3.doubleTransit?'peak-on':'peak-off'}">
     ${l3.doubleTransit
@@ -6586,6 +6858,7 @@ function dpAnalyze(){
     pushF(`${tag} · D-1 ${l1.mool?'mūlatrikoṇa':l1.d1.full.split('·')[0].trim().toLowerCase()}`, l1.digScore);
     pushF(`${tag} · D-9 navāṁśa`, l1.d9Mod);
     pushF(`${tag} · dispositor`, l1.dispMod);
+    pushF(`${tag} · pañcadhā maitri (compound friendship)`, l1.compoundMod);
     pushF(`${tag} · Iṣṭa vs Kaṣṭa phala`, l1.ishtaMod);
     pushF(`${tag} · ${(k==='Ra'||k==='Ke')?'delivers via dispositor/conjunction':'delivery'}`, l1.nodeMod);
     pushF(`${tag} · node in upachaya`, l1.nodeUpaMod);
@@ -6608,6 +6881,8 @@ function dpAnalyze(){
   if(l4.score) pushF('Yogas in play', l4.score);
   if(topicA) pushF(`Focus · ${topicA.t.label}`, topicA.score);
   if(antarDamp) pushF('AD lord debilitated (no Neecha Bhanga)', antarDamp);
+  if(pratyScore) pushF(`Pratyantardasha lord ${NM(pratyK)} · natal`, pratyScore);
+  if(pratyDamp) pushF('PD lord debilitated (no Neecha Bhanga)', pratyDamp);
 
   const _wUp=whyParts.filter(x=>x.val>0).sort((a,b)=>b.val-a.val).slice(0,5);
   const _wDn=whyParts.filter(x=>x.val<0).sort((a,b)=>a.val-b.val).slice(0,5);
@@ -6625,8 +6900,8 @@ function dpAnalyze(){
   <div class="dp-hero">
     <div class="dp-vbadge ${verdict.cls}"><div class="dp-vtier">${verdict.label}</div><div class="dp-vscore">${verdict.sub}</div></div>
     <div class="dp-hinfo">
-      <div class="dp-period-title">${GBYK[mahaK].gl} ${GBYK[mahaK].name} / ${GBYK[antarK].gl} ${GBYK[antarK].name} Antardasha</div>
-      <div class="dp-period-sub">${selAntar?`${_fD(selAntar.start)} — ${_fD(selAntar.end)}`:''}</div>
+      <div class="dp-period-title">${GBYK[mahaK].gl} ${GBYK[mahaK].name} / ${GBYK[antarK].gl} ${GBYK[antarK].name}${selPraty?` / ${GBYK[pratyK].gl} ${GBYK[pratyK].name}`:''} ${selPraty?'Pratyantardasha':'Antardasha'}</div>
+      <div class="dp-period-sub">${selPraty?`${_fD(selPraty.start)} — ${_fD(selPraty.end)}`:selAntar?`${_fD(selAntar.start)} — ${_fD(selAntar.end)}`:''}</div>
       <div class="dp-summary">${sumParts}</div>
     </div>
   </div>
@@ -6669,15 +6944,22 @@ function renderDashaPrediction(c,La,allBAV){
 
   const mahas=c.dashas.mahas, now=Date.now();
 
-  // Find default period (current maha + antar)
-  let defMahaIdx=0, defAntarIdx=0;
+  // Find default period (current maha + antar + pratyantar)
+  let defMahaIdx=0, defAntarIdx=0, defPratyIdx=0;
   for(let i=0;i<mahas.length;i++){
     const md=mahas[i];
     if(md.start<=now&&(md.end==null||md.end>=now)){
       defMahaIdx=i;
       for(let j=0;j<(md.antars||[]).length;j++){
         const ad=md.antars[j];
-        if(ad.start<=now&&(ad.end==null||ad.end>=now)){defAntarIdx=j;break;}
+        if(ad.start<=now&&(ad.end==null||ad.end>=now)){
+          defAntarIdx=j;
+          for(let p=0;p<(ad.pratyantars||[]).length;p++){
+            const pd=ad.pratyantars[p];
+            if(pd.start<=now&&(pd.end==null||pd.end>=now)){defPratyIdx=p;break;}
+          }
+          break;
+        }
       }
       break;
     }
@@ -6694,6 +6976,7 @@ function renderDashaPrediction(c,La,allBAV){
   <div class="dp-selector">
     <div class="dp-sel-group"><div class="dp-sel-label">Mahadasha</div><select id="dpMahaSelect">${mahaOpts}</select></div>
     <div class="dp-sel-group"><div class="dp-sel-label">Antardasha</div><select id="dpAntarSelect">${dpBuildAntarOpts(mahas[defMahaIdx],defAntarIdx)}</select></div>
+    <div class="dp-sel-group"><div class="dp-sel-label">Pratyantardasha</div><select id="dpPratyantarSelect">${dpBuildPratyantarOpts((mahas[defMahaIdx].antars||[])[defAntarIdx],defPratyIdx)}</select></div>
     <div class="dp-sel-group"><div class="dp-sel-label">Focus</div><select id="dpTopicSelect">${Object.entries(DP_TOPICS).map(([k,t])=>`<option value="${k}">${t.label}</option>`).join('')}</select></div>
   </div>
   <div class="dp-transit-note" id="dpTransitNote"></div>
@@ -6703,9 +6986,16 @@ function renderDashaPrediction(c,La,allBAV){
   document.getElementById('dpMahaSelect').onchange=function(){
     const mi=parseInt(this.value)||0;
     document.getElementById('dpAntarSelect').innerHTML=dpBuildAntarOpts(mahas[mi],0);
+    document.getElementById('dpPratyantarSelect').innerHTML=dpBuildPratyantarOpts((mahas[mi].antars||[])[0],0);
     dpAnalyze();
   };
-  document.getElementById('dpAntarSelect').onchange=dpAnalyze;
+  document.getElementById('dpAntarSelect').onchange=function(){
+    const mi=parseInt(document.getElementById('dpMahaSelect').value)||0;
+    const ai=parseInt(this.value)||0;
+    document.getElementById('dpPratyantarSelect').innerHTML=dpBuildPratyantarOpts((mahas[mi].antars||[])[ai],0);
+    dpAnalyze();
+  };
+  document.getElementById('dpPratyantarSelect').onchange=dpAnalyze;
   document.getElementById('dpTopicSelect').onchange=dpAnalyze;
   dpAnalyze();
 }
@@ -6831,11 +7121,12 @@ function lpSyncToDPE(c,p){
       if(mahas[i].antars[j]===p.antar){mi=i;ai=j;break;}
     }
   }
-  const mSel=document.getElementById("dpMahaSelect"),aSel=document.getElementById("dpAntarSelect");
+  const mSel=document.getElementById("dpMahaSelect"),aSel=document.getElementById("dpAntarSelect"),pSel=document.getElementById("dpPratyantarSelect");
   if(!mSel||!aSel) return;
   mSel.value=String(mi);
   mSel.dispatchEvent(new Event("change"));
   aSel.value=String(ai);
+  if(pSel) pSel.innerHTML=dpBuildPratyantarOpts((mahas[mi].antars||[])[ai],0);
   dpAnalyze();
   panel.scrollIntoView({behavior:"smooth",block:"start"});
 }
@@ -7184,6 +7475,43 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
     }
     return out;
   }
+
+  function pdfPageToText(items){
+    const lines=[];
+    for(const item of items){
+      if(!item||!item.str||!item.transform) continue;
+      const x=item.transform[4], y=item.transform[5];
+      let line=lines.find(entry=>Math.abs(entry.y-y)<2);
+      if(!line){line={y,items:[]};lines.push(line);}
+      line.items.push({x,str:item.str});
+    }
+    return lines
+      .sort((a,b)=>b.y-a.y)
+      .map(line=>line.items.sort((a,b)=>a.x-b.x).map(item=>item.str).join(" ").trim())
+      .filter(Boolean)
+      .join("\n");
+  }
+
+  async function extractPdfText(file){
+    if(!window.pdfjsLib) throw new Error("The PDF reader could not be loaded.");
+    pdfjsLib.GlobalWorkerOptions.workerSrc=new URL("pdf.worker.min.js",document.baseURI).href;
+    const task=pdfjsLib.getDocument({data:await file.arrayBuffer()});
+    const pdf=await task.promise, pages=[];
+    try{
+      for(let pageNo=1;pageNo<=pdf.numPages;pageNo++){
+        const page=await pdf.getPage(pageNo);
+        const content=await page.getTextContent();
+        pages.push(pdfPageToText(content.items));
+        page.cleanup();
+      }
+    }finally{
+      await pdf.destroy();
+    }
+    const text=pages.join("\n\n").trim();
+    if(!text) throw new Error("No selectable text was found. Scanned PDFs need OCR before they can be imported.");
+    return text;
+  }
+  JA.pdfPageToText=pdfPageToText;
   function load(){ try{return JSON.parse(localStorage.getItem(LS))||[]}catch(e){return[]} }
   function save(a){ localStorage.setItem(LS,JSON.stringify(a)); }
 
@@ -7199,6 +7527,7 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
       t.querySelector(".x").onclick=(e)=>{e.stopPropagation();const nm=charts[i]?.name||"Chart";charts.splice(i,1);if(active>=charts.length)active=charts.length-1;save(charts);draw();JA.onChartsChange&&JA.onChartsChange();JA.toast&&JA.toast(`Removed “${nm}”`,"warn");};
       tabs.appendChild(t);
     });
+    const create=document.createElement("button");create.type="button";create.className="ctab add";create.textContent="✦ Create Kundali";create.onclick=()=>JA.openBirthModal&&JA.openBirthModal(create);tabs.appendChild(create);
     const add=document.createElement("button"); add.type="button"; add.className="ctab add"; add.textContent="＋ Add chart"; add.onclick=()=>openModal(add); tabs.appendChild(add);
   }
   function draw(){
@@ -7206,6 +7535,7 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
     if(active<0||!charts[active]){empty.style.display="flex";empty.style.justifyContent="center";empty.style.alignItems="center";view.style.display="none";return;}
     empty.style.display="none";view.style.display="block";
     const c=charts[active], La=c.La.sign;
+    try{renderKundaliPanel(c);}catch(e){console.error("renderKundaliPanel:",e);}
     // pre-compute BAV so verdict has the natal-house score
     const avPos0={La:c.La.sign};
     for(const k of ["Su","Mo","Ma","Me","Ju","Ve","Sa"]) if(c.planets[k]) avPos0[k]=c.planets[k].sign;
@@ -7357,11 +7687,26 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
     if(e.key==="Escape"&&modal.classList.contains("show"))closeModal();
   });
   document.getElementById("fillDemo").onclick=e=>{e.preventDefault();nameEl.value="Demo chart";textEl.value=DEMO;};
-  document.getElementById("chartFile").onchange=e=>{
+  document.getElementById("chartFile").onchange=async e=>{
     const f=e.target.files[0]; if(!f)return;
-    const rd=new FileReader();
-    rd.onload=()=>{textEl.value=rd.result; if(!nameEl.value.trim())nameEl.value=f.name.replace(/\.[^.]+$/,""); msg.style.color="var(--muted)"; msg.textContent="File loaded — click “Parse & save”."; e.target.value="";};
-    rd.readAsText(f);
+    const isPdf=f.type==="application/pdf"||/\.pdf$/i.test(f.name);
+    const isText=f.type==="text/plain"||/\.txt$/i.test(f.name);
+    msg.style.color="var(--muted)";
+    msg.textContent=isPdf?"Reading PDF…":"Reading text file…";
+    try{
+      if(!isPdf&&!isText) throw new Error("Choose a .txt or .pdf chart file.");
+      textEl.value=isPdf?await extractPdfText(f):await f.text();
+      if(!nameEl.value.trim())nameEl.value=f.name.replace(/\.[^.]+$/,"");
+      msg.textContent=isPdf
+        ?"PDF text loaded — click “Parse & save”."
+        :"File loaded — click “Parse & save”.";
+    }catch(err){
+      textEl.value="";
+      msg.style.color="var(--debil)";
+      msg.textContent=err&&err.message?err.message:"This file could not be read.";
+    }finally{
+      e.target.value="";
+    }
   };
   document.getElementById("addFirst").onclick=e=>{e.preventDefault();openModal(e.currentTarget);};
   document.getElementById("demoFirst").onclick=e=>{e.preventDefault();charts.push({name:"Demo chart",...parse(DEMO)});active=charts.length-1;save(charts);draw();JA.onChartsChange&&JA.onChartsChange();JA.toast&&JA.toast("Demo chart loaded","ok");};
@@ -7397,6 +7742,134 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
     return true;
   };
   draw();
+})();
+
+/* ===== CREATE KUNDALI FROM BIRTH DETAILS ===== */
+(function(){
+  const $=id=>document.getElementById(id);
+  const modal=$("birthModal"),card=modal.querySelector(".card"),msg=$("birthMsg");
+  const fields={name:$("birthName"),gender:$("birthGender"),date:$("birthDate"),time:$("birthTime"),place:$("birthPlace"),lat:$("birthLat"),lon:$("birthLon"),tz:$("birthTimezone")};
+  const results=$("birthPlaceResults"),selected=$("birthPlaceSelected");
+  let trigger=null,lastSearchAt=0;
+
+  function focusables(){return[...card.querySelectorAll('button:not([disabled]),input:not([disabled]),select:not([disabled]),a[href]')];}
+  function openBirthModal(source){
+    trigger=source||document.activeElement;
+    for(const key of ["name","date","time","place","lat","lon","tz"])fields[key].value="";
+    fields.gender.value="";results.innerHTML="";selected.style.display="none";selected.textContent="";msg.textContent="";
+    fields.date.max=new Date().toISOString().slice(0,10);
+    modal.classList.add("show");modal.setAttribute("aria-hidden","false");fields.name.focus();
+  }
+  function closeBirthModal(){
+    modal.classList.remove("show");modal.setAttribute("aria-hidden","true");
+    if(trigger&&typeof trigger.focus==="function")trigger.focus();trigger=null;
+  }
+  JA.openBirthModal=openBirthModal;
+  $("createFirst").onclick=e=>{e.preventDefault();openBirthModal(e.currentTarget);};
+  $("birthCancel").onclick=closeBirthModal;
+  modal.onclick=e=>{if(e.target===modal)closeBirthModal();};
+  card.addEventListener("keydown",e=>{
+    if(e.key!=="Tab")return;const f=focusables();if(!f.length)return;
+    if(e.shiftKey&&document.activeElement===f[0]){e.preventDefault();f[f.length-1].focus();}
+    else if(!e.shiftKey&&document.activeElement===f[f.length-1]){e.preventDefault();f[0].focus();}
+  });
+  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&modal.classList.contains("show"))closeBirthModal();});
+
+  function inferTimezone(){
+    const lat=parseFloat(fields.lat.value),lon=parseFloat(fields.lon.value);
+    if(!Number.isFinite(lat)||!Number.isFinite(lon)||!window.tzlookup)return;
+    try{fields.tz.value=tzlookup(lat,lon);}catch(e){}
+  }
+  fields.lat.addEventListener("change",()=>{if(!fields.tz.value.trim())inferTimezone();});
+  fields.lon.addEventListener("change",()=>{if(!fields.tz.value.trim())inferTimezone();});
+
+  function choosePlace(item){
+    fields.place.value=item.display_name;
+    fields.lat.value=(+item.lat).toFixed(6);fields.lon.value=(+item.lon).toFixed(6);
+    inferTimezone();results.innerHTML="";
+    selected.style.display="block";
+    selected.innerHTML=`<b>${kundaliEscape(item.display_name)}</b><br>${fields.lat.value}°, ${fields.lon.value}° · ${kundaliEscape(fields.tz.value||"timezone needs manual entry")}`;
+  }
+  async function searchPlace(){
+    const q=fields.place.value.trim();
+    if(q.length<2){msg.style.color="var(--debil)";msg.textContent="Enter a city and country to search.";return;}
+    const btn=$("birthPlaceSearch"),previous=btn.textContent;btn.disabled=true;btn.textContent="Searching…";
+    msg.style.color="var(--muted)";msg.textContent="Searching OpenStreetMap place data…";results.innerHTML="";selected.style.display="none";
+    try{
+      const elapsed=Date.now()-lastSearchAt;if(elapsed<1100)await new Promise(resolve=>setTimeout(resolve,1100-elapsed));
+      lastSearchAt=Date.now();
+      const url=`https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=5&q=${encodeURIComponent(q)}`;
+      const response=await fetch(url,{headers:{"Accept":"application/json","Accept-Language":"en"}});
+      if(!response.ok)throw new Error("Place search is temporarily unavailable.");
+      const list=await response.json();
+      if(!list.length)throw new Error("No matching place found. Try “city, state, country” or enter coordinates manually.");
+      for(const item of list){
+        const b=document.createElement("button");b.type="button";b.className="birth-result";b.textContent=item.display_name;b.onclick=()=>choosePlace(item);results.appendChild(b);
+      }
+      msg.textContent="Choose the correct birthplace from the results.";
+    }catch(err){
+      msg.style.color="var(--debil)";msg.textContent=(err&&err.message)||"Place search failed. Enter coordinates and timezone manually.";
+    }finally{btn.disabled=false;btn.textContent=previous;}
+  }
+  $("birthPlaceSearch").onclick=searchPlace;
+  fields.place.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();searchPlace();}});
+
+  function localPartsAt(ms,timezone){
+    const fmt=new Intl.DateTimeFormat("en-CA",{timeZone:timezone,year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hourCycle:"h23"});
+    const out={};for(const p of fmt.formatToParts(new Date(ms)))if(p.type!=="literal")out[p.type]=+p.value;
+    return out;
+  }
+  function localBirthToUtc(dateText,timeText,timezone){
+    const [year,month,day]=dateText.split("-").map(Number),[hour,minute]=timeText.split(":").map(Number);
+    const target=Date.UTC(year,month-1,day,hour,minute,0);
+    let guess=target;
+    for(let i=0;i<5;i++){
+      const p=localPartsAt(guess,timezone);
+      const shown=Date.UTC(p.year,p.month-1,p.day,p.hour,p.minute,p.second);
+      const delta=target-shown;guess+=delta;if(Math.abs(delta)<1000)break;
+    }
+    const check=localPartsAt(guess,timezone);
+    if(check.year!==year||check.month!==month||check.day!==day||check.hour!==hour||check.minute!==minute){
+      throw new Error("That local time does not exist in the selected timezone (usually a daylight-saving transition). Check the birth time.");
+    }
+    return {date:new Date(guess),offsetHours:(target-guess)/3600000};
+  }
+  JA.localBirthToUtc=localBirthToUtc;
+  function normalizedTimezone(value){
+    let timezone=value.trim();
+    const half=timezone.length/2;
+    if(Number.isInteger(half)&&timezone.slice(0,half)===timezone.slice(half))timezone=timezone.slice(0,half);
+    return timezone;
+  }
+  $("birthCreate").onclick=()=>{
+    const btn=$("birthCreate"),previous=btn.textContent;btn.disabled=true;btn.textContent="Calculating…";msg.textContent="";
+    setTimeout(()=>{
+      try{
+        const name=fields.name.value.trim(),dateText=fields.date.value,timeText=fields.time.value,place=fields.place.value.trim();
+        const lat=parseFloat(fields.lat.value),lon=parseFloat(fields.lon.value),timezone=normalizedTimezone(fields.tz.value);
+        fields.tz.value=timezone;
+        if(!name)throw new Error("Enter the person's name.");
+        if(!dateText||!timeText)throw new Error("Enter both date and exact time of birth.");
+        if(!place)throw new Error("Enter and confirm the place of birth.");
+        if(!Number.isFinite(lat)||lat<-90||lat>90||!Number.isFinite(lon)||lon<-180||lon>180)throw new Error("Select a place or enter valid latitude and longitude.");
+        if(!timezone)throw new Error("Select a place or enter an IANA timezone such as Asia/Kolkata.");
+        const moment=localBirthToUtc(dateText,timeText,timezone);
+        const calc=computeChartForMoment(moment.date,lat,lon);
+        const offsetLabel=`UTC${moment.offsetHours>=0?"+":""}${Number(moment.offsetHours.toFixed(2))}`;
+        const near=Object.entries(calc.planets).filter(([,p])=>p.near).map(([k])=>GBYK[k].name);
+        const chart={
+          name,La:calc.La,planets:calc.planets,birthDate:moment.date.toISOString(),
+          dashas:computeVimDashas(calc.planets.Mo,moment.date.toISOString()),
+          birthDetails:{date:dateText,time:timeText,place,lat,lon,timezone,offsetLabel,gender:fields.gender.value||null,utc:moment.date.toISOString(),ayanamsa:"Lahiri",node:"mean",houseSystem:"whole-sign",engine:window.Astronomy?"Astronomy Engine 2.1.19":"Jyotish Atlas fallback"}
+        };
+        if(!JA.importChart(chart))throw new Error("The calculated chart could not be saved.");
+        closeBirthModal();document.getElementById("charts").scrollIntoView({behavior:"smooth"});
+        JA.toast&&JA.toast(near.length?`Kundali saved · verify cusp-sensitive ${near.join(", ")}`:`Kundali saved for ${name}`,"ok");
+      }catch(err){
+        msg.style.color="var(--debil)";msg.textContent=(err&&err.message)||"The Kundali could not be calculated.";
+      }finally{btn.disabled=false;btn.textContent=previous;}
+    },0);
+  };
 })();
 
 /* ===== SYNTHESIZER — use-my-chart bar (runs after My Charts, so JA.getActiveChart is ready) ===== */
@@ -8495,10 +8968,28 @@ function computeVimDashas(mo,birthDateStr){
     const si=DASHA_SEQ_K.indexOf(md.lord);
     for(let i=0;i<9;i++){
       const al=DASHA_SEQ_K[(si+i)%9],ay=md.fullYears*VIMY[al]/120,ae=addY(ac,ay);
-      md.antars.push({lord:al,start:ac,end:ae});ac=ae;
+      const antar={lord:al,start:ac,end:ae};
+      // Pratyantardasha (3rd Vimshottari tier) — subdivides the antardasha the same way the
+      // antardasha subdivides the mahadasha. This is the classical timing tier BPHS/most
+      // practitioners use to pin an event to a several-week/month window rather than the
+      // multi-year antardasha alone; without it the engine can only speak in year-scale terms.
+      antar.pratyantars=buildPratyantars(al,ac,ae,addY);
+      md.antars.push(antar);ac=ae;
     }
   }
   return{mahas};
+}
+function buildPratyantars(antarLord,antarStart,antarEnd,addY){
+  const MS=365.25*86400000;
+  const antarYears=(antarEnd-antarStart)/MS;
+  const si=DASHA_SEQ_K.indexOf(antarLord);
+  const pratyantars=[]; let pc=antarStart;
+  for(let i=0;i<9;i++){
+    const pl=DASHA_SEQ_K[(si+i)%9], py=antarYears*VIMY[pl]/120, pe=addY(pc,py);
+    pratyantars.push({lord:pl,start:pc,end:pe});
+    pc=pe;
+  }
+  return pratyantars;
 }
 
 /* ===== LIFE OUTLOOK ===== */
@@ -10590,11 +11081,16 @@ function runSelfTest(){
     ok("moment chart: Lagna sign 0..11", c.La.sign>=0&&c.La.sign<12);
     ok("moment chart: 9 planets", Object.keys(c.planets).length===9);
     ok("moment chart: nodes retrograde", c.planets.Ra.retro===true&&c.planets.Ke.retro===true);
+    ok("Astronomy Engine: seven classical longitudes finite", ["Su","Mo","Ma","Me","Ju","Ve","Sa"].every(k=>Number.isFinite(astronomyTropicalLongitude(k,new Date(Date.UTC(2020,0,1,6,0,0))))));
+    const svg=buildNorthIndianKundaliSvg({name:"Test",La:c.La,planets:c.planets});
+    ok("Kundali SVG: all 12 houses rendered", (svg.match(/class="k-house"/g)||[]).length===12);
   })();
-  // Cusp-margin safety band — widens with distance from J2000, capped at 1.5°.
-  ok("cuspMargin at J2000 ≈ 0.2°", Math.abs(cuspMarginDeg(2451545.0)-0.2)<1e-9);
-  ok("cuspMargin 50y out ≈ 0.85°", Math.abs(cuspMarginDeg(2451545.0+50*365.25)-0.85)<0.01);
-  ok("cuspMargin caps at 1.5°", cuspMarginDeg(2451545.0+500*365.25)===1.5);
+  (function(){
+    const converted=JA.localBirthToUtc("1990-05-15","14:30","Asia/Kolkata");
+    ok("birth timezone: Asia/Kolkata local time converts to UTC", converted.date.toISOString()==="1990-05-15T09:00:00.000Z"&&converted.offsetHours===5.5);
+  })();
+  // Astronomy Engine uses a tight fixed cusp guard; the legacy fallback remains wider.
+  ok("cuspMargin with Astronomy Engine = 0.08°", Math.abs(cuspMarginDeg(2451545.0)-0.08)<1e-9);
   ok("nearCusp flags both edges", nearCusp(0.5,1)===true && nearCusp(29.7,1)===true && nearCusp(15,1)===false);
   // Journal topic-fit — mechanical house/lord/varga check used by the Life Journal.
   (function(){
