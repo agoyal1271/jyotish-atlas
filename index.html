@@ -1219,6 +1219,20 @@ section{border-bottom-color:rgba(60,80,180,0.14)!important}
 .bm-asplegend span{display:inline-flex;align-items:center;gap:5px}
 .bm-asplegend i{width:18px;height:0;border-top-width:2px;border-top-style:solid;display:inline-block}
 .bm-asplegend i.dot{width:11px;height:11px;border:0;border-radius:3px}
+/* Reference toggle (Lagna chart / Moon chart) + Gochara transit overlay controls */
+.bm-refs{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;padding:9px 16px 0;font-size:11.5px;color:var(--muted)}
+.bm-refs-label{font-weight:600;color:var(--muted);letter-spacing:.02em}
+.bm-ref-btn{font-size:11.5px;font-weight:600;padding:4px 13px;border-radius:20px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);cursor:pointer;transition:.15s all}
+.bm-ref-btn:hover{color:var(--ink);border-color:color-mix(in srgb,var(--gold) 50%,var(--line))}
+.bm-ref-btn.active{background:linear-gradient(135deg,#3a5fd0,#6a3fc0);border-color:transparent;color:#fff;box-shadow:0 2px 10px rgba(70,90,210,.3)}
+.bm-gochara-ctrl{display:flex;align-items:center;gap:8px;margin-left:8px;padding-left:10px;border-left:1px solid var(--line);flex-wrap:wrap}
+.bm-gochara-toggle{display:inline-flex;align-items:center;gap:5px;cursor:pointer;font-weight:600;color:var(--muted);user-select:none}
+.bm-gochara-toggle:has(input:checked){color:var(--gold2)}
+.bm-gochara-toggle input{accent-color:var(--gold)}
+.bm-gochara-date{font-size:11px;border:1px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:6px;padding:2px 6px}
+.bm-gochara-note{font-size:10.5px;color:var(--muted);opacity:.65;font-style:italic}
+.bm-tr{cursor:pointer;transition:opacity .2s,filter .2s}
+.bm-tr:hover{filter:brightness(1.28)}
 /* interactive lordship tracing */
 .bm-hmark{cursor:pointer;transition:filter .15s}
 .bm-hmark:hover{filter:brightness(1.32)}
@@ -2817,6 +2831,46 @@ function bmLayer(name){
   if(!BM_CTX) return; BM_CTX.layer=name;
   renderBhavaMandala(BM_CTX.c,BM_CTX.baseLa,BM_CTX.N||1,false);
 }
+// Switch the house-counting Reference between the birth Ascendant and the natal Moon
+// (Chandra Kundali) — everything downstream (house numbers, lordship lines, aspects-to-house)
+// is already keyed off a single `La`, so this just swaps which sign that variable points to.
+function bmSetRef(name){
+  if(!BM_CTX) return; BM_CTX.ref=name;
+  renderBhavaMandala(BM_CTX.c,BM_CTX.baseLa,BM_CTX.N||1,false);
+}
+function bmToggleGochara(){
+  if(!BM_CTX) return; BM_CTX.gochara=!BM_CTX.gochara;
+  renderBhavaMandala(BM_CTX.c,BM_CTX.baseLa,BM_CTX.N||1,false);
+}
+function bmGocharaDate(v){
+  if(!BM_CTX) return; BM_CTX.gDate=v?new Date(v+'T12:00:00'):new Date();
+  renderBhavaMandala(BM_CTX.c,BM_CTX.baseLa,BM_CTX.N||1,false);
+}
+// Click a Gochara ring marker → trace text with the classical house-from-Moon verdict
+// (mirrors the ◎ Gochara · Current Transits panel lower down, so the numbers always agree).
+function bmTransitInfo(k){
+  const ct=document.getElementById('bhavaMandala'); if(!ct||!BM_CTX) return;
+  const natC=BM_CTX.c, gDate=BM_CTX.gDate||new Date();
+  const natMoonSign=natC.planets.Mo?natC.planets.Mo.sign:null;
+  let trPos=null; try{trPos=getTransitPlanets(gDate).pos;}catch(e){}
+  if(!trPos||!trPos[k]||natMoonSign==null) return;
+  const si=trPos[k].sign, hFromMoon=houseFromSigns(natMoonSign,si);
+  const good=(GCH_GOOD[k]||[]).includes(hFromMoon);
+  let vedhaBy=null;
+  if(good&&GCH_VEDHA[k]){
+    const vH=GCH_VEDHA[k][hFromMoon];
+    if(vH){ for(const o of ['Ju','Sa','Ra','Ke']){ if(o===k||!trPos[o])continue; if(houseFromSigns(natMoonSign,trPos[o].sign)===vH&&!GCH_VEXC.has(`${k}|${o}`)){vedhaBy=o;break;} } }
+  }
+  let satSpecial=null;
+  if(k==='Sa'){ if([12,1,2].includes(hFromMoon)) satSpecial='sade-sati'; else if(hFromMoon===4||hFromMoon===8) satSpecial='dhaiya'; }
+  const statusLbl=vedhaBy?`vedha — cancelled by ${GBYK[vedhaBy].name}`:good?'favourable':'challenging';
+  const statusCol=vedhaBy?'#f5d894':good?'#6fbf86':'#e2705a';
+  const PVC={Ju:'#e7b94e',Sa:'#8060c0',Ra:'#6040a0',Ke:'#909090'};
+  let msg=`<b style="color:${PVC[k]}">${GBYK[k].name}</b> is transiting <b>${SIGNS[si]}</b> — House ${hFromMoon} from natal Moon (<span style="color:${statusCol};font-weight:700">${statusLbl}</span>)`;
+  if(satSpecial) msg+=satSpecial==='sade-sati'?' &nbsp;·&nbsp; <b style="color:#c080f0">Sade Sati</b>':' &nbsp;·&nbsp; <b style="color:#c080f0">Dhaiya / Kantaka Shani</b>';
+  const tr=ct.querySelector('#bmTrace'); if(tr){tr.innerHTML=msg;tr.classList.add('show');}
+  clearTimeout(window._bmHLT); window._bmHLT=setTimeout(()=>bmRestore(ct),5200);
+}
 // Restore the wheel to its lens after a click highlight settles
 function bmRestore(ct){
   if(!ct) return;
@@ -2974,17 +3028,26 @@ function renderBhavaMandala(c,La,N,motion){
   const ct=document.getElementById('bhavaMandala');
   if(!ct)return;
   const layer=(BM_CTX&&BM_CTX.layer)||'lord';
-  BM_CTX={c:c,baseLa:La,N:N,layer:layer};
+  const ref=(BM_CTX&&BM_CTX.ref)||'la';
+  const gochara=(BM_CTX&&BM_CTX.gochara)||false;
+  const gDate=(BM_CTX&&BM_CTX.gDate)||new Date();
+  BM_CTX={c:c,baseLa:La,N:N,layer:layer,ref:ref,gochara:gochara,gDate:gDate};
   if(N>1){
     const wp={};
     for(const _k of ['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke']){const _p=c.planets[_k];if(_p)wp[_k]={sign:vargaSign(_p.sign,_p.deg,N),deg:_p.deg,retro:_p.retro};}
     c={planets:wp,La:{sign:vargaSign(c.La.sign,c.La.deg||0,N),deg:0},name:c.name,dashas:c.dashas};
     La=c.La.sign;
   }
+  // ── Reference toggle: recast houses from the Moon (Chandra Kundali) instead of the Ascendant.
+  //    Sign positions never move — only which sign counts as "House 1" changes, so every downstream
+  //    house-number / lordship / aspect-to-house computation below (all keyed off `La`) stays correct.
+  const natLaSign=La;
+  const canMoonRef=!!c.planets.Mo;
+  if(ref==='mo'&&canMoonRef) La=c.planets.Mo.sign;
   const showDeg=(N===1), vName=(BM_VARGAS.find(v=>v[0]===N)||[N,'D-'+N,''])[2];
-  const SZ=600,CX=300,CY=300;
+  const SZ=700,CX=350,CY=350;
   // radii — clean layout: sign band → house-number ring → planet zone → centre
-  const RL=292,ROo=284,ROi=246,RHNUM=224,RP=180,RSTEP=38,RC=46;
+  const RL=292,ROo=284,ROi=246,RHNUM=224,RP=180,RSTEP=38,RC=46,RTR=318;
   function pol(r,deg){const rad=(deg-90)*Math.PI/180;return{x:CX+r*Math.cos(rad),y:CY+r*Math.sin(rad)};}
   function sec(r1,r2,a1,a2){
     const s1=pol(r1,a1),e1=pol(r1,a2),s2=pol(r2,a1),e2=pol(r2,a2);
@@ -3143,15 +3206,66 @@ function renderBhavaMandala(c,La,N,motion){
     });
   });
 
-  // ---- Centre: ascendant ----
-  sv+=`<circle cx="${CX}" cy="${CY}" r="${RC}" fill="rgba(8,11,24,0.96)" stroke="rgba(231,193,78,0.55)" stroke-width="1.4"/>`;
-  sv+=`<text x="${CX}" y="${CY-9}" text-anchor="middle" dominant-baseline="central" font-size="10" letter-spacing="1.5" fill="rgba(175,198,255,0.8)">ASC</text>`;
-  sv+=`<text x="${CX}" y="${CY+9}" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="bold" fill="#e7c14e">${typeof SIGN3!=='undefined'?SIGN3[La]:La}</text>`;
+  // ---- Centre: ascendant (or Moon, when the Chandra Kundali reference is active) ----
+  const refIsMoon=(ref==='mo'&&canMoonRef);
+  sv+=`<circle cx="${CX}" cy="${CY}" r="${RC}" fill="rgba(8,11,24,0.96)" stroke="${refIsMoon?'rgba(200,216,255,0.6)':'rgba(231,193,78,0.55)'}" stroke-width="1.4"/>`;
+  sv+=`<text x="${CX}" y="${CY-9}" text-anchor="middle" dominant-baseline="central" font-size="10" letter-spacing="1.5" fill="rgba(175,198,255,0.8)">${refIsMoon?'MOON':'ASC'}</text>`;
+  sv+=`<text x="${CX}" y="${CY+9}" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="bold" fill="${refIsMoon?'#c8d8ff':'#e7c14e'}">${typeof SIGN3!=='undefined'?SIGN3[La]:La}</text>`;
+  // ---- When reading the Moon chart, keep the birth Ascendant visible as a small "Lg" tag ----
+  if(refIsMoon&&natLaSign!==La){
+    const lgp=pol(ROi+11,sa(natLaSign)+15);
+    sv+=`<g style="pointer-events:none"><circle cx="${lgp.x}" cy="${lgp.y}" r="10" fill="rgba(8,11,24,0.9)" stroke="rgba(231,193,78,0.75)" stroke-width="1"/><text x="${lgp.x}" y="${lgp.y}" text-anchor="middle" dominant-baseline="central" font-size="8.5" font-weight="700" fill="#e7c14e">Lg</text></g>`;
+  }
 
   // ---- Outer sign names (single line; element shown in house grid below) ----
   for(let i=0;i<12;i++){
     const tp=pol(RL,sa(i)+15),isLa=(i===La);
     sv+=`<text x="${tp.x}" y="${tp.y}" text-anchor="middle" dominant-baseline="central" font-size="10.5" fill="${isLa?'rgba(150,185,255,0.95)':'rgba(152,172,222,0.62)'}">${SN[i]}</text>`;
+  }
+
+  // ---- Gochara transit ring: Jupiter · Saturn · Rahu · Ketu — the four "slow" grahas classical
+  //      Gochara times against (the other five move too fast for a snapshot to mean much). Drawn as
+  //      a distinct OUTER ring, hollow + dashed, so it reads as "in motion now" vs the solid natal
+  //      pills inside — the standard biwheel convention (transit ring outside, natal wheel inside).
+  //      Good/challenging is always judged from the NATAL Rāśi Moon (classical rule) regardless of
+  //      which Reference (Lagna/Moon) is on screen — this is a D-1-only overlay.
+  if(gochara&&N===1){
+    const natC=(typeof BM_CTX!=='undefined'&&BM_CTX&&BM_CTX.c)?BM_CTX.c:c;
+    const natMoonSign=natC.planets.Mo?natC.planets.Mo.sign:null;
+    let trPos=null; try{trPos=getTransitPlanets(gDate).pos;}catch(e){}
+    if(trPos&&natMoonSign!=null){
+      const TRK=['Ju','Sa','Ra','Ke'];
+      const trOcc={};
+      TRK.forEach(k=>{ if(trPos[k]) (trOcc[trPos[k].sign]=trOcc[trPos[k].sign]||[]).push(k); });
+      let trG=`<g class="bm-g-transit">`;
+      Object.keys(trOcc).forEach(siKey=>{
+        const si=+siKey, arr=trOcc[si], base=sa(si)+15;
+        arr.forEach((k,idx)=>{
+          const off=(idx-(arr.length-1)/2)*10, pos=pol(RTR,base+off), spoke=pol(RL+2,base+off);
+          const hFromMoon=houseFromSigns(natMoonSign,si), hFromRef=houseFromSigns(La,si);
+          const good=(GCH_GOOD[k]||[]).includes(hFromMoon);
+          let vedhaBy=null;
+          if(good&&GCH_VEDHA[k]){
+            const vH=GCH_VEDHA[k][hFromMoon];
+            if(vH){ for(const o of TRK){ if(o===k||!trPos[o])continue; if(houseFromSigns(natMoonSign,trPos[o].sign)===vH&&!GCH_VEXC.has(`${k}|${o}`)){vedhaBy=o;break;} } }
+          }
+          let satSpecial=null;
+          if(k==='Sa'){ if([12,1,2].includes(hFromMoon)) satSpecial='sade-sati'; else if(hFromMoon===4||hFromMoon===8) satSpecial='dhaiya'; }
+          const statusCol=vedhaBy?'#f5d894':good?'#6fbf86':'#e2705a';
+          const statusLbl=vedhaBy?`Vedha (cancelled by ${GBYK[vedhaBy].name})`:good?'Favourable':'Challenging';
+          const v=PV[k];
+          const tip=`Transiting ${GBYK[k].name} · ${SN[si]} — H${hFromMoon} from natal Moon (${statusLbl})${satSpecial?(satSpecial==='sade-sati'?' · SADE SATI':' · Dhaiya/Kantaka'):''} · H${hFromRef} on this wheel — click for details`;
+          trG+=`<g class="bm-tr" data-trk="${k}" onclick="bmTransitInfo('${k}')">`+
+            `<line x1="${spoke.x}" y1="${spoke.y}" x2="${pos.x}" y2="${pos.y}" stroke="${statusCol}" stroke-width="1.2" stroke-dasharray="2,3" opacity="0.65"/>`+
+            `<circle cx="${pos.x}" cy="${pos.y}" r="13" fill="rgba(9,12,26,0.92)" stroke="${statusCol}" stroke-width="2" stroke-dasharray="3,2"><title>${tip}</title></circle>`+
+            `<text x="${pos.x}" y="${pos.y}" text-anchor="middle" dominant-baseline="central" font-size="12" fill="${v.col}" style="pointer-events:none">${v.gl}</text>`+
+            (satSpecial?`<circle cx="${pos.x+10}" cy="${pos.y-10}" r="6.5" fill="#220a3a" stroke="#c080f0" stroke-width="1"/><text x="${pos.x+10}" y="${pos.y-10}" text-anchor="middle" dominant-baseline="central" font-size="6.5" font-weight="800" fill="#c080f0" style="pointer-events:none">${satSpecial==='sade-sati'?'SS':'D'}</text>`:'')+
+            `</g>`;
+        });
+      });
+      trG+=`</g>`;
+      sv+=trG;
+    }
   }
   sv+=`</svg>`;
 
@@ -3189,6 +3303,17 @@ function renderBhavaMandala(c,La,N,motion){
   }
 
   const tabs=`<div class="bm-vtabs">`+BM_VARGAS.map(([n,lab,nm])=>`<button type="button" class="bm-vtab${n===N?' active':''}" onclick="bmTurn(${n})" title="${nm}">${lab}</button>`).join('')+`</div>`;
+  // Reference row: Lagna chart ↔ Moon chart (Chandra Kundali), plus the Gochara transit-ring toggle (D-1 only)
+  const fmtISO=d=>d.toISOString().slice(0,10);
+  const refsRow=`<div class="bm-refs">
+    <span class="bm-refs-label">Chart:</span>
+    <button type="button" class="bm-ref-btn${ref==='la'?' active':''}" onclick="bmSetRef('la')" title="Houses counted from the birth Ascendant">☉ Lagna</button>
+    <button type="button" class="bm-ref-btn${ref==='mo'?' active':''}"${canMoonRef?'':' disabled'} onclick="bmSetRef('mo')" title="Houses counted from the natal Moon — Chandra Kundali">☾ Moon${N===1?' · Chandra Kundali':''}</button>
+    ${N===1?`<span class="bm-gochara-ctrl">
+      <label class="bm-gochara-toggle"><input type="checkbox" ${gochara?'checked':''} onchange="bmToggleGochara()"> ◔ Gochara transits (Ju · Sa · Ra · Ke)</label>
+      ${gochara?`<input type="date" class="bm-gochara-date" value="${fmtISO(gDate)}" onchange="bmGocharaDate(this.value)">`:''}
+    </span>`:`<span class="bm-gochara-note">Gochara transit ring shown on D-1 only</span>`}
+  </div>`;
   const LENSES=[['lord','Lordship','Which planet rules each house'],['graha','Graha Dṛṣṭi','Which planets aspect each house (benefic / malefic)'],['rashi','Rāśi Dṛṣṭi','Jaimini sign-to-sign aspects'],['all','All layers','Lordship + planet aspects + sign aspects together']];
   const lensRow=`<div class="bm-lenses">`+LENSES.map(([id,lab,tip])=>`<button type="button" class="bm-lens${id===layer?' active':''}" onclick="bmLayer('${id}')" title="${tip}">${lab}</button>`).join('')+`</div>`;
   const LENS_DESC={
@@ -3198,12 +3323,14 @@ function renderBhavaMandala(c,La,N,motion){
     all:`all three layers at once — lordship lines, benefic/malefic aspect arrows, and rāśi-dṛṣṭi chords`
   };
   const aspLegend=`<div class="bm-asplegend"><span><i class="dot" style="background:rgba(90,210,150,.5)"></i>house aura: net benefic aspect</span><span><i class="dot" style="background:rgba(235,95,80,.5)"></i>net malefic aspect</span><span><i style="border-top-color:#5fd0a0"></i>benefic dṛṣṭi</span><span><i style="border-top-color:#ef6a5a"></i>malefic dṛṣṭi</span><span><i style="border-top-color:#9682eb"></i>rāśi dṛṣṭi</span><span style="color:#6fbf86">⬆ exalted</span><span style="color:#e9bf6a">● own sign</span><span style="color:#e2705a">⬇ debilitated</span></div>`;
-  const caption=`<div class="bm-caption">Showing <b>D-${N} · ${vName}</b>${N===1?' — the birth chart':' — divisional chart'} · lens: <b>${(LENSES.find(l=>l[0]===layer)||[,'Lordship'])[1]}</b>. ${LENS_DESC[layer]}. The coloured <b>aura</b> behind each sign always shows the net aspect load. <span style="color:#9db4ff">Blue</span> kendra · <span style="color:#7fe0a0">green</span> trikona · <span style="color:#f0a890">amber</span> dusthana · gold = Lagna.</div>`;
+  const gocharaLegend=(gochara&&N===1)?`<div class="bm-asplegend"><span><i style="border-top-color:#6fbf86;border-top-style:dashed"></i>gochara favourable</span><span><i style="border-top-color:#e2705a;border-top-style:dashed"></i>gochara challenging</span><span><i style="border-top-color:#f5d894;border-top-style:dashed"></i>vedha (cancelled)</span><span style="color:#c080f0">◐ SS / D = Sade Sati / Dhaiya</span><span style="opacity:.75">judged from natal Moon regardless of Reference</span></div>`:'';
+  const chartLabel=(ref==='mo'&&canMoonRef)?(N===1?'Chandra Kundali':`D-${N} · ${vName} (Moon reference)`):`D-${N} · ${vName}`;
+  const caption=`<div class="bm-caption">Showing <b>${chartLabel}</b>${N===1?(ref==='mo'?' — houses counted from the natal Moon':' — the birth chart'):' — divisional chart'} · lens: <b>${(LENSES.find(l=>l[0]===layer)||[,'Lordship'])[1]}</b>. ${LENS_DESC[layer]}. The coloured <b>aura</b> behind each sign always shows the net aspect load. <span style="color:#9db4ff">Blue</span> kendra · <span style="color:#7fe0a0">green</span> trikona · <span style="color:#f0a890">amber</span> dusthana · gold = ${ref==='mo'?'Moon':'Lagna'}.${gochara&&N===1?' The outer dashed ring is the current <b>Gochara</b> transit of Jupiter, Saturn, Rahu &amp; Ketu — click a marker for its verdict.':''}</div>`;
   const traceDefault={lord:'▶ Click any house to trace where its lord sits',graha:'▶ Click a planet to see what it aspects, or a house to see what aspects it',rashi:'▶ Click a house to see which signs cast rāśi dṛṣṭi on it',all:'▶ Click a house, or a planet, to isolate its relationships'}[layer];
 
   let d10Html='';
   if(N===10&&BM_CTX.c){try{d10Html=renderD10Guide(BM_CTX.c,BM_CTX.baseLa);}catch(e){console.warn('D10 guide:',e);}}
-  ct.innerHTML=`${tabs}${lensRow}<div class="bm-container">${sv}</div>${aspLegend}<div class="bm-trace" id="bmTrace">${traceDefault}</div>${caption}<div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div>${d10Html}<div class="bm-planet-panel" id="bmPlanetPanel"></div>`;
+  ct.innerHTML=`${tabs}${refsRow}${lensRow}<div class="bm-container">${sv}</div>${aspLegend}${gocharaLegend}<div class="bm-trace" id="bmTrace">${traceDefault}</div>${caption}<div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div>${d10Html}<div class="bm-planet-panel" id="bmPlanetPanel"></div>`;
   if(motion){const ns=ct.querySelector('.bm-svg');if(ns){ns.style.transformOrigin='center';ns.style.transform='rotate(14deg) scale(.9)';ns.style.opacity='0';requestAnimationFrame(()=>{ns.style.transition='transform .46s cubic-bezier(.34,1.12,.4,1),opacity .4s';ns.style.transform='none';ns.style.opacity='1';});}}
 }
 
