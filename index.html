@@ -669,9 +669,11 @@
   .hs-hn{font-size:16px;font-weight:800;color:var(--gold2);line-height:1}
   .hs-sign{font-size:10px;color:var(--muted);margin:2px 0 5px;letter-spacing:.02em}
   .hs-occ{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;min-height:20px;align-items:center}
-  .hs-emblem{display:inline-flex;align-items:center;justify-content:center}
+  .hs-emblem{display:inline-flex;align-items:center;justify-content:center;position:relative}
   .hs-emblem .emblem{width:17px;height:17px}
+  .hs-emblem.retro::after{content:'℞';position:absolute;top:-4px;right:-5px;font-size:9px;font-weight:800;color:var(--friend);background:var(--panel2);border-radius:50%;line-height:1;padding:0 1px}
   .hs-empty{font-size:10px;color:var(--muted)}
+  .retro-r{color:var(--friend);font-size:.75em;font-weight:700;margin-left:1px}
 
   /* ===== Planet Strength Dashboard ===== */
   .ps-wrap{margin-top:14px}
@@ -3989,6 +3991,9 @@ function grahaEmblem(k,opts={}){
     +`<circle class="ring-gold" cx="50" cy="50" r="44" fill="none" stroke-width="1"/>`
     +art+bija+`</svg>`;
 }
+// Small inline retrograde marker (℞), used everywhere a specific chart occupant is
+// named — accepts a planet position object ({retro:...}) so callers can pass p directly.
+const retroSup=p=>(p&&p.retro)?'<sup class="retro-r" title="Retrograde (Vakri) — high Cheṣṭā Bala, but timing is non-linear">℞</sup>':'';
 // Rashi roundel: element-tinted ring + classical unicode glyph in display face
 const RASHI_GLYPH=["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"];
 const ELEM_TINT={Fire:"var(--terracotta)",Earth:"#9a8a5e",Air:"var(--friend)",Water:"#6f9fb0"};
@@ -4221,7 +4226,7 @@ const CHARA_KARAKAS=[
 ];
 function charaKarakas(c){
   const PL=["Su","Mo","Ma","Me","Ju","Ve","Sa"];
-  const arr=PL.filter(k=>c.planets[k]).map(k=>({k,deg:c.planets[k].deg,sign:c.planets[k].sign}));
+  const arr=PL.filter(k=>c.planets[k]).map(k=>({k,deg:c.planets[k].deg,sign:c.planets[k].sign,retro:c.planets[k].retro}));
   arr.sort((a,b)=>b.deg-a.deg);   // highest degree-in-sign ⇒ Ātmakāraka
   return arr.map((o,i)=>({...o,...CHARA_KARAKAS[i]}));
 }
@@ -4956,9 +4961,10 @@ function renderAvasthas(c,La,N){
       else if(d10.score<=-2) NT.push("Debilitated in Daśāṁśa — career expression of this planet needs conscious effort.");
       if(d1.score>=1.5&&(bal.n==="Bāla"||bal.n==="Mṛta")) NT.push(`Dignified yet ${bal.n} by degree — the strength is real but expresses late or needs a dasha/transit to ignite.`);
       if(combust) NT.push("Combust — scorched by the Sun; outward results are suppressed even when otherwise strong.");
+      if(p.retro) NT.push("Retrograde (Vakri) — high Cheṣṭā Bala; results are intensified but arrive late or non-linearly.");
       const noteHtml=NT.length?`<div class="ck-sig" style="margin-top:4px">${NT.join(" ")}</div>`:"";
       const digCell=`<div class="av-digrow"><span class="av-dlabel">D1</span>${chip(p.sign,d1)} <span class="av-dlabel">D9</span>${chip(d9s,d9)} <span class="av-dlabel">D10</span>${chip(d10s,d10)}${vargottama?` <span class="av-vgot">★ vargottama</span>`:""}</div><div class="ck-sig">${d1.full.split("·")[0].trim()} in Rāśi</div>`;
-      t+=`<tr><td class="ck-pl"><span class="row-emblem">${grahaEmblem(k,{size:18})}<span>${g.name}</span></span>${noteHtml}</td>`+
+      t+=`<tr><td class="ck-pl"><span class="row-emblem">${grahaEmblem(k,{size:18})}<span>${g.name}${retroSup(p)}</span></span>${noteHtml}</td>`+
          `<td>${digCell}</td>`+
          `<td title="${bal.note}"><b>${bal.n}</b> <span class="av-t">${bal.t}</span></td>`+
          `<td title="${jag.note}"><b>${jag.n}</b> <span class="av-t">${jag.t}</span></td>`+
@@ -4986,8 +4992,9 @@ function renderAvasthas(c,La,N){
       else if(dig.score>=1.5) NT.push(`Dignified in ${vn} — strong for this domain.`);
       if(bal.n==="Mṛta"||bal.n==="Bāla") NT.push(`${bal.n} by degree — under-delivers even where dignified.`);
       if(combust) NT.push("Combust (from D-1) — outward results suppressed.");
+      if(p.retro) NT.push("Retrograde (from D-1) — Cheṣṭā Bala carries through; delivery in this domain is non-linear.");
       const noteHtml=NT.length?`<div class="ck-sig" style="margin-top:4px">${NT.join(" ")}</div>`:"";
-      t+=`<tr><td class="ck-pl"><span class="row-emblem">${grahaEmblem(k,{size:18})}<span>${g.name}</span></span>${noteHtml}</td>`+
+      t+=`<tr><td class="ck-pl"><span class="row-emblem">${grahaEmblem(k,{size:18})}<span>${g.name}${retroSup(p)}</span></span>${noteHtml}</td>`+
          `<td><div class="av-digrow">${chip(vs,dig)} <span style="color:${dig.col}">${dig.full.split("·")[0].trim()}</span>${same?` <span class="av-vgot">★ as D-1</span>`:""}</div></td>`+
          `<td title="${bal.note}"><b>${bal.n}</b> <span class="av-t">${bal.t}</span></td>`+
          `<td title="${jag.note}"><b>${jag.n}</b> <span class="av-t">${jag.t}</span></td>`+
@@ -5007,13 +5014,13 @@ function renderJaimini(c,La){
   let kt=`<table class="ck-table"><thead><tr><th>Kāraka</th><th>Planet</th><th>Sign · deg</th><th>Significator of</th></tr></thead><tbody>`;
   for(const o of ck){ const g=GBYK[o.k];
     kt+=`<tr><td class="ck-ab" title="${o.name}">${o.ab}<div class="ck-name">${o.name}</div></td>`+
-        `<td class="ck-pl"><span class="row-emblem">${grahaEmblem(o.k,{size:18})}<span>${g.name}</span></span></td><td>${SIGNS[o.sign]} · ${o.deg.toFixed(2)}°</td><td class="ck-sig">${o.sig}</td></tr>`; }
+        `<td class="ck-pl"><span class="row-emblem">${grahaEmblem(o.k,{size:18})}<span>${g.name}${retroSup(o)}</span></span></td><td>${SIGNS[o.sign]} · ${o.deg.toFixed(2)}°</td><td class="ck-sig">${o.sig}</td></tr>`; }
   kt+=`</tbody></table>`;
   // --- Karakamsa = Atmakaraka's navamsa sign ---
   const ak=ck[0], kSign=navamsaSign(ak.sign,ak.deg);
   const inK=["Su","Mo","Ma","Me","Ju","Ve","Sa","Ra","Ke"].filter(k=>{const p=c.planets[k];return p&&navamsaSign(p.sign,p.deg)===kSign;});
   const inKtxt=inK.length
-    ? inK.map(k=>`<li><b><span class="row-emblem">${grahaEmblem(k,{size:16})}<span>${GBYK[k].name}</span></span></b> in Kārakāṁśa → ${KARAKAMSA_GRAHA[k]}</li>`).join("")
+    ? inK.map(k=>`<li><b><span class="row-emblem">${grahaEmblem(k,{size:16})}<span>${GBYK[k].name}${retroSup(c.planets[k])}</span></span></b> in Kārakāṁśa → ${KARAKAMSA_GRAHA[k]}</li>`).join("")
     : `<li class="note">No planet sits in the Kārakāṁśa — read it through its sign-lord and any planets aspecting it in D-9.</li>`;
   const km=`<div class="km-head">Kārakāṁśa Lagna — <b>${SIGNS[kSign]}</b> <span class="note">(the Ātmakāraka <b>${GBYK[ak.k].name}</b> in Navāṁśa: the seat of the soul's pursuit)</span></div><ul class="km-list">${inKtxt}</ul>`;
   // --- Argala on the Lagna ---
@@ -5051,7 +5058,7 @@ function renderVargas(c,La){
   for(const k of PL){
     const p=c.planets[k]; if(!p) continue;
     const g=GBYK[k]; let vim=0;
-      tb+=`<tr><td class="vp-label"><span class="row-emblem">${grahaEmblem(k,{size:18})}<span>${g.name}</span></span></td>`;
+      tb+=`<tr><td class="vp-label"><span class="row-emblem">${grahaEmblem(k,{size:18})}<span>${g.name}${retroSup(p)}</span></span></td>`;
     for(const v of VARGA_DEFS){
       const vs=vargaSign(p.sign,p.deg,v.N), dig=dignityOf(k,vs), vg=v.N!==1&&vs===p.sign;
       vim+=v.w*vargaStrengthFrac(dig.score);
@@ -5187,7 +5194,7 @@ function renderHouseStrip(c,La){
     const isClk=!here.length&&!!lp;   // empty house whose lord is placed elsewhere → clickable
     let inner="";
     if(here.length){
-      inner=here.map(k=>`<span class="hs-emblem">${grahaEmblem(k,{size:17})}</span>`).join("");
+      inner=here.map(k=>{const p=c.planets[k];return `<span class="hs-emblem${p&&p.retro?' retro':''}" title="${GBYK[k].name}${p&&p.retro?' — Retrograde (Vakri)':''}">${grahaEmblem(k,{size:17})}</span>`;}).join("");
     } else if(lp){
       const lh=houseFromSigns(La,lp.sign);
       inner=`<span class="hs-empty">→ H${lh}</span>`;
@@ -7459,7 +7466,7 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
     for(const P of PLANET_BAV_ORDER){
       const bav=allBAV[P], g=GBYK[P];
       const natalSign=c.planets[P]?c.planets[P].sign:null;
-      tb+=`<tr><td class="plabel"><span class="row-emblem">${grahaEmblem(P,{size:17})}<span>${g.name}</span></span></td>`;
+      tb+=`<tr><td class="plabel"><span class="row-emblem">${grahaEmblem(P,{size:17})}<span>${g.name}${retroSup(c.planets[P])}</span></span></td>`;
       for(let h=1;h<=12;h++){
         const s=(La+h-1)%12, v=bav[s];
         const cls=v>=5?"hi5":v===4?"hi4":v===2?"lo2":v<=1?"lo1":"";
@@ -8212,9 +8219,9 @@ function renderSpecialLagnas(c,La,sav){
     return Object.entries(vargaPlanets).filter(([k,v])=>v===sign).map(([k])=>k);
   }
 
-  function vCardHTML(title,hSign,lord,lordVSign,lordDig,lordHn,pls,sav){
+  function vCardHTML(title,hSign,lord,lordVSign,lordDig,lordHn,pls,sav,c){
     const lg=GBYK[lord];
-    const gInline=k=>`<span class="bb-inline">${grahaEmblem(k,{size:22})}<span>${GBYK[k].name}</span></span>`;
+    const gInline=k=>`<span class="bb-inline">${grahaEmblem(k,{size:22})}<span>${GBYK[k].name}${retroSup(c&&c.planets[k])}</span></span>`;
     const sInline=i=>`<span class="bb-inline">${rashiEmblem(i,{size:22})}<span>${SIGNS[i]}</span></span>`;
     const lordInfo=lordVSign!==undefined
       ?`${gInline(lord)} · ${lordDig?lordDig.full:"—"} in ${sInline(lordVSign)}${lordHn?` (H${lordHn})`:""}`
@@ -8451,13 +8458,13 @@ function renderSpecialLagnas(c,La,sav){
       const vLS=varga.planets[vLord];
       const vLD=vLS!==undefined?dignityOf(vLord,vLS):null;
       const vLHn=vLS!==undefined?((vLS-varga.lagna+12)%12)+1:null;
-      vargaHTML=vCardHTML(`${topic.vn} · H${resultH}`,vSign,vLord,vLS,vLD,vLHn,planetsInVargaSign(varga.planets,vSign),null);
+      vargaHTML=vCardHTML(`${topic.vn} · H${resultH}`,vSign,vLord,vLS,vLD,vLHn,planetsInVargaSign(varga.planets,vSign),null,c);
     } else {
       vargaHTML=`<div class="bb-vcard"><div class="bb-vcard-title">Secondary chart</div><div style="color:var(--muted);font-size:13px;padding-top:6px">This topic is read from D-1 primarily — no secondary varga is prescribed in classical sources for this specific query.</div></div>`;
     }
 
     document.getElementById("bbCards").innerHTML=
-      vCardHTML(`D-1 Rasi · H${resultH}`,resultSign,d1Lord,d1LS,d1LD,d1LHn,d1Pls,sav)+vargaHTML;
+      vCardHTML(`D-1 Rasi · H${resultH}`,resultSign,d1Lord,d1LS,d1LD,d1LHn,d1Pls,sav,c)+vargaHTML;
     document.getElementById("bbReadingText").innerHTML=
       generateReading(c,La,person,topic,resultH,varga);
     emptyDiv.style.display="none";
@@ -8668,7 +8675,7 @@ function renderSpecialLagnas(c,La,sav){
       html+=`<div class="ga-planet-card">
         <div class="ga-planet-hd">
           <span class="ga-planet-glyph">${grahaEmblem(pk,{size:30})}</span>
-          <span class="ga-planet-name">${gp.name}</span>
+          <span class="ga-planet-name">${gp.name}${retroSup(lp)}</span>
           <span class="ga-planet-pos">in ${rashiEmblem(lp.sign,{size:20})}<span>${SIGNS[lp.sign]}</span> · H${planetH} · ${dig.full.split("·")[0].trim()}</span>
         </div>
         <div class="ga-archetype">${meta.theme}</div>
@@ -8698,7 +8705,7 @@ function renderSpecialLagnas(c,La,sav){
             <span class="ec-chip ${savVal>=30?"good":savVal<25?"bad":"gold"}" style="margin-left:auto">SAV ${savVal}</span>
           </div>
           <div class="ga-arudha-note">${gaHouseNote(pk,aruH)}</div>
-          ${pInSign.length?`<div style="font-size:12px;color:var(--muted);margin-bottom:8px">${pInSign.map(k=>`<span class="bb-inline">${grahaEmblem(k,{size:18})}<span>${GBYK[k].name}</span></span>`).join("")}<span style="color:var(--muted)">in ${SIGNS[ga.sign]}</span></div>`:""}
+          ${pInSign.length?`<div style="font-size:12px;color:var(--muted);margin-bottom:8px">${pInSign.map(k=>`<span class="bb-inline">${grahaEmblem(k,{size:18})}<span>${GBYK[k].name}${retroSup(c.planets[k])}</span></span>`).join("")}<span style="color:var(--muted)">in ${SIGNS[ga.sign]}</span></div>`:""}
           <button type="button" class="ar-calc-toggle">▸ How this was calculated</button>
           <div class="ar-calc">
             <div class="ar-step"><span class="ar-step-n">1</span><span>${gp.name} rules <b>${SIGNS[bhavaSign]}</b> (H${bhavaH} from Lagna)</span></div>
