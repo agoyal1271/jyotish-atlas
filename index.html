@@ -2634,7 +2634,7 @@ function renderD10Guide(d1c, d1La){
   const tag=(txt,cls)=>`<span class="d10-tag ${cls}">${txt}</span>`;
   const pill=(k)=>`<span class="d10-pill" style="color:${PC[k]};border-color:${PC[k]}33">${NM[k]}</span>`;
   const digTag=d=>{if(!d)return'';if(d.score>=2)return tag('Exalted','good');if(d.score>=1.5)return tag('Own sign','good');if(d.score>=1)return tag("Friend's sign",'neu');if(d.score<=-2)return tag('Debilitated','bad');if(d.score<=-1)return tag("Enemy's sign",'warn');return tag('Neutral','neu');};
-  const aspOnH=(h,si)=>{const ben=[],mal=[];PO.forEach(k=>{const p=d10p[k];if(!p||p.sign===si)return;const d=(si-p.sign+12)%12;const hit=(d===6)||(k==='Ma'&&(d===3||d===7))||(k==='Ju'&&(d===4||d===8))||(k==='Sa'&&(d===2||d===9));if(hit){(isBeneficPlanet(k,{planets:d10p})?ben:mal).push(k);}});return{ben,mal};};
+  const aspOnH=(h,si)=>{const ben=[],mal=[];PO.forEach(k=>{const p=d10p[k];if(!p||p.sign===si)return;const d=(si-p.sign+12)%12;const hit=(d===6)||(k==='Ma'&&(d===3||d===7))||(k==='Ju'&&(d===4||d===8))||(k==='Sa'&&(d===2||d===9))||((k==='Ra'||k==='Ke')&&(d===4||d===8));if(hit){(isBeneficPlanet(k,{planets:d10p})?ben:mal).push(k);}});return{ben,mal};};
 
   // Chara karakas from D-1
   let AK='Ve', AmK='Ma';
@@ -2983,7 +2983,7 @@ function bmFocusPlanet(k){
   pills.forEach(g=>g.style.opacity=g.getAttribute('data-pk')===k?'1':'0.3');
   const tr=ct.querySelector('#bmTrace');
   if(tr){const nm=(typeof GBYK!=='undefined'&&GBYK[k])?GBYK[k].name:k;
-    tr.innerHTML=`<b>${nm}</b> casts a <b style="color:${ben?'#5fd0a0':'#ef6a5a'}">${ben?'benefic':'malefic'}</b> dṛṣṭi on the highlighted houses — solid = 7th (full) aspect, dashed = special (Ma 4/8 · Ju 5/9 · Sa 3/10).`;tr.classList.add('show');}
+    tr.innerHTML=`<b>${nm}</b> casts a <b style="color:${ben?'#5fd0a0':'#ef6a5a'}">${ben?'benefic':'malefic'}</b> dṛṣṭi on the highlighted houses — solid = 7th (full) aspect, dashed = special (Ma 4/8 · Ju 5/9 · Sa 3/10 · Ra/Ke 5/9).`;tr.classList.add('show');}
   clearTimeout(window._bmHLT); window._bmHLT=setTimeout(()=>bmRestore(ct),4600);
   bmShowPlanetPanel(k,ct);
 }
@@ -3028,7 +3028,7 @@ function bmShowPlanetPanel(k,ct){
       `<span class="bm-vg-val" style="color:${DC(vd.score)};${isCur?'text-decoration:underline;text-underline-offset:3px':''}" title="${SIGNS[vs]} · ${vd.full}">${DA(vd.score)}${vott}</span>`;
   }).join('');
   // aspects this planet casts
-  const ASPMAP={Ma:[6,3,7],Ju:[6,4,8],Sa:[6,2,9]};
+  const ASPMAP={Ma:[6,3,7],Ju:[6,4,8],Sa:[6,2,9],Ra:[6,4,8],Ke:[6,4,8]};
   const offs=ASPMAP[k]||[6];
   const aspRows=offs.map((off,i)=>{
     const ts=(p.sign+off)%12, th=houseFromSigns(La,ts);
@@ -3197,7 +3197,7 @@ function renderBhavaMandala(c,La,N,motion){
   rashiG+=`</g>`;
 
   // ---- LAYER · Graha Dṛṣṭi (planet aspect arrows, benefic green / malefic red) ----
-  const ASP_OFF={Ma:[[6,0],[3,1],[7,1]],Ju:[[6,0],[4,1],[8,1]],Sa:[[6,0],[2,1],[9,1]]};
+  const ASP_OFF={Ma:[[6,0],[3,1],[7,1]],Ju:[[6,0],[4,1],[8,1]],Sa:[[6,0],[2,1],[9,1]],Ra:[[6,0],[4,1],[8,1]],Ke:[[6,0],[4,1],[8,1]]};
   let grahaG=`<g class="bm-g-graha" style="display:${showGraha?'':'none'}">`;
   PO.forEach(k=>{
     const p=c.planets[k]; if(!p||!planetPos[k]) return;
@@ -3368,7 +3368,7 @@ function renderBhavaMandala(c,La,N,motion){
   const lensRow=`<div class="bm-lenses">`+LENSES.map(([id,lab,tip])=>`<button type="button" class="bm-lens${id===layer?' active':''}" onclick="bmLayer('${id}')" title="${tip}">${lab}</button>`).join('')+`</div>`;
   const LENS_DESC={
     lord:`the faint <b>lord-coloured line</b> links each house to the planet that rules it (click a house to trace it)`,
-    graha:`<b style="color:#5fd0a0">green arrows</b> = benefic graha dṛṣṭi · <b style="color:#ef6a5a">red arrows</b> = malefic · <b>dashed</b> = special aspect (Ma 4/8 · Ju 5/9 · Sa 3/10). Click a planet to isolate its aspects`,
+    graha:`<b style="color:#5fd0a0">green arrows</b> = benefic graha dṛṣṭi · <b style="color:#ef6a5a">red arrows</b> = malefic · <b>dashed</b> = special aspect (Ma 4/8 · Ju 5/9 · Sa 3/10 · Ra/Ke 5/9). Click a planet to isolate its aspects`,
     rashi:`<b style="color:#9682eb">violet chords</b> = Jaimini rāśi dṛṣṭi (movable↔fixed, dual↔dual). Click a house to see which signs aspect it`,
     all:`all three layers at once — lordship lines, benefic/malefic aspect arrows, and rāśi-dṛṣṭi chords`
   };
@@ -4310,7 +4310,7 @@ function dignityOf(gk,ri){
   return {full:"Neutral sign · Sama",col:"var(--neutral)",score:0,lord};
 }
 function aspectsFromHouse(gk,house){
-  const add={Ma:[4,8],Ju:[5,9],Sa:[3,10]};
+  const add={Ma:[4,8],Ju:[5,9],Sa:[3,10],Ra:[5,9],Ke:[5,9]};
   const set=new Set([7]); (add[gk]||[]).forEach(a=>set.add(a));
   return [...set].map(d=>((house-1+d-1)%12)+1);
 }
@@ -4610,7 +4610,7 @@ const JA={};
       <div class="step"><div class="sn">B</div><div class="st"><b>Bhava fragment:</b> ${ORD(bn)} house (${b.skt}) — ${b.en.toLowerCase()}.</div></div>
       <div class="step"><div class="sn">N</div><div class="st"><b>Nakshatra fragment:</b> ${ni.n} p${ni.pada} — lord ${nl.name}, tone ${ni.t.split(",")[0]}.</div></div>
       <div class="step"><div class="sn">D9</div><div class="st"><b>Delivery line:</b> D-9 ${r9.name}${vg?" (vargottama)":"."}</div></div>`;
-    document.getElementById("aspText").innerHTML=`From house ${bn}, <b>${g.name}</b> aspects house${asp.length>1?"s":""} <b>${asp.join(", ")}</b>${(gk==="Ma"||gk==="Ju"||gk==="Sa")?` (incl. special aspects)`:""} — influencing ${asp.map(h=>BHAVAS[h-1].en.toLowerCase()).join(", ")}.`;
+    document.getElementById("aspText").innerHTML=`From house ${bn}, <b>${g.name}</b> aspects house${asp.length>1?"s":""} <b>${asp.join(", ")}</b>${(gk==="Ma"||gk==="Ju"||gk==="Sa"||gk==="Ra"||gk==="Ke")?` (incl. special aspects)`:""} — influencing ${asp.map(h=>BHAVAS[h-1].en.toLowerCase()).join(", ")}.`;
     const hc=document.getElementById("aspHouses");hc.innerHTML="";
     for(let h=1;h<=12;h++){const cls=h===bn?"occ":asp.includes(h)?"asp":"";const b=document.createElement("button");b.type="button";b.className="hcell "+cls;b.disabled=true;b.innerHTML=`<span class="hn">${h}</span><span>${BHAVAS[h-1].en.split(" ")[0]}</span>`;hc.appendChild(b);}
   }
@@ -6417,7 +6417,7 @@ function dpAspectsOn(c,La,sign){
   for(const k of ['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke']){
     const p=c.planets[k]; if(!p||p.sign===sign) continue;
     const d=(sign-p.sign+12)%12;
-    const hit=(d===6)||(k==='Ma'&&(d===3||d===7))||(k==='Ju'&&(d===4||d===8))||(k==='Sa'&&(d===2||d===9));
+    const hit=(d===6)||(k==='Ma'&&(d===3||d===7))||(k==='Ju'&&(d===4||d===8))||(k==='Sa'&&(d===2||d===9))||((k==='Ra'||k==='Ke')&&(d===4||d===8));
     if(hit){(isBeneficPlanet(k,c)?ben:mal).push({k,fromH:houseFromSigns(La,p.sign)});}
   }
   return {ben,mal,score:ben.length*0.35-mal.length*0.35};
@@ -7916,6 +7916,7 @@ function planetsAspecting(c,targetSign){
     if(pk==='Ma'&&(d===3||d===7)){result.push({pk,fromH:houseFromSigns(c.La.sign,lp.sign)});continue;}
     if(pk==='Ju'&&(d===4||d===8)){result.push({pk,fromH:houseFromSigns(c.La.sign,lp.sign)});continue;}
     if(pk==='Sa'&&(d===2||d===9)){result.push({pk,fromH:houseFromSigns(c.La.sign,lp.sign)});continue;}
+    if((pk==='Ra'||pk==='Ke')&&(d===4||d===8)){result.push({pk,fromH:houseFromSigns(c.La.sign,lp.sign)});continue;}
   }
   return result;
 }
