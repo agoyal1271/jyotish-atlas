@@ -3039,8 +3039,8 @@ function bmShowPlanetPanel(k,ct){
   panel.innerHTML=`<div class="bm-pp-inner">`+
     `<button class="bm-pp-close" onclick="bmClosePlanetPanel()" title="Close (or click outside)">×</button>`+
     `<div class="bm-pp-name" style="color:${col}">${gl} ${nm}</div>`+
-    `<div class="bm-pp-loc">D-1 · <b style="color:var(--ink)">${SIGNS[p.sign]}</b> ${isNode?'':p.deg.toFixed(1)+'° '} · H${h1}<br>`+
-    (isNode?'':`${nak.n} · Pada ${nak.pada}`)+`</div>`+
+    `<div class="bm-pp-loc">D-1 · <b style="color:var(--ink)">${SIGNS[p.sign]}</b> ${p.deg.toFixed(1)}° · H${h1}<br>`+
+    `${nak.n} · Pada ${nak.pada}</div>`+
     `<div class="bm-pp-dignity" style="color:${d1dig.score>=1?'var(--exalt)':d1dig.score<=-1?'var(--debil)':'var(--ink)'}">${isNode?'—':d1dig.full.split('·')[0].trim()}</div>`+
     `<div><span class="${benCls}">${benLbl}</span>${combust?' &nbsp;·&nbsp; <span class="bm-combust">⊙ combust</span>':''}</div>`+
     varSec+
