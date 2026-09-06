@@ -17,6 +17,8 @@ Open `index.html` in any modern browser — no server or install required. Chart
 | **Synthesizer** | Place a planet (D-1 sign + degree + house) → get the full layered reading including **D-9 Navamsa** (promise vs delivery), dignity, Nakshatra and Drishti. Switch to **Empty house** mode to read a house through its lord |
 | **My Charts** | Create a Kundali from birth details, or upload a `.txt` / text-based `.pdf` chart (JHora / Parashara's Light format). View and download a North Indian D-1 chart, then explore every planet's Nakshatra, vargas and combined verdict |
 | **BAV** | **Bhinna Ashtakavarga** for all 7 planets + Sarvashtakavarga, computed from the natal positions. Colour-coded by strength (5+ green → 1 red), natal house outlined, best/worst transit houses surfaced |
+| **Career Decoder** | The nakshatra sūtra for livelihood, as a step-by-step chain: **kāraka → its nakshatra → the nakshatra's lord → the rāśi and bhāva that lord occupies → its dispositor → whoever joins or aspects it**. The rāśi names the domain of the work, the bhāva names how and where it's delivered. Saturn (karma) by default; switch the kāraka to read money (Venus), business (Mercury), the mind (Moon) and more. Houses can be counted from the Lagna or from Chandra Lagna |
+| **Opportunity Windows** | The upachaya sūtra for timing: the chart is rotated so a **kāraka becomes the 1st house**, and any planet in the **3rd, 6th, 10th or 11th** from it hands over an opening in that kāraka's domain — during its own daśā or antardaśā. Each such planet is dated against the Vimshottari timeline (delivered / running / upcoming). Rotate to Moon (opportunity in general), Venus (money), Jupiter (growth), Mercury (business), Sun (vitality), and more |
 | **Practice** | Endless quiz drawn from the data — exaltations, lordships, karakas, house meanings |
 
 ---
@@ -40,7 +42,7 @@ Compatible with JHora and Parashara's Light `.txt` exports and text-based PDFs. 
 - **Built-in Kundali generation** — bundled Astronomy Engine calculates accurate tropical planetary positions, which the app converts to Lahiri sidereal positions; `tz-lookup` resolves an IANA timezone from birthplace coordinates
 - **Place privacy** — place search uses OpenStreetMap Nominatim. Only the search words are transmitted; the name, birth date/time and calculated chart remain in the browser
 - **Chart settings** — Lahiri ayanāṃśa, sidereal zodiac, whole-sign houses and mean lunar nodes
-- **Built-in regression guard** — open `index.html#selftest` to run 27 checks covering Navamsa, chart generation, timezone conversion, Kundali rendering and core data invariants. It stays inert during normal use.
+- **Built-in regression guard** — open `index.html#selftest` to run 40 checks covering Navamsa, chart generation, timezone conversion, Kundali rendering, the nakshatra sūtra chain / upachaya rotation, and core data invariants. It stays inert during normal use.
 - **Navamsa (D-9)** computed from each planet's degree using the classical `NAV_START = [Aries, Capricorn, Libra, Cancer]` rule; validated against four real natal charts (0 errors)
 - **BAV tables** validated sign-by-sign against four natal charts (23/23 rows exact). Two commonly-printed table errors (Moon and Venus) were corrected via a four-chart constraint solver
 - **Nakshatra** computed as `floor(lon / 13°20')` with pada as `floor(remainder / 3°20') + 1`; validated 11/11 against chart files

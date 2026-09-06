@@ -660,6 +660,78 @@
   .ol-ai-btn:focus-visible{border-color:var(--gold2)}
   .ol-ai-note{font-size:11.5px;color:var(--muted);margin-left:4px}
 
+  /* ===== Karma Sutra — karaka → nakshatra → lord → rashi/bhava chain ===== */
+  .kd-controls{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px}
+  .kd-ref{display:flex;gap:0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--panel2)}
+  .kd-ref button{background:none;border:none;color:var(--muted);font:inherit;font-size:12.5px;font-weight:600;padding:9px 15px;cursor:pointer;transition:background var(--dur) var(--ease),color var(--dur) var(--ease)}
+  .kd-ref button.on{background:color-mix(in srgb,var(--gold) 20%,transparent);color:var(--gold2)}
+  .kd-ref button:focus-visible{outline:2px solid var(--gold2);outline-offset:-2px}
+  .kd-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:14px 18px;margin-bottom:16px;border-radius:13px;
+    background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 14%,var(--panel2)),var(--panel2));border:1px solid color-mix(in srgb,var(--gold) 30%,var(--line))}
+  .kd-head-q{font-size:12px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+  .kd-head-a{font-family:var(--font-display);font-size:20px;color:var(--gold2);line-height:1.3}
+  .kd-chain{display:flex;flex-direction:column;gap:0;position:relative}
+  .kd-step{display:flex;gap:14px;padding-bottom:18px;position:relative}
+  .kd-step:not(:last-child)::before{content:"";position:absolute;left:15px;top:34px;bottom:0;width:2px;background:linear-gradient(180deg,var(--gold2),color-mix(in srgb,var(--gold) 22%,transparent))}
+  .kd-step-n{flex:0 0 32px;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:800;color:#2a1a0c;background:linear-gradient(135deg,var(--gold),var(--terracotta));position:relative;z-index:1}
+  .kd-step-n.kd-n-extra{background:var(--panel);color:var(--gold2);border:1px solid color-mix(in srgb,var(--gold) 40%,var(--line))}
+  .kd-step-main{flex:1;min-width:0}
+  .kd-step-lbl{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+  .kd-step-val{font-size:15.5px;font-weight:700;color:var(--ink);line-height:1.5;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .kd-step-val .emblem{width:24px;height:24px;flex:0 0 auto}
+  .kd-step-note{font-size:13px;color:var(--muted);line-height:1.62;margin-top:5px}
+  .kd-step-note b{color:var(--gold2)}
+  .kd-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .kd-pill{font-size:11.5px;padding:3px 10px;border-radius:999px;font-weight:600;border:1px solid var(--line);background:var(--panel);color:var(--muted)}
+  .kd-pill.on{background:color-mix(in srgb,var(--gold) 15%,transparent);color:var(--gold2);border-color:color-mix(in srgb,var(--gold) 34%,transparent)}
+  .kd-verdict{margin-top:6px;padding:16px 19px;border-radius:13px;background:var(--panel2);border:1px solid var(--line);border-left:3px solid var(--gold2);font-size:13.5px;line-height:1.72;color:var(--ink)}
+  .kd-verdict h4{margin:0 0 9px;font-size:14px;color:var(--gold2);font-weight:700}
+  .kd-verdict b{color:var(--gold2)}
+  .kd-verdict p{margin:0 0 9px}
+  .kd-verdict p:last-child{margin-bottom:0}
+  .kd-sig{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+  .kd-sig-row{display:flex;gap:10px;align-items:flex-start;padding:10px 13px;border-radius:10px;background:var(--panel2);border:1px solid var(--line);font-size:12.8px;line-height:1.6}
+  .kd-sig-row .kd-sig-tag{flex:0 0 auto;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;border-radius:999px;
+    background:color-mix(in srgb,var(--friend) 16%,transparent);color:var(--friend);border:1px solid color-mix(in srgb,var(--friend) 32%,transparent)}
+  .kd-caveat{margin-top:14px;font-size:12px;color:var(--muted);line-height:1.62;padding:11px 14px;background:var(--panel);border:1px solid var(--line);border-radius:10px}
+
+  /* ===== Opportunity Windows — upachaya (3·6·10·11) from a kāraka ===== */
+  .op-controls{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end;margin-bottom:18px}
+  .op-banner{padding:14px 18px;border-radius:13px;margin-bottom:16px;font-size:14px;line-height:1.62;color:var(--ink);
+    background:linear-gradient(135deg,color-mix(in srgb,var(--exalt) 18%,var(--panel2)),var(--panel2));border:1px solid color-mix(in srgb,var(--exalt) 38%,var(--line))}
+  .op-banner.op-none{background:linear-gradient(135deg,color-mix(in srgb,var(--debil) 16%,var(--panel2)),var(--panel2));border-color:color-mix(in srgb,var(--debil) 38%,var(--line))}
+  .op-banner b{color:var(--gold2)}
+  .op-wheel{display:grid;grid-template-columns:repeat(12,1fr);gap:5px;margin-bottom:8px}
+  .op-cell{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:8px 4px;text-align:center;min-height:70px;
+    display:flex;flex-direction:column;align-items:center;gap:4px;transition:transform var(--dur) var(--ease),border-color var(--dur) var(--ease)}
+  .op-cell.op-up{border-color:color-mix(in srgb,var(--gold) 52%,var(--line));background:color-mix(in srgb,var(--gold) 11%,var(--panel2))}
+  .op-cell.op-up.op-hit{border-color:var(--exalt);background:color-mix(in srgb,var(--exalt) 15%,var(--panel2));transform:translateY(-2px)}
+  .op-cell-n{font-size:11px;font-weight:800;color:var(--muted)}
+  .op-cell.op-up .op-cell-n{color:var(--gold2)}
+  .op-cell-sign{font-size:10px;color:var(--muted);line-height:1.2}
+  .op-cell-p{display:flex;flex-wrap:wrap;gap:2px;justify-content:center}
+  .op-wheel-key{font-size:11.5px;color:var(--muted);margin-bottom:16px;line-height:1.6}
+  .op-list{display:flex;flex-direction:column;gap:12px}
+  .op-card{background:var(--panel2);border:1px solid var(--line);border-radius:13px;padding:15px 18px}
+  .op-card-hd{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:9px}
+  .op-card-hd .emblem{width:26px;height:26px}
+  .op-card-name{font-size:16px;font-weight:700;color:var(--ink)}
+  .op-card-where{font-size:12px;color:var(--muted)}
+  .op-card-note{font-size:13px;color:var(--muted);line-height:1.62;margin-bottom:11px}
+  .op-wins{display:flex;flex-direction:column;gap:6px}
+  .op-win{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:9px;background:var(--panel);border:1px solid var(--line);font-size:12.5px;flex-wrap:wrap}
+  .op-win.op-now{border-color:var(--gold2);background:color-mix(in srgb,var(--gold) 14%,var(--panel));box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 22%,transparent)}
+  .op-win.op-past{opacity:.62}
+  .op-win-tag{flex:0 0 auto;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);color:var(--muted)}
+  .op-win.op-now .op-win-tag{background:var(--gold);color:#2a1a0c;border-color:transparent}
+  .op-win.op-next .op-win-tag{color:var(--exalt);border-color:color-mix(in srgb,var(--exalt) 34%,transparent)}
+  .op-win-lords{font-weight:700;color:var(--ink)}
+  .op-win-dates{color:var(--muted);margin-left:auto;font-size:12px;white-space:nowrap}
+  .op-nodata{padding:12px 14px;border-radius:10px;background:var(--panel);border:1px dashed var(--line);color:var(--muted);font-size:12.5px;line-height:1.6}
+  @media(max-width:900px){.op-wheel{grid-template-columns:repeat(6,1fr)}}
+  @media(max-width:600px){.kd-controls,.op-controls{flex-direction:column;align-items:stretch}.op-win-dates{margin-left:0;width:100%}}
+
   /* ===== House Strip ===== */
   .hs-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
   @media(max-width:700px){.hs-grid{grid-template-columns:repeat(4,1fr)}}
@@ -1696,6 +1768,8 @@ html.light .brand{color:var(--ink)!important}
         <a href="#synth">Synthesizer</a>
         <a href="#bbavam">Bhavat Bhavam</a>
         <a href="#arudhas">Graha Arudhas</a>
+        <a href="#karmasutra">Career Decoder</a>
+        <a href="#opportunity">Opportunity Windows</a>
         <a href="#prashna">Prashna Kundli</a>
         <a href="#compare">Compare</a>
       </div>
@@ -2086,6 +2160,57 @@ html.light .brand{color:var(--ink)!important}
     </div>
   </section>
 
+  <section id="karmasutra" class="section-reveal">
+    <div class="eyebrow">Nakshatra sūtra · profession &amp; livelihood</div>
+    <h2 class="display">Career Decoder</h2>
+    <p class="sub">Saturn is the kāraka of <i>karma</i> — the work you actually do. This sūtra reads the chain rather than the planet: <b>Saturn → the nakshatra it sits in → that nakshatra's lord → the rāśi and bhāva that lord occupies</b>. The rāśi names the <i>domain</i> of the work; the bhāva names <i>how and where</i> it is delivered; the dispositor and the planets aspecting that lord add the flavours. Swap the kāraka to run the same chain for money, learning or the mind.</p>
+    <div class="panel ec-zone-card" style="padding:22px">
+      <div class="kd-controls">
+        <div class="bb-sel-grp">
+          <label for="kdChart">Chart</label>
+          <select id="kdChart" class="bb-sel"></select>
+        </div>
+        <div class="bb-sel-grp">
+          <label for="kdKaraka">Decode</label>
+          <select id="kdKaraka" class="bb-sel"></select>
+        </div>
+        <div class="bb-sel-grp">
+          <label>Count houses from</label>
+          <div class="kd-ref" id="kdRef" role="group" aria-label="House reference point">
+            <button type="button" data-ref="La" class="on">Lagna</button>
+            <button type="button" data-ref="Mo">Chandra Lagna</button>
+          </div>
+        </div>
+      </div>
+      <div id="kdEmpty" style="text-align:center;color:var(--muted);padding:30px 0;font-size:13.5px">Add a chart in <b>My Charts</b> above to decode the career chain.</div>
+      <div id="kdResult" style="display:none"></div>
+    </div>
+  </section>
+
+  <section id="opportunity" class="section-reveal">
+    <div class="eyebrow">Upachaya sūtra · timing</div>
+    <h2 class="display">Opportunity Windows</h2>
+    <p class="sub">Houses <b>3, 6, 10 and 11</b> — the <i>upachaya</i> or growth houses — are where life hands you openings. Counted not from the Lagna but <b>from the kāraka of the thing you want</b>: Moon for opportunity in general, Venus for money, Jupiter for expansion, Mercury for business, Sun for vitality. Any planet sitting in those four houses from that kāraka will hand you an opening — and it does so <b>when its daśā or antardaśā runs</b>. This finds those planets and dates their windows.</p>
+    <div class="panel ec-zone-card" style="padding:22px">
+      <div class="op-controls">
+        <div class="bb-sel-grp">
+          <label for="opChart">Chart</label>
+          <select id="opChart" class="bb-sel"></select>
+        </div>
+        <div class="bb-sel-grp">
+          <label for="opKaraka">Opportunity in…</label>
+          <select id="opKaraka" class="bb-sel"></select>
+        </div>
+        <div class="bb-sel-grp" id="opBdWrap" style="display:none">
+          <label for="opBirthDate">Birth date <span style="font-weight:400;color:var(--muted)">(for daśā dates)</span></label>
+          <input type="text" id="opBirthDate" class="bb-sel" placeholder="e.g. May 1, 1988">
+        </div>
+      </div>
+      <div id="opEmpty" style="text-align:center;color:var(--muted);padding:30px 0;font-size:13.5px">Add a chart in <b>My Charts</b> above to find your opportunity windows.</div>
+      <div id="opResult" style="display:none"></div>
+    </div>
+  </section>
+
   <section id="lifepredictor" class="section-reveal">
     <div class="eyebrow">Full-life timeline</div>
     <h2 class="display">Life Predictor</h2>
@@ -2250,7 +2375,7 @@ html.light .brand{color:var(--ink)!important}
   </section>
 
   <footer>
-    <p><b>About the content.</b> Significations, dignities, lordships, Navamsa &amp; aspects follow the classical <i>Brihat Parashara Hora Shastra</i>. Chapter numbering varies by edition, so references are by topic. Rahu/Ketu exaltation differs between authorities and is noted. Your pasted charts are stored only in this browser (localStorage).</p>
+    <p><b>About the content.</b> Significations, dignities, lordships, Navamsa &amp; aspects follow the classical <i>Brihat Parashara Hora Shastra</i>. Chapter numbering varies by edition, so references are by topic. Rahu/Ketu exaltation differs between authorities and is noted. The <b>Career Decoder</b> and <b>Opportunity Windows</b> sections apply two teaching sūtras — reading a kāraka through its nakshatra lord, and counting the upachaya from a kāraka rather than from the Lagna. Both are built on standard Parashari components (nakshatra lordship, whole-sign houses, dispositors, Vimshottari), but the sūtras themselves are taught technique rather than a direct BPHS citation, and each is one thread of a chart, not the whole reading. Your pasted charts are stored only in this browser (localStorage).</p>
   </footer>
 </div>
 
@@ -8793,6 +8918,521 @@ function renderSpecialLagnas(c,La,sav){
   refreshChartSel();
 })();
 
+/* ══════════════════════════════════════════════════════════════════════
+   NAKSHATRA SŪTRA ENGINE — shared by the Career Decoder and the
+   Opportunity Windows sections.
+
+   Career Decoder chain (Saturn = kāraka of karma):
+     kāraka → its nakshatra → the nakshatra's lord → the rāśi + bhāva that
+     lord occupies → that lord's dispositor → whoever aspects/joins it.
+   The rāśi answers "in what domain", the bhāva answers "delivered how and
+   where", the dispositor and aspects add the flavours.
+
+   Opportunity Windows: the upachaya houses (3·6·10·11) counted from the
+   kāraka of the thing wanted. Planets there hand over openings, and they
+   do it during their own Mahā/Antardaśā — so each is dated against the
+   chart's Vimshottari timeline.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Rāśi = the domain / environment the work belongs to. */
+const SIGN_DOMAIN=[
+  {short:"initiative &amp; sharp instruments",long:"pioneering, competitive, start-from-scratch work — machinery and tools, sport, defence, surgery, anything that needs a first mover"},
+  {short:"accumulation &amp; sustenance",long:"gathering and holding resources — finance and banking, food, land and produce, luxury goods, voice and beauty; work that feeds and sustains a household"},
+  {short:"data, documents &amp; many hands",long:"information work — data, documents, gadgets, writing, trade and commerce; typically several parallel roles rather than one"},
+  {short:"nurture, teaching &amp; the home",long:"caring and cultivating — teaching, counselling, food, homes and property, public-facing service; work that looks after people"},
+  {short:"performance, media &amp; authority",long:"the stage and the spotlight — entertainment, film and media, creative direction, politics and leadership; work seen by an audience"},
+  {short:"service, analysis &amp; health",long:"precision service — health and diagnostics, accounts and audit, quality and process, detailed problem-solving"},
+  {short:"the public, trade &amp; design",long:"dealing with people at scale — trade, law, negotiation, design and aesthetics, partnerships and contracts"},
+  {short:"research &amp; hidden matters",long:"going beneath the surface — research, investigation, surgery, insurance and crisis work, the occult; secrets and transformations"},
+  {short:"teaching, law &amp; distance",long:"principles and guidance — teaching, law, philosophy, publishing, long-distance and cross-border work"},
+  {short:"structure, industry &amp; administration",long:"building durable systems — administration, industry, government, engineering, long-haul execution and organisation"},
+  {short:"networks, technology &amp; groups",long:"systems of many — technology, networks and platforms, large organisations, social causes, unconventional models"},
+  {short:"imagination, healing &amp; foreign shores",long:"the boundless — healing and hospitals, spirituality, the arts, water, charity, foreign lands and remote work"}
+];
+
+/* Bhāva = how and where the work is delivered. */
+const HOUSE_DELIVERY=[
+  {short:"through yourself",long:"you are the product — work led personally, identity-driven, difficult to delegate"},
+  {short:"through family &amp; resources",long:"family business, accumulated wealth, food, the voice; earning by holding and growing what you already have"},
+  {short:"with your own hands &amp; media",long:"self-published, self-taught, communicated directly — writing, media, online reach, short travel, skill of hand"},
+  {short:"from home, by teaching",long:"work anchored at home or on property — teaching, comfort and the domestic sector, vehicles, real estate"},
+  {short:"through creativity &amp; counsel",long:"advisory and creative output — teaching, mentoring, speculation, children, performance; learning usually runs alongside"},
+  {short:"as service &amp; employment",long:"a job, a daily grind, health-service, competition, litigation and debt; delivery is through disciplined routine"},
+  {short:"to the public &amp; clients",long:"you go to the people — client-facing work, partnership, trade, contracts; often done with or alongside a spouse"},
+  {short:"through research &amp; the hidden",long:"technical, occult, insurance, investigation; the work changes shape suddenly and often carries other people's resources"},
+  {short:"as consultancy &amp; dharma",long:"advising, teaching, publishing, guiding — often long-distance, foreign, or in a guru-like role"},
+  {short:"as visible position",long:"authority and recognition — government, public office, a title people know; the work is your public standing"},
+  {short:"through networks &amp; gains",long:"income streams and communities — large organisations, group ventures, referral and network-driven earning"},
+  {short:"behind the scenes &amp; abroad",long:"foreign lands, online or remote delivery, hospitals and institutions, research in seclusion; visible results, invisible worker"}
+];
+
+/* What each graha adds when it joins or aspects the nakshatra lord. */
+const PLANET_FLAVOR={
+  Su:"authority, government, self-driven visibility",
+  Mo:"the public, care, cash flow, emotional connect",
+  Ma:"technical skill, machines, land, competition, pressure",
+  Me:"communication, data, commerce, teaching, writing",
+  Ju:"teaching, finance and banking, advisory, expansion",
+  Ve:"design, the arts, comfort, relationships, luxury",
+  Sa:"structure, labour, service to the many, endurance",
+  Ra:"foreign reach, technology, unconventional routes, amplification",
+  Ke:"research, isolation, instinctive mastery, indifference to credit"
+};
+
+/* Kārakas the decoder chain can be run for. */
+const KD_KARAKAS=[
+  {k:"Sa",label:"Profession &amp; karma (Saturn)",q:"What work am I actually built to do?",
+   why:"Saturn is the kāraka of karma — the labour you owe and the livelihood you are held to. Its nakshatra names the field."},
+  {k:"Ve",label:"Money &amp; comfort (Venus)",q:"Where does my money actually come from?",
+   why:"Venus is the kāraka of wealth and comfort. Its nakshatra chain shows the source and the texture of what you earn and enjoy."},
+  {k:"Ju",label:"Wisdom, growth &amp; fortune (Jupiter)",q:"Where does my life expand?",
+   why:"Jupiter is the kāraka of wisdom, expansion and good fortune. Its nakshatra chain shows where growth is meant to land."},
+  {k:"Me",label:"Business, learning &amp; speech (Mercury)",q:"What is my mind commercially built for?",
+   why:"Mercury is the kāraka of commerce, learning and speech. Its nakshatra chain shows what your intellect trades in."},
+  {k:"Mo",label:"The mind &amp; emotional life (Moon)",q:"What does my mind keep returning to?",
+   why:"The Moon is the mind itself. Its nakshatra chain shows where your attention and emotional need actually live."},
+  {k:"Su",label:"Authority, vitality &amp; father (Sun)",q:"Where do I carry authority?",
+   why:"The Sun is the kāraka of the self, vitality and authority. Its nakshatra chain shows the arena where you are meant to stand in front."},
+  {k:"Ma",label:"Drive, property &amp; technical skill (Mars)",q:"Where does my force go?",
+   why:"Mars is the kāraka of drive, land and technical capability. Its nakshatra chain shows where that force is meant to be spent."}
+];
+
+/* Kārakas the opportunity sūtra can be rotated to. The first five are the
+   ones taught with the sūtra; the last two extend it on the same logic. */
+const OP_KARAKAS=[
+  {k:"Mo",label:"Opportunity in general (Moon)",domain:"openings of any kind",
+   note:"The Moon is the mind, and the mind sees an opening before the world offers it. Planets in the growth houses from the Moon keep new possibilities circulating in your head, and hand them over when their daśā runs."},
+  {k:"Ve",label:"Money (Venus)",domain:"money and material comfort",
+   note:"Venus is wealth and comfort. Planets in the growth houses from Venus are the ones that actually put money in front of you."},
+  {k:"Ju",label:"Growth, prosperity &amp; progeny (Jupiter)",domain:"expansion of family, prosperity and standing",
+   note:"Jupiter is expansion in every sense: children, prosperity, a bigger life. Planets in its growth houses deliver that enlargement."},
+  {k:"Me",label:"Business (Mercury)",domain:"business, trade and new ventures",
+   note:"Mercury is commerce. Planets in the growth houses from Mercury bring business openings and new income lines."},
+  {k:"Su",label:"Health &amp; vitality (Sun)",domain:"health, energy and authority",
+   note:"The Sun is vitality and the self. Planets in its growth houses lift energy, standing and physical robustness."},
+  {k:"Sa",label:"Career &amp; discipline (Saturn)",domain:"professional openings",ext:true,
+   note:"An extension of the same sūtra: Saturn is karma and profession, so its growth houses time the openings in the work itself."},
+  {k:"Ma",label:"Property &amp; courage (Mars)",domain:"land, property and bold moves",ext:true,
+   note:"An extension of the same sūtra: Mars is land, machinery and courage, so its growth houses time property and bold-move openings."}
+];
+
+/* Which house is `sign` from `refSign`, 1-based whole-sign. */
+function ksHouse(refSign,sign){ return houseFromSigns(refSign,sign); }
+
+/* The full career/kāraka chain for one chart. refK is 'La' or 'Mo'. */
+function buildKarmaChain(c,karakaK,refK){
+  const kp=c.planets&&c.planets[karakaK];
+  if(!kp) return null;
+  const refSign=refK==="Mo"?(c.planets.Mo?c.planets.Mo.sign:null):(c.La?c.La.sign:null);
+  if(refSign==null) return null;
+
+  const nak=nakInfo(kp.sign*30+(kp.deg||0));
+  const lordK=nak.l;
+  const lp=c.planets[lordK];
+  if(!lp) return null;
+
+  const lordHouse=ksHouse(refSign,lp.sign);
+  const lordDig=dignityOf(lordK,lp.sign);
+  const dispK=SIGN_LORD[lp.sign];
+  const dp=c.planets[dispK]||null;
+  const dispHouse=dp?ksHouse(refSign,dp.sign):null;
+
+  // Who joins or aspects the nakshatra lord (whole-sign, BPHS special aspects).
+  const withLord=[],aspecting=[];
+  for(const k of ["Su","Mo","Ma","Me","Ju","Ve","Sa","Ra","Ke"]){
+    const p=c.planets[k];
+    if(!p||k===lordK) continue;
+    if(p.sign===lp.sign){withLord.push(k);continue;}
+    if(aspectsFromHouse(k,ksHouse(refSign,p.sign)).includes(lordHouse)) aspecting.push(k);
+  }
+
+  // Lords of the houses that mark a professional signature.
+  const lordOfHouse=h=>SIGN_LORD[(refSign+h-1)%12];
+  const l6=lordOfHouse(6),l8=lordOfHouse(8),l5=lordOfHouse(5),l10=lordOfHouse(10);
+  const signals=[];
+  const sameSign=(a,b)=>c.planets[a]&&c.planets[b]&&c.planets[a].sign===c.planets[b].sign;
+  if(l6!==l8&&sameSign(l6,l8)){
+    signals.push({tag:"6th + 8th",text:`The lords of the 6th and 8th are together in ${SIGNS[c.planets[l6].sign]}. Classically this is the doctor, surgeon, scientist or occult practitioner combination — and it always brings pressure and deadlines into the work.`});
+    if(l5!==l6&&l5!==l8&&sameSign(l5,l6)) signals.push({tag:"5th joins",text:"The 5th lord sits with them, so study runs in parallel with the work — you will always be learning something alongside the job."});
+  } else if(l6===l8){
+    signals.push({tag:"6th = 8th",text:`One graha (${GBYK[l6].name}) owns both the 6th and the 8th, so service and crisis share a ruler — work tends to carry pressure, and a second occupation is common.`});
+  }
+  if([3,9,12].includes(lordHouse)) signals.push({tag:"reach",text:`The nakshatra lord sits in the ${ORD(lordHouse)} — the work travels. Online delivery, distance teaching, consultancy or a foreign clientele fit this placement far better than a fixed desk.`});
+  if(lordHouse===4) signals.push({tag:"home",text:"The nakshatra lord in the 4th is the classical teaching and home-anchored placement — work delivered from where you live, or by instructing others."});
+  if(withLord.includes("Ju")||aspecting.includes("Ju")) signals.push({tag:"guru",text:"Jupiter joins or watches the nakshatra lord. A teaching, advisory or finance strand belongs in this livelihood, whether or not it is the main title."});
+  if(withLord.includes("Ra")||aspecting.includes("Ra")) signals.push({tag:"Rahu",text:"Rahu is on the chain. Expect the unconventional route in — foreign links, technology, or a path nobody in the family took."});
+  if(lp.retro) signals.push({tag:"retrograde",text:`${GBYK[lordK].name} is retrograde, so this domain is revisited rather than entered once — expect a return to an earlier field, or recognition that arrives late.`});
+  if(lordK===karakaK) signals.push({tag:"self-ruled",text:`${GBYK[karakaK].name} sits in its own nakshatra, so the chain closes on itself. Its own sign and house carry the entire reading — the signature is unusually pure and hard to escape.`});
+  if(dispK===lordK) signals.push({tag:"own sign",text:`${GBYK[lordK].name} is in its own sign, so it needs no one else to deliver — the domain is self-sufficient and stable.`});
+
+  return {karakaK,kp,refSign,refK,nak,lordK,lp,lordHouse,lordDig,dispK,dp,dispHouse,withLord,aspecting,signals,l10};
+}
+
+/* Upachaya (3·6·10·11) occupants counted from a kāraka, with their daśā windows. */
+function buildOpportunity(c,karakaK){
+  const kp=c.planets&&c.planets[karakaK];
+  if(!kp) return null;
+  const UP=[3,6,10,11];
+  const upSigns=UP.map(h=>(kp.sign+h-1)%12);
+  const hits=[];
+  for(const k of ["Su","Mo","Ma","Me","Ju","Ve","Sa","Ra","Ke"]){
+    const p=c.planets[k];
+    if(!p||k===karakaK) continue;
+    const h=houseFromSigns(kp.sign,p.sign);
+    if(UP.includes(h)) hits.push({k,p,h,dig:dignityOf(k,p.sign)});
+  }
+  hits.sort((a,b)=>UP.indexOf(a.h)-UP.indexOf(b.h));
+  return {karakaK,kp,upSigns,hits};
+}
+
+/* Every Mahā/Antardaśā window in which planet k is the active lord. */
+function dashaWindowsFor(dashas,k){
+  if(!dashas||!dashas.mahas) return [];
+  const out=[];
+  for(const md of dashas.mahas){
+    const ownMaha=md.lord===k;
+    if(ownMaha) out.push({maha:md.lord,antar:null,own:true,start:md.start,end:md.end});
+    for(const ad of (md.antars||[])){
+      // The planet's antardasha inside its own mahadasha is already contained in
+      // the mahadasha window above — listing both reads as a duplicate.
+      if(ad.lord!==k||ownMaha) continue;
+      const s=Math.max(ad.start,md.start),e=Math.min(ad.end,md.end);
+      if(e>s) out.push({maha:md.lord,antar:ad.lord,own:false,start:s,end:e});
+    }
+  }
+  out.sort((a,b)=>a.start-b.start);
+  return out;
+}
+
+/* ===== CAREER DECODER SECTION ===== */
+(function(){
+  const LS_KEY="jyotish_charts_v1";
+  function getCharts(){try{return JSON.parse(localStorage.getItem(LS_KEY))||[];}catch(e){return[];}}
+  const selChart=document.getElementById("kdChart"),selKaraka=document.getElementById("kdKaraka");
+  const refBox=document.getElementById("kdRef"),emptyDiv=document.getElementById("kdEmpty"),resultDiv=document.getElementById("kdResult");
+  if(!selChart) return;
+  let refK="La";
+
+  KD_KARAKAS.forEach((kk,i)=>{const o=document.createElement("option");o.value=i;o.innerHTML=kk.label;selKaraka.appendChild(o);});
+
+  function step(n,label,val,note,extra){
+    return `<div class="kd-step"><div class="kd-step-n${extra?" kd-n-extra":""}">${n}</div><div class="kd-step-main">
+      <div class="kd-step-lbl">${label}</div><div class="kd-step-val">${val}</div>
+      ${note?`<div class="kd-step-note">${note}</div>`:""}</div></div>`;
+  }
+
+  function render(c,ch,kk){
+    const G=GBYK[ch.karakaK],L=GBYK[ch.lordK];
+    const kHouse=ksHouse(ch.refSign,ch.kp.sign);
+    const refName=ch.refK==="Mo"?"Chandra Lagna":"Lagna";
+    const dom=SIGN_DOMAIN[ch.lp.sign],del=HOUSE_DELIVERY[ch.lordHouse-1];
+    const nk=NAK[ch.nak.idx];
+
+    let html=`<div class="kd-head">
+      <div style="flex:1;min-width:220px">
+        <div class="kd-head-q">${kk.q}</div>
+        <div class="kd-head-a">${dom.short} — ${del.short}</div>
+      </div>
+      <span class="ec-chip gold">houses from ${refName}</span>
+    </div><div class="kd-chain">`;
+
+    html+=step(1,`Kāraka · ${G.name}`,
+      `${grahaEmblem(ch.karakaK,{size:24})}<span>${G.name}${retroSup(ch.kp)} in ${SIGNS[ch.kp.sign]} · ${ORD(kHouse)} house</span>`,
+      kk.why);
+
+    html+=step(2,"…sits in the nakshatra",
+      `<span style="color:var(--gold2)">${nk.n}</span> <span style="font-weight:400;color:var(--muted)">pada ${ch.nak.pada}</span>`,
+      `${nk.n} is "${nk.tr}" — ${nk.t}. Its own career grain: <b>${nk.career}</b>. That grain colours the work whatever the field turns out to be.`);
+
+    html+=step(3,`…ruled by ${L.name}`,
+      `${grahaEmblem(ch.lordK,{size:24})}<span>${L.name}</span>`,
+      `The nakshatra's lord is where the sūtra actually points. Everything about the livelihood is now read from <b>${L.name}</b>, not from ${G.name}.`);
+
+    html+=step(4,`${L.name} sits in the rāśi — the domain`,
+      `${rashiEmblem(ch.lp.sign,{size:24})}<span>${SIGNS[ch.lp.sign]}</span> <span class="ec-chip" style="margin-left:4px">${ch.lordDig.full.split("·")[0].trim()}</span>`,
+      `The rāśi names the <b>field</b>: ${dom.long}.`);
+
+    html+=step(5,`…in the ${ORD(ch.lordHouse)} house — the delivery`,
+      `<span style="color:var(--gold2)">${ORD(ch.lordHouse)} house</span> <span style="font-weight:400;color:var(--muted)">from ${refName}</span>`,
+      `The bhāva names <b>how and where</b> it reaches people: ${del.long}.`);
+
+    if(ch.dp){
+      const ddom=SIGN_DOMAIN[ch.dp.sign];
+      html+=step(6,`Dispositor · ${GBYK[ch.dispK].name}`,
+        `${grahaEmblem(ch.dispK,{size:24})}<span>${GBYK[ch.dispK].name} in ${SIGNS[ch.dp.sign]} · ${ORD(ch.dispHouse)} house</span>`,
+        ch.dispK===ch.lordK
+          ?`${L.name} rules its own sign, so it answers to nobody — this domain runs on its own strength.`
+          :`${GBYK[ch.dispK].name} owns the sign ${L.name} sits in, so it holds the deed. Its own placement (${ddom.short}, ${HOUSE_DELIVERY[ch.dispHouse-1].short}) is the root the livelihood ultimately draws on.`);
+    }
+
+    const flav=[...ch.withLord.map(k=>({k,how:"joins"})),...ch.aspecting.map(k=>({k,how:"aspects"}))];
+    html+=step(7,`Who touches ${L.name}`,
+      flav.length
+        ?flav.map(f=>`<span class="kd-pill on">${GBYK[f.k].gl} ${GBYK[f.k].name} <span style="font-weight:400;opacity:.75">${f.how}</span></span>`).join("")
+        :`<span class="kd-pill">Nobody — ${L.name} works unaided</span>`,
+      flav.length
+        ?`Each of these adds a strand to the work: ${flav.map(f=>`<b>${GBYK[f.k].name}</b> — ${PLANET_FLAVOR[f.k]}`).join("; ")}.`
+        :`No graha joins or aspects ${L.name}. The livelihood stays close to the plain reading of ${SIGNS[ch.lp.sign]} in the ${ORD(ch.lordHouse)} — narrower, but cleaner and less contradictory.`,
+      true);
+
+    html+="</div>";
+
+    // Verdict
+    const flavList=flav.length?flav.map(f=>PLANET_FLAVOR[f.k].split(",")[0].trim()).join(", "):null;
+    html+=`<div class="kd-verdict"><h4>Reading the chain</h4>
+      <p>${G.name} — your kāraka for ${kk.label.replace(/\s*\([^)]*\)/,"").toLowerCase()} — falls in <b>${nk.n}</b>, so it reports to <b>${L.name}</b>. ${L.name} sits in <b>${SIGNS[ch.lp.sign]}</b>, which sets the domain: ${dom.long}. It occupies the <b>${ORD(ch.lordHouse)} house</b> from your ${refName}, which sets the delivery: ${del.long}.</p>
+      <p>Put together: this points to work in the register of <b>${dom.short}</b>, carried out <b>${del.short}</b>${flavList?`, with ${flavList} woven through it`:""}. ${nk.n} adds its own grain — ${nk.t} — so even a fully unrelated job title will still feel like that underneath.</p>
+      ${ch.dp&&ch.dispK!==ch.lordK?`<p>If the reading feels close but not exact, follow the dispositor: ${GBYK[ch.dispK].name} in the ${ORD(ch.dispHouse)} house is the root beneath it, and it usually explains the part of your work that the first pass missed.</p>`:""}
+    </div>`;
+
+    if(ch.signals.length){
+      html+='<div class="kd-sig">'+ch.signals.map(s=>`<div class="kd-sig-row"><span class="kd-sig-tag">${s.tag}</span><span>${s.text}</span></div>`).join("")+"</div>";
+    }
+
+    html+=`<div class="kd-caveat">This is a single sūtra, not a whole chart. It is read in reverse — you already know the profession and you are checking that the chain lands on it. On an unknown chart it narrows the field, it does not name the job title. If it misses, switch the house reference to Chandra Lagna and read it again; the mind's chart often matches when the Lagna's does not.</div>`;
+
+    html+=`<div class="ol-ai-wrap"><div class="ol-ai-hdr">
+        <b>✦ Get a full AI reading</b>
+        <span>The whole chain as a prompt — paste into Claude or Gemini for a deeper reading.</span>
+      </div>
+      <textarea class="ol-prompt-ta" id="kdPromptText" readonly></textarea>
+      <div class="ol-ai-btns">
+        <button class="ol-ai-btn ol-ai-btn-cp" onclick="JA.copyOnly('kdPromptText')">Copy prompt</button>
+        <button class="ol-ai-btn ol-ai-btn-cl" onclick="JA.copyOpen('kdPromptText','https://claude.ai')">Copy &amp; open Claude.ai →</button>
+        <button class="ol-ai-btn ol-ai-btn-gm" onclick="JA.copyOpen('kdPromptText','https://gemini.google.com')">Copy &amp; open Gemini →</button>
+        <span class="ol-ai-note">Prompt is copied to clipboard — just paste ⌘V</span>
+      </div></div>`;
+
+    resultDiv.innerHTML=html;
+
+    const strip=s=>String(s).replace(/&amp;/g,"&").replace(/<[^>]*>/g,"");
+    const ta=document.getElementById("kdPromptText");
+    if(ta){
+      const occ=["Su","Mo","Ma","Me","Ju","Ve","Sa","Ra","Ke"].filter(k=>c.planets[k])
+        .map(k=>`${GBYK[k].name}: ${SIGNS[c.planets[k].sign]} ${(c.planets[k].deg||0).toFixed(2)}° (house ${ksHouse(ch.refSign,c.planets[k].sign)}${c.planets[k].retro?", retrograde":""})`).join("\n");
+      ta.value=
+`You are a classical Vedic (Parashari) astrologer. Read ONE sutra carefully rather than the whole chart.
+
+THE SUTRA: the karaka of a matter is read through its nakshatra. Take the karaka's nakshatra, find that nakshatra's lord, and read the RASHI that lord occupies as the DOMAIN of the matter and the BHAVA it occupies as HOW AND WHERE it is delivered. Then refine with the lord's dispositor and with whatever joins or aspects it.
+
+CHART (Lahiri sidereal, whole-sign houses; houses counted from ${strip(refName)})
+Lagna: ${SIGNS[c.La.sign]}${c.planets.Mo?`\nMoon sign: ${SIGNS[c.planets.Mo.sign]}`:""}
+${occ}
+
+THE CHAIN
+1. Karaka: ${G.name} in ${SIGNS[ch.kp.sign]}, house ${kHouse}
+2. Nakshatra: ${nk.n} pada ${ch.nak.pada} (${strip(nk.tr)}; ${strip(nk.t)}; career grain: ${strip(nk.career)})
+3. Nakshatra lord: ${L.name}
+4. ${L.name} is in ${SIGNS[ch.lp.sign]} — domain: ${strip(dom.long)}
+5. ${L.name} is in house ${ch.lordHouse} — delivery: ${strip(del.long)}
+6. Dispositor: ${GBYK[ch.dispK].name}${ch.dp?` in ${SIGNS[ch.dp.sign]}, house ${ch.dispHouse}`:""}
+7. Joining ${L.name}: ${ch.withLord.length?ch.withLord.map(k=>GBYK[k].name).join(", "):"none"}. Aspecting ${L.name}: ${ch.aspecting.length?ch.aspecting.map(k=>GBYK[k].name).join(", "):"none"}
+${ch.signals.length?`\nADDITIONAL SIGNALS\n${ch.signals.map(s=>`- ${strip(s.tag)}: ${strip(s.text)}`).join("\n")}`:""}
+
+QUESTION: ${strip(kk.q)}
+
+Please:
+1. Name 3-5 concrete fields this chain points to, with the specific step of the chain that justifies each.
+2. Say how the work is delivered day to day (employed / self-run / client-facing / from home / remote / behind the scenes) and why.
+3. Name the one strand of this livelihood the person is most likely to be underusing.
+4. State plainly what this sutra CANNOT tell us and which further factor (D-10, 10th lord, Amatyakaraka, current dasha) should be checked next.
+Be specific and classical. Do not flatter, and do not give medical, legal or financial advice.`;
+    }
+  }
+
+  function run(){
+    const charts=getCharts();
+    const idx=Math.min(parseInt(selChart.value,10)||0,charts.length-1);
+    const c=charts[idx];
+    if(!c||!c.La||!c.planets){emptyDiv.style.display="";resultDiv.style.display="none";return;}
+    const kk=KD_KARAKAS[parseInt(selKaraka.value,10)||0];
+    if(refK==="Mo"&&!c.planets.Mo){
+      emptyDiv.style.display="";resultDiv.style.display="none";
+      emptyDiv.innerHTML="This chart has no Moon position, so Chandra Lagna cannot be used. Switch back to <b>Lagna</b>.";
+      return;
+    }
+    const ch=buildKarmaChain(c,kk.k,refK);
+    if(!ch){
+      emptyDiv.style.display="";resultDiv.style.display="none";
+      emptyDiv.innerHTML=`This chart is missing the positions needed to run the ${GBYK[kk.k].name} chain.`;
+      return;
+    }
+    emptyDiv.style.display="none";resultDiv.style.display="block";
+    render(c,ch,kk);
+  }
+
+  function refreshCharts(){
+    const charts=getCharts(),prev=selChart.value;
+    selChart.innerHTML=charts.length
+      ?charts.map((c,i)=>`<option value="${i}">${kundaliEscape(c.name)}</option>`).join("")
+      :`<option value="">No charts saved yet</option>`;
+    if(charts.find((_,i)=>String(i)===prev)) selChart.value=prev;
+    if(!charts.length){
+      emptyDiv.innerHTML='Add a chart in <b>My Charts</b> above to decode the career chain.';
+      emptyDiv.style.display="";resultDiv.style.display="none";return;
+    }
+    run();
+  }
+
+  refBox&&refBox.addEventListener("click",e=>{
+    const b=e.target.closest("button[data-ref]"); if(!b) return;
+    refK=b.dataset.ref;
+    refBox.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));
+    run();
+  });
+  selChart.addEventListener("change",run);
+  selKaraka.addEventListener("change",run);
+  const _prev=JA.onChartsChange;
+  JA.onChartsChange=()=>{_prev&&_prev();refreshCharts();};
+  refreshCharts();
+})();
+
+/* ===== OPPORTUNITY WINDOWS SECTION ===== */
+(function(){
+  const LS_KEY="jyotish_charts_v1";
+  function getCharts(){try{return JSON.parse(localStorage.getItem(LS_KEY))||[];}catch(e){return[];}}
+  const selChart=document.getElementById("opChart"),selKaraka=document.getElementById("opKaraka");
+  const bdWrap=document.getElementById("opBdWrap"),bdInput=document.getElementById("opBirthDate");
+  const emptyDiv=document.getElementById("opEmpty"),resultDiv=document.getElementById("opResult");
+  if(!selChart) return;
+  const MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const fmtD=ms=>{const d=new Date(ms);return `${MON[d.getMonth()]} ${d.getFullYear()}`;};
+
+  OP_KARAKAS.forEach((kk,i)=>{const o=document.createElement("option");o.value=i;o.innerHTML=kk.label;selKaraka.appendChild(o);});
+
+  function render(c,op,kk){
+    const G=GBYK[op.karakaK],now=Date.now();
+    const dashas=c.dashas||null;
+
+    // Every window across every qualifying planet, so "what's next" is chart-wide.
+    const all=[];
+    op.hits.forEach(h=>{
+      dashaWindowsFor(dashas,h.k).forEach(w=>all.push(Object.assign({pk:h.k,uh:h.h},w)));
+    });
+    const running=all.filter(w=>w.start<=now&&w.end>now);
+    const future=all.filter(w=>w.start>now).sort((a,b)=>a.start-b.start);
+    const winLabel=w=>w.own?`${GBYK[w.maha].name} mahādaśā`:`${GBYK[w.maha].name} / ${GBYK[w.antar].name}`;
+
+    let html="";
+    if(!op.hits.length){
+      html+=`<div class="op-banner op-none"><b>No graha sits in the 3rd, 6th, 10th or 11th from ${G.name}.</b>
+        The growth houses from your kāraka of ${kk.domain} are empty, so openings in this area are not handed to you — they have to be manufactured. This is the friction case the sūtra warns about: effort still works, but it will not arrive as a knock on the door. Read the kāraka's own dignity and its dispositor instead, and look for support from the 11th lord from the Lagna.</div>`;
+    } else {
+      const names=op.hits.map(h=>GBYK[h.k].name).join(", ");
+      html+=`<div class="op-banner"><b>${op.hits.length} graha${op.hits.length>1?"s":""} in your growth houses from ${G.name}: ${names}.</b>
+        ${kk.note} Each of them opens a door in ${kk.domain} — and the timing is simply <b>when its daśā or antardaśā runs</b>.</div>`;
+      if(running.length){
+        html+=`<div class="op-banner" style="margin-top:-8px"><b>Running right now:</b> ${running.map(w=>`${winLabel(w)} (until ${fmtD(w.end)})`).join(", ")}. An opening in ${kk.domain} is live in this period — the sūtra says it is already in your hands or already on your mind.</div>`;
+      } else if(future.length){
+        const n=future[0];
+        html+=`<div class="op-banner" style="margin-top:-8px"><b>Next window:</b> ${winLabel(n)} from <b>${fmtD(n.start)}</b> to ${fmtD(n.end)} — ${GBYK[n.pk].name} sits in your ${ORD(n.uh)} from ${G.name}.</div>`;
+      }
+    }
+
+    // Rotated wheel: 12 houses counted from the kāraka.
+    html+='<div class="op-wheel">';
+    for(let h=1;h<=12;h++){
+      const sign=(op.kp.sign+h-1)%12;
+      const up=[3,6,10,11].includes(h);
+      const occ=["Su","Mo","Ma","Me","Ju","Ve","Sa","Ra","Ke"].filter(k=>c.planets[k]&&c.planets[k].sign===sign);
+      html+=`<div class="op-cell${up?" op-up":""}${up&&occ.some(k=>k!==op.karakaK)?" op-hit":""}" title="${ORD(h)} from ${G.name} — ${SIGNS[sign]}">
+        <span class="op-cell-n">${h===1?"1 ✦":h}</span>
+        <span class="op-cell-sign">${SIGNS[sign].slice(0,3)}</span>
+        <span class="op-cell-p">${occ.map(k=>glyphDot(GBYK[k])).join("")}</span>
+      </div>`;
+    }
+    html+=`</div><div class="op-wheel-key">The chart rotated so <b>${G.name} becomes the 1st house</b> (✦). The gold cells are the upachaya — 3, 6, 10 and 11 — the houses that grow with time. Green means a graha is sitting there, ready to hand something over.</div>`;
+
+    if(op.hits.length){
+      if(!dashas){
+        html+=`<div class="op-nodata">Add this chart's <b>birth date</b> above and the daśā windows for each of these grahas will be dated here. Without it the sūtra can name <i>who</i> gives the opening, but not <i>when</i>.</div>`;
+      }
+      html+='<div class="op-list">';
+      op.hits.forEach(h=>{
+        const g=GBYK[h.k];
+        const wins=dashaWindowsFor(dashas,h.k);
+        const past=wins.filter(w=>w.end<=now).slice(-2);
+        const cur=wins.filter(w=>w.start<=now&&w.end>now);
+        const next=wins.filter(w=>w.start>now).slice(0,3);
+        html+=`<div class="op-card">
+          <div class="op-card-hd">${grahaEmblem(h.k,{size:26})}<span class="op-card-name">${g.name}${retroSup(h.p)}</span>
+            <span class="op-card-where">${ORD(h.h)} from ${G.name} · in ${SIGNS[h.p.sign]} · ${h.dig.full.split("·")[0].trim()}</span></div>
+          <div class="op-card-note">In the ${ORD(h.h)} from ${G.name}, ${g.name} grows what it touches over time. What it opens carries its own signature — ${PLANET_FLAVOR[h.k]} — inside the field of ${kk.domain}.</div>`;
+        // The planet's own mahadasha is its widest opening, so it is always shown
+        // even when the recent/upcoming trim would otherwise drop it.
+        const shown=[...past,...cur,...next];
+        wins.filter(w=>w.own&&!shown.includes(w)).forEach(w=>shown.push(w));
+        shown.sort((a,b)=>a.start-b.start);
+        if(shown.length){
+          html+='<div class="op-wins">';
+          shown.forEach(w=>{
+            const state=w.end<=now?"past":w.start<=now?"now":"next";
+            const tag=state==="past"?"delivered":state==="now"?"running":"upcoming";
+            const lords=w.own?`${GBYK[w.maha].name} <span style="font-weight:400;color:var(--muted)">— full mahādaśā</span>`
+              :`${GBYK[w.maha].name} / ${GBYK[w.antar].name}`;
+            const dates=state==="now"?`until ${fmtD(w.end)}`:`${fmtD(w.start)} — ${fmtD(w.end)}`;
+            html+=`<div class="op-win op-${state}"><span class="op-win-tag">${tag}</span><span class="op-win-lords">${lords}</span><span class="op-win-dates">${dates}</span></div>`;
+          });
+          html+="</div>";
+        }
+        html+="</div>";
+      });
+      html+="</div>";
+    }
+
+    html+=`<div class="kd-caveat" style="margin-top:16px">Read this as availability, not as a promise. A planet in the upachaya from a kāraka says an opening is <i>structurally offered</i> in its daśā; whether it is taken depends on the planet's own dignity, the transits over that period, and you. Note also that the 6th is an upachaya but still a dusthāna — growth there usually arrives through competition, service or a fight rather than as a gift.</div>`;
+
+    resultDiv.innerHTML=html;
+  }
+
+  function run(){
+    const charts=getCharts();
+    const idx=Math.min(parseInt(selChart.value,10)||0,charts.length-1);
+    const c=charts[idx];
+    if(!c||!c.planets){emptyDiv.style.display="";resultDiv.style.display="none";bdWrap.style.display="none";return;}
+    bdWrap.style.display="";
+    bdInput.value=c.birthDate||"";
+    const kk=OP_KARAKAS[parseInt(selKaraka.value,10)||0];
+    const op=buildOpportunity(c,kk.k);
+    if(!op){
+      emptyDiv.style.display="";resultDiv.style.display="none";
+      emptyDiv.innerHTML=`This chart has no ${GBYK[kk.k].name} position, so the rotation cannot be made.`;
+      return;
+    }
+    emptyDiv.style.display="none";resultDiv.style.display="block";
+    render(c,op,kk);
+  }
+
+  function refreshCharts(){
+    const charts=getCharts(),prev=selChart.value;
+    selChart.innerHTML=charts.length
+      ?charts.map((c,i)=>`<option value="${i}">${kundaliEscape(c.name)}</option>`).join("")
+      :`<option value="">No charts saved yet</option>`;
+    if(charts.find((_,i)=>String(i)===prev)) selChart.value=prev;
+    if(!charts.length){
+      emptyDiv.innerHTML='Add a chart in <b>My Charts</b> above to find your opportunity windows.';
+      emptyDiv.style.display="";resultDiv.style.display="none";bdWrap.style.display="none";return;
+    }
+    run();
+  }
+
+  bdInput.addEventListener("change",()=>{
+    const charts=getCharts();
+    const idx=Math.min(parseInt(selChart.value,10)||0,charts.length-1);
+    if(!charts[idx]) return;
+    const bd=bdInput.value.trim()||null;
+    charts[idx].birthDate=bd;
+    charts[idx].dashas=bd&&charts[idx].planets&&charts[idx].planets.Mo?computeVimDashas(charts[idx].planets.Mo,bd):null;
+    localStorage.setItem(LS_KEY,JSON.stringify(charts));
+    JA.onChartsChange&&JA.onChartsChange();
+  });
+  selChart.addEventListener("change",run);
+  selKaraka.addEventListener("change",run);
+  const _prev=JA.onChartsChange;
+  JA.onChartsChange=()=>{_prev&&_prev();refreshCharts();};
+  refreshCharts();
+})();
+
 /* ===== VIMSHOTTARI DASHA — parse from JHora export ===== */
 // Reads the "Vimsottari Dasa ():" section that JHora exports.
 // JHora gives only START dates; end of period N = start of period N+1.
@@ -9017,6 +9657,16 @@ function buildPratyantars(antarLord,antarStart,antarEnd,addY){
     const el=document.getElementById(id); if(!el) return;
     const txt=el.value;
     const go=()=>{JA.toast&&JA.toast("Prompt copied to clipboard","ok");};
+    if(navigator.clipboard){navigator.clipboard.writeText(txt).then(go).catch(go);}
+    else{const ta=document.createElement("textarea");ta.value=txt;ta.style.cssText="position:fixed;opacity:0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");}catch(e){}ta.remove();go();}
+  };
+
+  // Generic "copy this textarea, then open that site" — same contract as the
+  // per-section variants below, but usable from any prompt box.
+  JA.copyOpen=function(id,url){
+    const el=document.getElementById(id); if(!el) return;
+    const txt=el.value;
+    const go=()=>{JA.toast&&JA.toast("Prompt copied to clipboard","ok");window.open(url,"_blank");};
     if(navigator.clipboard){navigator.clipboard.writeText(txt).then(go).catch(go);}
     else{const ta=document.createElement("textarea");ta.value=txt;ta.style.cssText="position:fixed;opacity:0";document.body.appendChild(ta);ta.select();try{document.execCommand("copy");}catch(e){}ta.remove();go();}
   };
@@ -9988,7 +10638,8 @@ function toggleTheme(){
   const cmdList=document.getElementById("cmdList");
   let cmdItems=[],cmdView=[],cmdSel=0;
   const SECTIONS=[["why","The idea"],["grahas","Grahas"],["rashis","Rashis"],["bhavas","Bhavas"],["nakshatras","Nakshatras"],
-    ["synth","Synthesizer"],["bbavam","Bhavat Bhavam"],["arudhas","Graha Arudhas"],["compare","Compare charts"],
+    ["synth","Synthesizer"],["bbavam","Bhavat Bhavam"],["arudhas","Graha Arudhas"],
+    ["karmasutra","Career Decoder"],["opportunity","Opportunity Windows"],["compare","Compare charts"],
     ["charts","My Charts"],["promptbuilder","Prompt Builder"],["outlook","Life Outlook"],["lifepredictor","Life Predictor"],
     ["quiz","Practice quiz"]];
   function openTokenDetail(tokensId,sectionId,i){
@@ -11000,6 +11651,40 @@ function runSelfTest(){
     ok("journalTopicFit returns a house/lord/score shape", fit.house===10 && !!fit.lord && typeof fit.score==='number');
     ok("journalFitLabel maps score to a label+class", ['good','neu','warn','bad'].includes(journalFitLabel(fit.score).cls));
     ok("journalTopicFit finds Saturn as H10 lord's dasha connection (rules it)", fit.lordsConnect.some(x=>x.k==='Sa'&&x.con.includes('rules it')));
+  })();
+  // Nakshatra sutra engine — the karaka→nakshatra→lord→rashi/bhava chain and
+  // the upachaya-from-karaka rotation behind the Career Decoder / Opportunity Windows.
+  (function(){
+    ok("SIGN_DOMAIN has 12 rashis", SIGN_DOMAIN.length===12);
+    ok("HOUSE_DELIVERY has 12 bhavas", HOUSE_DELIVERY.length===12);
+    ok("PLANET_FLAVOR covers all 9 grahas", GRAHAS.every(g=>!!PLANET_FLAVOR[g.k]));
+    ok("every KD/OP karaka is a real graha", KD_KARAKAS.concat(OP_KARAKAS).every(x=>!!GBYK[x.k]));
+    // Synthetic chart: Aries lagna. Saturn at Aries 15° = Bharani (13°20'–26°40'), lord Venus.
+    // Venus sits in Libra(6) = 7th house from Aries — the video's "Bharani → Venus → 7th" shape.
+    const testC={La:{sign:0,deg:5},planets:{
+      Su:{sign:4,deg:10,retro:false}, Mo:{sign:3,deg:5,retro:false}, Ma:{sign:0,deg:15,retro:false},
+      Me:{sign:2,deg:12,retro:false}, Ju:{sign:8,deg:5,retro:false}, Ve:{sign:6,deg:18,retro:false},
+      Sa:{sign:0,deg:15,retro:false}, Ra:{sign:1,deg:14,retro:true}, Ke:{sign:7,deg:14,retro:true}
+    }};
+    const ch=buildKarmaChain(testC,"Sa","La");
+    ok("karma chain: Saturn at Aries 15° is in Bharani", ch&&ch.nak.n==="Bharani");
+    ok("karma chain: Bharani's lord is Venus", ch&&ch.lordK==="Ve");
+    ok("karma chain: Venus in Libra = 7th house from Aries lagna", ch&&ch.lordHouse===7);
+    ok("karma chain: Venus in Libra is its own sign, so it disposits itself", ch&&ch.dispK==="Ve");
+    // Chandra Lagna re-reference: Moon in Cancer(3), Venus in Libra(6) ⇒ 4th from the Moon.
+    const chMo=buildKarmaChain(testC,"Sa","Mo");
+    ok("karma chain: Chandra Lagna re-counts Venus to the 4th", chMo&&chMo.lordHouse===4);
+    // Upachaya from Venus in Libra(6): 3rd=Sag(8), 6th=Pisces(11), 10th=Cancer(3), 11th=Leo(4).
+    const op=buildOpportunity(testC,"Ve");
+    const found=op.hits.map(h=>h.k).sort().join(",");
+    ok("upachaya from Venus finds Jupiter (3rd) + Moon (10th) + Sun (11th)", found==="Ju,Mo,Su");
+    ok("upachaya rotation never returns the karaka itself", op.hits.every(h=>h.k!=="Ve"));
+    ok("upachaya houses are only 3, 6, 10, 11", op.hits.every(h=>[3,6,10,11].includes(h.h)));
+    // Dasha windows: every window returned must actually be that planet's period.
+    const dsh=computeVimDashas(testC.planets.Mo,"1988-05-01");
+    const wins=dashaWindowsFor(dsh,"Ju");
+    ok("dashaWindowsFor returns only Jupiter periods", wins.length>0&&wins.every(w=>w.maha==="Ju"||w.antar==="Ju"));
+    ok("dashaWindowsFor windows are ordered and non-empty", wins.every(w=>w.end>w.start)&&wins.every((w,i)=>i===0||w.start>=wins[i-1].start));
   })();
   const failed=A.filter(x=>!x.pass);
   if(console.table) console.table(A);
