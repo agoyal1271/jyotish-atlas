@@ -42,7 +42,8 @@ Compatible with JHora and Parashara's Light `.txt` exports and text-based PDFs. 
 - **Built-in Kundali generation** — bundled Astronomy Engine calculates accurate tropical planetary positions, which the app converts to Lahiri sidereal positions; `tz-lookup` resolves an IANA timezone from birthplace coordinates
 - **Place privacy** — place search uses OpenStreetMap Nominatim. Only the search words are transmitted; the name, birth date/time and calculated chart remain in the browser
 - **Chart settings** — Lahiri ayanāṃśa, sidereal zodiac, whole-sign houses and mean lunar nodes
-- **Built-in regression guard** — open `index.html#selftest` to run 40 checks covering Navamsa, chart generation, timezone conversion, Kundali rendering, the nakshatra sūtra chain / upachaya rotation, and core data invariants. It stays inert during normal use.
+- **Bhava Mandala RTN lens** — Rāśi-tulya Navāṁśa overlays D-9 graha signs on the fixed D-1 house frame and marks the D-9 lagna separately, without adding RTN to unrelated chart views.
+- **Built-in regression guard** — open `index.html#selftest` to run checks covering Navamsa/RTN, chart generation, timezone conversion, Kundali rendering, the nakshatra sūtra chain / upachaya rotation, and core data invariants. It stays inert during normal use.
 - **Navamsa (D-9)** computed from each planet's degree using the classical `NAV_START = [Aries, Capricorn, Libra, Cancer]` rule; validated against four real natal charts (0 errors)
 - **BAV tables** validated sign-by-sign against four natal charts (23/23 rows exact). Two commonly-printed table errors (Moon and Venus) were corrected via a four-chart constraint solver
 - **Nakshatra** computed as `floor(lon / 13°20')` with pada as `floor(remainder / 3°20') + 1`; validated 11/11 against chart files
