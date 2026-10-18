@@ -1402,6 +1402,42 @@ html.light .bm-pp-inner{background:rgba(237,242,255,0.98);border-color:rgba(90,1
   .bm-planet-panel.open{transform:none}
 }
 html.light .bm-hcell{background:rgba(240,244,255,0.7);border-color:rgba(80,100,200,0.16)}
+/* Special lagnas (AL · UL · IL) — wheel tags + Gochara timing cards */
+.bm-sl{cursor:pointer;transition:filter .15s}
+.bm-sl:hover{filter:brightness(1.35)}
+.bm-sl.hot rect{filter:drop-shadow(0 0 4px var(--slc))}
+.bm-sl.hot{animation:bm-sl-pulse 2.4s ease-in-out infinite}
+@keyframes bm-sl-pulse{50%{opacity:.62}}
+.bm-sl-hl{opacity:0;transition:opacity .25s}
+.bm-sl-hl.on{opacity:1}
+.bm-sl-toggle{margin-left:8px;padding-left:10px;border-left:1px solid var(--line)}
+.bm-sl-intro{width:100%;padding:4px 16px 0;font-size:11.5px;color:var(--muted);line-height:1.55}
+.bm-sl-wrap{width:100%;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;padding:10px 16px 6px}
+.bm-sl-card{border:1px solid var(--line);border-top:3px solid var(--slc);border-radius:10px;padding:10px 12px;background:rgba(20,28,60,0.4);font-size:12px;color:var(--muted);min-width:0}
+html.light .bm-sl-card{background:rgba(240,244,255,0.7)}
+.bm-sl-card.flash{animation:bm-sl-flash 1.4s ease-out}
+@keyframes bm-sl-flash{0%{box-shadow:0 0 0 2px var(--slc)}100%{box-shadow:0 0 0 0 transparent}}
+.bm-sl-hd{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;color:var(--ink)}
+.bm-sl-tag{font-size:10px;font-weight:800;letter-spacing:.04em;color:var(--slc);border:1px solid var(--slc);border-radius:7px;padding:0 6px;cursor:pointer}
+.bm-sl-sign{font-weight:700;color:var(--slc)}
+.bm-sl-dom{flex-basis:100%;font-size:11px;color:var(--muted)}
+.bm-sl-natal{font-size:11px;margin:5px 0 4px}
+.bm-sl-gantt{width:100%;height:90px;display:block;margin:4px 0 2px}
+.bm-sl-grid{stroke:var(--line);stroke-width:1}
+.bm-sl-yr{font-size:9px;fill:var(--muted)}
+.bm-sl-rl{font-size:9.5px;font-weight:700}
+.bm-sl-now{stroke:var(--gold2);stroke-width:1.4;stroke-dasharray:3,2}
+.bm-sl-nowt{font-size:8px;fill:var(--gold2);font-weight:700}
+.bm-sl-sub{font-size:9.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold2);font-weight:700;margin:8px 0 3px}
+.bm-sl-row{padding:5px 0;border-top:1px solid rgba(90,115,210,.12)}
+.bm-sl-row.conj .bm-sl-how{color:var(--ink);font-weight:700}
+.bm-sl-who{font-weight:700;margin-right:6px}
+.bm-sl-how{margin-right:6px}
+.bm-sl-when{font-size:11px;color:var(--ink);white-space:nowrap}
+.bm-sl-fx{font-size:11.5px;line-height:1.5;color:var(--ink);opacity:.88;margin-top:2px}
+.bm-sl-empty,.bm-sl-note{font-size:11.5px;line-height:1.5;padding:4px 0}
+.bm-sl-note{margin-top:6px;border-top:1px solid rgba(90,115,210,.12);padding-top:7px}
+@media(prefers-reduced-motion:reduce){.bm-sl.hot{animation:none}}
 
 /* ===== COSMOS ANIMATIONS ===== */
 @keyframes cosmos-twinkle{0%,100%{opacity:.2}50%{opacity:.85}}
@@ -3059,6 +3095,7 @@ function bmRestore(ct){
   ct.querySelectorAll('.bm-chord').forEach(ch=>{ch.classList.remove('on');ch.style.opacity='';});
   ct.querySelectorAll('.bm-pill').forEach(g=>{g.classList.remove('on');g.style.opacity='1';});
   ct.querySelectorAll('.bm-hmark').forEach(m=>m.classList.remove('on'));
+  ct.querySelectorAll('.bm-sl-hl').forEach(p=>p.classList.remove('on'));
   // don't auto-close the side panel on restore — let the user close it explicitly
 }
 // Click a house → draw TWO linkages at once, whatever lens is active:
@@ -3198,6 +3235,168 @@ function bmPanelOutside(e){
     panel.classList.remove('open');
   }
 }
+/* ── Special Lagnas on the wheel: Arudha (AL), Upapada (UL), Indu (IL) ──
+   All three are D-1 rāśi points computed from the natal chart + birth Lagna (never the Moon
+   reference). They are then timed against the slow-graha Gochara: a transit "contacts" a special
+   lagna when it occupies that sign (conjunction — the strongest trigger) or, for Jupiter and
+   Saturn, casts graha dṛṣṭi on it (Ju 5/7/9 · Sa 3/7/10). Rahu/Ketu are read by occupation only —
+   the nodal axis already covers the 7th (Rahu on the 7th from a lagna = Ketu on it). */
+const BM_SL_META={
+  AL:{nm:'Arudha Lagna',col:'#7cc8ff',dom:'public image, status &amp; how the world sees you'},
+  UL:{nm:'Upapada Lagna',col:'#ff8fb8',dom:'marriage, spouse &amp; committed partnership'},
+  IL:{nm:'Indu Lagna',col:'#7fe0a0',dom:'wealth, liquidity &amp; financial flow'}
+};
+const BM_SL_PL=['Ju','Sa','Ra','Ke'];
+const BM_SL_ASP={Ju:[4,6,8],Sa:[2,6,9],Ra:[],Ke:[]};   // sign distance planet→target, conjunction handled separately
+// Classical-flavoured impact of each slow graha contacting each special lagna: c = occupies it · a = aspects it
+const BM_SL_FX={
+  AL:{
+    Ju:{c:'Reputation rises — recognition, promotion, good press; you are seen as credible and wise. A prime window for status gains.',
+        a:'A supportive gaze on your image — goodwill, mentors and chances to be seen favourably.'},
+    Sa:{c:'Image under load — heavier responsibility and scrutiny; status is rebuilt slowly but durably. Avoid shortcuts.',
+        a:'Pressure on public standing — recognition is delayed and you must prove yourself; steady effort pays later.'},
+    Ra:{c:'Sudden visibility or hype — fame, foreign or tech links, but also image distortion or controversy. Verify before you amplify.'},
+    Ke:{c:'A step back from the spotlight — detachment from titles; the image may dim or be misread. Good for quiet, inner work.'}
+  },
+  UL:{
+    Ju:{c:'The strongest marriage trigger — engagement, wedding or renewed commitment; the spouse and their family prosper.',
+        a:'A protective aspect on partnership — harmony, family blessings, a supportive time for proposals.'},
+    Sa:{c:'Commitment tested — duty, distance or delay in the relationship. Bonds formed now are serious and long-lasting.',
+        a:'Sobriety in partnership — responsibilities towards spouse or in-laws; patience works better than reaction.'},
+    Ra:{c:'Unconventional relationship events — sudden attraction, cross-cultural bonds, or confusion and obsession. Check the reality.'},
+    Ke:{c:'Detachment in partnership — distance, a spiritual turn or loosening ties. Handle the relationship consciously.'}
+  },
+  IL:{
+    Ju:{c:'Peak wealth window — income growth, savings and windfalls through knowledge, advice or expansion.',
+        a:'Financial support — new income channels open; a good time to invest or ask for a raise.'},
+    Sa:{c:'Slow money — financial discipline, paying down debt and building long-term assets. Gains come through patience.',
+        a:'Cash-flow pressure — expenses or delayed payments; trim and consolidate rather than speculate.'},
+    Ra:{c:'Sudden or unusual gains — speculation, foreign or tech money; losses can be just as sudden if you overleverage.'},
+    Ke:{c:'Detachment from money — unexpected outflows or loss of interest in accumulating. Avoid risky bets.'}
+  }
+};
+// The three special lagnas of the natal chart: {AL:sign, UL:sign, IL:sign} (null when not computable)
+function bmSpecialLagnas(c,La){
+  const out={};
+  try{const a=computeAL(c,La);out.AL=a?a.sign:null;}catch(e){out.AL=null;}
+  try{const u=computeUL(c,La);out.UL=u?u.sign:null;}catch(e){out.UL=null;}
+  try{const i=computeIL(c,La);out.IL=i?i.sign:null;}catch(e){out.IL=null;}
+  return out;
+}
+// Sidereal signs of the four slow grahas only — a light-weight sampler for the timeline scan.
+function bmSlowSigns(date){
+  const jd=jdFromDate(date),T=(jd-2451545.0)/36525,ayan=lahiriAyanamsa(jd),o={};
+  for(const k of ['Ju','Sa']){const a=astronomyTropicalLongitude(k,date);o[k]=tropToSid(a==null?planetGeoLon(k,T):a,ayan).sign;}
+  const raT=rv(125.044522-1934.136261*T+2.0758e-3*T*T+T*T*T/450000);
+  o.Ra=tropToSid(raT,ayan).sign; o.Ke=(o.Ra+6)%12;
+  return o;
+}
+// How a graha in `sign` touches the target sign: 'c' (occupies), 'a5'/'a7'/… (graha dṛṣṭi) or null
+function bmSLContact(k,sign,target){
+  const d=((target-sign)%12+12)%12;
+  if(d===0) return 'c';
+  return (BM_SL_ASP[k]||[]).includes(d)?'a'+(d+1):null;
+}
+// Scan the slow-graha transits from 3 years before `from` to `yrs` years after it (3-day steps) and
+// return, for each special lagna, the contiguous windows in which each graha contacts it.
+let BM_SL_CACHE=null;
+function bmSLWindows(sl,from,yrs){
+  yrs=yrs||12;
+  const key=JSON.stringify(sl)+'|'+from.toISOString().slice(0,10)+'|'+yrs;
+  if(BM_SL_CACHE&&BM_SL_CACHE.key===key) return BM_SL_CACHE.val;
+  const DAY=864e5, STEP=3*DAY, t0=from.getTime()-3*365.25*DAY, t1=from.getTime()+yrs*365.25*DAY;
+  const ids=Object.keys(sl).filter(id=>sl[id]!=null), out={}, open={};
+  ids.forEach(id=>{out[id]=[];open[id]={};});
+  for(let t=t0;t<=t1+STEP;t+=STEP){
+    const last=t>t1, s=last?null:bmSlowSigns(new Date(t));
+    ids.forEach(id=>BM_SL_PL.forEach(k=>{
+      const ty=last?null:bmSLContact(k,s[k],sl[id]), cur=open[id][k];
+      if(cur&&cur.type!==ty){out[id].push({k,type:cur.type,start:cur.start,end:t,openStart:cur.start===t0,openEnd:last});open[id][k]=null;}
+      if(ty&&(!open[id][k])) open[id][k]={type:ty,start:t};
+    }));
+  }
+  ids.forEach(id=>out[id].sort((x,y)=>x.start-y.start));
+  BM_SL_CACHE={key,val:out};
+  return out;
+}
+const bmFmtMon=ms=>new Date(ms).toLocaleDateString(undefined,{month:'short',year:'numeric'});
+const bmSLVerb=ty=>ty==='c'?'transits':`aspects (${ORD(+ty.slice(1))})`;
+function bmToggleSL(){
+  if(!BM_CTX) return; BM_CTX.sl=!(BM_CTX.sl!==false);
+  renderBhavaMandala(BM_CTX.c,BM_CTX.baseLa,BM_CTX.N||1,false);
+}
+// Click a special-lagna tag → light its sign, flash its timing card, and summarise now/next in the trace.
+function bmSLInfo(id){
+  const ct=document.getElementById('bhavaMandala'); if(!ct||!BM_CTX) return;
+  const m=BM_SL_META[id], sl=bmSpecialLagnas(BM_CTX.c,BM_CTX.baseLa), si=sl[id]; if(si==null) return;
+  const gDate=BM_CTX.gDate||new Date(), now=gDate.getTime(), wins=(bmSLWindows(sl,gDate)[id]||[]);
+  const La=(BM_CTX.ref==='mo'&&BM_CTX.c.planets.Mo)?BM_CTX.c.planets.Mo.sign:BM_CTX.baseLa;
+  const live=wins.filter(w=>w.start<=now&&w.end>now), next=wins.find(w=>w.start>now);
+  const nm=k=>`<b style="color:${GBYK[k].col}">${GBYK[k].name}</b>`;
+  let msg=`<b style="color:${m.col}">${id} · ${m.nm}</b> in <b>${SIGNS[si]}</b> (H${houseFromSigns(La,si)}) — ${m.dom}. `;
+  msg+=live.length?`<span style="color:var(--muted)">Now:</span> ${live.map(w=>`${nm(w.k)} ${bmSLVerb(w.type)}`).join(', ')}.`:`<span style="color:var(--muted)">No slow-graha contact now.</span>`;
+  if(next) msg+=` <span style="color:var(--muted)">Next:</span> ${nm(next.k)} ${bmSLVerb(next.type)} from ${bmFmtMon(next.start)}.`;
+  const tr=ct.querySelector('#bmTrace'); if(tr){tr.innerHTML=msg;tr.classList.add('show');}
+  ct.querySelectorAll('.bm-sl-hl').forEach(p=>p.classList.toggle('on',p.getAttribute('data-sl')===id));
+  const card=ct.querySelector('#bmSL-'+id);
+  if(card){card.classList.remove('flash');void card.offsetWidth;card.classList.add('flash');}
+  clearTimeout(window._bmHLT); window._bmHLT=setTimeout(()=>bmRestore(ct),6200);
+}
+// One timing card per special lagna: natal occupants, a 13-year Gochara strip and now/next readings.
+function bmSLCards(c,natLa,La,gDate){
+  const sl=bmSpecialLagnas(c,natLa), ids=['AL','UL','IL'].filter(id=>sl[id]!=null);
+  if(!ids.length) return '';
+  let all; try{all=bmSLWindows(sl,gDate);}catch(e){console.warn('special lagna transits:',e);return '';}
+  const DAY=864e5, now=gDate.getTime(), a0=now-365.25*DAY, a1=now+12*365.25*DAY;
+  const W=640,LX=58,RW=W-LX-8,RH=17,TOP=6, H=TOP+BM_SL_PL.length*RH+18;
+  const X=t=>LX+(Math.min(Math.max(t,a0),a1)-a0)/(a1-a0)*RW;
+  const PCOL={Ju:'#e7b94e',Sa:'#9a7ce0',Ra:'#8a6ad0',Ke:'#a8a8b8'};
+  return ids.map(id=>{
+    const m=BM_SL_META[id], si=sl[id], wins=all[id]||[], h=houseFromSigns(La,si);
+    const occ=['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke'].filter(k=>c.planets[k]&&c.planets[k].sign===si);
+    const lord=SIGN_LORD[si], lp=c.planets[lord];
+    // ── Gantt strip: one row per slow graha, solid = occupies, translucent = aspects ──
+    let g=`<svg class="bm-sl-gantt" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="${m.nm} transit timeline">`;
+    const y0=new Date(a0).getFullYear()+1;
+    for(let y=y0;new Date(y,0,1).getTime()<a1;y++){
+      const x=X(new Date(y,0,1).getTime());
+      g+=`<line x1="${x}" y1="${TOP}" x2="${x}" y2="${H-14}" class="bm-sl-grid"/>`;
+      if((y-y0)%2===0) g+=`<text x="${x}" y="${H-3}" text-anchor="middle" class="bm-sl-yr">${y}</text>`;
+    }
+    BM_SL_PL.forEach((k,r)=>{
+      const yy=TOP+r*RH;
+      g+=`<text x="${LX-6}" y="${yy+RH/2}" text-anchor="end" dominant-baseline="central" class="bm-sl-rl" fill="${PCOL[k]}">${GBYK[k].gl} ${GBYK[k].name}</text>`;
+      wins.filter(w=>w.k===k&&w.end>a0&&w.start<a1).forEach(w=>{
+        const x1=X(w.start), x2=Math.max(X(w.end),x1+2), conj=w.type==='c';
+        const tip=`${GBYK[k].name} ${bmSLVerb(w.type)} ${id} (${SIGNS[si]}) · ${w.openStart?'before ':''}${bmFmtMon(w.start)} – ${bmFmtMon(w.end)} — ${(BM_SL_FX[id][k]||{})[conj?'c':'a']||''}`;
+        g+=`<rect x="${x1}" y="${yy+3}" width="${x2-x1}" height="${RH-6}" rx="3" fill="${PCOL[k]}" fill-opacity="${conj?0.9:0.3}" stroke="${PCOL[k]}" stroke-opacity="${conj?0:0.8}" stroke-width="1"><title>${tip.replace(/<[^>]+>/g,'')}</title></rect>`;
+      });
+    });
+    const xn=X(now);
+    g+=`<line x1="${xn}" y1="${TOP-3}" x2="${xn}" y2="${H-14}" class="bm-sl-now"/><text x="${xn}" y="${TOP-1}" text-anchor="middle" class="bm-sl-nowt">now</text></svg>`;
+    // ── Readings: what is active at the Gochara date, then the next contact of each graha ──
+    const row=(w,state)=>{
+      const conj=w.type==='c', fx=(BM_SL_FX[id][w.k]||{})[conj?'c':'a']||'';
+      const when=state==='now'?`${w.openStart?'since before ':'since '}${bmFmtMon(w.start)} → ${bmFmtMon(w.end)}`:`${bmFmtMon(w.start)} → ${bmFmtMon(w.end)}`;
+      return `<div class="bm-sl-row${conj?' conj':''}"><span class="bm-sl-who" style="color:${PCOL[w.k]}">${GBYK[w.k].gl} ${GBYK[w.k].name}</span><span class="bm-sl-how">${bmSLVerb(w.type)}</span><span class="bm-sl-when">${when}</span><div class="bm-sl-fx">${fx}</div></div>`;
+    };
+    const live=wins.filter(w=>w.start<=now&&w.end>now);
+    const nextBy=BM_SL_PL.map(k=>wins.find(w=>w.k===k&&w.start>now)).filter(Boolean).sort((x,y)=>x.start-y.start);
+    let ulNote='';
+    if(id==='UL'){
+      const s2=(si+1)%12, tr=bmSlowSigns(gDate), here=BM_SL_PL.filter(k=>tr[k]===s2);
+      ulNote=`<div class="bm-sl-note">2nd from UL (<b>${SIGNS[s2]}</b>) sustains the marriage: Jupiter there supports continuity; Saturn, Rahu or Ketu there test it.${here.length?` Transiting now: ${here.map(k=>`<b style="color:${PCOL[k]}">${GBYK[k].name}</b>`).join(', ')}.`:''}</div>`;
+    }
+    return `<div class="bm-sl-card" id="bmSL-${id}" style="--slc:${m.col}">`+
+      `<div class="bm-sl-hd"><span class="bm-sl-tag" onclick="bmSLInfo('${id}')" title="Show on the wheel">${id}</span><b>${m.nm}</b><span class="bm-sl-sign">${SIGNS[si]} · H${h}</span><span class="bm-sl-dom">${m.dom}</span></div>`+
+      `<div class="bm-sl-natal">Natal: ${occ.length?occ.map(k=>`<b style="color:${GBYK[k].col}">${GBYK[k].name}</b>`).join(', ')+' sit here':'no planets here'} · sign lord <b>${GBYK[lord].name}</b>${lp?` in ${SIGNS[lp.sign]} (H${houseFromSigns(La,lp.sign)})`:''}</div>`+
+      g+
+      `<div class="bm-sl-sub">Active on ${gDate.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})}</div>`+
+      (live.length?live.map(w=>row(w,'now')).join(''):`<div class="bm-sl-empty">No slow-graha contact right now — ${id} themes run on natal promise and daśā alone.</div>`)+
+      (nextBy.length?`<div class="bm-sl-sub">Next contact by each graha</div>`+nextBy.map(w=>row(w,'next')).join(''):'')+
+      ulNote+`</div>`;
+  }).join('');
+}
 function renderBhavaMandala(c,La,N,motion){
   N=N||1;
   const ct=document.getElementById('bhavaMandala');
@@ -3206,7 +3405,8 @@ function renderBhavaMandala(c,La,N,motion){
   const ref=(BM_CTX&&BM_CTX.ref)||'la';
   const gochara=(BM_CTX&&BM_CTX.gochara)||false;
   const gDate=(BM_CTX&&BM_CTX.gDate)||new Date();
-  BM_CTX={c:c,baseLa:La,N:N,layer:layer,ref:ref,gochara:gochara,gDate:gDate};
+  const slOn=!(BM_CTX&&BM_CTX.sl===false);
+  BM_CTX={c:c,baseLa:La,N:N,layer:layer,ref:ref,gochara:gochara,gDate:gDate,sl:slOn};
   if(N>1){
     const wp={};
     for(const _k of ['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke']){const _p=c.planets[_k];if(_p)wp[_k]={sign:vargaSign(_p.sign,_p.deg,N),deg:_p.deg,retro:_p.retro};}
@@ -3386,10 +3586,28 @@ function renderBhavaMandala(c,La,N,motion){
   sv+=`<circle cx="${CX}" cy="${CY}" r="${RC}" fill="rgba(8,11,24,0.96)" stroke="${refIsMoon?'rgba(200,216,255,0.6)':'rgba(231,193,78,0.55)'}" stroke-width="1.4"/>`;
   sv+=`<text x="${CX}" y="${CY-9}" text-anchor="middle" dominant-baseline="central" font-size="10" letter-spacing="1.5" fill="rgba(175,198,255,0.8)">${refIsMoon?'MOON':'ASC'}</text>`;
   sv+=`<text x="${CX}" y="${CY+9}" text-anchor="middle" dominant-baseline="central" font-size="17" font-weight="bold" fill="${refIsMoon?'#c8d8ff':'#e7c14e'}">${typeof SIGN3!=='undefined'?SIGN3[La]:La}</text>`;
-  // ---- When reading the Moon chart, keep the birth Ascendant visible as a small "Lg" tag ----
+  // ---- Sign-band tags: the birth Ascendant ("Lg", when reading the Moon chart) and the special
+  //      lagnas AL · UL · IL (D-1 only). Up to four tags share a sign via fixed slots either side of
+  //      the glyph. A special lagna with a slow graha sitting on it right now glows (class "hot"). ----
+  const SLOT=[[-10,273],[10,273],[-10,257],[10,257]], slotUse={};
+  const tagAt=si=>{const n=slotUse[si]=(slotUse[si]||0)+1,[off,r]=SLOT[(n-1)%4];return pol(r,sa(si)+15+off);};
   if(refIsMoon&&natLaSign!==La){
-    const lgp=pol(ROi+11,sa(natLaSign)+15);
-    sv+=`<g style="pointer-events:none"><circle cx="${lgp.x}" cy="${lgp.y}" r="10" fill="rgba(8,11,24,0.9)" stroke="rgba(231,193,78,0.75)" stroke-width="1"/><text x="${lgp.x}" y="${lgp.y}" text-anchor="middle" dominant-baseline="central" font-size="8.5" font-weight="700" fill="#e7c14e">Lg</text></g>`;
+    const lgp=tagAt(natLaSign);
+    sv+=`<g style="pointer-events:none"><circle cx="${lgp.x}" cy="${lgp.y}" r="8" fill="rgba(8,11,24,0.9)" stroke="rgba(231,193,78,0.75)" stroke-width="1"/><text x="${lgp.x}" y="${lgp.y}" text-anchor="middle" dominant-baseline="central" font-size="7.5" font-weight="700" fill="#e7c14e">Lg</text></g>`;
+  }
+  if(slOn&&N===1){
+    const sl=bmSpecialLagnas(c,natLaSign);
+    let trNow=null; try{trNow=bmSlowSigns(gDate);}catch(e){}
+    ['AL','UL','IL'].forEach(id=>{
+      const si=sl[id]; if(si==null) return;
+      const m=BM_SL_META[id], tp=tagAt(si);
+      const hot=trNow?BM_SL_PL.filter(k=>trNow[k]===si):[];
+      const tip=`${m.nm} (${id}) · ${SN[si]} · H${houseFromSigns(La,si)} — ${m.dom.replace(/&amp;/g,'&')}${hot.length?` · transiting it now: ${hot.map(k=>GBYK[k].name).join(', ')}`:''} — click for timing`;
+      sv+=`<path class="bm-sl-hl" data-sl="${id}" d="${sec(ROo,RC,sa(si)+0.6,sa(si)+29.4)}" fill="${m.col}" fill-opacity="0.07" stroke="${m.col}" stroke-width="2" style="pointer-events:none"/>`;
+      sv+=`<g class="bm-sl${hot.length?' hot':''}" data-sl="${id}" onclick="bmSLInfo('${id}')" style="--slc:${m.col}">`+
+        `<rect x="${tp.x-12}" y="${tp.y-7}" width="24" height="14" rx="7" fill="rgba(8,11,24,0.94)" stroke="${m.col}" stroke-width="${hot.length?1.8:1.2}"><title>${tip}</title></rect>`+
+        `<text x="${tp.x}" y="${tp.y}" text-anchor="middle" dominant-baseline="central" font-size="8" font-weight="800" letter-spacing=".4" fill="${m.col}" style="pointer-events:none">${id}</text></g>`;
+    });
   }
 
   // ---- Outer sign names (single line; element shown in house grid below) ----
@@ -3488,6 +3706,7 @@ function renderBhavaMandala(c,La,N,motion){
       <label class="bm-gochara-toggle"><input type="checkbox" ${gochara?'checked':''} onchange="bmToggleGochara()"> ◔ Gochara transits (Ju · Sa · Ra · Ke)</label>
       ${gochara?`<input type="date" class="bm-gochara-date" value="${fmtISO(gDate)}" onchange="bmGocharaDate(this.value)">`:''}
     </span>`:`<span class="bm-gochara-note">Gochara transit ring shown on D-1 only</span>`}
+    ${N===1?`<label class="bm-gochara-toggle bm-sl-toggle" title="Arudha Lagna · Upapada Lagna · Indu Lagna, with their transit timing below"><input type="checkbox" ${slOn?'checked':''} onchange="bmToggleSL()"> ✦ Special lagnas (AL · UL · IL)</label>`:''}
   </div>`;
   const LENSES=[['lord','Lordship','Which planet rules each house'],['graha','Graha Dṛṣṭi','Which planets aspect each house (benefic / malefic)'],['rashi','Rāśi Dṛṣṭi','Jaimini sign-to-sign aspects'],['all','All layers','Lordship + planet aspects + sign aspects together']];
   const lensRow=`<div class="bm-lenses">`+LENSES.map(([id,lab,tip])=>`<button type="button" class="bm-lens${id===layer?' active':''}" onclick="bmLayer('${id}')" title="${tip}">${lab}</button>`).join('')+`</div>`;
@@ -3499,13 +3718,16 @@ function renderBhavaMandala(c,La,N,motion){
   };
   const aspLegend=`<div class="bm-asplegend"><span><i class="dot" style="background:rgba(90,210,150,.5)"></i>house aura: net benefic aspect</span><span><i class="dot" style="background:rgba(235,95,80,.5)"></i>net malefic aspect</span><span><i style="border-top-color:#5fd0a0"></i>benefic dṛṣṭi</span><span><i style="border-top-color:#ef6a5a"></i>malefic dṛṣṭi</span><span><i style="border-top-color:#9682eb"></i>rāśi dṛṣṭi</span><span style="color:#6fbf86">⬆ exalted</span><span style="color:#e9bf6a">● own sign</span><span style="color:#e2705a">⬇ debilitated</span></div>`;
   const gocharaLegend=(gochara&&N===1)?`<div class="bm-asplegend"><span><i style="border-top-color:#6fbf86;border-top-style:dashed"></i>gochara favourable</span><span><i style="border-top-color:#e2705a;border-top-style:dashed"></i>gochara challenging</span><span><i style="border-top-color:#f5d894;border-top-style:dashed"></i>vedha (cancelled)</span><span style="color:#c080f0">◐ SS / D = Sade Sati / Dhaiya</span><span style="opacity:.75">judged from natal Moon regardless of Reference</span></div>`:'';
+  const slLegend=(slOn&&N===1)?`<div class="bm-asplegend">${Object.entries(BM_SL_META).map(([id,m])=>`<span style="color:${m.col}"><b>${id}</b>&nbsp;${m.nm}</span>`).join('')}<span style="opacity:.75">glowing tag = a slow graha sits on it now · click a tag for timing</span></div>`:'';
+  let slHtml='';
+  if(slOn&&N===1){try{const cards=bmSLCards(c,natLaSign,La,gDate);if(cards)slHtml=`<div class="bm-sec">Special Lagnas · Gochara timing — Jupiter · Saturn · Rahu · Ketu over AL · UL · IL</div><div class="bm-sl-intro">Solid bar = the graha <b>sits on</b> that lagna (strongest trigger) · translucent bar = it <b>aspects</b> it (Ju 5/7/9 · Sa 3/7/10). Strip runs one year back to twelve ahead of ${gDate.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})}${gochara?'':' — turn on Gochara to change the date'}. Results ripen most when the daśā of the transiting graha, or of the lagna's lord, is also running.</div><div class="bm-sl-wrap">${cards}</div>`;}catch(e){console.warn('special lagna cards:',e);}}
   const chartLabel=(ref==='mo'&&canMoonRef)?(N===1?'Chandra Kundali':`D-${N} · ${vName} (Moon reference)`):`D-${N} · ${vName}`;
   const caption=`<div class="bm-caption">Showing <b>${chartLabel}</b>${N===1?(ref==='mo'?' — houses counted from the natal Moon':' — the birth chart'):' — divisional chart'} · lens: <b>${(LENSES.find(l=>l[0]===layer)||[,'Lordship'])[1]}</b>. ${LENS_DESC[layer]}. The coloured <b>aura</b> behind each sign always shows the net aspect load. <span style="color:#9db4ff">Blue</span> kendra · <span style="color:#7fe0a0">green</span> trikona · <span style="color:#f0a890">amber</span> dusthana · gold = ${ref==='mo'?'Moon':'Lagna'}.${gochara&&N===1?' The outer dashed ring is the current <b>Gochara</b> transit of Jupiter, Saturn, Rahu &amp; Ketu — click a marker for its verdict.':''}</div>`;
   const traceDefault={lord:'▶ Click any house to trace where its lord sits',graha:'▶ Click a planet to see what it aspects, or a house to see what aspects it',rashi:'▶ Click a house to see which signs cast rāśi dṛṣṭi on it',all:'▶ Click a house, or a planet, to isolate its relationships'}[layer];
 
   let d10Html='';
   if(N===10&&BM_CTX.c){try{d10Html=renderD10Guide(BM_CTX.c,BM_CTX.baseLa);}catch(e){console.warn('D10 guide:',e);}}
-  ct.innerHTML=`${tabs}${refsRow}${lensRow}<div class="bm-container">${sv}</div>${aspLegend}${gocharaLegend}<div class="bm-trace" id="bmTrace">${traceDefault}</div>${caption}<div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div>${d10Html}<div class="bm-planet-panel" id="bmPlanetPanel"></div>`;
+  ct.innerHTML=`${tabs}${refsRow}${lensRow}<div class="bm-container">${sv}</div>${aspLegend}${gocharaLegend}${slLegend}<div class="bm-trace" id="bmTrace">${traceDefault}</div>${caption}${slHtml}<div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div>${d10Html}<div class="bm-planet-panel" id="bmPlanetPanel"></div>`;
   if(motion){const ns=ct.querySelector('.bm-svg');if(ns){ns.style.transformOrigin='center';ns.style.transform='rotate(14deg) scale(.9)';ns.style.opacity='0';requestAnimationFrame(()=>{ns.style.transition='transform .46s cubic-bezier(.34,1.12,.4,1),opacity .4s';ns.style.transform='none';ns.style.opacity='1';});}}
 }
 
@@ -8011,11 +8233,12 @@ function computeAL(c,La){
 
 function computeIL(c,La){
   const d1_9=SIGN_LORD[(La+8)%12], d1v=INDU_VAL[d1_9]||0;
-  const d9La=navamsaSign(c.La.sign,c.La.deg||0);
-  const d9_9=SIGN_LORD[(d9La+8)%12], d9v=INDU_VAL[d9_9]||0;
-  const sum=d1v+d9v, rem=sum%12||12;
+  // Phaladeepika Ch.6: add the kalās of the 9th lord from the Lagna and the 9th lord from the Moon
+  // (not from the D-9 Lagna), take the remainder by 12 and count that many signs from the Moon.
   const mo=c.planets.Mo; if(!mo) return null;
-  return{sign:(mo.sign+rem-1)%12,d1_9,d1v,d9La,d9_9,d9v,sum,rem,moonSign:mo.sign};
+  const mo_9=SIGN_LORD[(mo.sign+8)%12], mov=INDU_VAL[mo_9]||0;
+  const sum=d1v+mov, rem=sum%12||12;
+  return{sign:(mo.sign+rem-1)%12,d1_9,d1v,mo_9,mov,sum,rem,moonSign:mo.sign};
 }
 
 // Upapada Lagna (UL) = Arudha Pada of the 12th house. Jaimini/BPHS: primary indicator of
@@ -8196,8 +8419,8 @@ function renderSpecialLagnas(c,La,sav){
           <span>♀ Venus <b>12</b></span><span>♂ Mars <b>6</b></span><span>☿ Mercury <b>8</b></span><span>♄ Saturn <b>1</b></span>
         </div>
         <div class="sl-step"><span class="sl-step-n">1</span><span>D-1 H9 from ${SIGNS[La]} = <b>${SIGNS[(La+8)%12]}</b> · lord <b>${GBYK[il.d1_9].name}</b> · Indu value <b>${il.d1v}</b></span></div>
-        <div class="sl-step"><span class="sl-step-n">2</span><span>D-9 Lagna = <b>${SIGNS[il.d9La]}</b> · H9 = <b>${SIGNS[(il.d9La+8)%12]}</b> · lord <b>${GBYK[il.d9_9].name}</b> · Indu value <b>${il.d9v}</b></span></div>
-        <div class="sl-step"><span class="sl-step-n">3</span><span>${il.d1v} + ${il.d9v} = <b>${il.sum}</b> · ${il.sum} ÷ 12 = remainder <b>${il.rem}</b></span></div>
+        <div class="sl-step"><span class="sl-step-n">2</span><span>Moon in <b>${SIGNS[il.moonSign]}</b> · H9 from Moon = <b>${SIGNS[(il.moonSign+8)%12]}</b> · lord <b>${GBYK[il.mo_9].name}</b> · Indu value <b>${il.mov}</b></span></div>
+        <div class="sl-step"><span class="sl-step-n">3</span><span>${il.d1v} + ${il.mov} = <b>${il.sum}</b> · ${il.sum} ÷ 12 = remainder <b>${il.rem}</b></span></div>
         <div class="sl-step"><span class="sl-step-n">4</span><span>Moon in <b>${SIGNS[il.moonSign]}</b> · count ${il.rem} forward: <b style="color:var(--gold2)">${chain}</b></span></div>
         <div class="sl-step"><span class="sl-step-n">✓</span><span>Indu Lagna = <b style="color:var(--gold2)">${SIGNS[il.sign]}</b> · H${ilH} from Lagna</span></div>
       </div>`;
@@ -11685,6 +11908,20 @@ function runSelfTest(){
     const wins=dashaWindowsFor(dsh,"Ju");
     ok("dashaWindowsFor returns only Jupiter periods", wins.length>0&&wins.every(w=>w.maha==="Ju"||w.antar==="Ju"));
     ok("dashaWindowsFor windows are ordered and non-empty", wins.every(w=>w.end>w.start)&&wins.every((w,i)=>i===0||w.start>=wins[i-1].start));
+  })();
+  // Special lagnas — AG-style chart: Virgo lagna, Mercury own sign, Sun own sign in the 12th,
+  // Moon in Aries, Venus (9th lord) + Jupiter (9th from Moon) ⇒ AL Gemini · UL Taurus · IL Capricorn (matches JHora).
+  (function(){
+    const t={La:{sign:5,deg:14.7},planets:{
+      Su:{sign:4,deg:14},Mo:{sign:0,deg:5},Ma:{sign:11,deg:17},Me:{sign:5,deg:6},Ju:{sign:1,deg:11},
+      Ve:{sign:2,deg:28},Sa:{sign:8,deg:2},Ra:{sign:10,deg:20},Ke:{sign:4,deg:20}}};
+    const sl=bmSpecialLagnas(t,5);
+    ok("special lagnas: AL = Gemini (lord in Lagna → 10th)", sl.AL===2);
+    ok("special lagnas: UL = Taurus (12th lord in 12th → 10th from it)", sl.UL===1);
+    ok("Indu Lagna uses 9th lord from Moon: Venus 12 + Jupiter 10 ⇒ Capricorn", sl.IL===9);
+    ok("bmSLContact: Saturn 3rd/7th/10th aspects, Rahu by occupation only", bmSLContact('Sa',0,2)==='a3'&&bmSLContact('Sa',0,9)==='a10'&&bmSLContact('Ra',0,6)===null&&bmSLContact('Ra',3,3)==='c');
+    const w=bmSLWindows(sl,new Date(Date.UTC(2026,0,1)),3);
+    ok("special-lagna windows ordered, non-empty, slow grahas only", ['AL','UL','IL'].every(id=>w[id].length>0&&w[id].every((x,i)=>x.end>x.start&&BM_SL_PL.includes(x.k)&&(i===0||x.start>=w[id][i-1].start))));
   })();
   const failed=A.filter(x=>!x.pass);
   if(console.table) console.table(A);
