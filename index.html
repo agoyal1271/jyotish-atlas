@@ -3357,17 +3357,50 @@ function bmHouseSAV(c,La,h){
   const sign=(La+h-1)%12,sav=computeSAV(avPos),value=sav[sign];
   const rank=1+sav.filter(v=>v>value).length;
   const contributions=planets.map(k=>({k,value:computeBAV(k,avPos)[sign]}));
-  let label,copy;
+  let label,baseline;
   if(value>=30){
     label='Supported';
-    copy='This area has above-average structural support. Effort and favorable timing here are more likely to find backing.';
+    baseline=`${BM_HOUSE_NAMES[h-1]} has a strong underlying base at ${value} SAV, ranked #${rank} in this chart.`;
   }else if(value>=25){
     label='Balanced';
-    copy='This area has balanced support. Results depend more on its ruler, occupying planets and the timing of events.';
+    baseline=`${BM_HOUSE_NAMES[h-1]} has a workable but not dominant base at ${value} SAV, ranked #${rank} in this chart.`;
   }else{
     label='Effortful';
-    copy='This area may ask for more deliberate effort and patience. This indicates less support, not denial of results.';
+    baseline=`${BM_HOUSE_NAMES[h-1]} starts with lighter structural support at ${value} SAV, ranked #${rank} in this chart; this asks for more deliberate effort, not denial of results.`;
   }
+  const lord=SIGN_LORD[sign],lp=c.planets[lord],lordH=lp?houseFromSigns(La,lp.sign):null;
+  let rulerLine=`${GBYK[lord].name} rules this house.`;
+  if(lp){
+    const dig=dignityOf(lord,lp.sign),av=baladiAvastha(lp.sign,lp.deg);
+    const digText=dig.score>=2?'is exalted':dig.score>=1.5?'is in its own sign':dig.score>=1?'is in a friendly sign':dig.score<=-2?(hasNeechaBhanga(lord,c,La)?'is debilitated but receives cancellation support':'is debilitated and has reduced ease'):dig.score<=-1?'is in an enemy sign and works with friction':'is in a neutral sign';
+    const avText={Yuvā:'at a mature, productive degree',Kumāra:'at a capable developing degree',Vṛddha:'at a later degree with more measured delivery',Bāla:'at an early degree whose delivery is still developing',Mṛta:'at a low-delivery degree that needs stronger support'}[av.n]||`in ${av.n} avastha`;
+    rulerLine=`Its ruler, ${GBYK[lord].name}, sits in H${lordH} (${BM_HOUSE_NAMES[lordH-1].toLowerCase()}), ${digText}, and is ${avText}.`;
+  }
+  const occ=bmPlanetKeysInHouse(c,La,h);
+  const aspectors=['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke'].filter(k=>{
+    const p=c.planets[k]; if(!p||occ.includes(k)) return false;
+    return aspectsFromHouse(k,houseFromSigns(La,p.sign)).includes(h);
+  });
+  let influenceLine='';
+  if(occ.length){
+    const names=occ.map(k=>GBYK[k].name).join(occ.length>1?' and ':'');
+    const meanings=occ.slice(0,2).map(k=>BM_PLANET_CORE[k]).join(' and ');
+    influenceLine=` ${names} ${occ.length>1?'occupy':'occupies'} the house, directly emphasizing ${meanings}.`;
+  }
+  if(aspectors.length){
+    const parts=aspectors.map(k=>`${GBYK[k].name}, which ${BM_ASPECT_EFFECT[k]}`);
+    const aspectText=parts.length===1?parts[0]:parts.length===2?`${parts[0]} and ${parts[1]}`:`${parts.slice(0,-1).join('; ')}; and ${parts[parts.length-1]}`;
+    influenceLine+=` It also receives natal aspects from ${aspectText}.`;
+  }
+  const phase=bmCurrentPhase(c,La,h);
+  let timingLine='';
+  if(phase){
+    const period=`${GBYK[phase.md.lord].name}${phase.ad?`/${GBYK[phase.ad.lord].name}`:''}`;
+    timingLine=phase.isActive
+      ?` The current ${period} period directly activates this house, so its themes are part of the present life phase.`
+      :` The current ${period} period does not directly activate this house, so its results may be quieter until a stronger timing trigger arrives.`;
+  }
+  const copy=`${baseline} ${rulerLine}${influenceLine}${timingLine}`;
   return{value,rank,label,copy,contributions};
 }
 function bmFormatPhaseDateFull(ts){
