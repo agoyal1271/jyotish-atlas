@@ -1398,6 +1398,16 @@ html.light .d10-step{background:rgba(240,244,255,0.7);border-color:rgba(80,100,2
 .bm-reading-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-bottom:6px}
 .bm-focus-list{display:flex;flex-wrap:wrap;gap:6px}
 .bm-focus-chip{display:inline-flex;padding:5px 9px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-size:11.5px;color:var(--ink)}
+.bm-sav-card{margin-top:11px;padding:11px 12px;border:1px solid color-mix(in srgb,var(--gold) 32%,var(--line));border-radius:11px;background:color-mix(in srgb,var(--gold) 6%,var(--panel));display:grid;gap:7px}
+.bm-sav-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.bm-sav-title{font-size:12px;font-weight:800;color:var(--ink)}
+.bm-sav-score{font-size:11.5px;color:var(--gold2);font-weight:750}
+.bm-sav-meter{height:5px;border-radius:999px;background:color-mix(in srgb,var(--muted) 18%,transparent);overflow:hidden}
+.bm-sav-meter>span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,color-mix(in srgb,var(--gold) 60%,var(--muted)),var(--gold));max-width:100%}
+.bm-sav-copy{font-size:12px;line-height:1.55;color:var(--muted)}
+.bm-sav-contrib{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:7px}
+.bm-sav-contrib span{padding:5px 2px;text-align:center;border:1px solid var(--line);border-radius:6px;background:var(--panel);font-size:10.5px;color:var(--muted)}
+.bm-sav-contrib b{display:block;color:var(--ink);font-size:11px;margin-bottom:1px}
 .bm-planet-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:7px}
 .bm-planet-action{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
 .bm-planet-action:hover{border-color:var(--gold)}
@@ -3306,12 +3316,32 @@ function bmPlanetButton(k){
   const g=GBYK[k];
   return `<button type="button" class="bm-planet-action" onclick="bmShowSimplePlanet('${k}')"><span style="color:${g.col}">${g.gl}</span>${g.name}</button>`;
 }
+function bmHouseSAV(c,La,h){
+  const planets=['Su','Mo','Ma','Me','Ju','Ve','Sa'];
+  const avPos={La};
+  planets.forEach(k=>{if(c.planets[k]) avPos[k]=c.planets[k].sign;});
+  const sign=(La+h-1)%12,sav=computeSAV(avPos),value=sav[sign];
+  const rank=1+sav.filter(v=>v>value).length;
+  const contributions=planets.map(k=>({k,value:computeBAV(k,avPos)[sign]}));
+  let label,copy;
+  if(value>=30){
+    label='Supported';
+    copy='This area has above-average structural support. Effort and favorable timing here are more likely to find backing.';
+  }else if(value>=25){
+    label='Balanced';
+    copy='This area has balanced support. Results depend more on its ruler, occupying planets and the timing of events.';
+  }else{
+    label='Effortful';
+    copy='This area may ask for more deliberate effort and patience. This indicates less support, not denial of results.';
+  }
+  return{value,rank,label,copy,contributions};
+}
 function bmRenderHouseReading(h){
   const panel=document.getElementById('bmReading');
   if(!panel||!BM_CTX) return;
   const c=BM_CTX.c,La=BM_CTX.baseLa,b=BHAVAS[h-1],si=(La+h-1)%12,r=RASHIS[si];
   const lord=SIGN_LORD[si],lordP=c.planets[lord],lordH=lordP?houseFromSigns(La,lordP.sign):null;
-  const occ=bmPlanetKeysInHouse(c,La,h),focus=b.kar.slice(0,5);
+  const occ=bmPlanetKeysInHouse(c,La,h),focus=b.kar.slice(0,5),sav=bmHouseSAV(c,La,h);
   const traits=r.traits.slice(0,2).join(' and ');
   const signLine=h===1
     ?`${r.name} is your rising sign, giving your outward approach a <b>${traits}</b> quality.`
@@ -3331,6 +3361,11 @@ function bmRenderHouseReading(h){
     <div class="bm-reading-block">
       <div class="bm-reading-label">What this house focuses on</div>
       <div class="bm-focus-list">${focus.map(x=>`<span class="bm-focus-chip">${x}</span>`).join('')}</div>
+      <div class="bm-sav-card" aria-label="House support: ${sav.value} SAV, ${sav.label}, rank ${sav.rank} of 12 houses">
+        <div class="bm-sav-head"><span class="bm-sav-title">House support · ${sav.label}</span><span class="bm-sav-score">${sav.value} SAV · #${sav.rank} of 12</span></div>
+        <div class="bm-sav-meter" aria-hidden="true"><span style="width:${Math.min(100,Math.max(0,sav.value/45*100)).toFixed(1)}%"></span></div>
+        <div class="bm-sav-copy">${sav.copy}</div>
+      </div>
     </div>
     <div class="bm-reading-block">
       <div class="bm-reading-label">How you approach it</div>
@@ -3352,6 +3387,8 @@ function bmRenderHouseReading(h){
     </div>
     <details class="bm-tech-details"><summary>Why? View chart evidence</summary><div class="bm-tech-body">
       House ${h} (${b.skt}) · ${r.name} · ${b.cat}.<br>
+      Sarvashtakavarga: ${sav.value} bindus for ${r.name}, ranked #${sav.rank} among this chart's twelve signs. SAV is read as contextual support, not a stand-alone promise of an outcome.<br>
+      <div class="bm-sav-contrib">${sav.contributions.map(x=>`<span><b>${GBYK[x.k].name.slice(0,3)}</b>${x.value}</span>`).join('')}</div>
       House lord: ${GBYK[lord].name}${lordH?` in H${lordH} (${SIGNS[lordP.sign]} ${lordP.deg.toFixed(1)}°)`:''}.<br>
       ${occ.length?`Occupants: ${occ.map(k=>{const p=c.planets[k],n=nakInfo(p.sign*30+p.deg);return`${GBYK[k].name} ${p.deg.toFixed(1)}° ${SIGNS[p.sign]} · ${n.n} pada ${n.pada}`;}).join('; ')}.`:'No occupants; read primarily through the house lord.'}
     </div></details>`;
