@@ -1393,6 +1393,17 @@ html.light .d10-step{background:rgba(240,244,255,0.7);border-color:rgba(80,100,2
 .bm-reading-eyebrow{font-size:10.5px;text-transform:uppercase;letter-spacing:.11em;color:var(--gold2);font-weight:700}
 .bm-reading h3{margin:5px 0 4px;font-family:var(--font-display);font-size:25px;line-height:1.1}
 .bm-reading-sign{font-size:12.5px;color:var(--muted);margin-bottom:16px}
+.bm-phase-card{margin:2px 0 14px;padding:14px;border-radius:12px;border:1px solid color-mix(in srgb,var(--gold) 48%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 13%,var(--panel)),var(--panel));box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.bm-phase-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.bm-phase-kicker{font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold2);font-weight:800}
+.bm-phase-active{padding:3px 7px;border-radius:999px;background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--gold2);font-size:10.5px;font-weight:800}
+.bm-phase-lords{font-family:var(--font-display);font-size:20px;line-height:1.2;color:var(--ink);margin:6px 0 3px}
+.bm-phase-dates{font-size:11px;color:var(--muted);margin-bottom:8px}
+.bm-phase-copy{font-size:12.5px;line-height:1.6;color:var(--ink)}
+.bm-phase-copy b{color:var(--gold2)}
+.bm-phase-houses{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.bm-phase-house{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:999px;padding:4px 7px;font:inherit;font-size:10.5px;cursor:pointer}
+.bm-phase-house.current{border-color:var(--gold);color:var(--gold2);font-weight:800}
 .bm-reading-block{padding:12px 0;border-top:1px solid var(--line)}
 .bm-reading-block:first-of-type{border-top:0;padding-top:4px}
 .bm-reading-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-bottom:6px}
@@ -1408,6 +1419,14 @@ html.light .d10-step{background:rgba(240,244,255,0.7);border-color:rgba(80,100,2
 .bm-sav-contrib{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:7px}
 .bm-sav-contrib span{padding:5px 2px;text-align:center;border:1px solid var(--line);border-radius:6px;background:var(--panel);font-size:10.5px;color:var(--muted)}
 .bm-sav-contrib b{display:block;color:var(--ink);font-size:11px;margin-bottom:1px}
+.bm-influence-list{display:grid;gap:7px;margin-top:7px}
+.bm-influence-card{padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--panel);font-size:11.5px;line-height:1.55;color:var(--muted)}
+.bm-influence-head{display:flex;justify-content:space-between;gap:8px;align-items:baseline;color:var(--ink);font-weight:750}
+.bm-influence-rel{font-size:10px;color:var(--gold2);font-weight:700;text-align:right}
+.bm-influence-meta{margin-top:3px}
+.bm-transit-details{margin-top:8px}
+.bm-transit-details summary{cursor:pointer;color:var(--gold2);font-size:11.5px;font-weight:700}
+.bm-transit-details .bm-influence-list{padding-top:5px}
 .bm-planet-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:7px}
 .bm-planet-action{display:inline-flex;align-items:center;gap:6px;padding:7px 10px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
 .bm-planet-action:hover{border-color:var(--gold)}
@@ -3336,12 +3355,100 @@ function bmHouseSAV(c,La,h){
   }
   return{value,rank,label,copy,contributions};
 }
+function bmFormatPhaseDate(ts){
+  if(!ts) return '?';
+  return new Date(ts).toLocaleDateString('en',{month:'short',year:'numeric'});
+}
+function bmCurrentPhase(c,La,h){
+  if(!c.dashas||!c.dashas.mahas) return null;
+  const now=Date.now(); let md=null,ad=null;
+  for(const m of c.dashas.mahas){
+    if(m.start<=now&&(m.end==null||m.end>=now)){
+      md=m;
+      ad=(m.antars||[]).find(a=>a.start<=now&&(a.end==null||a.end>=now))||null;
+      break;
+    }
+  }
+  if(!md) return null;
+  const domains=k=>{
+    const p=c.planets[k],fn=functionalNature(k,La),hs=[...(fn.houses||[])];
+    if(p) hs.push(houseFromSigns(La,p.sign));
+    return[...new Set(hs)].filter(x=>x>=1&&x<=12);
+  };
+  const mdH=domains(md.lord),adH=ad?domains(ad.lord):[],active=[...new Set([...mdH,...adH])];
+  return{md,ad,mdH,adH,active,isActive:active.includes(h)};
+}
+function bmPhaseCard(c,La,h){
+  const x=bmCurrentPhase(c,La,h); if(!x) return '';
+  const mg=GBYK[x.md.lord],ag=x.ad?GBYK[x.ad.lord]:null;
+  const names=hs=>hs.slice(0,3).map(n=>BM_HOUSE_NAMES[n-1].toLowerCase()).join(', ');
+  const copy=ag
+    ?`<b>${mg.name}</b> sets the long chapter around ${names(x.mdH)}. <b>${ag.name}</b> shapes the immediate phase through ${names(x.adH)}.`
+    :`<b>${mg.name}</b> sets the present life chapter around ${names(x.mdH)}.`;
+  return `<div class="bm-phase-card">
+    <div class="bm-phase-top"><span class="bm-phase-kicker">Active life phase</span>${x.isActive?'<span class="bm-phase-active">This house is active now</span>':''}</div>
+    <div class="bm-phase-lords">${mg.gl} ${mg.name} Mahadasha${ag?` · ${ag.gl} ${ag.name} Antardasha`:''}</div>
+    <div class="bm-phase-dates">${bmFormatPhaseDate(x.md.start)} — ${bmFormatPhaseDate(x.md.end)}${x.ad?` · current sub-phase until ${bmFormatPhaseDate(x.ad.end)}`:''}</div>
+    <div class="bm-phase-copy">${copy} ${x.isActive?'The selected house is directly connected to one or both period lords.':'This house remains part of the chart, but is not a primary period-lord focus right now.'}</div>
+    <div class="bm-phase-houses">${x.active.map(n=>`<button type="button" class="bm-phase-house${n===h?' current':''}" onclick="bmSelectHouse(${n})">H${n} · ${BM_HOUSE_NAMES[n-1]}</button>`).join('')}</div>
+  </div>`;
+}
+function bmRelationToLord(k,lord){
+  if(k===lord) return 'House ruler';
+  const rel=FRIEND[k];
+  if(!rel) return `Relationship to ${GBYK[lord].name}: contextual`;
+  if(rel.f.includes(lord)) return `Friendly to ${GBYK[lord].name}, the ruler`;
+  if(rel.e.includes(lord)) return `Natural enemy of ${GBYK[lord].name}, the ruler`;
+  return `Neutral to ${GBYK[lord].name}, the ruler`;
+}
+function bmBAVTone(v){return v>=5?'strong':v>=3?'moderate':'lighter';}
+const BM_ASPECT_EFFECT={
+  Su:'brings visibility, authority and questions of confidence',Mo:'sensitizes this area and ties it to emotional security',
+  Ma:'adds drive, urgency and productive friction',Me:'adds analysis, communication and adaptability',
+  Ju:'encourages growth, guidance and perspective',Ve:'seeks harmony, connection and value',
+  Sa:'adds duty, delay and the potential for durable structure',Ra:'intensifies desire and unconventional development',
+  Ke:'brings detachment, precision and inward reassessment'
+};
+function bmHouseInfluences(c,La,h){
+  const targetSign=(La+h-1)%12,lord=SIGN_LORD[targetSign];
+  const avPos={La}; ['Su','Mo','Ma','Me','Ju','Ve','Sa'].forEach(k=>{if(c.planets[k])avPos[k]=c.planets[k].sign;});
+  const keys=['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke'];
+  const natal=[];
+  for(const k of keys){
+    const p=c.planets[k]; if(!p) continue;
+    const from=houseFromSigns(La,p.sign); if(!aspectsFromHouse(k,from).includes(h)) continue;
+    const distance=((h-from+12)%12)+1;
+    const bav=['Su','Mo','Ma','Me','Ju','Ve','Sa'].includes(k)?computeBAV(k,avPos)[targetSign]:null;
+    natal.push({k,from,distance,bav,relation:bmRelationToLord(k,lord)});
+  }
+  let current=[];
+  try{
+    const tp=getTransitPlanets(new Date()).pos;
+    for(const k of keys){
+      if(!tp[k]) continue;
+      const from=houseFromSigns(La,tp[k].sign),occupies=from===h;
+      if(!occupies&&!aspectsFromHouse(k,from).includes(h)) continue;
+      const distance=occupies?null:((h-from+12)%12)+1;
+      const bav=['Su','Mo','Ma','Me','Ju','Ve','Sa'].includes(k)?computeBAV(k,avPos)[tp[k].sign]:null;
+      current.push({k,from,distance,bav,occupies,sign:tp[k].sign,relation:bmRelationToLord(k,lord)});
+    }
+  }catch(e){}
+  return{natal,current};
+}
+function bmInfluenceCard(x,current){
+  const g=GBYK[x.k];
+  const contact=x.occupies?`currently occupies this house`:`${current?'currently aspects':'aspects'} from H${x.from} through its ${ORD(x.distance)} aspect`;
+  const bav=x.bav==null?'Node transits are read through their dispositor; no individual BAV is assigned.':current
+    ?`${g.name}'s current transit sign has ${x.bav}/8 BAV (${bmBAVTone(x.bav)} transit support).`
+    :`If ${g.name} transits this house: ${x.bav}/8 BAV (${bmBAVTone(x.bav)} support).`;
+  return `<div class="bm-influence-card"><div class="bm-influence-head"><span style="color:${g.col}">${g.gl} ${g.name}</span><span class="bm-influence-rel">${x.relation}</span></div><div class="bm-influence-meta">${g.name} ${contact}; it ${BM_ASPECT_EFFECT[x.k]}. ${bav}</div></div>`;
+}
 function bmRenderHouseReading(h){
   const panel=document.getElementById('bmReading');
   if(!panel||!BM_CTX) return;
   const c=BM_CTX.c,La=BM_CTX.baseLa,b=BHAVAS[h-1],si=(La+h-1)%12,r=RASHIS[si];
   const lord=SIGN_LORD[si],lordP=c.planets[lord],lordH=lordP?houseFromSigns(La,lordP.sign):null;
-  const occ=bmPlanetKeysInHouse(c,La,h),focus=b.kar.slice(0,5),sav=bmHouseSAV(c,La,h);
+  const occ=bmPlanetKeysInHouse(c,La,h),focus=b.kar.slice(0,5),sav=bmHouseSAV(c,La,h),influences=bmHouseInfluences(c,La,h);
   const traits=r.traits.slice(0,2).join(' and ');
   const signLine=h===1
     ?`${r.name} is your rising sign, giving your outward approach a <b>${traits}</b> quality.`
@@ -3358,6 +3465,7 @@ function bmRenderHouseReading(h){
     <div class="bm-reading-eyebrow">House ${h} · ${b.skt}</div>
     <h3>${BM_HOUSE_NAMES[h-1]}</h3>
     <div class="bm-reading-sign">${r.name} · ruled by ${GBYK[lord].name}</div>
+    ${bmPhaseCard(c,La,h)}
     <div class="bm-reading-block">
       <div class="bm-reading-label">What this house focuses on</div>
       <div class="bm-focus-list">${focus.map(x=>`<span class="bm-focus-chip">${x}</span>`).join('')}</div>
@@ -3377,6 +3485,11 @@ function bmRenderHouseReading(h){
       <div style="font-size:12.5px;line-height:1.6;margin-top:8px;color:var(--muted)">${planetLine}</div>
     </div>
     <div class="bm-reading-block">
+      <div class="bm-reading-label">What influences this house</div>
+      ${influences.natal.length?`<div class="bm-influence-list">${influences.natal.map(x=>bmInfluenceCard(x,false)).join('')}</div>`:`<div style="font-size:12.5px;line-height:1.6;color:var(--muted)">No natal planet casts a direct graha drishti here. Read the house mainly through its ruler and occupants.</div>`}
+      ${influences.current.length?`<details class="bm-transit-details"><summary>Current sky · ${influences.current.length} planet${influences.current.length===1?'':'s'} influencing this house</summary><div class="bm-influence-list">${influences.current.map(x=>bmInfluenceCard(x,true)).join('')}</div></details>`:''}
+    </div>
+    <div class="bm-reading-block">
       <div class="bm-reading-label">Where this story leads</div>
       ${lordH?`<div class="bm-lord-path"><span class="bm-path-node">H${h} · ${BM_HOUSE_NAMES[h-1]}</span><span class="bm-path-arrow">→ ${GBYK[lord].name} →</span><button type="button" class="bm-path-node" onclick="bmSelectHouse(${lordH})">H${lordH} · ${BM_HOUSE_NAMES[lordH-1]}</button></div>`:''}
       <div style="font-size:12.5px;line-height:1.6;margin-top:9px">${lordLine}</div>
@@ -3389,6 +3502,7 @@ function bmRenderHouseReading(h){
       House ${h} (${b.skt}) · ${r.name} · ${b.cat}.<br>
       Sarvashtakavarga: ${sav.value} bindus for ${r.name}, ranked #${sav.rank} among this chart's twelve signs. SAV is read as contextual support, not a stand-alone promise of an outcome.<br>
       <div class="bm-sav-contrib">${sav.contributions.map(x=>`<span><b>${GBYK[x.k].name.slice(0,3)}</b>${x.value}</span>`).join('')}</div>
+      Aspect convention: all grahas cast the 7th aspect; Mars also 4th/8th, Jupiter 5th/9th, Saturn 3rd/10th. This app uses the selected 5th/9th node-aspect convention for Rahu and Ketu.<br>
       House lord: ${GBYK[lord].name}${lordH?` in H${lordH} (${SIGNS[lordP.sign]} ${lordP.deg.toFixed(1)}°)`:''}.<br>
       ${occ.length?`Occupants: ${occ.map(k=>{const p=c.planets[k],n=nakInfo(p.sign*30+p.deg);return`${GBYK[k].name} ${p.deg.toFixed(1)}° ${SIGNS[p.sign]} · ${n.n} pada ${n.pada}`;}).join('; ')}.`:'No occupants; read primarily through the house lord.'}
     </div></details>`;
