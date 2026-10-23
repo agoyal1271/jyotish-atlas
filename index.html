@@ -1401,9 +1401,23 @@ html.light .d10-step{background:rgba(240,244,255,0.7);border-color:rgba(80,100,2
 .bm-phase-dates{font-size:11px;color:var(--muted);margin-bottom:8px}
 .bm-phase-copy{font-size:12.5px;line-height:1.6;color:var(--ink)}
 .bm-phase-copy b{color:var(--gold2)}
+.bm-phase-timing{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:9px 0}
+.bm-phase-time{padding:7px 8px;border:1px solid var(--line);border-radius:8px;background:color-mix(in srgb,var(--panel) 82%,transparent);font-size:10.5px;color:var(--muted);line-height:1.45}
+.bm-phase-time b{display:block;color:var(--ink);font-size:11px}
+.bm-phase-section{margin-top:9px}
+.bm-phase-section-label{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:750;margin-bottom:4px}
 .bm-phase-houses{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.bm-phase-section .bm-phase-houses{margin-top:0}
 .bm-phase-house{border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:999px;padding:4px 7px;font:inherit;font-size:10.5px;cursor:pointer}
 .bm-phase-house.current{border-color:var(--gold);color:var(--gold2);font-weight:800}
+.bm-phase-tone{margin-top:11px;padding:9px 10px;border-radius:9px;border:1px solid var(--line);background:var(--panel)}
+.bm-phase-tone-head{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11.5px;font-weight:800;color:var(--ink)}
+.bm-phase-tone-badge{padding:3px 7px;border-radius:999px;font-size:10px;text-transform:uppercase;letter-spacing:.04em}
+.bm-phase-tone.supportive .bm-phase-tone-badge{color:#4fd0a0;background:rgba(79,208,160,.12)}
+.bm-phase-tone.mixed .bm-phase-tone-badge{color:var(--gold2);background:color-mix(in srgb,var(--gold) 12%,transparent)}
+.bm-phase-tone.demanding .bm-phase-tone-badge{color:#ef8b76;background:rgba(239,106,90,.12)}
+.bm-phase-tone-copy{font-size:11px;line-height:1.5;color:var(--muted);margin-top:5px}
+.bm-phase-degree{font-size:10.5px;line-height:1.5;color:var(--muted);margin-top:5px;padding-top:5px;border-top:1px solid var(--line)}
 .bm-reading-block{padding:12px 0;border-top:1px solid var(--line)}
 .bm-reading-block:first-of-type{border-top:0;padding-top:4px}
 .bm-reading-label{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-bottom:6px}
@@ -1456,6 +1470,7 @@ html.light .d10-step{background:rgba(240,244,255,0.7);border-color:rgba(80,100,2
 @media(max-width:820px){
   .bm-simple-layout{grid-template-columns:1fr;padding:8px 10px 14px}
   .bm-reading{position:static;min-height:0}
+  .bm-phase-timing{grid-template-columns:1fr}
 }
 /* Planet side panel — fixed overlay; does not affect SVG layout */
 .bm-planet-panel{position:fixed;right:22px;top:50%;transform:translateY(-50%) translateX(18px);width:232px;z-index:310;opacity:0;pointer-events:none;transition:opacity .2s,transform .22s cubic-bezier(.34,1.1,.5,1);max-height:85vh;overflow-y:auto}
@@ -3355,9 +3370,9 @@ function bmHouseSAV(c,La,h){
   }
   return{value,rank,label,copy,contributions};
 }
-function bmFormatPhaseDate(ts){
+function bmFormatPhaseDateFull(ts){
   if(!ts) return '?';
-  return new Date(ts).toLocaleDateString('en',{month:'short',year:'numeric'});
+  return new Date(ts).toLocaleDateString('en',{day:'numeric',month:'short',year:'numeric'});
 }
 function bmCurrentPhase(c,La,h){
   if(!c.dashas||!c.dashas.mahas) return null;
@@ -3378,9 +3393,33 @@ function bmCurrentPhase(c,La,h){
   const mdH=domains(md.lord),adH=ad?domains(ad.lord):[],active=[...new Set([...mdH,...adH])];
   return{md,ad,mdH,adH,active,isActive:active.includes(h)};
 }
+function bmPhaseTone(c,La,x){
+  const ad=x.ad||{lord:x.md.lord,start:x.md.start,end:x.md.end};
+  let verdict={label:'Mixed'},score=null;
+  try{
+    const result=lpComputePeriodScore(c,La,lpBuildBAV(c,La),x.md,ad);
+    verdict=result.verdict; score=result.total;
+  }catch(e){}
+  const supportive=['Exceptional','Strong','Favorable'].includes(verdict.label);
+  const demanding=['Challenging','Difficult'].includes(verdict.label);
+  const cls=supportive?'supportive':demanding?'demanding':'mixed';
+  const label=supportive?'Supportive phase':demanding?'Demanding phase':'Mixed phase';
+  const copy=supportive
+    ?'More factors support delivery than resist it. Use the opening, while still working consciously with the active houses.'
+    :demanding
+      ?'Resistance and responsibility are more prominent. This favors patience, preparation and realistic pacing—not fear or fatalism.'
+      :'Helpful and difficult factors coexist. Results are likely to depend more on choices, timing and sustained effort.';
+  const degreeNote=k=>{
+    const p=c.planets[k]; if(!p) return '';
+    const av=baladiAvastha(p.sign,p.deg),dig=dignityOf(k,p.sign);
+    return `${GBYK[k].name} ${p.deg.toFixed(1)}° · ${av.n} · ${k==='Ra'||k==='Ke'?'read through dispositor':dig.full.split('·')[0].trim()}`;
+  };
+  const notes=[degreeNote(x.md.lord)]; if(x.ad&&x.ad.lord!==x.md.lord) notes.push(degreeNote(x.ad.lord));
+  return{cls,label,copy,score,notes:notes.filter(Boolean)};
+}
 function bmPhaseCard(c,La,h){
   const x=bmCurrentPhase(c,La,h); if(!x) return '';
-  const mg=GBYK[x.md.lord],ag=x.ad?GBYK[x.ad.lord]:null;
+  const mg=GBYK[x.md.lord],ag=x.ad?GBYK[x.ad.lord]:null,tone=bmPhaseTone(c,La,x);
   const names=hs=>hs.slice(0,3).map(n=>BM_HOUSE_NAMES[n-1].toLowerCase()).join(', ');
   const copy=ag
     ?`<b>${mg.name}</b> sets the long chapter around ${names(x.mdH)}. <b>${ag.name}</b> shapes the immediate phase through ${names(x.adH)}.`
@@ -3388,9 +3427,19 @@ function bmPhaseCard(c,La,h){
   return `<div class="bm-phase-card">
     <div class="bm-phase-top"><span class="bm-phase-kicker">Active life phase</span>${x.isActive?'<span class="bm-phase-active">This house is active now</span>':''}</div>
     <div class="bm-phase-lords">${mg.gl} ${mg.name} Mahadasha${ag?` · ${ag.gl} ${ag.name} Antardasha`:''}</div>
-    <div class="bm-phase-dates">${bmFormatPhaseDate(x.md.start)} — ${bmFormatPhaseDate(x.md.end)}${x.ad?` · current sub-phase until ${bmFormatPhaseDate(x.ad.end)}`:''}</div>
+    <div class="bm-phase-dates">The long chapter and the current sub-phase</div>
+    <div class="bm-phase-timing">
+      <div class="bm-phase-time"><b>${mg.name} Mahadasha started</b>${bmFormatPhaseDateFull(x.md.start)} · ends ${bmFormatPhaseDateFull(x.md.end)}</div>
+      ${x.ad?`<div class="bm-phase-time"><b>${ag.name} Antardasha started</b>${bmFormatPhaseDateFull(x.ad.start)} · ends ${bmFormatPhaseDateFull(x.ad.end)}</div>`:''}
+    </div>
     <div class="bm-phase-copy">${copy} ${x.isActive?'The selected house is directly connected to one or both period lords.':'This house remains part of the chart, but is not a primary period-lord focus right now.'}</div>
-    <div class="bm-phase-houses">${x.active.map(n=>`<button type="button" class="bm-phase-house${n===h?' current':''}" onclick="bmSelectHouse(${n})">H${n} · ${BM_HOUSE_NAMES[n-1]}</button>`).join('')}</div>
+    <div class="bm-phase-section"><div class="bm-phase-section-label">Long chapter · ${mg.name} activates</div><div class="bm-phase-houses">${x.mdH.map(n=>`<button type="button" class="bm-phase-house${n===h?' current':''}" onclick="bmSelectHouse(${n})">H${n} · ${BM_HOUSE_NAMES[n-1]}</button>`).join('')}</div></div>
+    ${x.ad?`<div class="bm-phase-section"><div class="bm-phase-section-label">Current sub-phase · ${ag.name} activates</div><div class="bm-phase-houses">${x.adH.map(n=>`<button type="button" class="bm-phase-house${n===h?' current':''}" onclick="bmSelectHouse(${n})">H${n} · ${BM_HOUSE_NAMES[n-1]}</button>`).join('')}</div></div>`:''}
+    <div class="bm-phase-tone ${tone.cls}">
+      <div class="bm-phase-tone-head"><span>How this phase may feel</span><span class="bm-phase-tone-badge">${tone.label}</span></div>
+      <div class="bm-phase-tone-copy">${tone.copy} This is a traditional Jyotish tendency, not a certainty.</div>
+      <div class="bm-phase-degree"><b>Degree and condition check:</b> ${tone.notes.join(' · ')}</div>
+    </div>
   </div>`;
 }
 function bmRelationToLord(k,lord){
