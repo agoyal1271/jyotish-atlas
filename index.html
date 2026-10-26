@@ -3617,6 +3617,28 @@ const D10_PLANET_CORE={
   Ju:'wisdom, teaching, judgment and counsel',Ve:'relationships, harmony, value and discernment',Sa:'discipline, responsibility and durable effort',Ra:'ambition, observation and unconventional growth',Ke:'specialised instinct, detachment and inward mastery'
 };
 const D10_HOUSE_SHORT=['APPROACH','RESOURCES','EFFORT','WORKPLACE','JUDGMENT','CONFLICT','CLIENTS','OBSTACLES','GUIDANCE','STATUS','GAINS','OUTGOINGS'];
+// An aspect carries both the planet's nature and the professional domain
+// it occupies. Source house and aspect distance are distinct quantities.
+const D10_ASPECT_SOURCE=[
+  'your professional attitude and personal initiative',
+  'your available skills, experience and resources',
+  'your effort, communication and professional connections',
+  'your workplace conditions and sense of comfort at work',
+  'your professional judgment, ideas and decisions',
+  'competition, service demands and professional disagreements',
+  'clients, customers and business partnerships',
+  'unexpected obstacles, disruptions and professional change',
+  'mentors, advice and your professional support system',
+  'your responsibilities, authority and public standing',
+  'income, gains and the rewards of your work',
+  'expenses, separation and work done abroad or behind the scenes'
+];
+function bmD10AspectMeaning(x,targetHouse,rulerName){
+  const planet=GBYK[x.k].name,source=D10_ASPECT_SOURCE[x.from-1];
+  const target=D10_HOUSE_INFO[targetHouse-1].title.toLowerCase();
+  const recipient=rulerName?`${rulerName}, the ruler of H${targetHouse}`:`H${targetHouse} (${target})`;
+  return `${planet} casts its ${ORD(x.distance)} aspect from H${x.from} (${D10_HOUSE_INFO[x.from-1].title.toLowerCase()}) onto ${recipient}. Its ${D10_PLANET_CORE[x.k]} reaches ${target} through ${source}. This links how you experience ${target} with what happens in that source area.`;
+}
 function bmD10Condition(k,c){
   const p=c.planets[k];
   if(!p) return 'placement unavailable';
@@ -3640,9 +3662,11 @@ function bmD10Narrative(c,La,h){
   if(lh){
     parts.push(`${name(lord)} is in H${lh} (${domain(lh)}), ${bmD10Condition(lord,c).toLowerCase()}. ${h===6?`Professional disputes may centre on ${domain(lh)}; clarify expectations in that area.`:h===8?`When setbacks arise, examine ${domain(lh)} as a possible source of strain.`:`This connects ${domain(h)} with ${domain(lh)}.`}`);
     const rulerContacts=bmD10HouseInfluences(c,La,lh).filter(x=>x.k!==lord);
-    if(rulerContacts.length) parts.push(`The ruler itself ${rulerContacts.map(x=>x.occupies?`shares H${lh} with ${name(x.k)}`:`receives ${name(x.k)}'s ${ORD(x.distance)} aspect from H${x.from}`).join('; ')}. This adds ${rulerContacts.map(x=>D10_PLANET_CORE[x.k]).join('; ')} to how it delivers this house's results.`);
+    for(const x of rulerContacts) parts.push(x.occupies
+      ?`${name(lord)}, this house's ruler, shares H${lh} (${domain(lh)}) with ${name(x.k)}. Their conjunction adds ${D10_PLANET_CORE[x.k]} through ${D10_ASPECT_SOURCE[lh-1]} to how the ruler delivers ${domain(h)}.`
+      :bmD10AspectMeaning(x,h,name(lord)));
   }
-  if(asp.length) parts.push(`The house also receives ${asp.map(x=>`${name(x.k)}'s ${ORD(x.distance)} aspect from H${x.from}`).join('; ')}. ${asp.map(x=>`${name(x.k)} brings ${D10_PLANET_CORE[x.k]} into ${domain(h)}`).join('; ')}.`);
+  if(asp.length) parts.push(...asp.map(x=>bmD10AspectMeaning(x,h)));
   else parts.push('No planet casts a direct graha aspect onto this house in the selected convention.');
   if(h===3&&pressure.length) parts.push(`${pressure.map(x=>name(x.k)).join(' and ')} can turn pressure into execution here: the lecture treats forceful influences on H3 as useful for effort, initiative and persistence. Channel the intensity into consistent action.`);
   if(h===4){
@@ -3699,7 +3723,7 @@ function bmRenderD10HouseReading(h){
     <div class="bm-reading-block"><div class="bm-reading-label">What this house focuses on</div><div class="bm-focus-list">${info.focus.map(x=>`<span class="bm-focus-chip">${x}</span>`).join('')}</div><div style="font-size:13px;line-height:1.65;margin-top:10px">${info.copy}</div></div>
     ${tenthLine?`<div class="bm-reading-block bm-d10-career-callout"><div class="bm-reading-label">Career anchor</div><div style="font-size:13px;line-height:1.65">${tenthLine}</div></div>`:''}
     <div class="bm-reading-block"><div class="bm-reading-label">What this says about your career</div><div class="bm-reading-summary">${summary}</div></div>
-    <details class="bm-tech-details"><summary>Planets influencing this house · ${influences.length}</summary><div class="bm-tech-body">${influences.map(x=>`<p><b>${GBYK[x.k].name}</b> · ${x.occupies?'occupies this house':`${ORD(x.distance)} aspect from H${x.from}`} · ${bmD10Condition(x.k,c)}.<br>${x.relation}.</p>`).join('')||'No occupants or direct graha aspects.'}</div></details>
+    <details class="bm-tech-details"><summary>Planets influencing this house · ${influences.length}</summary><div class="bm-tech-body">${influences.map(x=>`<p><b>${GBYK[x.k].name}</b> · ${x.occupies?'occupies this house':`${ORD(x.distance)} aspect from H${x.from} (${D10_HOUSE_INFO[x.from-1].title.toLowerCase()})`} · ${bmD10Condition(x.k,c)}.<br>${x.relation}.${x.occupies?'':`<br>Source-house theme: ${D10_ASPECT_SOURCE[x.from-1]}.`}</p>`).join('')||'No occupants or direct graha aspects.'}</div></details>
     <details class="bm-tech-details"><summary>D-1 career foundation</summary><div class="bm-tech-body">Your D-1 10th house is ${SIGNS[(d1La+9)%12]}. Its ruler ${GBYK[d1lord].name}${d1p?` sits in H${houseFromSigns(d1La,d1p.sign)}, ${bmD10Condition(d1lord,d1).toLowerCase()}`:''}. ${bmD10HouseInfluences(d1,d1La,10).map(x=>`${GBYK[x.k].name} ${x.occupies?'occupies it':`aspects it from H${x.from}`}`).join('; ')||'No occupants or direct aspects'}. Read this foundation alongside the D-10 details.</div></details>
     <details class="bm-tech-details"><summary>Reading method and source</summary><div class="bm-tech-body">Adapted from <a href="https://www.youtube.com/watch?v=eyxQQrfiVLc" target="_blank" rel="noopener">Amit Pal Arora’s D-10 lecture, first 25 minutes</a>. House, lord, occupants and actual graha aspects are combined. All grahas: 7th; Mars: 4th/8th; Jupiter: 5th/9th; Saturn: 3rd/10th. Node 5th/9th aspects follow this app’s convention, not a verified rule from this lecture. H12 uses a general professional interpretation because the lecture’s caption is ambiguous. D-10 sign placements are used; natal degrees are not D-10 degrees. These are traditional interpretive tendencies.</div></details>`;
 }
