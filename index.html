@@ -1853,11 +1853,13 @@ body:has(.modal.show){overflow:hidden}
 .bm-house-picker label{font-size:13px;font-weight:700;color:var(--ink)}
 .bm-house-picker select{flex:1;min-width:0;min-height:44px;max-width:100%;font-size:16px}
 .bm-reading:focus{outline:2px solid var(--gold);outline-offset:2px}
+.bm-quick-varga{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
 @media(max-width:720px){
   .jm-rail{flex:0 0 100%;min-width:0;flex-wrap:nowrap}
   .jm-chapchip{flex-shrink:0;min-height:44px}
   .jm-bar-right{margin-left:auto;min-width:0}
   .jm-home,.jm-topics-btn,.jm-explore-btn{min-height:44px}
+ .bm-quick-varga{width:100%;margin-left:0;order:3}
 }
 @media(max-width:1200px){
   .charts-layout{flex-direction:column}
@@ -3176,12 +3178,12 @@ function bmSetSimpleMode(simple){
     BM_SELECTED_HOUSE=BM_SELECTED_HOUSE||1;
     BM_CTX.ref='la'; BM_CTX.layer='lord'; BM_CTX.gochara=false;
   }
-  renderBhavaMandala(BM_CTX.c,BM_CTX.baseLa,BM_SIMPLE?1:(BM_CTX.N||1),false);
+  renderBhavaMandala(BM_CTX.c,BM_CTX.baseLa,BM_SIMPLE?(BM_CTX.N===10?10:1):(BM_CTX.N||1),false);
 }
 function bmSelectHouse(h){
   BM_SELECTED_HOUSE=Math.max(1,Math.min(12,+h||1));
   if(!BM_CTX) return;
-  if(BM_SIMPLE) renderBhavaMandala(BM_CTX.c,BM_CTX.baseLa,1,false);
+  if(BM_SIMPLE) renderBhavaMandala(BM_CTX.c,BM_CTX.baseLa,BM_CTX.N===10?10:1,false);
   else bmHighlight(BM_SELECTED_HOUSE);
 }
 function bmChooseHouse(h){
@@ -3593,6 +3595,67 @@ function bmInfluenceCard(x,current){
     :`If ${g.name} transits this house: ${x.bav}/8 BAV (${bmBAVTone(x.bav)} support).`;
   return `<div class="bm-influence-card"><div class="bm-influence-head"><span style="color:${g.col}">${g.gl} ${g.name}</span><span class="bm-influence-rel">${x.relation}</span></div><div class="bm-influence-meta">${g.name} ${contact}; it ${BM_ASPECT_EFFECT[x.k]}. ${bav}</div></div>`;
 }
+/* D-10 quick reading: a deliberately small, house-first translation of the
+   career rules used in the D-10 lesson. These meanings are lenses, not fixed
+   job predictions; the sign, lord, occupants and aspects personalise them. */
+const D10_HOUSE_INFO=[
+  {title:'Career approach',focus:['professional attitude','initiative','willingness to work'],copy:'How you show up for work: your career temperament, initiative and readiness to act.'},
+  {title:'Career resources',focus:['skills','experience','speech','support'],copy:'The tools you can draw on professionally—not only money, but knowledge, judgment, capability and people.'},
+  {title:'Effort & network',focus:['effort','communication','network','movement'],copy:'How you build a career through effort, communication, connections, short travel and repeated practice.'},
+  {title:'Work environment',focus:['workplace','comfort','location','satisfaction'],copy:'The setting in which you work and whether the professional environment feels supportive and sustainable.'},
+  {title:'Judgment & team',focus:['intelligence','decisions','creativity','team members'],copy:'How you apply intelligence and judgment at work; also the quality of teams or juniors you guide.'},
+  {title:'Competition & service',focus:['competition','challenges','conflict','service'],copy:'The work friction you meet: competition, disputes, service demands and the problems you learn to solve.'},
+  {title:'Partners & clients',focus:['business partners','customers','independent work','daily earnings'],copy:'How partnerships, clients and the marketplace participate in your professional life.'},
+  {title:'Obstacles & change',focus:['sudden problems','pressure','setbacks','transformation'],copy:'Where unexpected professional obstacles, distress or major changes may require resilience.'},
+  {title:'Guidance & support',focus:['mentors','advice','growth','belief'],copy:'The guidance, mentors, counsel and support system that help your career grow in the right direction.'},
+  {title:'Status & karma',focus:['action','authority','respect','public standing'],copy:'Your visible professional action, responsibility, status, reputation and the work you are known for.'},
+  {title:'Gains & balance sheet',focus:['income','gains','recognition','networks'],copy:'The rewards of professional effort: income, gains, recognition and useful professional networks.'},
+  {title:'Losses & behind the scenes',focus:['expenditure','separation','foreign work','hidden opposition'],copy:'Where professional energy may be spent, withdrawn or redirected into foreign, private or behind-the-scenes work.'}
+];
+const D10_PLANET_CORE={
+  Su:'visibility, authority and leadership',Mo:'public response, care and adaptability',Ma:'technical execution, courage and hard work',Me:'analysis, communication and commerce',
+  Ju:'wisdom, teaching, judgment and counsel',Ve:'relationships, harmony, value and discernment',Sa:'discipline, responsibility and durable effort',Ra:'ambition, observation and unconventional growth',Ke:'specialised instinct, detachment and inward mastery'
+};
+function bmD10ChartData(){
+  if(!BM_CTX) return null;
+  const src=BM_CTX.c,base=BM_CTX.baseLa,wp={};
+  for(const k of ['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke']){
+    const p=src.planets[k]; if(p) wp[k]={...p,sign:vargaSign(p.sign,p.deg,10)};
+  }
+  return {c:{...src,planets:wp,La:{...(src.La||{}),sign:vargaSign(base,src.La?.deg||0,10)}},La:vargaSign(base,src.La?.deg||0,10)};
+}
+function bmD10HouseInfluences(c,La,h){
+  const out=[];
+  for(const k of ['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke']){
+    const p=c.planets[k]; if(!p) continue;
+    const from=houseFromSigns(La,p.sign);
+    if(from!==h && !aspectsFromHouse(k,from).includes(h)) continue;
+    out.push({k,from,distance:from===h?null:((h-from+12)%12)+1,occupies:from===h,relation:bmRelationToLord(k,SIGN_LORD[(La+h-1)%12])});
+  }
+  return out;
+}
+function bmRenderD10HouseReading(h){
+  const panel=document.getElementById('bmReading'),data=bmD10ChartData();
+  if(!panel||!data) return;
+  const c=data.c,La=data.La,info=D10_HOUSE_INFO[h-1],si=(La+h-1)%12,r=RASHIS[si],lord=SIGN_LORD[si],lordP=c.planets[lord],lordH=lordP?houseFromSigns(La,lordP.sign):null;
+  const occ=bmPlanetKeysInHouse(c,La,h),influences=bmD10HouseInfluences(c,La,h),h10lord=SIGN_LORD[(La+9)%12],h10P=c.planets[h10lord],h10H=h10P?houseFromSigns(La,h10P.sign):null;
+  const signLine=`${r.name} shapes this professional area through ${r.traits.slice(0,2).join(' and ')}.`;
+  const planetLine=occ.length?`${occ.map(k=>GBYK[k].name).join(occ.length>1?' and ':'')} ${occ.length>1?'activate':'activates'} this area: ${occ.map(k=>`${GBYK[k].name} adds ${D10_PLANET_CORE[k]}`).join('; ')}.`:`No planet occupies this house; read it mainly through its ruler, ${GBYK[lord].name}.`;
+  const lordLine=lordH?`${GBYK[lord].name}, ruler of this D-10 house, sits in H${lordH} (${D10_HOUSE_INFO[lordH-1].title.toLowerCase()}).`: `${GBYK[lord].name} carries this house's professional results.`;
+  const tenthLine=h===10?`This is the D-10 10th house itself: it is the clearest place to read visible work, status and professional karma.`:h10H?`The D-10 10th lord, ${GBYK[h10lord].name}, is in H${h10H} (${D10_HOUSE_INFO[h10H-1].title.toLowerCase()}); that house becomes a major career domain.`:'';
+  const influenceLine=influences.length?influences.map(x=>{const g=GBYK[x.k],rel=x.relation;return `${g.name} ${x.occupies?'occupies':'aspects'} this house and adds ${D10_PLANET_CORE[x.k]}${rel&&rel!=='House ruler'?` (${rel.toLowerCase()})`:''}.`;}).join(' '):'No direct graha influence is shown; the house and its ruler carry the main story.';
+  const summary=`${info.title}: ${info.copy} ${planetLine} ${lordLine}`;
+  panel.innerHTML=`
+    <div class="bm-reading-eyebrow">D-10 House ${h} · Daśāṁśa</div>
+    <h3>${info.title}</h3>
+    <div class="bm-reading-sign">${r.name} · ruled by ${GBYK[lord].name}</div>
+    <div class="bm-reading-block"><div class="bm-reading-label">What this house focuses on</div><div class="bm-focus-list">${info.focus.map(x=>`<span class="bm-focus-chip">${x}</span>`).join('')}</div><div style="font-size:13px;line-height:1.65;margin-top:10px">${info.copy}</div></div>
+    ${tenthLine?`<div class="bm-reading-block bm-d10-career-callout"><div class="bm-reading-label">Career anchor</div><div style="font-size:13px;line-height:1.65">${tenthLine}</div></div>`:''}
+    <div class="bm-reading-block"><div class="bm-reading-label">How it shows in your D-10</div><div style="font-size:13px;line-height:1.65">${signLine} ${planetLine}</div></div>
+    <div class="bm-reading-block"><div class="bm-reading-label">Ruler and influences</div><div style="font-size:13px;line-height:1.65">${lordLine} ${influenceLine}</div></div>
+    <div class="bm-reading-block"><div class="bm-reading-label">What this says about your career</div><div class="bm-reading-summary">${summary}</div></div>
+    <details class="bm-tech-details"><summary>Why? View D-10 evidence</summary><div class="bm-tech-body">D-10 ${r.name} · House ${h}. House ruler: ${GBYK[lord].name}${lordH?` in H${lordH} at ${lordP.deg.toFixed(1)}°`:''}. ${occ.length?`Occupants: ${occ.map(k=>`${GBYK[k].name} ${c.planets[k].deg.toFixed(1)}°`).join('; ')}.`:'No occupants.'} ${h10H?`10th lord: ${GBYK[h10lord].name} in H${h10H}.`:''} Aspect convention: all grahas 7th; Mars 4th/8th, Jupiter 5th/9th, Saturn 3rd/10th.</div></details>`;
+}
 function bmRenderHouseReading(h){
   const panel=document.getElementById('bmReading');
   if(!panel||!BM_CTX) return;
@@ -3660,6 +3723,12 @@ function bmRenderHouseReading(h){
 function bmShowSimplePlanet(k){
   const panel=document.getElementById('bmReading');
   if(!panel||!BM_CTX) return;
+  if(BM_CTX.N===10){
+    const data=bmD10ChartData(),p=data&&data.c.planets[k]; if(!p) return;
+    const h=houseFromSigns(data.La,p.sign),g=GBYK[k],r=RASHIS[p.sign],info=D10_HOUSE_INFO[h-1],dig=dignityOf(k,p.sign);
+    panel.innerHTML=`<button type="button" class="bm-reading-back" onclick="bmRenderD10HouseReading(${h})">← House ${h} · ${info.title}</button><div class="bm-reading-eyebrow">Planet in your D-10</div><h3 style="color:${g.col}">${g.gl} ${g.name}</h3><div class="bm-reading-sign">House ${h} · ${info.title} · ${r.name}</div><div class="bm-reading-block"><div class="bm-reading-label">In one line</div><div class="bm-reading-summary">${g.name} brings ${D10_PLANET_CORE[k]} into your ${info.title.toLowerCase()} area.</div></div><div class="bm-reading-block"><div class="bm-reading-label">How this may appear</div><div style="font-size:13px;line-height:1.65">${g.desc}</div><div class="bm-reading-balance"><div class="bm-balance-row"><b>At its best</b>${g.strong}</div><div class="bm-balance-row"><b>Watch for</b>${g.afflicted}</div></div></div><details class="bm-tech-details"><summary>Show the D-10 evidence</summary><div class="bm-tech-body">${g.name} · ${r.name} ${p.deg.toFixed(1)}° · D-10 House ${h}.<br>${dig.full}</div></details>`;
+    return;
+  }
   const c=BM_CTX.c,La=BM_CTX.baseLa,p=c.planets[k]; if(!p) return;
   const h=houseFromSigns(La,p.sign),b=BHAVAS[h-1],g=GBYK[k],r=RASHIS[p.sign];
   const dig=dignityOf(k,p.sign),nak=nakInfo(p.sign*30+p.deg);
@@ -3688,7 +3757,7 @@ function bmShowSimplePlanet(k){
 }
 function renderBhavaMandala(c,La,N,motion){
   N=N||1;
-  if(BM_SIMPLE) N=1;
+  if(BM_SIMPLE && N!==10) N=1;
   const ct=document.getElementById('bhavaMandala');
   if(!ct)return;
   const simple=BM_SIMPLE,selectedH=BM_SELECTED_HOUSE||1;
@@ -3706,6 +3775,7 @@ function renderBhavaMandala(c,La,N,motion){
     c={planets:wp,La:{sign:vargaSign(c.La.sign,c.La.deg||0,N),deg:0},name:c.name,dashas:c.dashas};
     La=c.La.sign;
   }
+  if(BM_CTX){BM_CTX.renderC=c;BM_CTX.renderLa=La;}
   // ── Reference toggle: recast houses from the Moon (Chandra Kundali) instead of the Ascendant.
   //    Sign positions never move — only which sign counts as "House 1" changes, so every downstream
   //    house-number / lordship / aspect-to-house computation below (all keyed off `La`) stays correct.
@@ -4006,13 +4076,14 @@ function renderBhavaMandala(c,La,N,motion){
 
   let d10Html='';
   if(N===10&&BM_CTX.c){try{d10Html=renderD10Guide(BM_CTX.c,BM_CTX.baseLa);}catch(e){console.warn('D10 guide:',e);}}
-  const modeRow=`<div class="bm-modebar"><div class="bm-mode-copy"><b>Read this chart house by house</b>${simple?'Select a house, then select a planet for one more layer.':'Technical chart layers and classical relationships.'}</div><div class="bm-mode-actions"><button type="button" class="bm-mode-btn${simple?' active':''}" onclick="bmSetSimpleMode(true)">Simple reading</button><button type="button" class="bm-mode-btn${simple?'':' active'}" onclick="bmSetSimpleMode(false)">Advanced chart</button></div></div>`;
+  const modeRow=`<div class="bm-modebar"><div class="bm-mode-copy"><b>${N===10?'Read your career house by house':'Read this chart house by house'}</b>${simple?'Select a house, then select a planet for one more layer.':'Technical chart layers and classical relationships.'}</div>${simple?`<div class="bm-quick-varga"><button type="button" class="bm-mode-btn${N===1?' active':''}" onclick="bmTurn(1)">D-1 · Life</button><button type="button" class="bm-mode-btn${N===10?' active':''}" onclick="bmTurn(10)">D-10 · Career</button></div>`:''}<div class="bm-mode-actions"><button type="button" class="bm-mode-btn${simple?' active':''}" onclick="bmSetSimpleMode(true)">Simple reading</button><button type="button" class="bm-mode-btn${simple?'':' active'}" onclick="bmSetSimpleMode(false)">Advanced chart</button></div></div>`;
   const chartView=document.getElementById('chartView');
   if(chartView) chartView.classList.toggle('bm-simple-active',simple);
   if(simple){
-    const picker=`<div class="bm-house-picker"><label for="bmHouseSelect">Explore a house</label><select id="bmHouseSelect" onchange="bmChooseHouse(this.value)">${BM_HOUSE_NAMES.map((name,i)=>`<option value="${i+1}"${selectedH===i+1?' selected':''}>${i+1} · ${name}</option>`).join('')}</select></div>`;
+    const houseNames=N===10?D10_HOUSE_INFO.map(x=>x.title):BM_HOUSE_NAMES;
+    const picker=`<div class="bm-house-picker"><label for="bmHouseSelect">Explore a house</label><select id="bmHouseSelect" onchange="bmChooseHouse(this.value)">${houseNames.map((name,i)=>`<option value="${i+1}"${selectedH===i+1?' selected':''}>${i+1} · ${name}</option>`).join('')}</select></div>`;
     ct.innerHTML=`${modeRow}${picker}<div class="bm-simple-layout"><div><div class="bm-container">${sv}</div><div class="bm-simple-hint">Choose a house above or on the wheel. Select a planet to understand its role.</div></div><aside class="bm-reading" id="bmReading" tabindex="-1" style="scroll-margin-top:150px" aria-live="polite"></aside></div>`;
-    bmRenderHouseReading(selectedH);
+    N===10?bmRenderD10HouseReading(selectedH):bmRenderHouseReading(selectedH);
   }else{
     ct.innerHTML=`${modeRow}${tabs}${refsRow}${lensRow}<div class="bm-container">${sv}</div>${aspLegend}${gocharaLegend}<div class="bm-trace" id="bmTrace">${traceDefault}</div>${caption}<div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${isRTN?'RTN (D-9 sign / D-1 house)':vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div>${d10Html}<div class="bm-planet-panel" id="bmPlanetPanel"></div>`;
   }
