@@ -3603,7 +3603,7 @@ const D10_HOUSE_INFO=[
   {title:'Career resources',focus:['skills','experience','speech','support'],copy:'The tools you can draw on professionally—not only money, but knowledge, judgment, capability and people.'},
   {title:'Effort & network',focus:['effort','communication','network','movement'],copy:'How you build a career through effort, communication, connections, short travel and repeated practice.'},
   {title:'Work environment',focus:['workplace','comfort','location','satisfaction'],copy:'The setting in which you work and whether the professional environment feels supportive and sustainable.'},
-  {title:'Judgment & team',focus:['intelligence','decisions','creativity','team members'],copy:'How you apply intelligence and judgment at work; also the quality of teams or juniors you guide.'},
+  {title:'Professional judgment',focus:['intelligence','decisions','creativity'],copy:'How you apply intelligence, make decisions and solve problems at work.'},
   {title:'Competition & service',focus:['competition','challenges','conflict','service'],copy:'The work friction you meet: competition, disputes, service demands and the problems you learn to solve.'},
   {title:'Partners & clients',focus:['business partners','customers','independent work','daily earnings'],copy:'How partnerships, clients and the marketplace participate in your professional life.'},
   {title:'Obstacles & change',focus:['sudden problems','pressure','setbacks','transformation'],copy:'Where unexpected professional obstacles, distress or major changes may require resilience.'},
@@ -3616,6 +3616,50 @@ const D10_PLANET_CORE={
   Su:'visibility, authority and leadership',Mo:'public response, care and adaptability',Ma:'technical execution, courage and hard work',Me:'analysis, communication and commerce',
   Ju:'wisdom, teaching, judgment and counsel',Ve:'relationships, harmony, value and discernment',Sa:'discipline, responsibility and durable effort',Ra:'ambition, observation and unconventional growth',Ke:'specialised instinct, detachment and inward mastery'
 };
+const D10_HOUSE_SHORT=['APPROACH','RESOURCES','EFFORT','WORKPLACE','JUDGMENT','CONFLICT','CLIENTS','OBSTACLES','GUIDANCE','STATUS','GAINS','OUTGOINGS'];
+function bmD10Condition(k,c){
+  const p=c.planets[k];
+  if(!p) return 'placement unavailable';
+  if(k==='Ra'||k==='Ke') return `read through ${GBYK[SIGN_LORD[p.sign]].name}, its sign ruler`;
+  return dignityOf(k,p.sign).full.split('·')[0].trim();
+}
+function bmD10Narrative(c,La,h){
+  const name=k=>GBYK[k].name,domain=n=>D10_HOUSE_INFO[n-1].title.toLowerCase();
+  const lord=SIGN_LORD[(La+h-1)%12],lp=c.planets[lord],lh=lp?houseFromSigns(La,lp.sign):null;
+  const contacts=bmD10HouseInfluences(c,La,h),occ=contacts.filter(x=>x.occupies),asp=contacts.filter(x=>!x.occupies);
+  const pressure=contacts.filter(x=>['Su','Ma','Sa','Ra','Ke'].includes(x.k));
+  const jupiter=contacts.some(x=>x.k==='Ju');
+  const parts=[];
+  if(h===2){
+    const resources={Su:'leadership and taking responsibility',Mo:'emotional awareness and responsiveness, with boundaries around over-involvement',Ma:'technical skill, logic and sustained hands-on effort',Me:'analysis, communication and commercial skill',Ju:'experience, knowledge and sound judgment',Ve:'discernment: choosing useful people, relationships and opportunities',Sa:'discipline, patience and reliable execution',Ra:'observation and unconventional approaches',Ke:'specialised instinct and staying rooted in your strengths'};
+    const keys=occ.length?occ.map(x=>x.k):[lord];
+    parts.push(`${occ.length?'With '+keys.map(name).join(' and ')+' occupying H2':'With H2 empty, its ruler '+name(lord)+' takes the lead'}, your usable professional resources are ${keys.map(k=>resources[k]).join('; ')}. These describe capabilities you can use across occupations.`);
+  }else if(occ.length){
+    parts.push(`${occ.map(x=>name(x.k)).join(' and ')} ${occ.length===1?'occupies':'occupy'} H${h}, making ${domain(h)} an area where ${occ.map(x=>D10_PLANET_CORE[x.k]).join('; ')} is expressed directly.`);
+  }else parts.push(`H${h} is empty, so ${name(lord)}, its ruler, carries the main story of ${domain(h)}.`);
+  if(lh){
+    parts.push(`${name(lord)} is in H${lh} (${domain(lh)}), ${bmD10Condition(lord,c).toLowerCase()}. ${h===6?`Professional disputes may centre on ${domain(lh)}; clarify expectations in that area.`:h===8?`When setbacks arise, examine ${domain(lh)} as a possible source of strain.`:`This connects ${domain(h)} with ${domain(lh)}.`}`);
+    const rulerContacts=bmD10HouseInfluences(c,La,lh).filter(x=>x.k!==lord);
+    if(rulerContacts.length) parts.push(`The ruler itself ${rulerContacts.map(x=>x.occupies?`shares H${lh} with ${name(x.k)}`:`receives ${name(x.k)}'s ${ORD(x.distance)} aspect from H${x.from}`).join('; ')}. This adds ${rulerContacts.map(x=>D10_PLANET_CORE[x.k]).join('; ')} to how it delivers this house's results.`);
+  }
+  if(asp.length) parts.push(`The house also receives ${asp.map(x=>`${name(x.k)}'s ${ORD(x.distance)} aspect from H${x.from}`).join('; ')}. ${asp.map(x=>`${name(x.k)} brings ${D10_PLANET_CORE[x.k]} into ${domain(h)}`).join('; ')}.`);
+  else parts.push('No planet casts a direct graha aspect onto this house in the selected convention.');
+  if(h===3&&pressure.length) parts.push(`${pressure.map(x=>name(x.k)).join(' and ')} can turn pressure into execution here: the lecture treats forceful influences on H3 as useful for effort, initiative and persistence. Channel the intensity into consistent action.`);
+  if(h===4){
+    const reasons=[...pressure.map(x=>`${name(x.k)} ${x.occupies?'occupies':'aspects'} H4`),...([6,8,12].includes(lh)?[`${name(lord)}, the 4th lord, is in H${lh}`]:[])];
+    if(reasons.length) parts.push(`Workplace friction is indicated by ${reasons.join('; ')}. In the lecture's method, this makes workplace fit and opportunities away from your birthplace worth exploring. It does not establish that relocation is required.${jupiter?' Jupiter also influences H4, adding guidance and a mitigating influence; assess that alongside the pressure.':''}`);
+    else parts.push('The lecture’s specific H4 relocation triggers are absent here; this alone does not decide whether local or distant work is better.');
+  }
+  if([1,5,7,9,10,11,12].includes(h)&&pressure.length){
+    const caution={1:'protect motivation from pressure and over-identification with work',5:'allow time for careful decisions under pressure',7:'make partner expectations and customer commitments explicit',9:'check the quality of advice before acting on it',10:'balance ambition with realistic responsibilities',11:'review whether rewards justify the effort invested',12:'track expenditure and commitments that consume professional energy'};
+    parts.push(`${pressure.map(x=>name(x.k)).join(' and ')} ${pressure.length===1?'adds':'add'} pressure here: ${caution[h]}.${jupiter?' Jupiter also contributes perspective and guidance, so the reading contains support as well as friction.':''}`);
+  }
+  for(const x of contacts.filter(x=>x.k==='Ra'||x.k==='Ke')){
+    const disp=SIGN_LORD[c.planets[x.k].sign],dp=c.planets[disp];
+    parts.push(`${name(x.k)} works through ${name(disp)}${dp?` in H${houseFromSigns(La,dp.sign)} (${bmD10Condition(disp,c)})`:''}; include that ruler when judging the node's influence.`);
+  }
+  return {parts,contacts,lord,lh};
+}
 function bmD10ChartData(){
   if(!BM_CTX) return null;
   const src=BM_CTX.c,base=BM_CTX.baseLa,wp={};
@@ -3642,19 +3686,22 @@ function bmRenderD10HouseReading(h){
   const signLine=`${r.name} shapes this professional area through ${r.traits.slice(0,2).join(' and ')}.`;
   const planetLine=occ.length?`${occ.map(k=>GBYK[k].name).join(occ.length>1?' and ':'')} ${occ.length>1?'activate':'activates'} this area: ${occ.map(k=>`${GBYK[k].name} adds ${D10_PLANET_CORE[k]}`).join('; ')}.`:`No planet occupies this house; read it mainly through its ruler, ${GBYK[lord].name}.`;
   const lordLine=lordH?`${GBYK[lord].name}, ruler of this D-10 house, sits in H${lordH} (${D10_HOUSE_INFO[lordH-1].title.toLowerCase()}).`: `${GBYK[lord].name} carries this house's professional results.`;
-  const tenthLine=h===10?`This is the D-10 10th house itself: it is the clearest place to read visible work, status and professional karma.`:h10H?`The D-10 10th lord, ${GBYK[h10lord].name}, is in H${h10H} (${D10_HOUSE_INFO[h10H-1].title.toLowerCase()}); that house becomes a major career domain.`:'';
+  const careerExamples={1:'Personal visibility and recognition are emphasised; body-related work is one example given in the lecture.',2:'Possible expressions include family business, finance, food, jewellery or speech-based work.',3:'Personal effort, communication, travel, liaison or repeated transfers may be part of the work.',4:'Home-based work, property, interiors, hospitality or public leadership are possible expressions.',5:'Advisory work and applying professional judgment are emphasised.',10:'Authority, responsibility and directing work are emphasised.'};
+  const tenthLine=h10H?`Your D-10 10th lord, ${GBYK[h10lord].name}, sits in H${h10H} (${D10_HOUSE_INFO[h10H-1].title.toLowerCase()}), ${bmD10Condition(h10lord,c).toLowerCase()}. ${careerExamples[h10H]||'Read the career through this house’s professional domain; the first 25 minutes do not give a detailed occupation rule for this placement.'}`:'';
   const influenceLine=influences.length?influences.map(x=>{const g=GBYK[x.k],rel=x.relation;return `${g.name} ${x.occupies?'occupies':'aspects'} this house and adds ${D10_PLANET_CORE[x.k]}${rel&&rel!=='House ruler'?` (${rel.toLowerCase()})`:''}.`;}).join(' '):'No direct graha influence is shown; the house and its ruler carry the main story.';
-  const summary=`${info.title}: ${info.copy} ${planetLine} ${lordLine}`;
+  const reading=bmD10Narrative(c,La,h);
+  const summary=reading.parts.map(p=>`<p>${p}</p>`).join('');
+  const d1=BM_CTX.c,d1La=BM_CTX.baseLa,d1lord=SIGN_LORD[(d1La+9)%12],d1p=d1.planets[d1lord];
   panel.innerHTML=`
     <div class="bm-reading-eyebrow">D-10 House ${h} · Daśāṁśa</div>
     <h3>${info.title}</h3>
     <div class="bm-reading-sign">${r.name} · ruled by ${GBYK[lord].name}</div>
     <div class="bm-reading-block"><div class="bm-reading-label">What this house focuses on</div><div class="bm-focus-list">${info.focus.map(x=>`<span class="bm-focus-chip">${x}</span>`).join('')}</div><div style="font-size:13px;line-height:1.65;margin-top:10px">${info.copy}</div></div>
     ${tenthLine?`<div class="bm-reading-block bm-d10-career-callout"><div class="bm-reading-label">Career anchor</div><div style="font-size:13px;line-height:1.65">${tenthLine}</div></div>`:''}
-    <div class="bm-reading-block"><div class="bm-reading-label">How it shows in your D-10</div><div style="font-size:13px;line-height:1.65">${signLine} ${planetLine}</div></div>
-    <div class="bm-reading-block"><div class="bm-reading-label">Ruler and influences</div><div style="font-size:13px;line-height:1.65">${lordLine} ${influenceLine}</div></div>
     <div class="bm-reading-block"><div class="bm-reading-label">What this says about your career</div><div class="bm-reading-summary">${summary}</div></div>
-    <details class="bm-tech-details"><summary>Why? View D-10 evidence</summary><div class="bm-tech-body">D-10 ${r.name} · House ${h}. House ruler: ${GBYK[lord].name}${lordH?` in H${lordH} at ${lordP.deg.toFixed(1)}°`:''}. ${occ.length?`Occupants: ${occ.map(k=>`${GBYK[k].name} ${c.planets[k].deg.toFixed(1)}°`).join('; ')}.`:'No occupants.'} ${h10H?`10th lord: ${GBYK[h10lord].name} in H${h10H}.`:''} Aspect convention: all grahas 7th; Mars 4th/8th, Jupiter 5th/9th, Saturn 3rd/10th.</div></details>`;
+    <details class="bm-tech-details"><summary>Planets influencing this house · ${influences.length}</summary><div class="bm-tech-body">${influences.map(x=>`<p><b>${GBYK[x.k].name}</b> · ${x.occupies?'occupies this house':`${ORD(x.distance)} aspect from H${x.from}`} · ${bmD10Condition(x.k,c)}.<br>${x.relation}.</p>`).join('')||'No occupants or direct graha aspects.'}</div></details>
+    <details class="bm-tech-details"><summary>D-1 career foundation</summary><div class="bm-tech-body">Your D-1 10th house is ${SIGNS[(d1La+9)%12]}. Its ruler ${GBYK[d1lord].name}${d1p?` sits in H${houseFromSigns(d1La,d1p.sign)}, ${bmD10Condition(d1lord,d1).toLowerCase()}`:''}. ${bmD10HouseInfluences(d1,d1La,10).map(x=>`${GBYK[x.k].name} ${x.occupies?'occupies it':`aspects it from H${x.from}`}`).join('; ')||'No occupants or direct aspects'}. Read this foundation alongside the D-10 details.</div></details>
+    <details class="bm-tech-details"><summary>Reading method and source</summary><div class="bm-tech-body">Adapted from <a href="https://www.youtube.com/watch?v=eyxQQrfiVLc" target="_blank" rel="noopener">Amit Pal Arora’s D-10 lecture, first 25 minutes</a>. House, lord, occupants and actual graha aspects are combined. All grahas: 7th; Mars: 4th/8th; Jupiter: 5th/9th; Saturn: 3rd/10th. Node 5th/9th aspects follow this app’s convention, not a verified rule from this lecture. H12 uses a general professional interpretation because the lecture’s caption is ambiguous. D-10 sign placements are used; natal degrees are not D-10 degrees. These are traditional interpretive tendencies.</div></details>`;
 }
 function bmRenderHouseReading(h){
   const panel=document.getElementById('bmReading');
@@ -3912,16 +3959,18 @@ function renderBhavaMandala(c,La,N,motion){
 
   // ---- House markers: house number + its ruling lord's glyph ----
   const HT=h=>[1,4,7,10].includes(h)?'ken':[5,9].includes(h)?'trik':[6,8,12].includes(h)?'dust':'';
+  const wheelNames=N===10?D10_HOUSE_INFO.map(x=>x.title):BM_HOUSE_NAMES;
+  const wheelShort=N===10?D10_HOUSE_SHORT:BM_HOUSE_SHORT;
   const HCOL={ken:'#9db4ff',trik:'#7fe0a0',dust:'#f0a890','':'rgba(178,198,242,0.82)'};
   for(let h=1;h<=12;h++){
     const si=(La+h-1)%12,a=sa(si)+15,p=pol(RHNUM,a),ht=HT(h),isH1=h===1,isSelected=h===selectedH;
     const lord=SIGN_LORD[si],lv=PV[lord],lp=c.planets[lord],lordH=lp?houseFromSigns(La,lp.sign):null;
     const tip=`House ${h} · ${SN[si]} · lord ${GBYK[lord].name}${lordH?(lordH===h?' in own house':` in H${lordH}`):''}${isH1?' · Lagna':ht==='ken'?' · Kendra':ht==='trik'?' · Trikona':ht==='dust'?' · Dusthana':''}`;
     const mw=simple?58:30,mh=simple?38:34;
-    sv+=`<g class="bm-hmark${isSelected?' on':''}" data-h="${h}" data-si="${si}" role="button" tabindex="0" aria-label="House ${h}, ${BM_HOUSE_NAMES[h-1]}" onclick="bmSelectHouse(${h})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmSelectHouse(${h})}">`+
-      `<rect x="${p.x-mw/2}" y="${p.y-mh/2}" width="${mw}" height="${mh}" rx="9" fill="${isSelected?'rgba(231,193,78,0.18)':'rgba(8,12,28,0.84)'}" stroke="${isSelected?'#e7c14e':isH1?'rgba(231,193,78,.7)':'rgba(95,120,205,0.42)'}" stroke-width="${isSelected?2.5:isH1?1.5:1}"><title>${tip} — select ${BM_HOUSE_NAMES[h-1]}</title></rect>`+
+    sv+=`<g class="bm-hmark${isSelected?' on':''}" data-h="${h}" data-si="${si}" role="button" tabindex="0" aria-label="House ${h}, ${wheelNames[h-1]}" onclick="bmSelectHouse(${h})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmSelectHouse(${h})}">`+
+      `<rect x="${p.x-mw/2}" y="${p.y-mh/2}" width="${mw}" height="${mh}" rx="9" fill="${isSelected?'rgba(231,193,78,0.18)':'rgba(8,12,28,0.84)'}" stroke="${isSelected?'#e7c14e':isH1?'rgba(231,193,78,.7)':'rgba(95,120,205,0.42)'}" stroke-width="${isSelected?2.5:isH1?1.5:1}"><title>${tip} — select ${wheelNames[h-1]}</title></rect>`+
       `<text x="${p.x}" y="${p.y-6}" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="${isSelected?'#f5d894':isH1?'#e7c14e':HCOL[ht]}" style="pointer-events:none">${h}</text>`+
-      `<text x="${p.x}" y="${p.y+9}" text-anchor="middle" dominant-baseline="central" font-size="${simple?'8.2':'11.5'}" fill="${simple?'rgba(225,232,248,.9)':lv.col}" style="pointer-events:none">${simple?BM_HOUSE_SHORT[h-1]:lv.gl}</text>`+
+      `<text x="${p.x}" y="${p.y+9}" text-anchor="middle" dominant-baseline="central" font-size="${simple?'8.2':'11.5'}" fill="${simple?'rgba(225,232,248,.9)':lv.col}" style="pointer-events:none">${simple?wheelShort[h-1]:lv.gl}</text>`+
       `</g>`;
   }
 
@@ -3950,7 +3999,7 @@ function renderBhavaMandala(c,La,N,motion){
   const refIsMoon=(ref==='mo'&&canMoonRef);
   sv+=`<circle cx="${CX}" cy="${CY}" r="${RC}" fill="rgba(8,11,24,0.96)" stroke="${refIsMoon?'rgba(200,216,255,0.6)':'rgba(231,193,78,0.55)'}" stroke-width="1.4"/>`;
   sv+=`<text x="${CX}" y="${CY-10}" text-anchor="middle" dominant-baseline="central" font-size="10" letter-spacing="1.5" fill="rgba(175,198,255,0.8)">${simple?'HOUSE '+selectedH:isRTN?'RTN':refIsMoon?'MOON':'ASC'}</text>`;
-  sv+=`<text x="${CX}" y="${CY+9}" text-anchor="middle" dominant-baseline="central" font-size="${simple?'12':'17'}" font-weight="bold" fill="${refIsMoon?'#c8d8ff':'#e7c14e'}">${simple?BM_HOUSE_NAMES[selectedH-1].toUpperCase():(typeof SIGN3!=='undefined'?SIGN3[La]:La)}</text>`;
+  sv+=`<text x="${CX}" y="${CY+9}" text-anchor="middle" dominant-baseline="central" font-size="${simple?'12':'17'}" font-weight="bold" fill="${refIsMoon?'#c8d8ff':'#e7c14e'}">${simple?(N===10?wheelShort[selectedH-1]:wheelNames[selectedH-1].toUpperCase()):(typeof SIGN3!=='undefined'?SIGN3[La]:La)}</text>`;
   // ---- When reading the Moon chart, keep the birth Ascendant visible as a small "Lg" tag ----
   if(refIsMoon&&natLaSign!==La){
     const lgp=pol(ROi+11,sa(natLaSign)+15);
