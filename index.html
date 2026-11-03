@@ -1854,6 +1854,16 @@ body:has(.modal.show){overflow:hidden}
 .bm-house-picker select{flex:1;min-width:0;min-height:44px;max-width:100%;font-size:16px}
 .bm-reading:focus{outline:2px solid var(--gold);outline-offset:2px}
 .bm-quick-varga{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+.bm-transit-overview{margin:12px 16px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.bm-transit-controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.bm-transit-controls label{font-weight:700}
+.bm-transit-controls input{font:inherit;font-size:16px;min-height:44px;max-width:100%;min-width:0}
+.bm-transit-top{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.bm-transit-area{display:flex;flex-direction:column;gap:6px;text-align:left;padding:12px;min-width:0;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--ink);cursor:pointer;overflow-wrap:anywhere}
+.bm-transit-area.supportive{border-left:3px solid #6fbf86}.bm-transit-area.demanding{border-left:3px solid #e2705a}.bm-transit-area.mixed{border-left:3px solid #e9bf6a}
+.bm-transit-area small{color:var(--muted)}
+.bm-transit-reading{font-size:13px;line-height:1.65}.bm-transit-reading p{margin:10px 0}
+@media(max-width:600px){.bm-transit-top{grid-template-columns:1fr}.bm-transit-overview{margin:10px 8px;padding:12px}.bm-transit-controls label{flex-basis:100%}}
 @media(max-width:720px){
   .jm-rail{flex:0 0 100%;min-width:0;flex-wrap:nowrap}
   .jm-chapchip{flex-shrink:0;min-height:44px}
@@ -3219,8 +3229,18 @@ function bmToggleGochara(){
   renderBhavaMandala(BM_CTX.c,BM_CTX.baseLa,BM_CTX.N||1,false);
 }
 function bmGocharaDate(v){
-  if(!BM_CTX) return; BM_CTX.gDate=v?new Date(v+'T12:00:00'):new Date();
+  if(!BM_CTX) return;
+  const date=v?new Date(v+'T12:00:00Z'):new Date();
+  if(!Number.isFinite(+date)||date.getUTCFullYear()<1900||date.getUTCFullYear()>2100) return;
+  if(+date===+bmSelectedDate()) return;
+  BM_TRANSIT_PREVIOUS=bmSelectedDate();
+  BM_CTX.gDate=date;
   renderBhavaMandala(BM_CTX.c,BM_CTX.baseLa,BM_CTX.N||1,false);
+}
+let BM_TRANSIT_PREVIOUS=null;
+function bmSelectedDate(){return BM_CTX?.gDate||new Date(new Date().toISOString().slice(0,10)+'T12:00:00Z');}
+function bmDateLabel(date=bmSelectedDate()){
+  return date.toLocaleDateString('en',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'});
 }
 // Click a Gochara ring marker → trace text with the classical house-from-Moon verdict
 // (mirrors the ◎ Gochara · Current Transits panel lower down, so the numbers always agree).
@@ -3467,8 +3487,8 @@ function bmHouseSAV(c,La,h){
   if(phase){
     const period=`${GBYK[phase.md.lord].name}${phase.ad?`/${GBYK[phase.ad.lord].name}`:''}`;
     timingLine=phase.isActive
-      ?` The current ${period} period directly activates this house, so its themes are part of the present life phase.`
-      :` The current ${period} period does not directly activate this house, so its results may be quieter until a stronger timing trigger arrives.`;
+      ?` On ${bmDateLabel()}, the ${period} period directly activates this house.`
+      :` On ${bmDateLabel()}, the ${period} period does not directly activate this house.`;
   }
   const copy=`${baseline} ${rulerLine}${influenceLine}${timingLine}`;
   return{value,rank,label,copy,contributions};
@@ -3477,13 +3497,13 @@ function bmFormatPhaseDateFull(ts){
   if(!ts) return '?';
   return new Date(ts).toLocaleDateString('en',{day:'numeric',month:'short',year:'numeric'});
 }
-function bmCurrentPhase(c,La,h){
+function bmCurrentPhase(c,La,h,date=bmSelectedDate()){
   if(!c.dashas||!c.dashas.mahas) return null;
-  const now=Date.now(); let md=null,ad=null;
+  const now=+date; let md=null,ad=null;
   for(const m of c.dashas.mahas){
-    if(m.start<=now&&(m.end==null||m.end>=now)){
+    if(m.start<=now&&(m.end==null||m.end>now)){
       md=m;
-      ad=(m.antars||[]).find(a=>a.start<=now&&(a.end==null||a.end>=now))||null;
+      ad=(m.antars||[]).find(a=>a.start<=now&&(a.end==null||a.end>now))||null;
       break;
     }
   }
@@ -3528,7 +3548,7 @@ function bmPhaseCard(c,La,h){
     ?`<b>${mg.name}</b> sets the long chapter around ${names(x.mdH)}. <b>${ag.name}</b> shapes the immediate phase through ${names(x.adH)}.`
     :`<b>${mg.name}</b> sets the present life chapter around ${names(x.mdH)}.`;
   return `<div class="bm-phase-card">
-    <div class="bm-phase-top"><span class="bm-phase-kicker">Active life phase</span>${x.isActive?'<span class="bm-phase-active">This house is active now</span>':''}</div>
+    <div class="bm-phase-top"><span class="bm-phase-kicker">Life phase · ${bmDateLabel()}</span>${x.isActive?'<span class="bm-phase-active">Active on this date</span>':''}</div>
     <div class="bm-phase-lords">${mg.gl} ${mg.name} Mahadasha${ag?` · ${ag.gl} ${ag.name} Antardasha`:''}</div>
     <div class="bm-phase-dates">The long chapter and the current sub-phase</div>
     <div class="bm-phase-timing">
@@ -3554,6 +3574,81 @@ function bmRelationToLord(k,lord){
   return `Neutral to ${GBYK[lord].name}, the ruler`;
 }
 function bmBAVTone(v){return v>=5?'strong':v>=3?'moderate':'lighter';}
+let BM_TRANSIT_CACHE=null;
+function bmTransitSnapshot(c,La,date=bmSelectedDate()){
+  if(BM_TRANSIT_CACHE?.c===c&&BM_TRANSIT_CACHE.La===La&&BM_TRANSIT_CACHE.time===+date) return BM_TRANSIT_CACHE.value;
+  const keys=['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke'],pos={La};
+  const complete=keys.slice(0,7).every(k=>Number.isInteger(c.planets[k]?.sign));
+  keys.slice(0,7).forEach(k=>{if(c.planets[k])pos[k]=c.planets[k].sign;});
+  let sky;
+  try{sky=getTransitPlanets(date).pos;}catch(e){return null;}
+  if(!keys.every(k=>Number.isInteger(sky?.[k]?.sign)))return null;
+  const bav=complete?Object.fromEntries(keys.slice(0,7).map(k=>[k,computeBAV(k,pos)])):null;
+  const sav=complete?computeSAV(pos):null;
+  const houses=Array.from({length:12},(_,i)=>{
+    const h=i+1,sign=(La+i)%12,phase=bmCurrentPhase(c,La,h,date);
+    const contacts=keys.flatMap(k=>{
+      const s=sky[k].sign,from=houseFromSigns(La,s),occupies=from===h;
+      if(!occupies&&!aspectsFromHouse(k,from).includes(h))return [];
+      const value=bav?.[k]?.[s]??null;
+      const moonHouse=c.planets.Mo?houseFromSigns(c.planets.Mo.sign,s):null;
+      const good=moonHouse!==null&&(GCH_GOOD[k]||[]).includes(moonHouse);
+      const vedhaHouse=good?GCH_VEDHA[k]?.[moonHouse]:null;
+      const blockers=vedhaHouse?keys.filter(other=>other!==k&&!GCH_VEXC.has(k+'|'+other)&&houseFromSigns(c.planets.Mo.sign,sky[other].sign)===vedhaHouse):[];
+      return [{k,from,sign:s,occupies,distance:occupies?null:((h-from+12)%12)+1,bav:value,moonHouse,good,blockers}];
+    });
+    // Transparent qualitative display heuristic, not a classical prediction score.
+    const supporting=contacts.filter(x=>x.bav!==null&&x.bav>=5&&x.blockers.length===0);
+    const demanding=contacts.filter(x=>x.bav!==null&&x.bav<=3);
+    const label=!contacts.length?'Quieter':supporting.length&&!demanding.length?'Supportive influences':demanding.length&&!supporting.length?'More demanding':'Mixed influences';
+    const tone=label==='Supportive influences'?'supportive':label==='More demanding'?'demanding':'mixed';
+    const emphasis=contacts.reduce((n,x)=>n+(['Ju','Sa','Ra','Ke'].includes(x.k)?2:1)+(x.occupies?1:0),0)+(phase?.isActive?2:0);
+    return {h,contacts,label,tone,emphasis,phase,sav:sav?.[sign]??null};
+  });
+  const value={sky,houses,sav,bav};
+  BM_TRANSIT_CACHE={c,La,time:+date,value};return value;
+}
+function bmTransitOverview(c,La){
+  const snapshot=bmTransitSnapshot(c,La),date=bmSelectedDate();
+  const controls=`<div class="bm-transit-controls"><label for="bmTransitDate">Your chart on this date</label><input id="bmTransitDate" type="date" min="1900-01-01" max="2100-12-31" value="${date.toISOString().slice(0,10)}" onchange="bmGocharaDate(this.value)"><button type="button" class="bm-mode-btn" onclick="bmGocharaDate(new Date().toISOString().slice(0,10))">Today</button></div>`;
+  if(!snapshot)return `<section class="bm-transit-overview">${controls}<p>Transit positions are unavailable for this date. Please choose another date.</p></section>`;
+  const top=[...snapshot.houses].sort((a,b)=>b.emphasis-a.emphasis||a.h-b.h).slice(0,3);
+  let changes='';
+  if(BM_TRANSIT_PREVIOUS&&+date!==+BM_TRANSIT_PREVIOUS){
+    const before=bmTransitSnapshot(c,La,BM_TRANSIT_PREVIOUS);
+    if(before){
+      const moved=Object.keys(snapshot.sky).filter(k=>GBYK[k]&&before.sky[k]&&snapshot.sky[k].sign!==before.sky[k].sign);
+      const lines=moved.map(k=>{
+        const a=before.sky[k].sign,b=snapshot.sky[k].sign,from=houseFromSigns(La,a),to=houseFromSigns(La,b);
+        const scores=snapshot.bav?.[k]?` Its BAV support changes from ${snapshot.bav[k][a]}/8 to ${snapshot.bav[k][b]}/8.`:'';
+        const targets=aspectsFromHouse(k,to).map(h=>`H${h} (${BM_HOUSE_NAMES[h-1]})`).join(', ');
+        return `<li>${GBYK[k].name}: ${SIGNS[a]} / H${from} → ${SIGNS[b]} / H${to}.${scores} It now aspects ${targets}.</li>`;
+      });
+      const phase=bmCurrentPhase(c,La,1,date),oldPhase=bmCurrentPhase(c,La,1,BM_TRANSIT_PREVIOUS);
+      const pKey=x=>x?x.md.lord+'/'+(x.ad?.lord||''):'unavailable';
+      if(pKey(phase)!==pKey(oldPhase))lines.push(`<li>Active period changes from ${oldPhase?GBYK[oldPhase.md.lord].name+(oldPhase.ad?' / '+GBYK[oldPhase.ad.lord].name:''):'unavailable'} to ${phase?GBYK[phase.md.lord].name+(phase.ad?' / '+GBYK[phase.ad.lord].name:''):'unavailable'}.</li>`);
+      changes=`<details class="bm-tech-details" open><summary>What changed since ${bmDateLabel(BM_TRANSIT_PREVIOUS)}?</summary><div class="bm-tech-body">${lines.length?`<ul>${lines.join('')}</ul>`:'No sign-based transit contacts or active period lords changed. Degrees may have moved within the same signs.'} Natal SAV and BAV tables remain fixed. These compare the two dates; intermediate crossings are not listed.</div></details>`;
+    }
+  }
+  // Restore the selected-date snapshot after comparing the previous date.
+  bmTransitSnapshot(c,La,date);
+  return `<section class="bm-transit-overview">${controls}<div class="bm-reading-label">Areas most activated · ${bmDateLabel(date)}</div><div class="bm-transit-top">${top.map(x=>`<button type="button" class="bm-transit-area ${x.tone}" onclick="bmChooseHouse(${x.h})"><b>H${x.h} · ${BM_HOUSE_NAMES[x.h-1]}</b><span>${x.label}</span><small>${x.contacts.length} transit contacts${x.phase?.isActive?' · active period link':''}</small></button>`).join('')}</div><p class="note">Date snapshots use 12:00 UTC. Longer transits and active period links receive more emphasis. Select a house for its explanation.</p>${changes}</section>`;
+}
+function bmTransitHouseReading(c,La,h){
+  const x=bmTransitSnapshot(c,La)?.houses[h-1];
+  if(!x)return '<div class="bm-reading-block">Transit reading unavailable for this date.</div>';
+  const lord=SIGN_LORD[(La+h-1)%12],lp=c.planets[lord],occupants=bmPlanetKeysInHouse(c,La,h);
+  const name=BM_HOUSE_NAMES[h-1].toLowerCase();
+  const paragraphs=x.contacts.map(t=>{
+    const g=GBYK[t.k],source=BM_HOUSE_NAMES[t.from-1].toLowerCase();
+    const contact=t.occupies?`${g.name} is moving through H${h} (${name})`:`${g.name} is in H${t.from} (${source}), casting its ${ORD(t.distance)} aspect onto H${h}`;
+    const path=t.occupies?`It directly ${BM_ASPECT_EFFECT[t.k]} in ${name}.`:`It ${BM_ASPECT_EFFECT[t.k]}; developments in ${source} can carry that influence into ${name}.`;
+    const support=t.bav===null?`${['Ra','Ke'].includes(t.k)?`No individual BAV is assigned to ${g.name}; read its transit through ${GBYK[SIGN_LORD[t.sign]].name}, the ruler of ${SIGNS[t.sign]}.`:'BAV cannot be calculated because natal positions are incomplete.'}`:`${g.name} has ${t.bav}/8 BAV in ${SIGNS[t.sign]}, the sign it occupies: ${t.bav>=5?'stronger support for this passage':t.bav<=3?'lighter support, calling for more preparation and patience':'moderate support for this passage'}.`;
+    const moon=t.moonHouse?` From the natal Moon it is in H${t.moonHouse}, ${t.good?(t.blockers.length?`normally favourable, but the app’s vedha rule flags obstruction by ${t.blockers.map(k=>GBYK[k].name).join(' and ')}`:'a favourable transit position in the app’s gochara rules'):'outside this planet’s favourable transit houses'}.`:'';
+    return `<p><b>${g.name} · ${t.occupies?'in this house':`from H${t.from}`}</b><br>${contact}. ${path} ${support}${moon}</p>`;
+  });
+  return `<section class="bm-reading-block bm-transit-reading"><div class="bm-reading-label">Transit impact · ${bmDateLabel()}</div><div class="bm-phase-tone-badge ${x.tone}">${x.label}</div><div class="bm-reading-summary">${paragraphs.join('')||'<p>No direct transit occupants or aspects on this date. This does not make the house inactive.</p>'}</div><p>${x.sav===null?'Natal SAV is unavailable.':`The receiving house has ${x.sav} natal SAV: ${x.sav>=30?'stronger underlying support':x.sav>=25?'a moderate underlying base':'a lighter underlying base requiring deliberate effort'}. This stays fixed when the date changes.`}</p><p>Its natal ruler ${GBYK[lord].name}${lp?` is in H${houseFromSigns(La,lp.sign)} (${BM_HOUSE_NAMES[houseFromSigns(La,lp.sign)-1]}), ${bmD10Condition(lord,c).toLowerCase()}`:''}.${occupants.length?` Natal ${occupants.map(k=>GBYK[k].name).join(' and ')} also occupy this house.`:''}</p><p>${x.phase?`${GBYK[x.phase.md.lord].name} Mahadasha${x.phase.ad?' / '+GBYK[x.phase.ad.lord].name+' Antardasha':''} is active on this date. ${x.phase.isActive?'Its period lords also occupy or rule this house, reinforcing its activation.':'The period lords do not directly occupy or rule this house.'}`:'Dasha timing is not available for this date in the chart data.'}</p><details class="bm-tech-details"><summary>How to read this indicator</summary><div class="bm-tech-body">This is a qualitative summary of transit BAV: 5–8 stronger, 4 moderate, 0–3 lighter. Vedha can interrupt favourable support. Conflicting indications remain mixed; nodes have no individual BAV score. SAV, natal conditions and period activation are shown separately. The label is a display aid, not a classical combined score or a guaranteed event. Aspecting planets use BAV in their occupied sign, not the receiving house. Node aspects follow the app’s 5th/7th/9th convention.</div></details></section>`;
+}
 const BM_ASPECT_EFFECT={
   Su:'brings visibility, authority and questions of confidence',Mo:'sensitizes this area and ties it to emotional security',
   Ma:'adds drive, urgency and productive friction',Me:'adds analysis, communication and adaptability',
@@ -3575,7 +3670,7 @@ function bmHouseInfluences(c,La,h){
   }
   let current=[];
   try{
-    const tp=getTransitPlanets(new Date()).pos;
+    const tp=getTransitPlanets(bmSelectedDate()).pos;
     for(const k of keys){
       if(!tp[k]) continue;
       const from=houseFromSigns(La,tp[k].sign),occupies=from===h;
@@ -3749,7 +3844,8 @@ function bmRenderHouseReading(h){
     <div class="bm-reading-eyebrow">House ${h} · ${b.skt}</div>
     <h3>${BM_HOUSE_NAMES[h-1]}</h3>
     <div class="bm-reading-sign">${r.name} · ruled by ${GBYK[lord].name}</div>
-    ${bmPhaseCard(c,La,h)}
+    ${bmTransitHouseReading(c,La,h)}
+    <details class="bm-tech-details"><summary>Life phase on ${bmDateLabel()}</summary>${bmPhaseCard(c,La,h)||'<p>No period data for this date.</p>'}</details>
     <div class="bm-reading-block">
       <div class="bm-reading-label">What this house focuses on</div>
       <div class="bm-focus-list">${focus.map(x=>`<span class="bm-focus-chip">${x}</span>`).join('')}</div>
@@ -3771,7 +3867,6 @@ function bmRenderHouseReading(h){
     <div class="bm-reading-block">
       <div class="bm-reading-label">What influences this house</div>
       ${influences.natal.length?`<div class="bm-influence-list">${influences.natal.map(x=>bmInfluenceCard(x,false)).join('')}</div>`:`<div style="font-size:12.5px;line-height:1.6;color:var(--muted)">No natal planet casts a direct graha drishti here. Read the house mainly through its ruler and occupants.</div>`}
-      ${influences.current.length?`<details class="bm-transit-details"><summary>Current sky · ${influences.current.length} planet${influences.current.length===1?'':'s'} influencing this house</summary><div class="bm-influence-list">${influences.current.map(x=>bmInfluenceCard(x,true)).join('')}</div></details>`:''}
     </div>
     <div class="bm-reading-block">
       <div class="bm-reading-label">Where this story leads</div>
@@ -3836,7 +3931,8 @@ function renderBhavaMandala(c,La,N,motion){
   const layer=(BM_CTX&&BM_CTX.layer)||'lord';
   const ref=isRTN?'la':((BM_CTX&&BM_CTX.ref)||'la');
   const gochara=(BM_CTX&&BM_CTX.gochara)||false;
-  const gDate=(BM_CTX&&BM_CTX.gDate)||new Date();
+  const gDate=bmSelectedDate();
+  if(BM_CTX&&BM_CTX.c!==c) BM_TRANSIT_PREVIOUS=null;
   BM_CTX={c:c,baseLa:La,N:N,layer:layer,ref:ref,gochara:gochara,gDate:gDate,simple:simple,selectedHouse:selectedH};
   if(isRTN){
     c=bmBuildRtnChart(c,La);
@@ -3985,12 +4081,15 @@ function renderBhavaMandala(c,La,N,motion){
   const HT=h=>[1,4,7,10].includes(h)?'ken':[5,9].includes(h)?'trik':[6,8,12].includes(h)?'dust':'';
   const wheelNames=N===10?D10_HOUSE_INFO.map(x=>x.title):BM_HOUSE_NAMES;
   const wheelShort=N===10?D10_HOUSE_SHORT:BM_HOUSE_SHORT;
+  const transitHouses=simple&&N===1?bmTransitSnapshot(BM_CTX.c,BM_CTX.baseLa)?.houses:null;
   const HCOL={ken:'#9db4ff',trik:'#7fe0a0',dust:'#f0a890','':'rgba(178,198,242,0.82)'};
   for(let h=1;h<=12;h++){
     const si=(La+h-1)%12,a=sa(si)+15,p=pol(RHNUM,a),ht=HT(h),isH1=h===1,isSelected=h===selectedH;
     const lord=SIGN_LORD[si],lv=PV[lord],lp=c.planets[lord],lordH=lp?houseFromSigns(La,lp.sign):null;
     const tip=`House ${h} · ${SN[si]} · lord ${GBYK[lord].name}${lordH?(lordH===h?' in own house':` in H${lordH}`):''}${isH1?' · Lagna':ht==='ken'?' · Kendra':ht==='trik'?' · Trikona':ht==='dust'?' · Dusthana':''}`;
     const mw=simple?58:30,mh=simple?38:34;
+    const transit=transitHouses?.[h-1];
+    if(transit)sv+=`<circle cx="${p.x+mw/2}" cy="${p.y-mh/2}" r="5" fill="${transit.tone==='supportive'?'#6fbf86':transit.tone==='demanding'?'#e2705a':'#e9bf6a'}"><title>${transit.label} on ${bmDateLabel()}</title></circle>`;
     sv+=`<g class="bm-hmark${isSelected?' on':''}" data-h="${h}" data-si="${si}" role="button" tabindex="0" aria-label="House ${h}, ${wheelNames[h-1]}" onclick="bmSelectHouse(${h})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmSelectHouse(${h})}">`+
       `<rect x="${p.x-mw/2}" y="${p.y-mh/2}" width="${mw}" height="${mh}" rx="9" fill="${isSelected?'rgba(231,193,78,0.18)':'rgba(8,12,28,0.84)'}" stroke="${isSelected?'#e7c14e':isH1?'rgba(231,193,78,.7)':'rgba(95,120,205,0.42)'}" stroke-width="${isSelected?2.5:isH1?1.5:1}"><title>${tip} — select ${wheelNames[h-1]}</title></rect>`+
       `<text x="${p.x}" y="${p.y-6}" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="${isSelected?'#f5d894':isH1?'#e7c14e':HCOL[ht]}" style="pointer-events:none">${h}</text>`+
@@ -4155,7 +4254,7 @@ function renderBhavaMandala(c,La,N,motion){
   if(simple){
     const houseNames=N===10?D10_HOUSE_INFO.map(x=>x.title):BM_HOUSE_NAMES;
     const picker=`<div class="bm-house-picker"><label for="bmHouseSelect">Explore a house</label><select id="bmHouseSelect" onchange="bmChooseHouse(this.value)">${houseNames.map((name,i)=>`<option value="${i+1}"${selectedH===i+1?' selected':''}>${i+1} · ${name}</option>`).join('')}</select></div>`;
-    ct.innerHTML=`${modeRow}${picker}<div class="bm-simple-layout"><div><div class="bm-container">${sv}</div><div class="bm-simple-hint">Choose a house above or on the wheel. Select a planet to understand its role.</div></div><aside class="bm-reading" id="bmReading" tabindex="-1" style="scroll-margin-top:150px" aria-live="polite"></aside></div>`;
+    ct.innerHTML=`${modeRow}${N===1?bmTransitOverview(BM_CTX.c,BM_CTX.baseLa):''}${picker}<div class="bm-simple-layout"><div><div class="bm-container">${sv}</div><div class="bm-simple-hint">Choose a house above or on the wheel. Select a planet to understand its role.${N===1?'<br>Transit dots: green · supportive, amber · mixed, coral · demanding.':''}</div></div><aside class="bm-reading" id="bmReading" tabindex="-1" style="scroll-margin-top:150px" aria-live="polite"></aside></div>`;
     N===10?bmRenderD10HouseReading(selectedH):bmRenderHouseReading(selectedH);
   }else{
     ct.innerHTML=`${modeRow}${tabs}${refsRow}${lensRow}<div class="bm-container">${sv}</div>${aspLegend}${gocharaLegend}<div class="bm-trace" id="bmTrace">${traceDefault}</div>${caption}<div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${isRTN?'RTN (D-9 sign / D-1 house)':vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div>${d10Html}<div class="bm-planet-panel" id="bmPlanetPanel"></div>`;
