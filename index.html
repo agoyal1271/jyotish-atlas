@@ -1935,6 +1935,7 @@ body:has(.modal.show){overflow:hidden}
 .atlas-predict #promptbuilder,.atlas-predict #lifepredictor,.atlas-predict #outlook{margin-top:42px;padding-top:34px;border-top:1px solid var(--line)}
 @media(max-width:680px){#atlasExperience{margin:10px 0 22px;border-radius:14px}.ax-top{align-items:flex-start;padding:11px 12px;flex-direction:column}.ax-modes{width:100%}.ax-mode{flex:1}.ax-body{padding:20px 14px}.ax-title{font-size:31px}.ax-actions{display:grid;grid-template-columns:1fr}.ax-primary,.ax-secondary{width:100%}.ax-phase{padding:13px;gap:10px}}
 </style>
+<script src="transit-evidence.js"></script>
 </head>
 <body>
 <a href="#main" class="skip-link">Skip to content</a>
@@ -6517,13 +6518,14 @@ function gocharaAnalysis(pos,moonSign,La,allBAV){
         }
       }
     }
-    const bavSign=(allBAV[k]!=null)?allBAV[k][pos[k].sign]:null;
+    const bavSign=(allBAV?.[k]!=null)?allBAV[k][pos[k].sign]:null;
+    const savSign=allBAV?.SAV?.[pos[k].sign]??null;
     let satSpecial=null;
     if(k==='Sa'){
       if([12,1,2].includes(h)) satSpecial='sade-sati';
       else if(h===4||h===8) satSpecial='dhaiya';
     }
-    res[k]={h,hLa,sign:pos[k].sign,deg:pos[k].deg,good,vedha:!!vedhaBy,vedhaBy,bavSign,satSpecial};
+    res[k]={h,hLa,sign:pos[k].sign,deg:pos[k].deg,good,vedha:!!vedhaBy,vedhaBy,bavSign,savSign,satSpecial};
   }
   return res;
 }
@@ -7073,44 +7075,11 @@ function dpLayer3(c,La,allBAV,gochara){
   const saG=gochara.Sa;
   if(saG){
     const saFn=functionalNature('Sa',La);
-    if(saG.satSpecial==='sade-sati'){
-      // BPHS: phase-based base penalty — 1st from Moon is peak, 12th and 2nd are inception/exit
-      const basePenalty=saG.h===1?-1.5:-0.75;
-      // Sade Sati Resilience Score = (BAV × 1.5) + LagnaWeight + TransitDignity ± NatalModifiers
-      const bavPts=saG.bavSign!=null?saG.bavSign:4;
-      const bavComp=bavPts*1.5;
-      const lagnaWt=saFn.tier==='yogakaraka'?4:saFn.tier==='benefic'?3:saFn.tier==='neutral'||saFn.tier==='mixed'?2:0;
-      const satTrDig=dignityOf('Sa',saG.sign);
-      const trDigScore=satTrDig.score>=2?3:satTrDig.score>=1?2:satTrDig.score>=0?1:satTrDig.score>=-1?0:-1;
-      // Natal conjunction modifiers: benefics/malefics in Moon's natal sign
-      const moSign=c.planets.Mo.sign;
-      let natalMod=0;
-      ['Ju','Ve','Me'].forEach(pk=>{if(c.planets[pk]&&c.planets[pk].sign===moSign)natalMod+=1;});
-      ['Sa','Ma','Ra','Ke'].forEach(pk=>{if(c.planets[pk]&&c.planets[pk].sign===moSign)natalMod-=1;});
-      const SRS=bavComp+lagnaWt+trDigScore+natalMod;
-      let srsMult,flagCls,srsLabel;
-      if(SRS>10){
-        srsMult=0.1; flagCls='w-neu';
-        srsLabel=`SRS ${SRS.toFixed(1)} — Saturn as kingmaker; tangible gains through relentless structured effort`;
-      } else if(SRS>=6){
-        srsMult=0.45; flagCls=(saFn.tier==='yogakaraka'||saFn.tier==='benefic')?'w-neu':'w-damp';
-        srsLabel=`SRS ${SRS.toFixed(1)} — standard Sade Sati; progress demands discipline and patience`;
-      } else {
-        srsMult=1.0; flagCls='w-damp';
-        srsLabel=`SRS ${SRS.toFixed(1)} — high karmic load; strategic retreat and lifestyle caution advised`;
-      }
-      saScore=basePenalty*srsMult;
-      const phaseLabel=saG.h===1?'peak phase':saG.h===12?'inception phase':'exit phase';
-      flags.push({cls:flagCls,text:`Sade Sati (${phaseLabel}) — ${srsLabel}`});
-    } else if(saG.satSpecial==='dhaiya'){
-      // Dhaiya: functional nature moderates the 2.5-year pressure in 4th/8th from Moon
-      let dhaiyaPenalty=-0.75,flagCls='w-damp',fnNote='';
-      if(saFn.tier==='yogakaraka'){dhaiyaPenalty=-0.2;flagCls='w-neu';fnNote=' — yogakaraka Saturn; effort rewarded despite strain';}
-      else if(saFn.tier==='benefic'){dhaiyaPenalty=-0.35;flagCls='w-neu';fnNote=' — functional benefic moderates transit strain';}
-      else if(saFn.tier==='neutral'||saFn.tier==='mixed'){dhaiyaPenalty=-0.5;}
-      if(saG.bavSign!=null&&saG.bavSign>=5) dhaiyaPenalty*=0.7;
-      saScore=dhaiyaPenalty;
-      flags.push({cls:flagCls,text:`Dhaiya / Kantaka Shani — Saturn in H${saG.h} from Moon (2.5-year pressure)${fnNote}`});
+    if(saG.satSpecial==='sade-sati'||saG.satSpecial==='dhaiya'){
+      // Describe Moon-relative pressure separately from topic outcomes.
+      saScore=0;
+      const condition=saG.satSpecial==='sade-sati'?'Sade Sati':'Dhaiya / Kantaka Shani';
+      flags.push({cls:'w-neu',text:`${condition} · Saturn H${saG.h} from Moon. Consider pressure alongside its ${saFn.tier} natal role, SAV, own BAV and the running dasha. This condition alone does not determine success or failure.`});
     } else if(saG.good&&!saG.vedha){
       saScore=1;
       if(saG.bavSign!=null) saScore*=(saG.bavSign>=5?1.2:saG.bavSign<=2?0.6:1);
@@ -7136,8 +7105,12 @@ function dpLayer3(c,La,allBAV,gochara){
     else if(ta.q>0){ taraScore+=wt*0.5; }
   }
 
-  const doubleTransit=juScore>0&&saScore>0;
-  return{score:juScore+saScore+raScore+taraScore,juScore,saScore,raScore,taraScore,flags,doubleTransit,juG,saG,raG};
+  // SAV includes BAV: expose evidence without adding correlated score bonuses.
+  const avEvidence=['Ju','Sa'].map(k=>({planet:k,...AtlasTransit.avEvidence(gochara[k])}));
+  avEvidence.forEach(e=>flags.push({cls:'w-neu',text:`${GBYK[e.planet].name}: ${e.text} Sign-transit support does not guarantee an event.`}));
+  const doubleTransitHouses=AtlasTransit.commonHouses(juG?.hLa,saG?.hLa);
+  const doubleTransit=doubleTransitHouses.length>0;
+  return{score:juScore+saScore+raScore+taraScore,juScore,saScore,raScore,taraScore,flags,doubleTransit,doubleTransitHouses,avEvidence,juG,saG,raG};
 }
 
 // Scan an antardasha month-by-month: transit quality (gochara + tara) over its span,
@@ -7576,18 +7549,19 @@ function dpAnalyze(){
     if(!g) return '';
     const isGood=g.good&&!g.vedha&&!g.satSpecial;
     const isSati=g.satSpecial==='sade-sati',isDhay=g.satSpecial==='dhaiya';
-    const cls=isSati||isDhay?'dp-tr-sati':isGood?'dp-tr-good':'dp-tr-bad';
+    const av=AtlasTransit.avEvidence(g);
+    const cls=av.tone==='supportive'?'dp-tr-good':av.tone==='demanding'?'dp-tr-bad':'dp-tr-sati';
     const vt=isSati?`Sade Sati · H${g.h} from Moon`:isDhay?`Dhaiya · H${g.h} from Moon`:
       g.vedha?`H${g.h} from Moon · vedha by ${GBYK[g.vedhaBy].name}`:
       isGood?`H${g.h} from Moon · favorable`:`H${g.h} from Moon · challenging`;
     const bav=g.bavSign!=null?`<div class="dp-tr-bav">BAV: ${g.bavSign}/8${g.bavSign>=5?' — strong':g.bavSign<=2?' — weak':''}</div>`:'';
-    return `<div class="dp-tr-card ${cls}"><div class="dp-tr-planet">${GBYK[pk].gl} ${GBYK[pk].name}</div><div class="dp-tr-verdict">${vt}</div>${bav}</div>`;
+    return `<div class="dp-tr-card ${cls}"><div class="dp-tr-planet">${GBYK[pk].gl} ${GBYK[pk].name}</div><div class="dp-tr-verdict">${vt}</div><div class="dp-tr-bav">${AtlasTransit.avEvidence(g).text}</div></div>`;
   }
 
   const mahaFn=l2M.fn;
   const sumParts=[
     `${GBYK[mahaK].name} ${mahaFn.tier==='yogakaraka'?'(Yogakaraka)':mahaFn.label.toLowerCase()} · ${l1M&&l1M.mool?'Mooltrikona':l1M?l1M.d1.full.split('·')[0].trim():''} in ${c.planets[mahaK]?RASHIS[c.planets[mahaK].sign].name:'?'}`,
-    l3.doubleTransit?'Jupiter + Saturn both favorable — double transit window open':
+    l3.doubleTransit?`Jupiter + Saturn jointly activate ${l3.doubleTransitHouses.map(h=>'H'+h).join(', ')}; activation is not a favourable verdict`:
     l3.juScore>0&&l3.saScore<0?'Jupiter supports; Saturn challenges':
     l3.juScore<0&&l3.saScore>0?'Saturn supports; Jupiter tests':
     l3.juScore<0&&l3.saScore<0?'Both major transit lords challenging':''
@@ -7609,11 +7583,12 @@ function dpAnalyze(){
   const crCls={greatFriend:'pos2',friend:'pos1',neutral:'neu',enemy:'neg1',greatEnemy:'neg2'};
   const relH=rel.hFrMaha?` · <span class="dp-fval ${natCls}" style="display:inline-block">${rel.nat==='friend'?'Natural friends':rel.nat==='enemy'?'Natural enemies':'Neutral'}</span>${rel.cr?` · <span class="dp-fval ${crCls[rel.cr.tier]}" style="display:inline-block">Compound: ${crLbl[rel.cr.tier]}</span>`:''}`:'';
 
-  const peakHtml=`<div class="dp-peak ${l3.doubleTransit?'peak-on':'peak-off'}">
-    ${l3.doubleTransit
-      ?'★ Double Transit Window — Jupiter and Saturn both in favorable Gochara houses from natal Moon. Highest probability for dasha themes to manifest as events. Act on this window.'
-      :`Double Transit not active · Jupiter H${l3.juG?l3.juG.h:'?'} from Moon (${l3.juScore>0?'favorable':'unfavorable'}) · Saturn H${l3.saG?l3.saG.h:'?'} from Moon (${l3.saScore>0?'favorable':l3.saG&&l3.saG.satSpecial?l3.saG.satSpecial:'unfavorable'})`
-    }
+  const sharedHouses=l3.doubleTransitHouses||[];
+  const relevant=topicA&&sharedHouses.includes(topicA.h);
+  const peakHtml=`<div class="dp-peak ${relevant?'peak-on':'peak-off'}">
+    ${sharedHouses.length?`Jupiter and Saturn jointly occupy or aspect ${sharedHouses.map(h=>'H'+h).join(', ')}.`:'No shared Jupiter–Saturn house activation on this date.'}
+    ${topicA?(relevant?'The selected topic house is jointly activated.':'The selected topic house is not jointly activated.'):'Select a topic to check its primary house.'}
+    Activation is timing evidence, not a probability of success.
   </div>`;
 
   // Transit timeline across the selected sub-period — surfaces best/worst windows
@@ -7987,7 +7962,7 @@ function lpShowDetail(wrap,idx){
   const detail=wrap.querySelector('.lp-detail'); if(!detail) return;
   const thTags=p.themes.themes.slice(0,6).map(t=>`<span class="lp-tag">${t.label}</span>`).join('');
   const dtNote=p.transitDate?`Transit snapshot: ${_fD(p.transitDate.getTime())} (mid-period)`:'';
-  const peak=p.l3.doubleTransit?' · Double transit window':p.l3.juScore>0&&p.l3.saScore>0?'':p.l3.juScore>0?' · Jupiter supportive':p.l3.saScore>0?' · Saturn supportive':'';
+  const peak=p.l3.doubleTransit?` · Joint Jupiter–Saturn activation: ${(p.l3.doubleTransitHouses||[]).map(h=>'H'+h).join(', ')}. Activation does not guarantee a favourable event`:'';
   const goalNote=wrap._lpGoalIdx>=0&&OUTLOOK_GOALS[wrap._lpGoalIdx]
     ?`<div class="lp-detail-note" style="margin-top:8px">Goal filter: ${OUTLOOK_GOALS[wrap._lpGoalIdx].label} — houses ${OUTLOOK_GOALS[wrap._lpGoalIdx].houses.map(h=>'H'+h).join(', ')}</div>`:'';
   detail.className='lp-detail show';
@@ -7999,6 +7974,9 @@ function lpShowDetail(wrap,idx){
         <div class="lp-detail-sub">${_fD(p.antar.start)} — ${_fD(p.antar.end)} · score ${p.total.toFixed(1)}</div>
         <div class="lp-detail-note">${p.verdict.sub}${peak?'. '+peak.replace(/^ · /,''):''}. ${dtNote}</div>
         ${goalNote}
+        ${(p.l3.avEvidence||[]).map(e=>`<p class="lp-detail-note">${GBYK[e.planet].name}: ${e.text}</p>`).join('')}
+        ${(p.l3.flags||[]).filter(f=>/Sade Sati|Dhaiya/.test(f.text)).map(f=>`<p class="lp-detail-note">${f.text}</p>`).join('')}
+        <p class="lp-detail-note">SAV includes the seven planetary BAV totals; these are related indicators, not independent confirmations. Timeline colours remain heuristic summaries. The detailed engine may use a different date, topic or sub-period.</p>
       </div>
     </div>
     ${thTags?`<div class="lp-tags">${thTags}</div>`:''}
