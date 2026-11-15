@@ -1464,7 +1464,6 @@ html.light .d10-step{background:rgba(240,244,255,0.7);border-color:rgba(80,100,2
 #chartView.bm-simple-active>#lpChartEmbed,
 #chartView.bm-simple-active>#transitPanel,
 #chartView.bm-simple-active>#yogaPanel,
-#chartView.bm-simple-active>#dashaPanel,
 #chartView.bm-simple-active>#specialLagnas,
 #chartView.bm-simple-active>#chartStory{display:none!important}
 @media(max-width:820px){
@@ -1931,7 +1930,7 @@ body:has(.modal.show){overflow:hidden}
 .ax-phase-title{margin-top:3px;font-size:18px;font-weight:800;color:var(--ink)}.ax-phase-meta{margin-top:3px;color:var(--muted);font-size:12.5px;line-height:1.55}
 .ax-evidence{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.ax-evidence span{padding:4px 8px;border:1px solid var(--line);border-radius:99px;background:var(--panel);color:var(--muted);font-size:11px;font-weight:700}
 .ax-learn{display:none}.atlas-learn .ax-predict{display:none}.atlas-learn .ax-learn{display:block}
-.atlas-predict header.top .site-nav{display:none}.atlas-predict #main>section:not(#charts):not(#promptbuilder):not(#lifepredictor):not(#outlook){display:none!important}.atlas-predict #charts{padding-top:4px}.atlas-predict #charts>.eyebrow,.atlas-predict #charts>h2,.atlas-predict #charts>.sub{display:none}
+.atlas-predict header.top .site-nav{display:none}.atlas-predict #main>section:not(#atlasExperience):not(#charts):not(#promptbuilder):not(#lifepredictor):not(#outlook){display:none!important}.atlas-predict #charts{padding-top:4px}.atlas-predict #charts>.eyebrow,.atlas-predict #charts>h2,.atlas-predict #charts>.sub{display:none}
 .atlas-predict #promptbuilder,.atlas-predict #lifepredictor,.atlas-predict #outlook{margin-top:42px;padding-top:34px;border-top:1px solid var(--line)}
 @media(max-width:680px){#atlasExperience{margin:10px 0 22px;border-radius:14px}.ax-top{align-items:flex-start;padding:11px 12px;flex-direction:column}.ax-modes{width:100%}.ax-mode{flex:1}.ax-body{padding:20px 14px}.ax-title{font-size:31px}.ax-actions{display:grid;grid-template-columns:1fr}.ax-primary,.ax-secondary{width:100%}.ax-phase{padding:13px;gap:10px}}
 </style>
@@ -12495,7 +12494,7 @@ function runSelfTest(){
     return isNaN(d.getTime())?"date unavailable":d.toLocaleDateString(undefined,{month:"short",year:"numeric"});
   };
   const esc=s=>String(s||"").replace(/[&<>\"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[m]));
-  const name=k=>(window.GBYK&&GBYK[k]&&GBYK[k].name)||k||"Unknown";
+  const name=k=>GBYK[k]?.name||k||"Unknown";
 
   function currentPeriod(c){
     const now=Date.now(), mahas=c&&c.dashas&&c.dashas.mahas||[];
@@ -12517,10 +12516,10 @@ function runSelfTest(){
     const phase=p?`${name(p.md.lord)} Mahadasha${p.ad?` / ${name(p.ad.lord)} Antardasha`:""}${p.pd?` / ${name(p.pd.lord)}`:""}`:"Timing data needs a birth date";
     const dates=p?`${fmt(p.md.start)} – ${fmt(p.md.end)}${p.ad?` · current sub-period: ${fmt(p.ad.start)} – ${fmt(p.ad.end)}`:""}`:"Add a birth date to calculate Vimshottari timing.";
     const evidence=[];
-    if(c.La) evidence.push(`Lagna: ${esc((window.SIGNS&&SIGNS[c.La.sign])||"available")}`);
-    if(c.planets&&c.planets.Mo) evidence.push(`Moon: ${esc((window.SIGNS&&SIGNS[c.planets.Mo.sign])||"available")}`);
+    if(c.La) evidence.push(`Lagna: ${esc(SIGNS[c.La.sign]||"available")}`);
+    if(c.planets&&c.planets.Mo) evidence.push(`Moon: ${esc(SIGNS[c.planets.Mo.sign]||"available")}`);
     if(p&&p.ad) evidence.push("Dasha timing active");
-    predict.innerHTML=`<div class="ax-kicker">Your chart · ${esc(c.name||"Untitled")}</div><h1 class="ax-title">Start with what is active now.</h1><p class="ax-copy">Read the current life phase first, then open a house or ask one focused question. The detailed chart remains available when you want to inspect the reasoning.</p><div class="ax-phase"><div class="ax-phase-mark">◎</div><div><div class="ax-phase-label">Active life phase</div><div class="ax-phase-title">${esc(phase)}</div><div class="ax-phase-meta">${esc(dates)}</div><div class="ax-evidence">${evidence.map(x=>`<span>${x}</span>`).join("")}</div></div></div><div class="ax-actions"><button type="button" class="ax-primary" data-atlas-action="read-chart">Read my houses</button><button type="button" class="ax-secondary" data-atlas-action="ask">Ask a focused question</button><button type="button" class="ax-secondary" data-atlas-action="timing">Explore timing</button></div>`;
+   predict.innerHTML=`<div class="ax-kicker">Your chart · ${esc(c.name||"Untitled")}</div><h1 class="ax-title">Start with what is active now.</h1><p class="ax-copy">Read the current life phase first, then open a house or ask one focused question. The detailed chart remains available when you want to inspect the reasoning.</p><div class="ax-phase"><div class="ax-phase-mark">◎</div><div><div class="ax-phase-label">Active life phase</div><div class="ax-phase-title">${esc(phase)}</div><div class="ax-phase-meta">${esc(dates)}</div><div class="ax-evidence">${evidence.map(x=>`<span>${x}</span>`).join("")}</div></div></div><div class="ax-actions"><button type="button" class="ax-primary" data-atlas-action="read-chart">Read my houses</button><button type="button" class="ax-secondary" data-atlas-action="ask">Ask a focused question</button><button type="button" class="ax-secondary" data-atlas-action="timing">Dasha Prediction Engine</button></div>`;
   }
   function jump(id){document.getElementById(id)?.scrollIntoView({behavior:"smooth",block:"start"});}
   function setMode(mode,scroll){
@@ -12541,7 +12540,17 @@ function runSelfTest(){
     if(a==="demo"){document.getElementById("demoFirst")?.click();return;}
     if(a==="read-chart"){document.getElementById("btnMandalaView")?.click();jump("charts");return;}
     if(a==="ask"){jump("promptbuilder");return;}
-    if(a==="timing"){jump("lifepredictor");return;}
+    if(a==="timing"){
+      const c=chart();
+      if(!c?.dashas?.mahas?.length){
+        JA.toast&&JA.toast("Add birth details or import a chart with Vimshottari dates to open the dasha engine.","warn");
+        jump("charts");return;
+      }
+      renderDashaPrediction(c,c.La.sign,lpBuildBAV(c,c.La.sign));
+      const panel=document.getElementById("dashaPanel");
+      panel.setAttribute("tabindex","-1");panel.focus({preventScroll:true});
+      jump("dashaPanel");return;
+    }
     if(a==="start-learning"){window.Journey&&Journey.go&&Journey.go("starthere");return;}
     if(a==="explore-learning"){window.Journey&&Journey.explore&&Journey.explore();jump("why");}
   });
