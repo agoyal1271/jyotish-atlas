@@ -1909,6 +1909,31 @@ body:has(.modal.show){overflow:hidden}
   .bm-phase-time,.bm-phase-degree{font-size:12px}
   .charts-sidebar .ctab{min-height:44px}
 }
+
+/* ===== ATLAS EXPERIENCE SHELL · prediction-first, learning always available ===== */
+#atlasExperience{position:relative;z-index:12;margin:18px 0 30px;border:1px solid var(--line);border-radius:18px;background:var(--panel);box-shadow:var(--shadow-1);overflow:hidden}
+.ax-top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 18px;border-bottom:1px solid var(--line)}
+.ax-brand{font-size:13px;font-weight:800;letter-spacing:.02em;color:var(--ink)}
+.ax-brand span{color:var(--gold2)}
+.ax-modes{display:flex;gap:4px;padding:4px;background:var(--panel2);border:1px solid var(--line);border-radius:10px}
+.ax-mode{min-height:36px;padding:7px 11px;border:0;border-radius:7px;background:transparent;color:var(--muted);font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.ax-mode[aria-pressed="true"]{background:var(--gold);color:#17110a}
+.ax-body{padding:26px 28px 28px;background:linear-gradient(125deg,color-mix(in srgb,var(--gold) 8%,transparent),transparent 47%)}
+.ax-kicker{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:var(--gold2)}
+.ax-title{margin:8px 0 7px;font-family:var(--display);font-size:clamp(28px,4vw,44px);letter-spacing:-.035em;line-height:1.04;color:var(--ink)}
+.ax-copy{max-width:680px;margin:0;color:var(--muted);font-size:15px;line-height:1.65}
+.ax-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:20px}
+.ax-primary,.ax-secondary{min-height:44px;border-radius:9px;padding:10px 14px;font:inherit;font-size:13px;font-weight:800;cursor:pointer}
+.ax-primary{border:1px solid var(--gold);background:var(--gold);color:#17110a}.ax-secondary{border:1px solid var(--line);background:var(--panel2);color:var(--ink)}
+.ax-primary:hover{filter:brightness(1.06)}.ax-secondary:hover{border-color:var(--gold)}
+.ax-phase{display:grid;grid-template-columns:auto minmax(0,1fr);gap:13px;align-items:start;margin-top:22px;padding:15px;border:1px solid color-mix(in srgb,var(--gold) 42%,var(--line));border-radius:12px;background:color-mix(in srgb,var(--gold) 7%,var(--panel2))}
+.ax-phase-mark{display:grid;place-items:center;width:37px;height:37px;border-radius:50%;background:var(--gold);color:#17110a;font-weight:900}.ax-phase-label{font-size:11px;text-transform:uppercase;letter-spacing:.09em;font-weight:800;color:var(--gold2)}
+.ax-phase-title{margin-top:3px;font-size:18px;font-weight:800;color:var(--ink)}.ax-phase-meta{margin-top:3px;color:var(--muted);font-size:12.5px;line-height:1.55}
+.ax-evidence{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}.ax-evidence span{padding:4px 8px;border:1px solid var(--line);border-radius:99px;background:var(--panel);color:var(--muted);font-size:11px;font-weight:700}
+.ax-learn{display:none}.atlas-learn .ax-predict{display:none}.atlas-learn .ax-learn{display:block}
+.atlas-predict header.top .site-nav{display:none}.atlas-predict #main>section:not(#charts):not(#promptbuilder):not(#lifepredictor):not(#outlook){display:none!important}.atlas-predict #charts{padding-top:4px}.atlas-predict #charts>.eyebrow,.atlas-predict #charts>h2,.atlas-predict #charts>.sub{display:none}
+.atlas-predict #promptbuilder,.atlas-predict #lifepredictor,.atlas-predict #outlook{margin-top:42px;padding-top:34px;border-top:1px solid var(--line)}
+@media(max-width:680px){#atlasExperience{margin:10px 0 22px;border-radius:14px}.ax-top{align-items:flex-start;padding:11px 12px;flex-direction:column}.ax-modes{width:100%}.ax-mode{flex:1}.ax-body{padding:20px 14px}.ax-title{font-size:31px}.ax-actions{display:grid;grid-template-columns:1fr}.ax-primary,.ax-secondary{width:100%}.ax-phase{padding:13px;gap:10px}}
 </style>
 </head>
 <body>
@@ -1968,6 +1993,25 @@ body:has(.modal.show){overflow:hidden}
 <div id="readProgress"></div>
 
 <div class="wrap" id="main">
+
+  <section id="atlasExperience" aria-label="Jyotish Atlas experience mode">
+    <div class="ax-top">
+      <div class="ax-brand">✦ Jyotish <span>Atlas</span></div>
+      <div class="ax-modes" role="group" aria-label="Choose experience">
+        <button type="button" class="ax-mode" data-atlas-mode="predict" aria-pressed="true">Predictions</button>
+        <button type="button" class="ax-mode" data-atlas-mode="learn" aria-pressed="false">Learn Jyotish</button>
+      </div>
+    </div>
+    <div class="ax-body">
+      <div class="ax-predict" id="axPredict"></div>
+      <div class="ax-learn">
+        <div class="ax-kicker">Learn the grammar</div>
+        <h1 class="ax-title">Understand a chart, one clear idea at a time.</h1>
+        <p class="ax-copy">Follow the guided course for a paced introduction, or return to Predictions whenever you want to apply the rules to your own chart.</p>
+        <div class="ax-actions"><button type="button" class="ax-primary" data-atlas-action="start-learning">Start the guided course</button><button type="button" class="ax-secondary" data-atlas-action="explore-learning">Explore the full reference</button></div>
+      </div>
+    </div>
+  </section>
 
   <section id="hero" class="hero-warm">
     <div class="hero-copy">
@@ -12461,6 +12505,75 @@ function runSelfTest(){
   if(console.table) console.table(A);
   return {total:A.length, failed:failed.length, fails:failed.map(f=>f.test)};
 }
+/* ===== ATLAS EXPERIENCE · one chart state, two clear ways to use it ===== */
+(function(){
+  const KEY="ja_experience_mode";
+  const root=document.documentElement;
+  const predict=document.getElementById("axPredict");
+  const modeButtons=[...document.querySelectorAll("[data-atlas-mode]")];
+  const fmt=ts=>{
+    if(!ts) return "date unavailable";
+    const d=new Date(ts);
+    return isNaN(d.getTime())?"date unavailable":d.toLocaleDateString(undefined,{month:"short",year:"numeric"});
+  };
+  const esc=s=>String(s||"").replace(/[&<>\"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[m]));
+  const name=k=>(window.GBYK&&GBYK[k]&&GBYK[k].name)||k||"Unknown";
+
+  function currentPeriod(c){
+    const now=Date.now(), mahas=c&&c.dashas&&c.dashas.mahas||[];
+    const md=mahas.find(m=>m.start<=now&&(!m.end||now<m.end));
+    if(!md) return null;
+    const ad=(md.antars||[]).find(a=>a.start<=now&&(!a.end||now<a.end));
+    const pd=ad&&(ad.pratyantars||[]).find(p=>p.start<=now&&(!p.end||now<p.end));
+    return {md,ad,pd};
+  }
+  function chart(){return window.JA&&JA.getActiveChart?JA.getActiveChart():null;}
+  function render(){
+    if(!predict) return;
+    const c=chart();
+    if(!c){
+      predict.innerHTML=`<div class="ax-kicker">Start here</div><h1 class="ax-title">A clear reading begins with your chart.</h1><p class="ax-copy">Create a Kundali from birth details or import a JHora / Parashara’s Light export. Your chart remains in this browser.</p><div class="ax-actions"><button type="button" class="ax-primary" data-atlas-action="create">Create my Kundali</button><button type="button" class="ax-secondary" data-atlas-action="import">Import a chart</button><button type="button" class="ax-secondary" data-atlas-action="demo">Try a sample chart</button></div>`;
+      return;
+    }
+    const p=currentPeriod(c);
+    const phase=p?`${name(p.md.lord)} Mahadasha${p.ad?` / ${name(p.ad.lord)} Antardasha`:""}${p.pd?` / ${name(p.pd.lord)}`:""}`:"Timing data needs a birth date";
+    const dates=p?`${fmt(p.md.start)} – ${fmt(p.md.end)}${p.ad?` · current sub-period: ${fmt(p.ad.start)} – ${fmt(p.ad.end)}`:""}`:"Add a birth date to calculate Vimshottari timing.";
+    const evidence=[];
+    if(c.La) evidence.push(`Lagna: ${esc((window.SIGNS&&SIGNS[c.La.sign])||"available")}`);
+    if(c.planets&&c.planets.Mo) evidence.push(`Moon: ${esc((window.SIGNS&&SIGNS[c.planets.Mo.sign])||"available")}`);
+    if(p&&p.ad) evidence.push("Dasha timing active");
+    predict.innerHTML=`<div class="ax-kicker">Your chart · ${esc(c.name||"Untitled")}</div><h1 class="ax-title">Start with what is active now.</h1><p class="ax-copy">Read the current life phase first, then open a house or ask one focused question. The detailed chart remains available when you want to inspect the reasoning.</p><div class="ax-phase"><div class="ax-phase-mark">◎</div><div><div class="ax-phase-label">Active life phase</div><div class="ax-phase-title">${esc(phase)}</div><div class="ax-phase-meta">${esc(dates)}</div><div class="ax-evidence">${evidence.map(x=>`<span>${x}</span>`).join("")}</div></div></div><div class="ax-actions"><button type="button" class="ax-primary" data-atlas-action="read-chart">Read my houses</button><button type="button" class="ax-secondary" data-atlas-action="ask">Ask a focused question</button><button type="button" class="ax-secondary" data-atlas-action="timing">Explore timing</button></div>`;
+  }
+  function jump(id){document.getElementById(id)?.scrollIntoView({behavior:"smooth",block:"start"});}
+  function setMode(mode,scroll){
+    const learn=mode==="learn";
+    root.classList.toggle("atlas-learn",learn);
+    root.classList.toggle("atlas-predict",!learn);
+    modeButtons.forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.atlasMode===mode)));
+    try{localStorage.setItem(KEY,mode);}catch(e){}
+    if(learn){ window.Journey&&Journey.guided&&Journey.guided(); if(scroll) window.Journey&&Journey.go&&Journey.go("starthere"); }
+    else { window.Journey&&Journey.explore&&Journey.explore(); render(); if(scroll) jump("charts"); }
+  }
+  document.addEventListener("click",e=>{
+    const button=e.target.closest("[data-atlas-mode],[data-atlas-action]"); if(!button) return;
+    if(button.dataset.atlasMode){setMode(button.dataset.atlasMode,button.dataset.atlasMode==="learn");return;}
+    const a=button.dataset.atlasAction;
+    if(a==="create"){window.JA&&JA.openBirthModal&&JA.openBirthModal(button);return;}
+    if(a==="import"){jump("charts");const b=[...document.querySelectorAll("#chartTabs .ctab")].find(x=>/add chart/i.test(x.textContent));b&&b.click();return;}
+    if(a==="demo"){document.getElementById("demoFirst")?.click();return;}
+    if(a==="read-chart"){document.getElementById("btnMandalaView")?.click();jump("charts");return;}
+    if(a==="ask"){jump("promptbuilder");return;}
+    if(a==="timing"){jump("lifepredictor");return;}
+    if(a==="start-learning"){window.Journey&&Journey.go&&Journey.go("starthere");return;}
+    if(a==="explore-learning"){window.Journey&&Journey.explore&&Journey.explore();jump("why");}
+  });
+  const previous=window.JA&&JA.onChartsChange;
+  if(window.JA) JA.onChartsChange=function(){previous&&previous();render();};
+  const saved=(()=>{try{return localStorage.getItem(KEY);}catch(e){return null;}})();
+  setMode(saved==="learn"?"learn":"predict",false);
+  render();
+})();
+
 if(location.hash==="#selftest"){
   window.addEventListener("load",()=>{
     const r=runSelfTest();
