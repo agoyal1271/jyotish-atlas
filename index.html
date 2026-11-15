@@ -1946,6 +1946,7 @@ body:has(.modal.show){overflow:hidden}
 <script src="transit-evidence.js"></script>
 <script src="reading-packet.js"></script>
 <link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="app-shell.css">
 </head>
 <body>
 <a href="#main" class="skip-link">Skip to content</a>
@@ -4829,6 +4830,7 @@ window.Journey=(function(){
     });
     // keyboard prev/next when not typing
     document.addEventListener('keydown', e=>{
+      if(document.documentElement.classList.contains('app-shell')) return;
       if(mode!=='guided') return;
       const tag=(document.activeElement&&document.activeElement.tagName)||'';
       if(/INPUT|TEXTAREA|SELECT/.test(tag)) return;
@@ -4863,6 +4865,7 @@ window.Journey=(function(){
     idx=Math.max(0,Math.min(STEPS.length-1,i));
     paint();
     try{ localStorage.setItem(LS_STEP,String(idx)); }catch(e){}
+    if(window.AtlasNavigate){AtlasNavigate(STEPS[idx].id);return;}
     // scroll to just under the sticky bar
     const main=el('main');
     const y=(main?main.getBoundingClientRect().top+window.scrollY:0)+ (bar?bar.offsetHeight:0) - 8;
@@ -5564,7 +5567,7 @@ const JA={};
     for(let h=1;h<=12;h++){const cls=h===bn?"occ":asp.includes(h)?"asp":"";const b=document.createElement("button");b.type="button";b.className="hcell "+cls;b.disabled=true;b.innerHTML=`<span class="hn">${h}</span><span>${BHAVAS[h-1].en.split(" ")[0]}</span>`;hc.appendChild(b);}
   }
   [sG,sR,sB].forEach(s=>s.onchange=render);sD.oninput=render;render();
-  JA.setPlanet=(gk,sign,deg,house)=>{sG.value=gk;sR.value=sign;sD.value=Math.min(29.5,Math.round(deg*2)/2);sB.value=house;setMode("planet");render();document.getElementById("synth").scrollIntoView({behavior:"smooth"});};
+  JA.setPlanet=(gk,sign,deg,house)=>{sG.value=gk;sR.value=sign;sD.value=Math.min(29.5,Math.round(deg*2)/2);sB.value=house;setMode("planet");render();AtlasNavigate("synth");};
 })();
 
 (function(){
@@ -5607,7 +5610,7 @@ const JA={};
       <div class="step"><div class="sn">∑</div><div class="st"><b>Verdict:</b> ${b.en} is ${supported?"<b style='color:var(--exalt)'>well-supported</b>":challenged?"<b style='color:var(--debil)'>challenged</b>":"<b>mixed</b>"} — lord ${lord.name} is ${hc.t.split(" (")[0]} &amp; ${v.t.toLowerCase()}.</div></div>`;
   }
   [hL,hN,hS].forEach(s=>s.onchange=render);hD.oninput=render;render();
-  JA.setHouse=(lag,hn,lordSign,lordDeg)=>{hL.value=lag;hN.value=hn;hS.value=lordSign;hD.value=Math.min(29.5,Math.round(lordDeg*2)/2);setMode("house");render();document.getElementById("synth").scrollIntoView({behavior:"smooth"});};
+  JA.setHouse=(lag,hn,lordSign,lordDeg)=>{hL.value=lag;hN.value=hn;hS.value=lordSign;hD.value=Math.min(29.5,Math.round(lordDeg*2)/2);setMode("house");render();AtlasNavigate("synth");};
 })();
 
 function setMode(m){
@@ -7947,7 +7950,7 @@ function lpSyncToDPE(c,p){
   aSel.value=String(ai);
   if(pSel) pSel.innerHTML=dpBuildPratyantarOpts((mahas[mi].antars||[])[ai],0);
   dpAnalyze();
-  panel.scrollIntoView({behavior:"smooth",block:"start"});
+  AtlasNavigate(panel.id);
 }
 
 function lpTransitGoalBoost(La,houses,y,m){
@@ -8561,7 +8564,7 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
   JA.getCharts=()=>charts.slice();
   JA.getActiveIndex=()=>active;
   JA.getActiveChart=()=>(active>=0?charts[active]:null);
-  JA.activateChart=(i)=>{if(i>=0&&i<charts.length){active=i;draw();JA.onChartsChange&&JA.onChartsChange();document.getElementById("charts").scrollIntoView({behavior:"smooth"});}};
+  JA.activateChart=(i)=>{if(i>=0&&i<charts.length){active=i;draw();JA.onChartsChange&&JA.onChartsChange();AtlasNavigate("charts");}};
   JA.importChart=(obj)=>{
     if(!obj||!obj.La||!obj.planets) return false;
     charts.push(obj);active=charts.length-1;save(charts);draw();JA.onChartsChange&&JA.onChartsChange();
@@ -8689,7 +8692,7 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
           birthDetails:{date:dateText,time:timeText,place,lat,lon,timezone,offsetLabel,gender:fields.gender.value||null,utc:moment.date.toISOString(),ayanamsa:"Lahiri",node:"mean",houseSystem:"whole-sign",engine:window.Astronomy?"Astronomy Engine 2.1.19":"Jyotish Atlas fallback"}
         };
         if(!JA.importChart(chart))throw new Error("The calculated chart could not be saved.");
-        closeBirthModal();document.getElementById("charts").scrollIntoView({behavior:"smooth"});
+        closeBirthModal();AtlasNavigate("charts");
         JA.toast&&JA.toast(near.length?`Kundali saved · verify cusp-sensitive ${near.join(", ")}`:`Kundali saved for ${name}`,"ok");
       }catch(err){
         msg.style.color="var(--debil)";msg.textContent=(err&&err.message)||"The Kundali could not be calculated.";
@@ -11434,7 +11437,7 @@ function toggleTheme(){
     if(c){pill.hidden=false;pill.querySelector(".cp-name").textContent=c.name;}
     else pill.hidden=true;
   }
-  pill&&pill.addEventListener("click",()=>document.getElementById("charts").scrollIntoView({behavior:"smooth"}));
+  pill&&pill.addEventListener("click",()=>AtlasNavigate("charts"));
 
   /* ---- Command palette ---- */
   const cmdP=document.getElementById("cmdPalette");
@@ -11450,11 +11453,11 @@ function toggleTheme(){
     const btns=document.querySelectorAll("#"+tokensId+" .tok");
     if(btns[i]) btns[i].click();
     const s=document.getElementById(sectionId);
-    s&&s.scrollIntoView({behavior:"smooth"});
+    s&&AtlasNavigate(sectionId);
   }
   function buildIndex(){
     const items=[];
-    SECTIONS.forEach(([id,label])=>items.push({label,cat:"Section",ic:"§",run:()=>document.getElementById(id)?.scrollIntoView({behavior:"smooth"})}));
+    SECTIONS.forEach(([id,label])=>items.push({label,cat:"Section",ic:"§",run:()=>AtlasNavigate(id)}));
     GRAHAS.forEach((g,i)=>items.push({label:`${g.name} · ${g.skt}`,cat:"Graha",ic:g.gl,run:()=>openTokenDetail("grahaTokens","grahas",i)}));
     RASHIS.forEach((r,i)=>items.push({label:`${r.name} · ${r.skt}`,cat:"Rashi",ic:r.name[0],run:()=>openTokenDetail("rashiTokens","rashis",i)}));
     BHAVAS.forEach((b,i)=>items.push({label:`${b.n} · ${b.en}`,cat:"Bhava",ic:b.n,run:()=>openTokenDetail("bhavaTokens","bhavas",i)}));
@@ -11995,7 +11998,7 @@ function toggleTheme(){
     selChart.value=String(Math.max(0,JA.getActiveIndex()));
     run();
   }
-  selChart.addEventListener('change',()=>{JA.activateChart(+selChart.value);document.getElementById('promptbuilder').scrollIntoView({behavior:'smooth'});});
+  selChart.addEventListener('change',()=>{JA.activateChart(+selChart.value);AtlasNavigate("promptbuilder");});
   selTopic.addEventListener("change",run);
   let qTimer;
   if(pbQuestion) pbQuestion.addEventListener("input",()=>{
@@ -12167,7 +12170,7 @@ function toggleTheme(){
       const nm='Praśna · '+mom.label.split(' (')[0];
       JA.importChart&&JA.importChart({name:nm,La:c.La,planets:c.planets,birthDate:null,dashas:null});
       JA.toast&&JA.toast('Praśna chart added to My Charts','ok');
-      const el=document.getElementById('charts'); el&&el.scrollIntoView({behavior:'smooth'});
+      const el=document.getElementById('charts'); el&&AtlasNavigate(el.id);
     };
   }
 
@@ -12596,7 +12599,7 @@ function runSelfTest(){
     if(p&&p.ad) evidence.push("Dasha timing active");
    predict.innerHTML=`<div class="ax-kicker">Your chart · ${esc(c.name||"Untitled")}</div><h1 class="ax-title">Start with what is active now.</h1><p class="ax-copy">Read the current life phase first, then open a house or ask one focused question. The detailed chart remains available when you want to inspect the reasoning.</p><div class="ax-phase"><div class="ax-phase-mark">◎</div><div><div class="ax-phase-label">Active life phase</div><div class="ax-phase-title">${esc(phase)}</div><div class="ax-phase-meta">${esc(dates)}</div><div class="ax-evidence">${evidence.map(x=>`<span>${x}</span>`).join("")}</div></div></div><div class="ax-actions"><button type="button" class="ax-primary" data-atlas-action="read-chart">Read my houses</button><button type="button" class="ax-secondary" data-atlas-action="ask">Ask a focused question</button><button type="button" class="ax-secondary" data-atlas-action="timing">Dasha Prediction Engine</button></div>`;
   }
-  function jump(id){document.getElementById(id)?.scrollIntoView({behavior:"smooth",block:"start"});}
+  function jump(id){if(window.AtlasNavigate)AtlasNavigate(id);else document.getElementById(id)?.scrollIntoView({behavior:"smooth",block:"start"});}
   function setMode(mode,scroll){
     const learn=mode==="learn";
     root.classList.toggle("atlas-learn",learn);
@@ -12645,5 +12648,6 @@ if(location.hash==="#selftest"){
 }
 </script>
 <script src="almanac.js"></script>
+<script src="app-shell.js"></script>
 </body>
 </html>

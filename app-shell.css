@@ -1,0 +1,29 @@
+/* One viewport, one visible workspace. Modals remain outside the stage. */
+html.app-shell,html.app-shell body{height:100%;overflow:hidden}
+.app-shell body{margin:0}
+.app-shell header.top,.app-shell #readProgress,.app-shell #jmBar,.app-shell #main>footer{display:none!important}
+.app-shell #main{position:fixed;inset:72px 0 0 244px;width:auto;max-width:none;margin:0;padding:28px clamp(16px,3vw,48px);overflow:auto;overscroll-behavior:contain;height:auto;scroll-behavior:auto}
+html.app-shell #main>section{display:none!important}
+html.app-shell #main>section.workspace-active{display:block!important;opacity:1!important;transform:none!important;visibility:visible!important;margin:0 auto;max-width:1440px;padding-top:0}
+html.app-shell #main>section[hidden]{display:none!important}
+#workspaceRail{position:fixed;inset:0 auto 0 0;width:244px;background:var(--bg2);border-right:1px solid var(--line);overflow-y:auto;padding:24px 16px;box-sizing:border-box}
+.workspace-brand{display:block;font:22px var(--font-display);color:var(--ink);text-decoration:none;padding:0 10px 20px}
+.workspace-group{margin-bottom:16px}.workspace-group p{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:8px 10px}
+.workspace-group a{display:flex;align-items:center;min-height:44px;padding:8px 12px;box-sizing:border-box;color:var(--muted);text-decoration:none;border-radius:8px;font-size:14px}
+.workspace-group a:hover,#workspaceLessons a:hover{background:var(--panel2);color:var(--ink)}
+.workspace-group a[aria-current],#workspaceLessons a[aria-current]{background:var(--panel2);color:var(--gold2);box-shadow:inset 3px 0 var(--gold)}
+#workspaceBar{position:fixed;inset:0 0 auto 244px;height:72px;box-sizing:border-box;display:flex;align-items:center;gap:20px;padding:12px 28px;background:var(--bg);border-bottom:1px solid var(--line);z-index:20}
+#workspaceTitle{margin-right:auto;font-weight:600}#workspaceBar .header-actions{display:flex;gap:8px}
+.workspace-picker{display:none}
+#workspaceLessons{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}#workspaceLessons[hidden]{display:none}
+#workspaceLessons a{color:var(--muted);padding:12px;text-decoration:none;border-radius:6px}
+.app-shell :is(#workspaceRail,#workspaceBar,#workspaceLessons) :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.app-shell .jm-stepnav{display:flex!important}.app-shell .ax-top .ax-brand{display:none}
+@media(max-width:900px){
+ #workspaceRail{display:none}#workspaceBar{left:0;padding:10px 14px;gap:10px;height:116px;flex-wrap:wrap}
+ #workspaceTitle{display:none}.workspace-picker{display:flex;align-items:center;gap:8px;width:100%;font-size:13px;color:var(--muted)}
+ .workspace-picker select{flex:1;min-width:0;min-height:44px;font:inherit;font-size:16px;color:var(--ink);background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:8px}
+ #workspaceBar .appearance-field{width:auto;flex:1;justify-content:flex-start}#workspaceBar .header-actions{margin-left:auto}#workspaceBar #activeChartPill{display:none}
+ .app-shell #main{inset:116px 0 0;padding:20px 16px;padding-bottom:max(24px,env(safe-area-inset-bottom))}
+}
+@media print{html.app-shell,html.app-shell body{height:auto;overflow:visible}#workspaceRail,#workspaceBar,#workspaceLessons{display:none!important}.app-shell #main{position:static;overflow:visible;padding:0}}
