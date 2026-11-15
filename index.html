@@ -1947,6 +1947,7 @@ body:has(.modal.show){overflow:hidden}
 <script src="reading-packet.js"></script>
 <link rel="stylesheet" href="tokens.css">
 <link rel="stylesheet" href="app-shell.css">
+<link rel="stylesheet" href="global-chart.css">
 </head>
 <body>
 <a href="#main" class="skip-link">Skip to content</a>
@@ -8564,7 +8565,7 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
   JA.getCharts=()=>charts.slice();
   JA.getActiveIndex=()=>active;
   JA.getActiveChart=()=>(active>=0?charts[active]:null);
-  JA.activateChart=(i)=>{if(i>=0&&i<charts.length){active=i;draw();JA.onChartsChange&&JA.onChartsChange();AtlasNavigate("charts");}};
+  JA.activateChart=(i,opts={})=>{if(i>=0&&i<charts.length){active=i;draw();JA.onChartsChange&&JA.onChartsChange();if(!opts.stay)AtlasNavigate("charts");}};
   JA.importChart=(obj)=>{
     if(!obj||!obj.La||!obj.planets) return false;
     charts.push(obj);active=charts.length-1;save(charts);draw();JA.onChartsChange&&JA.onChartsChange();
@@ -12649,5 +12650,6 @@ if(location.hash==="#selftest"){
 </script>
 <script src="almanac.js"></script>
 <script src="app-shell.js"></script>
+<script src="global-chart.js"></script>
 </body>
 </html>
