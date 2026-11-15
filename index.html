@@ -7037,8 +7037,10 @@ function dpLayer1(k,c,La){
   const hk=houseFromSigns(La,p.sign);
   // Grahaṇa dosha — a luminary conjunct a node (eclipse) loses lustre.
   const grahanMod=((k==='Su'||k==='Mo')&&['Ra','Ke'].some(nk=>c.planets[nk]&&c.planets[nk].sign===p.sign))?-0.5:0;
-  // Nodes thrive in upachaya houses (3/6/11) — Rahu in the 6th is classically strong (Shatrujit).
-  const nodeUpaMod=((k==='Ra'||k==='Ke')&&[3,6,11].includes(hk))?0.7:0;
+  // Nodes thrive in upachaya houses (3/6/10/11). H6 is especially associated with overcoming
+  // opposition; H10 belongs here as the karma/upachaya house. This is a house-based reading,
+  // not an unsupported automatic bonus for a few selected signs.
+  const nodeUpaMod=((k==='Ra'||k==='Ke')&&[3,6,10,11].includes(hk))?0.7:0;
 
   return{
     k,p,d1,d9,d9s,vg,mool,nb,combust,retro,
@@ -7046,6 +7048,50 @@ function dpLayer1(k,c,La){
     score:base+grahanMod+nodeUpaMod,
     dispK,dispDig,house:hk
   };
+}
+
+// A high Ishta / low Kashta planet can deliver a difficult lordship in a more constructive form.
+// BPHS treats Ishta and Kashta as separate strength results; the 70% relief is an explicit
+// display heuristic, bounded so it moderates functional friction rather than reversing it.
+function dpFunctionalReliefs(k,c,La,fnScore,house){
+  if(!(fnScore<0)) return{ishtaRelief:0,lagnaAspectRelief:0,ishtaApplied:0,lagnaAspectApplied:0,total:0};
+  const p=c.planets[k]; let ishtaRelief=0,lagnaAspectRelief=0;
+  if(p?.ishta>=40&&p?.kashta<15) ishtaRelief=Math.abs(fnScore)*0.7;
+  const lagnaLord=SIGN_LORD[La],ll=c.planets[lagnaLord];
+  if(ll&&k!==lagnaLord&&[1,4,7,10].includes(house)){
+    const llHouse=houseFromSigns(La,ll.sign),llDig=dignityOf(lagnaLord,ll.sign);
+    if(llDig.score>=1.5&&aspectsFromHouse(lagnaLord,llHouse).includes(house)) lagnaAspectRelief=Math.abs(fnScore)*0.7;
+  }
+  // Two correlated forms of protection should not invert a malefic lordship into a benefic one.
+  const requested=ishtaRelief+lagnaAspectRelief,total=Math.min(Math.abs(fnScore)*0.85,requested),scale=requested?total/requested:0;
+  return{ishtaRelief,lagnaAspectRelief,ishtaApplied:ishtaRelief*scale,lagnaAspectApplied:lagnaAspectRelief*scale,total};
+}
+
+// Career-only delivery adjustment. D-10 dignity itself is already counted by dpTopicAnalysis;
+// this adds the missing AmK / 6th-10th activation and supportive Jupiter-contact evidence.
+function dpCareerDelivery(c,La,mahaK,antarK){
+  let amk=null;try{amk=charaKarakas(c)[1]?.k||null;}catch(e){}
+  const d10La=vargaSign(c.La.sign,c.La.deg||0,10),items=[];
+  for(const [k,weight] of [...new Map([[mahaK,.4],[antarK,.6]])]){
+    const p=c.planets[k];if(!p)continue;
+    const d1H=houseFromSigns(La,p.sign),rules=functionalNature(k,La).houses||[];
+    const triggers=[];
+    if(k===amk)triggers.push('Amātyakāraka');
+    if([6,10].includes(d1H))triggers.push(`occupies H${d1H}`);
+    if(rules.some(h=>h===6||h===10))triggers.push(`rules ${rules.filter(h=>h===6||h===10).map(h=>'H'+h).join('/')}`);
+    if(!triggers.length)continue;
+    const d10Sign=vargaSign(p.sign,p.deg,10),d10H=houseFromSigns(d10La,d10Sign);
+    let raw=[1,4,5,7,9,10].includes(d10H)?.3:[6,11].includes(d10H)?.12:[8,12].includes(d10H)?-.25:0;
+    const ju=c.planets.Ju;
+    if(ju&&k!=='Ju'){
+      const juD10H=houseFromSigns(d10La,vargaSign(ju.sign,ju.deg,10));
+      const linked=vargaSign(ju.sign,ju.deg,10)===d10Sign||aspectsFromHouse('Ju',juD10H).includes(d10H);
+      if(linked&&dignityOf('Ju',vargaSign(ju.sign,ju.deg,10)).score>=0)raw+=.2;
+    }
+    items.push({k,weight,d10H,triggers,jupiterSupport:raw!==0&&ju&&k!=='Ju'&&(vargaSign(ju.sign,ju.deg,10)===d10Sign||aspectsFromHouse('Ju',houseFromSigns(d10La,vargaSign(ju.sign,ju.deg,10))).includes(d10H)),score:raw*weight});
+  }
+  const score=Math.max(-.45,Math.min(.45,items.reduce((sum,x)=>sum+x.score,0)));
+  return{amk,items,score};
 }
 
 // Layer 2: functional quality score for planet k
@@ -7069,10 +7115,10 @@ function dpLayer2(k,c,La){
   else if(fn.tier==='malefic')  fnScore=fn.label.includes('8th')?-1:-0.6;
   else fnScore=0;
 
-  // A node (Ra/Ke) in an upachaya (3/6/11) is a STRENGTH (Shatrujit), not a dusthana liability —
+  // A node (Ra/Ke) in an upachaya (3/6/10/11) is a STRENGTH, not a dusthana liability —
   // don't apply the generic 6/8/12 penalty to Rahu/Ketu sitting in the 6th.
   const isNode=(k==='Ra'||k==='Ke');
-  const hq=(isNode&&[3,6,11].includes(house))?0.5
+  const hq=(isNode&&[3,6,10,11].includes(house))?0.5
           :[1,4,7,10].includes(house)?0.5:[5,9].includes(house)?0.5:[6,8,12].includes(house)?-0.5:0;
 
   // Trikona lord in a kendra (or kendra lord in a trikona) — a classical auspicious /
@@ -7084,7 +7130,10 @@ function dpLayer2(k,c,La){
   // Kendradhipati dosha — the yoga prevails over the benefic-ruling-kendras penalty.
   if(rajaMod>0 && fnScore<0 && fn.tier==='neutral') fnScore=0;
 
-  return{score:fnScore+hq+rajaMod,fnScore,hq,rajaMod,fn,house};
+  const relief=dpFunctionalReliefs(k,c,La,fnScore,house);
+  const adjustedFnScore=fnScore+relief.total;
+
+  return{score:adjustedFnScore+hq+rajaMod,fnScore,adjustedFnScore,hq,rajaMod,fn,house,...relief};
 }
 
 // Layer 3: transit score (uses already-computed gochara object)
@@ -7538,8 +7587,9 @@ function dpAnalyze(){
   // Topic focus — D-1 paired with the matter's varga (wealth D-2 / relationship D-9 / career D-10).
   const topicKey=(document.getElementById('dpTopicSelect')||{}).value||'general';
   const topicA=dpTopicAnalysis(c,La,topicKey,mahaK,antarK);
+  const careerDelivery=topicKey==='career'?dpCareerDelivery(c,La,mahaK,antarK):null;
 
-  const total=natalScore+l3.score+l4.score+antarDamp+rel.relScore+nakScore+pratyScore+pratyDamp+(topicA?topicA.score:0);
+  const total=natalScore+l3.score+l4.score+antarDamp+rel.relScore+nakScore+pratyScore+pratyDamp+(topicA?topicA.score:0)+(careerDelivery?careerDelivery.score:0);
   const verdict=dpVerdict(total,hardCap);
 
   function lordCard(l1,l2,role){
@@ -7576,6 +7626,8 @@ function dpAnalyze(){
     const fnCls=fn.tier==='yogakaraka'?'pos2':fn.tier==='benefic'?'pos1':fn.tier==='malefic'?'neg1':fn.tier==='mixed'?'neg1':'neu';
     const fnLbl=fn.tier==='neutral'&&fn.label==='Kendradhipati'?'Kendradhipati (dosha)':fn.label;
     rows.push(`<div class="dp-factor"><span class="dp-flabel">Functional role</span><span class="dp-fval ${fnCls}">${fnLbl}</span></div>`);
+    if(l2.ishtaApplied) rows.push(`<div class="dp-factor"><span class="dp-flabel">Iṣṭa / Kaṣṭa relief</span><span class="dp-fval pos1">high Iṣṭa + low Kaṣṭa moderates functional friction</span></div>`);
+    if(l2.lagnaAspectApplied) rows.push(`<div class="dp-factor"><span class="dp-flabel">Lagna-lord aspect</span><span class="dp-fval pos1">own/exalted Lagna lord aspects this Kendra</span></div>`);
     return `<div class="dp-lord-card"><div class="dp-lord-name">${g.gl} ${g.name}<span class="dp-lord-role">${role}</span></div>${rows.join('')}</div>`;
   }
 
@@ -7675,6 +7727,10 @@ function dpAnalyze(){
       <div class="dp-topic-conn"><b>Delivery in this period:</b> ${dvTxt}.</div>
       <div class="dp-topic-conn"><b>Dasha activation:</b> ${conn}.</div></div>`;
   }
+  if(careerDelivery?.items.length){
+    const lines=careerDelivery.items.map(x=>`${NM(x.k)} — ${x.triggers.join(', ')} · D-10 H${x.d10H}${x.jupiterSupport?' · Jupiter supports':''}`).join('<br>');
+    topicHtml+=`<div class="dp-topic"><div class="dp-section-title">Career delivery refinement · D-10</div><div class="dp-topic-conn">${lines}</div><div class="dp-topic-conn">This bounded adjustment reads the career role and D-10 placement together; it does not replace the D-1 promise, D-10 lord or running dasha.</div></div>`;
+  }
 
   // ---- "Why this verdict" — surface the actual ± drivers behind the score ----
   const whyParts=[];
@@ -7694,7 +7750,9 @@ function dpAnalyze(){
     pushF(`${tag} · retrograde (Cheṣṭā)`, l1.retroMod);
     pushF(`${tag} · Ātma/Amātya-kāraka`, l1.akMod);
     if(l2){
-      pushF(`${tag} · functional ${(l2.fn.label||'').toLowerCase()}`, l2.fnScore);
+      pushF(`${tag} · functional ${(l2.fn.label||'').toLowerCase()}`, l2.adjustedFnScore);
+      pushF(`${tag} · Iṣṭa/Kaṣṭa functional relief`, l2.ishtaApplied);
+      pushF(`${tag} · exalted/own Lagna-lord aspect relief`, l2.lagnaAspectApplied);
       pushF(`${tag} · house quality (H${l2.house})`, l2.hq);
       pushF(`${tag} · Rāja-yoga placement`, l2.rajaMod);
     }
@@ -7707,6 +7765,7 @@ function dpAnalyze(){
   if(l3.taraScore) pushF('Transit nakṣatra tārā', l3.taraScore);
   if(l4.score) pushF('Yogas in play', l4.score);
   if(topicA) pushF(`Focus · ${topicA.t.label}`, topicA.score);
+  if(careerDelivery?.score) pushF('Career delivery · AmK / H6-H10 in D-10', careerDelivery.score);
   if(antarDamp) pushF('AD lord debilitated (no Neecha Bhanga)', antarDamp);
   if(pratyScore) pushF(`Pratyantardasha lord ${NM(pratyK)} · natal`, pratyScore);
   if(pratyDamp) pushF('PD lord debilitated (no Neecha Bhanga)', pratyDamp);
