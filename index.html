@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <meta name="description" content="Jyotish Atlas — an interactive primer to Parashara's grammar. Learn the 9 Grahas, 12 Rashis, and 12 Bhavas, synthesize placements, and paste real natal charts."/>
 <meta name="theme-color" content="#181310"/>
+<script src="appearance.js"></script>
 <meta property="og:title" content="Jyotish Atlas"/>
 <meta property="og:description" content="Parashara's grammar, made interactive — grahas, rashis, bhavas, synthesizer, and chart analysis."/>
 <meta property="og:type" content="website"/>
@@ -1944,6 +1945,7 @@ body:has(.modal.show){overflow:hidden}
 </style>
 <script src="transit-evidence.js"></script>
 <script src="reading-packet.js"></script>
+<link rel="stylesheet" href="tokens.css">
 </head>
 <body>
 <a href="#main" class="skip-link">Skip to content</a>
@@ -2006,6 +2008,7 @@ body:has(.modal.show){overflow:hidden}
   <section id="atlasExperience" aria-label="Jyotish Atlas experience mode">
     <div class="ax-top">
       <div class="ax-brand">✦ Jyotish <span>Atlas</span></div>
+      <label class="appearance-field">Appearance<select data-appearance aria-label="Appearance"><option value="system">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label>
       <div class="ax-modes" role="group" aria-label="Choose experience">
         <button type="button" class="ax-mode" data-atlas-mode="predict" aria-pressed="true">Predictions</button>
         <button type="button" class="ax-mode" data-atlas-mode="learn" aria-pressed="false">Learn Jyotish</button>
@@ -11291,10 +11294,7 @@ function setThemeColor(light){
   if(meta) meta.setAttribute("content",light?"#f5f1e8":"#181310");
 }
 function toggleTheme(){
-  const light=document.documentElement.classList.toggle("light");
-  localStorage.setItem("ja_theme",light?"light":"dark");
-  document.getElementById("themeToggle").textContent=light?"☉":"☾";
-  setThemeColor(light);
+  AtlasAppearance.set(document.documentElement.classList.contains('light')?'dark':'light');
 }
 (function(){
   const light=localStorage.getItem("ja_theme")==="light";
@@ -11303,7 +11303,7 @@ function toggleTheme(){
     const btn=document.getElementById("themeToggle");
     if(btn) btn.textContent="☉";
   }
-  setThemeColor(light);
+  AtlasAppearance.apply();
 })();
 
 /* ===== Site chrome: mobile nav, scrollspy, section reveal, chart view ===== */
@@ -12362,6 +12362,7 @@ function journalFitLabel(score){
     saveJ(j); titleEl.value=''; renderList(c); JA.toast&&JA.toast('Event logged','ok');
   };
   chartSel.addEventListener('change',refresh);
+  window.addEventListener('atlas-journal-change',refresh);
   const _prev=JA.onChartsChange; JA.onChartsChange=()=>{_prev&&_prev();refresh();};
 
   JA.jrCopyOpen=function(url){
@@ -12643,5 +12644,6 @@ if(location.hash==="#selftest"){
   });
 }
 </script>
+<script src="almanac.js"></script>
 </body>
 </html>
