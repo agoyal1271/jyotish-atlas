@@ -1948,6 +1948,7 @@ body:has(.modal.show){overflow:hidden}
 <link rel="stylesheet" href="tokens.css">
 <link rel="stylesheet" href="app-shell.css">
 <link rel="stylesheet" href="global-chart.css">
+<link rel="stylesheet" href="observatory.css">
 </head>
 <body>
 <a href="#main" class="skip-link">Skip to content</a>
@@ -5408,6 +5409,9 @@ function explorer(tokensId,detailId,items,renderTok,renderDetail){
   };
   items.forEach((it,i)=>{
     const t=document.createElement("button");t.type="button";t.className="tok"+(i===0?" active":"");t.innerHTML=renderTok(it);
+    const aura=it.col||(it.elem==="Fire"?"#cf714d":it.elem==="Earth"?"#9b8956":it.elem==="Air"?"#5e9bb2":it.elem==="Water"?"#6d83b8":it.n?"#9c78bc":"#6984b5");
+    const signification=(it.karakas&&it.karakas.slice(0,3).join(" · "))||(it.traits&&it.traits.slice(0,3).join(" · "))||(it.kar&&it.kar.slice(0,3).join(" · "))||it.s||"Open to consult its significations";
+    t.classList.add("tok-atmospheric");t.style.setProperty("--aura",aura);t.dataset.signification=signification;
     t.onclick=()=>{setActiveToken(t);dEl.innerHTML=renderDetail(it);};
     tEl.appendChild(t);
   });
@@ -12651,5 +12655,6 @@ if(location.hash==="#selftest"){
 <script src="almanac.js"></script>
 <script src="app-shell.js"></script>
 <script src="global-chart.js"></script>
+<script src="observatory.js"></script>
 </body>
 </html>

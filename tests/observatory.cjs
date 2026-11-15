@@ -1,0 +1,12 @@
+const fs=require('node:fs'),assert=require('node:assert/strict'),vm=require('node:vm');
+const css=fs.readFileSync('observatory.css','utf8'),js=fs.readFileSync('observatory.js','utf8'),html=fs.readFileSync('index.html','utf8');
+assert.ok(css.includes('backdrop-filter:blur(14px)'));
+assert.ok(css.includes('radial-gradient(#89601e0d'));
+assert.ok(css.includes('.tok-atmospheric:hover'));
+assert.ok(css.includes('@media(prefers-reduced-motion:reduce)'));
+assert.ok(js.includes('Array.from({length:72}'));
+assert.ok(js.includes('class="om-rotor"'));
+assert.ok(js.includes('पराशर · नवांश · दशा'));
+assert.ok(html.includes('observatory.css')&&html.includes('observatory.js'));
+assert.doesNotThrow(()=>new vm.Script(js));
+console.log('Observatory SVG, depth, interaction, manuscript and motion checks passed.');
