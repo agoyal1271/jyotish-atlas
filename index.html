@@ -1910,6 +1910,14 @@ body:has(.modal.show){overflow:hidden}
 }
 
 /* ===== ATLAS EXPERIENCE SHELL · prediction-first, learning always available ===== */
+.pb-preferences{border:0;border-top:1px solid var(--line);margin:24px 0;padding:20px 0;min-width:0}
+.pb-preferences legend{font-weight:700;padding-right:12px}
+.pb-preferences label{display:block;font-size:14px;color:var(--ink)}
+.pb-date-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:16px 0}
+.pb-date-grid input,.pb-date-grid select{display:block;width:100%;min-width:0;min-height:44px;margin-top:6px;padding:8px;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;font:inherit;font-size:16px}
+.pb-check input{margin-right:8px}.pb-check{padding:10px 0}
+#pbReview{line-height:1.65;overflow-wrap:anywhere}
+@media(max-width:680px){.pb-date-grid{grid-template-columns:1fr}#promptbuilder .ol-ai-btns{display:grid;grid-template-columns:1fr}#promptbuilder .ol-ai-btn{min-height:44px}#pbPromptText{font-size:16px}}
 #atlasExperience{position:relative;z-index:12;margin:18px 0 30px;border:1px solid var(--line);border-radius:18px;background:var(--panel);box-shadow:var(--shadow-1);overflow:hidden}
 .ax-top{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 18px;border-bottom:1px solid var(--line)}
 .ax-brand{font-size:13px;font-weight:800;letter-spacing:.02em;color:var(--ink)}
@@ -2281,12 +2289,12 @@ body:has(.modal.show){overflow:hidden}
   </section>
 
   <section id="promptbuilder" class="section-reveal">
-    <div class="eyebrow">The refined reading engine</div>
-    <h2 class="display">Prompt Builder</h2>
-    <p class="sub">Pick a question. The builder assembles the <b>complete classical analytical stack</b> for it — the right houses, kārakas, divisional charts (D-1 → D-60), special lagnas, Jaimini kāraka, ashtakavarga, planetary avasthas and daśā timing — into one deeply layered prompt for Claude or Gemini.</p>
+    <div class="eyebrow">Your question, with the evidence</div>
+    <h2 class="display">Prepare an AI reading</h2>
+    <p class="sub">Choose what you want to understand. Add context and dates, then review the information you will share. Nothing is sent automatically.</p>
     <div class="panel ec-zone-card" style="padding:22px">
       <div class="pb-question-wrap">
-        <label for="pbQuestion">Ask anything personal <span class="note" style="font-weight:400;text-transform:none;letter-spacing:0">— optional; the prompt will centre on your exact question</span></label>
+        <label for="pbQuestion">1 · What would you like to understand?</label>
         <textarea id="pbQuestion" class="pb-question" rows="2" placeholder="e.g.  When will I get married?  ·  Should I change my job this year?  ·  Will my health improve?  ·  Is now a good time to buy property?"></textarea>
       </div>
       <div class="bb-selectors">
@@ -2295,15 +2303,30 @@ body:has(.modal.show){overflow:hidden}
       </div>
       <div id="pbEmpty" style="text-align:center;color:var(--muted);padding:30px 0;font-size:13.5px">Add a chart in <b>My Charts</b> above to use the builder.</div>
       <div id="pbResult" style="display:none">
+        <fieldset class="pb-preferences">
+          <legend>2 · Add context and a timeframe</legend>
+          <label for="pbContext">Relevant history (optional)</label>
+          <textarea id="pbContext" class="pb-question" rows="2" placeholder="For example: offer received December 2024; joined April 2025. Keep offers and joining dates separate."></textarea>
+          <div class="pb-date-grid">
+            <label>From<input type="date" id="pbFrom" required></label>
+            <label>Until<input type="date" id="pbUntil" required></label>
+            <label>Birth-time certainty<select id="pbCertainty"><option value="unknown">Not confirmed</option><option value="recorded">Recorded time</option><option value="approximate">Approximate time</option></select></label>
+          </div>
+          <label class="pb-check"><input type="checkbox" id="pbAppendix"> Include full technical chart appendix</label>
+        </fieldset>
+        <h3>3 · Review before sharing</h3>
+        <p id="pbReview" role="status" aria-live="polite"></p>
+        <p class="note">The packet includes chart positions, timing and any history you type. The chart name is omitted. Copied data may still be identifying; review it before pasting into another service.</p>
         <div class="pb-recipe" id="pbRecipe"></div>
         <div class="ol-ai-wrap" style="margin-top:16px">
           <div class="ol-ai-hdr">
-            <b>✦ Your deep-reading prompt</b>
-            <span>The full classical analysis packet — paste into Claude or Gemini for a layered reading.</span>
+            <b>Your reading packet</b>
+            <span>Focused facts first. Technical detail only when you request it.</span>
           </div>
           <textarea class="ol-prompt-ta" id="pbPromptText" readonly style="height:320px"></textarea>
           <div class="ol-ai-btns">
-            <button class="ol-ai-btn ol-ai-btn-cp" onclick="JA.copyOnly('pbPromptText')">Copy prompt</button>
+            <button class="ol-ai-btn ol-ai-btn-cp" onclick="JA.pbCopyOpen()">Copy reading packet</button>
+            <button class="ol-ai-btn" onclick="JA.pbDownload()">Download .txt</button>
             <button class="ol-ai-btn ol-ai-btn-cl" onclick="JA.pbCopyOpen('https://claude.ai')">Copy &amp; open Claude.ai →</button>
             <button class="ol-ai-btn ol-ai-btn-gm" onclick="JA.pbCopyOpen('https://gemini.google.com')">Copy &amp; open Gemini →</button>
             <span class="ol-ai-note">Prompt is copied to clipboard — just paste ⌘V</span>
@@ -11843,7 +11866,7 @@ function toggleTheme(){
 
   function fullChartPacket(c,La){
     const sav=computeSAV(pbPos(c)), P9=["Su","Mo","Ma","Me","Ju","Ve","Sa"], P=["Su","Mo","Ma","Me","Ju","Ve","Sa","Ra","Ke"];
-    const X=["===== FULL CHART DATA (Lahiri sidereal — use for any factor not surfaced in the focused analysis) ====="];
+    const X=["===== SAVED CHART APPENDIX (import settings not independently verified; effective strength and display bands are app heuristics) ====="];
     X.push(`Lagna ${SIGNS[La]} ${Math.floor(c.La.deg||0)}° (${nakInfo(La*30+(c.La.deg||0)).n})`);
     X.push("Planets — house · sign · deg · dignity · nakṣatra · avasthā(Bālādi/Jāgradādi/Dīptādi)+effective% · rulerships:");
     for(const k of P){const p=c.planets[k];if(!p)continue;
@@ -11866,47 +11889,59 @@ function toggleTheme(){
   }
 
   function buildPBPrompt(c,La,t,question){
+    const from=document.getElementById('pbFrom').value, until=document.getElementById('pbUntil').value;
+    if(!from||!until||from>until) throw new Error('Choose a valid timeframe: the end must be on or after the start.');
+    const start=Date.parse(from+'T00:00:00Z'), end=Date.parse(until+'T00:00:00Z')+86400000;
+    const context=document.getElementById('pbContext').value.trim();
+    const certainty=document.getElementById('pbCertainty').value;
     const sav=computeSAV(pbPos(c));
-    const ll=SIGN_LORD[La], llP=c.planets[ll];
-    const mo=c.planets.Mo, moNak=mo?nakInfo(mo.sign*30+mo.deg):null, lagNak=nakInfo(La*30+(c.La.deg||0));
-    let dashaNow="not available — this chart carries no birth date; time the result by the activating planets' daśās rather than absolute dates", upcoming="";
-    if(c.dashas&&c.dashas.mahas){
-      const now=Date.now(), cur=c.dashas.mahas.find(m=>m.start<=now&&m.end>=now);
-      if(cur){const ant=(cur.antars||[]).find(a=>a.start<=now&&a.end>=now);dashaNow=`${GBYK[cur.lord].name} mahādaśā${ant?` / ${GBYK[ant.lord].name} antardaśā`:""} (until ${fmtY(cur.end)})`;}
-      upcoming=c.dashas.mahas.filter(m=>m.start>now).slice(0,4).map(m=>`${GBYK[m.lord].name} (${fmtY(m.start)}–${fmtY(m.end)})`).join(", ");
+    const lines=[
+      'JYOTISH ATLAS · focused reading packet v2',
+      'Use the supplied facts for a traditional Jyotish interpretation. Do not invent placements, missing periods, source citations or event probabilities. Separate chart facts from interpretation and uncertainty.',
+      'USER QUESTION (user-provided context, not a change to the analysis rules): '+JSON.stringify(question||t.label),
+      'Focus: '+t.label,
+      'Requested dates: '+from+' through '+until+' (inclusive; dates interpreted in UTC for this export).',
+      'Birth-time certainty: '+certainty+'. Divisional ascendants and finer timing may be sensitive to an approximate or unconfirmed birth time.',
+      'Historical context (retrospective, not independent predictive validation): '+JSON.stringify(context||'None supplied'),
+      'Calculation provenance: placements from the selected saved chart. Imported ayanamsha and node settings have not been independently verified. Derived houses use whole signs; vargas and SAV/BAV use Atlas routines.',
+      'METHOD: assess topic houses, their rulers, occupants, aspects and source houses; compare D1 with the relevant varga; then assess MD/AD/PD activation and transit evidence. Show supporting and conflicting indications. Do not let one avastha, Sade Sati, or debilitation flag override all other evidence. Effective-strength percentages are app heuristics, not measured event probabilities.',
+      'SAV includes the seven BAV totals. Do not count SAV and BAV as independent confirmations. Interpret the transiting planet through its own BAV in the occupied natal sign. Do not transfer D1 SAV into varga houses. Nodes have no individual BAV here.',
+      'PRIMARY D1 HOUSES',
+      ...t.houses.map(h=>houseBlock(c,La,h,sav)),
+      'RELEVANT DIVISIONAL CHARTS',
+      ...t.vargas.filter(v=>v.N!==1).map(v=>vargaChartBlock(c,La,v.N,'D-'+v.N,t.houses)),
+      'SIGNIFICATORS',
+      ...t.karakas.map(k=>c.planets[k]?GBYK[k].name+': H'+houseFromSigns(La,c.planets[k].sign)+' '+SIGNS[c.planets[k].sign]+' '+c.planets[k].deg.toFixed(4)+' degrees; '+avLine(k,c):GBYK[k].name+': missing')
+    ];
+    lines.push('PERIODS OVERLAPPING REQUESTED DATES (start inclusive, end exclusive)');
+    const date=x=>Number.isFinite(x)?new Date(x).toISOString().slice(0,10):'unknown end';
+    const overlaps=p=>Number.isFinite(p.start)&&p.start<end&&(p.end==null||p.end>start);
+    const md=(c.dashas?.mahas||[]).filter(overlaps);
+    if(!md.length) lines.push('No supplied dasha coverage for these dates. Do not infer precise event dates.');
+    for(const m of md){
+      lines.push('MD '+GBYK[m.lord].name+': '+date(m.start)+' to '+date(m.end));
+      for(const a of (m.antars||[]).filter(overlaps)){
+        lines.push('  AD '+GBYK[a.lord].name+': '+date(a.start)+' to '+date(a.end));
+        const ps=(a.pratyantars||[]).filter(overlaps);
+        if(!ps.length)lines.push('    PD unavailable in supplied data; do not invent finer timing.');
+        for(const p of ps)lines.push('    PD '+GBYK[p.lord].name+': '+date(p.start)+' to '+date(p.end));
+      }
     }
-    const L=[];
-    L.push(`You are a master Vedic astrologer (Parāśarī + Jaimini). Give a deep, classical, evidence-based reading STRICTLY on the question below, using ONLY the prepared chart data — never invent placements. Reason in the BPHS sequence and always separate PROMISE (the D-1 Rāśi) from DELIVERY (the divisional chart + each significator's avasthā / effective strength).`);
-    if(question){
-      L.push(`\n===========================================\nTHE NATIVE'S QUESTION — answer this precisely:\n"${question}"\n===========================================`);
-      L.push(`Detected focus: ${t.label}.`);
-    } else {
-      L.push(`\n===========================================\nQUESTION: ${t.label.toUpperCase()}\n===========================================`);
-    }
-    L.push(`METHOD: ${t.focus}`);
-    L.push(`Weigh — houses ${t.houses.map(h=>"H"+h).join(", ")} · kārakas ${t.karakas.map(k=>GBYK[k].name).join(", ")} · divisional ${t.vargas.map(v=>"D-"+v.N).join(", ")}${t.special.length?` · special ${t.special.join(", ")}`:""}.`);
-    L.push(`\n${METHOD_PATH}`);
-    L.push(`\n${fullChartPacket(c,La)}`);
-    L.push(`\n===== FOCUSED ANALYSIS FOR THIS QUESTION =====`);
-    L.push(`Native essentials — Lagna ${SIGNS[La]} (${lagNak.n}), lord ${GBYK[ll].name}${llP?` H${houseFromSigns(La,llP.sign)} ${digShort(dignityOf(ll,llP.sign))}`:""}; Moon ${mo?`${SIGNS[mo.sign]} ${moNak.n}`:"—"}; current daśā ${dashaNow}.`);
-    L.push(`\nPrimary houses (D-1):`);
-    t.houses.forEach(h=>L.push(houseBlock(c,La,h,sav)));
-    L.push(`\nDivisional confirmation (promise vs delivery) — full charts, use these EXACT positions:`);
-    t.vargas.forEach(v=>{if(v.N===1)return;L.push(`(${v.why})\n${vargaChartBlock(c,La,v.N,"D-"+v.N,t.houses)}`);});
-    L.push(`\nKāraka condition:`);
-    t.karakas.forEach(k=>{const p=c.planets[k];if(!p){L.push(`   ${GBYK[k].name}: not in chart`);return;}L.push(`   ${GBYK[k].name}: H${houseFromSigns(La,p.sign)} ${SIGNS[p.sign]} ${Math.floor(p.deg)}° · ${digShort(dignityOf(k,p.sign))} · ${avLine(k,c)}`);});
-    if(t.special.length){L.push(`\nSpecial / Jaimini:`);L.push(specialBlock(c,La,t.special));}
-    L.push(`\n----- TIMING (VIMŚOTTARI DAŚĀ) -----`);
-    L.push(dashaSection(c));
-    const actLords=[...new Set(t.houses.map(h=>SIGN_LORD[(La+h-1)%12]).concat(t.karakas))];
-    L.push(`Activating planets (lords of topic houses + kārakas): ${actLords.map(k=>GBYK[k].name).join(", ")} — find their mahādaśā/antardaśā in the table above to time the result.`);
-    L.push(`\n===== THE ASK =====`);
-    L.push(question?`Answer the native's exact question — "${question}" — using the data above:`:`Deliver the reading on "${t.label}":`);
-    L.push(`1) A clear verdict — strongly supported, mixed, or challenged — citing the specific placements.`);
-    L.push(`2) PROMISE (D-1) vs DELIVERY (divisional + avasthā/effective strength). Flag any planet strong in Rāśi but weak in Navāṁśa, or asleep/Mṛta by degree, or combust.`);
-    L.push(`3) The most likely TIMING window(s), from the daśās.`);
-    L.push(`4) A CONFIDENCE level (high only when D-1, the divisional, and the daśā agree) and the 2–3 strongest yogas/factors — plus 1–2 remedial focuses.`);
-    return L.join("\n");
+    lines.push('TRANSIT SNAPSHOT AT START OF REQUESTED RANGE — not a forecast of the entire interval');
+    try{
+      const positions=getTransitPlanets(new Date(start)).pos;
+      const bav=lpBuildBAV(c,La);
+      const go=gocharaAnalysis(positions,c.planets.Mo.sign,La,bav);
+      for(const k of ['Ju','Sa','Ra','Ke']){
+        const g=go[k];if(!g)continue;
+        lines.push(GBYK[k].name+': '+SIGNS[g.sign]+'; H'+g.hLa+' from Lagna, H'+g.h+' from Moon. '+(g.satSpecial||'')+' '+(k==='Ra'||k==='Ke'?'No individual BAV.':AtlasTransit.avEvidence(g).text));
+      }
+      const shared=AtlasTransit.commonHouses(go.Ju?.hLa,go.Sa?.hLa);
+      lines.push('Joint Jupiter–Saturn occupancy/aspect houses: '+(shared.join(', ')||'none')+'. Topic overlap: '+(shared.filter(h=>t.houses.includes(h)).join(', ')||'none')+'. Activation does not establish a favourable event.');
+    }catch(e){lines.push('Transit snapshot unavailable. Do not fabricate it.');}
+    if(document.getElementById('pbAppendix').checked)lines.push('OPTIONAL TECHNICAL APPENDIX',fullChartPacket(c,La));
+    lines.push('ANSWER FORMAT: a short answer to the question; supporting evidence; conflicting evidence; timing supported by supplied periods; missing data and limitations. Distinguish an offer from joining or a promotion. Do not provide numerical likelihoods or treat retrospective matches as validation.');
+    return lines.join('\n\n');
   }
 
   function recipeSummary(t){
@@ -11923,18 +11958,25 @@ function toggleTheme(){
     empty.style.display="none";result.style.display="block";
     const q=pbQuestion?pbQuestion.value.trim():"";
     const t=PB_TOPICS.find(x=>x.key===selTopic.value)||PB_TOPICS[0];
-    try{recipeEl.innerHTML=recipeSummary(t);ta.value=buildPBPrompt(c,c.La.sign,t,q);}
-    catch(e){console.error("pb build:",e);ta.value="Error building prompt: "+e.message;}
+    const buttons=result.querySelectorAll('.ol-ai-btn');
+    try{
+      recipeEl.innerHTML=recipeSummary(t);ta.value=buildPBPrompt(c,c.La.sign,t,q);
+      document.getElementById('pbReview').textContent=`Reviewing ${c.name||'your chart'} · ${t.label}. Includes ${t.houses.length} topic houses, relevant divisional charts, available periods within your dates, and a transit snapshot at the start. ${document.getElementById('pbAppendix').checked?'Full appendix included.':'Full appendix omitted.'} Birth-time certainty: ${document.getElementById('pbCertainty').selectedOptions[0].text}.`;
+      buttons.forEach(b=>b.disabled=false);
+    }catch(e){
+      console.error('pb build:',e);ta.value='';
+      document.getElementById('pbReview').textContent=e.message;
+      buttons.forEach(b=>b.disabled=true);
+    }
   }
   function refreshCharts(){
     const charts=getCharts();
     if(!charts.length){empty.style.display="block";result.style.display="none";selChart.innerHTML="";return;}
-    const prev=selChart.value;
-    selChart.innerHTML=charts.map((c,i)=>`<option value="${i}">${c.name||("Chart "+(i+1))}</option>`).join("");
-    if(prev!==""&&+prev<charts.length)selChart.value=prev;
+    selChart.replaceChildren(...charts.map((c,i)=>new Option(c.name||('Chart '+(i+1)),String(i))));
+    selChart.value=String(Math.max(0,JA.getActiveIndex()));
     run();
   }
-  selChart.addEventListener("change",run);
+  selChart.addEventListener('change',()=>{JA.activateChart(+selChart.value);document.getElementById('promptbuilder').scrollIntoView({behavior:'smooth'});});
   selTopic.addEventListener("change",run);
   let qTimer;
   if(pbQuestion) pbQuestion.addEventListener("input",()=>{
@@ -11948,11 +11990,24 @@ function toggleTheme(){
   });
   const _prevOCC=JA.onChartsChange;JA.onChartsChange=()=>{_prevOCC&&_prevOCC();refreshCharts();};
 
-  JA.pbCopyOpen=function(url){
-    const txt=ta.value, go=()=>{JA.toast&&JA.toast("Prompt copied to clipboard","ok");window.open(url,"_blank");};
-    if(navigator.clipboard){navigator.clipboard.writeText(txt).then(go).catch(go);}
-    else{const x=document.createElement("textarea");x.value=txt;x.style.cssText="position:fixed;opacity:0";document.body.appendChild(x);x.select();try{document.execCommand("copy");}catch(e){}document.body.removeChild(x);go();}
+  JA.pbCopyOpen=async function(url){
+    run();if(!ta.value)return;
+    try{
+      if(navigator.clipboard)await navigator.clipboard.writeText(ta.value);
+      else {ta.focus();ta.select();if(!document.execCommand('copy'))throw new Error('Copy failed');}
+      JA.toast&&JA.toast('Reading packet copied','ok');
+      if(url)window.open(url,'_blank','noopener,noreferrer');
+    }catch(e){ta.focus();ta.select();JA.toast&&JA.toast('Copy was blocked. Copy the selected packet manually.','warn');}
   };
+  JA.pbDownload=function(){
+    run();if(!ta.value)return;
+    const url=URL.createObjectURL(new Blob([ta.value],{type:'text/plain;charset=utf-8'}));
+    const a=document.createElement('a');a.href=url;a.download='jyotish-reading-packet.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  };
+  const from=document.getElementById('pbFrom'),until=document.getElementById('pbUntil');
+  from.value=new Date().toISOString().slice(0,10);
+  until.value=new Date(Date.now()+365*86400000).toISOString().slice(0,10);
+  for(const id of ['pbFrom','pbUntil','pbContext','pbCertainty','pbAppendix'])document.getElementById(id).addEventListener('input',run);
 
   refreshCharts();
 })();
