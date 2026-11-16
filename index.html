@@ -8413,9 +8413,16 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
   }
 
   let charts=load(), active=charts.length?Math.max(0,Math.min(charts.length-1,(()=>{try{return parseInt(localStorage.getItem(ACTIVE_LS),10)||0;}catch(e){return 0;}})())):-1;
-  function notifyActive(){
-    JA.onChartsChange&&JA.onChartsChange();
+  function emitActiveChart(){
     window.dispatchEvent(new CustomEvent('atlas-active-chart-change',{detail:{index:active,chart:active>=0?charts[active]:null}}));
+  }
+  function notifyActive(){
+    // The active Kundali is primary state. Publish it before legacy workspace renderers run,
+    // then again after they finish. A single older renderer must never freeze chart switching.
+    emitActiveChart();
+    try{JA.onChartsChange&&JA.onChartsChange();}
+    catch(e){console.error('A chart workspace could not refresh after switching charts:',e);}
+    finally{queueMicrotask(emitActiveChart);}
   }
   function removeChart(i,opts={}){
     if(i<0||i>=charts.length)return false;

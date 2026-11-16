@@ -51,7 +51,7 @@
     // The core chart store emits this after every activation path. Queue one final binding pass
     // after legacy render callbacks have completed, preventing any tool-local select from
     // silently restoring its first option.
-    window.addEventListener('atlas-active-chart-change',()=>queueMicrotask(afterChartChange));
+    window.addEventListener('atlas-active-chart-change',()=>queueMicrotask(()=>{try{afterChartChange();}catch(e){console.error('Global active-chart binding failed:',e);}}));
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
