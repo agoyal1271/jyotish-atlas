@@ -19,5 +19,6 @@ assert.ok(html.includes('jyotish_active_chart_v1'));
 assert.ok(html.includes('JA.openImportModal=openModal'));
 assert.ok(html.includes("new CustomEvent('atlas-active-chart-change'"));
 assert.ok(source.includes("window.addEventListener('atlas-active-chart-change'"));
+assert.ok(html.includes('active=i;persistActive();draw();notifyActive()'),'switching must not rewrite all chart data before updating the interface');
 assert.doesNotThrow(()=>new vm.Script(source));
 console.log('Global active-chart source, switcher, gate and integration checks passed.');
