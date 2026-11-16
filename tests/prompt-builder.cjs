@@ -5,7 +5,8 @@ const html=fs.readFileSync(require('node:path').join(__dirname,'../index.html'),
 const start=html.indexOf('  const pbScheduleCache='),end=html.indexOf('  function recipeSummary(',start);
 const fields={pbFrom:{value:'2027-01-01'},pbUntil:{value:'2027-12-31'},pbContext:{value:'Offer in December; joining in April'},pbCertainty:{value:'approximate'},pbAppendix:{checked:false}};
 const P=require('../reading-packet.js');
-const ctx={AtlasPacket:P,document:{getElementById:id=>fields[id]},SIGNS:Array.from({length:12},(_,i)=>'Sign'+i),houseFromSigns:(a,b)=>(b-a+12)%12+1,navamsaSign:s=>s,dignityOf:()=>({}),digShort:()=> 'neutral',lpBuildBAV:()=>({}),computeSAV:()=>Array(12).fill(28),pbPos:()=>({}),houseBlock:()=> 'house evidence',vargaChartBlock:(c,l,n)=> 'D'+n+' varga evidence',fullChartPacket:()=> 'APPENDIX_SENTINEL',getTransitPlanets:()=>{throw Error('unavailable');},GBYK:{Mo:{name:'Moon'},Me:{name:'Mercury'}}};
+const names={Su:'Sun',Mo:'Moon',Ma:'Mars',Me:'Mercury',Ju:'Jupiter',Ve:'Venus',Sa:'Saturn',Ra:'Rahu',Ke:'Ketu'};
+const ctx={AtlasPacket:P,document:{getElementById:id=>fields[id]},SIGNS:Array.from({length:12},(_,i)=>'Sign'+i),houseFromSigns:(a,b)=>(b-a+12)%12+1,navamsaSign:s=>s,dignityOf:()=>({}),digShort:()=> 'neutral',nakInfo:()=>({n:'Ashwini',pada:1,l:'Ke'}),lpBuildBAV:()=>({}),computeSAV:()=>Array(12).fill(28),pbPos:()=>({}),houseBlock:()=> 'house evidence',vargaChartBlock:(c,l,n)=> 'D'+n+' varga evidence',fullChartPacket:()=> 'APPENDIX_SENTINEL',getTransitPlanets:()=>{throw Error('unavailable');},GBYK:Object.fromEntries(Object.entries(names).map(([k,name])=>[k,{name}]))};
 vm.createContext(ctx);vm.runInContext(html.slice(start,end),ctx);
 const ms=s=>Date.parse(s+'T00:00:00Z');
 const chart={name:'PRIVATE_NAME',dashas:{mahas:[{lord:'Mo',start:ms('2026-01-01'),end:ms('2028-01-01'),antars:[{lord:'Me',start:ms('2026-01-01'),end:ms('2027-01-01')},{lord:'Mo',start:ms('2027-01-01'),end:ms('2028-01-01')}]}]}};
@@ -16,6 +17,7 @@ assert.ok(packet.includes('Offer in December; joining in April'));
 assert.ok(packet.includes('PD unavailable'));
 assert.ok(packet.includes('DATA GAP: transit calculation unavailable'));
 assert.ok(packet.includes('D9 varga evidence')&&packet.includes('D10 varga evidence'));
+assert.ok(packet.includes('nakṣatra Ashwini p1; star-lord Ketu'),'include nakshatra, pada and star-lord in the default packet');
 assert.ok(ctx.buildPBPrompt(chart,0,topic,'career in next 2 years').includes('TIMEFRAME MISMATCH'));
 assert.throws(()=>ctx.buildPBPrompt({...chart,La:null},0,topic,'Question'),/Chart data incomplete/);
 assert.ok(!packet.includes('AD Mercury'),'exclude the interval ending exactly at requested start');

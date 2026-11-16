@@ -11952,13 +11952,14 @@ function toggleTheme(){
   function fullChartPacket(c,La){
     const sav=computeSAV(pbPos(c)), P9=["Su","Mo","Ma","Me","Ju","Ve","Sa"], P=["Su","Mo","Ma","Me","Ju","Ve","Sa","Ra","Ke"];
     const X=["===== SAVED CHART APPENDIX (import settings not independently verified; effective strength and display bands are app heuristics) ====="];
-    X.push(`Lagna ${SIGNS[La]} ${Math.floor(c.La.deg||0)}° (${nakInfo(La*30+(c.La.deg||0)).n})`);
+    const laNak=nakInfo(La*30+(c.La.deg||0));
+    X.push(`Lagna ${SIGNS[La]} ${Math.floor(c.La.deg||0)}° · nakṣatra ${laNak.n} p${laNak.pada} · star-lord ${GBYK[laNak.l].name}`);
     X.push("Planets — house · sign · deg · dignity · nakṣatra · avasthā(Bālādi/Jāgradādi/Dīptādi)+effective% · rulerships:");
     for(const k of P){const p=c.planets[k];if(!p)continue;
       const h=houseFromSigns(La,p.sign),ni=nakInfo(p.sign*30+p.deg),dig=dignityOf(k,p.sign);
       const rules=[];for(let hh=1;hh<=12;hh++)if(SIGN_LORD[(La+hh-1)%12]===k)rules.push("H"+hh);
       const A=planetAvasthaStrength(k,c), av=A?` · ${A.bal.n}/${A.jag.n}/${A.dee.n} eff ${A.pct}%${A.vargottama?" VARGOTTAMA":""}`:"";
-      X.push(`  ${GBYK[k].name.padEnd(8)} H${String(h).padStart(2)} ${SIGNS[p.sign].padEnd(11)} ${String(Math.floor(p.deg)).padStart(2)}° · ${digShort(dig)}${p.retro?" R":""}${isCombustDE(k,c)?" COMBUST":""} · ${ni.n} p${ni.pada}${av} · rules ${rules.join(",")||"—"}`);
+      X.push(`  ${GBYK[k].name.padEnd(8)} H${String(h).padStart(2)} ${SIGNS[p.sign].padEnd(11)} ${String(Math.floor(p.deg)).padStart(2)}° · ${digShort(dig)}${p.retro?" R":""}${isCombustDE(k,c)?" COMBUST":""} · nakṣatra ${ni.n} p${ni.pada} · star-lord ${GBYK[ni.l].name}${av} · rules ${rules.join(",")||"—"}`);
     }
     X.push("Houses — sign · lord & its placement · occupants · SAV (≥30 strong / 25-29 avg / <25 weak):");
     for(let h=1;h<=12;h++){const hs=(La+h-1)%12,lord=SIGN_LORD[hs],lp=c.planets[lord];
@@ -11994,7 +11995,7 @@ function toggleTheme(){
       'Birth-time certainty: '+certainty+'. Divisional ascendants and finer timing may be sensitive to an approximate or unconfirmed birth time.',
       'Historical context (retrospective, not independent predictive validation): '+JSON.stringify(context||'None supplied'),
       'Calculation provenance: placements from the selected saved chart. Imported ayanamsha and node settings have not been independently verified. Derived houses use whole signs; vargas and SAV/BAV use Atlas routines.',
-      'METHOD: assess topic houses, their rulers, occupants, aspects and source houses; compare D1 with the relevant varga; then assess MD/AD/PD activation and transit evidence. Show supporting and conflicting indications. Do not let one avastha, Sade Sati, or debilitation flag override all other evidence. Effective-strength percentages are app heuristics, not measured event probabilities.',
+      'METHOD: assess topic houses, their rulers, occupants, aspects and source houses; read each relevant planet through its nakṣatra, pāda and star-lord before timing; compare D1 with the relevant varga; then assess MD/AD/PD activation and transit evidence. Show supporting and conflicting indications. Do not let one avastha, Sade Sati, or debilitation flag override all other evidence. Effective-strength percentages are app heuristics, not measured event probabilities.',
       'RECONCILIATION: D1 is the natal foundation; the topic varga (D10 for career) is the domain-specific examination; D9 qualifies planetary dignity and underlying support. Distinguish the D1 goal-house lord in each varga from that varga’s own goal-house lord. Explain conflicting placements without averaging charts or imposing an automatic veto.',
       'WEIGHTING: consider support and friction, weighting relevance, strength, timing and independence rather than giving every factor equal weight. Do not triple-count dignity, dignity-derived wakefulness and strength scores. Separate capacity, expression and ease: dusthana placement or retrogression is not automatic denial. Recorded birth time does not independently verify timezone, location or clock accuracy.',
       'SAV includes the seven BAV totals. Do not count SAV and BAV as independent confirmations. Interpret the transiting planet through its own BAV in the occupied natal sign. Do not transfer D1 SAV into varga houses. Nodes have no individual BAV here.',
@@ -12003,11 +12004,11 @@ function toggleTheme(){
       'RELEVANT DIVISIONAL CHARTS',
       ...[...new Set([9,...t.vargas.map(v=>v.N),...(/career|profession/i.test(t.label)?[10]:[])])].filter(N=>N!==1).map(N=>vargaChartBlock(c,La,N,'D-'+N,t.houses)),
       'SIGNIFICATORS',
-      ...t.karakas.map(k=>c.planets[k]?GBYK[k].name+': H'+houseFromSigns(La,c.planets[k].sign)+' '+SIGNS[c.planets[k].sign]+' '+c.planets[k].deg.toFixed(4)+' degrees; '+avLine(k,c):GBYK[k].name+': missing')
+      ...t.karakas.map(k=>{const p=c.planets[k];if(!p)return GBYK[k].name+': missing';const ni=nakInfo(p.sign*30+p.deg);return GBYK[k].name+': H'+houseFromSigns(La,p.sign)+' '+SIGNS[p.sign]+' '+p.deg.toFixed(4)+' degrees; nakṣatra '+ni.n+' p'+ni.pada+'; star-lord '+GBYK[ni.l].name+'; '+avLine(k,c);})
     ];
     lines.push('FULL D1 PLACEMENTS — facts, not a verdict',
-      'Lagna '+SIGNS[c.La.sign]+' '+c.La.deg.toFixed(4)+' degrees',
-      ...Object.entries(c.planets).filter(([k])=>GBYK[k]).map(([k,p])=>GBYK[k].name+': '+SIGNS[p.sign]+' '+p.deg.toFixed(4)+' degrees; H'+houseFromSigns(La,p.sign)+'; retrograde '+(typeof p.retro==='boolean'?String(p.retro):'not recorded')+'; dignity '+digShort(dignityOf(k,p.sign))+'; D1/D9 same sign '+String(p.sign===navamsaSign(p.sign,p.deg))));
+      (()=>{const ni=nakInfo(c.La.sign*30+c.La.deg);return 'Lagna '+SIGNS[c.La.sign]+' '+c.La.deg.toFixed(4)+' degrees; nakṣatra '+ni.n+' p'+ni.pada+'; star-lord '+GBYK[ni.l].name;})(),
+      ...Object.entries(c.planets).filter(([k])=>GBYK[k]).map(([k,p])=>{const ni=nakInfo(p.sign*30+p.deg);return GBYK[k].name+': '+SIGNS[p.sign]+' '+p.deg.toFixed(4)+' degrees; H'+houseFromSigns(La,p.sign)+'; nakṣatra '+ni.n+' p'+ni.pada+'; star-lord '+GBYK[ni.l].name+'; retrograde '+(typeof p.retro==='boolean'?String(p.retro):'not recorded')+'; dignity '+digShort(dignityOf(k,p.sign))+'; D1/D9 same sign '+String(p.sign===navamsaSign(p.sign,p.deg));}));
     lines.push('PERIODS OVERLAPPING REQUESTED DATES (start inclusive, end exclusive)');
     const date=x=>Number.isFinite(x)?new Date(x).toISOString().slice(0,10):'unknown end';
     const overlaps=p=>Number.isFinite(p.start)&&p.start<end&&(p.end==null||p.end>start);
