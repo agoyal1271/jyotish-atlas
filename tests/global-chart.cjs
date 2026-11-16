@@ -4,6 +4,9 @@ assert.deepEqual([...new Set([...source.matchAll(/'([a-z]+Chart)'/g)].map(x=>x[1
 assert.ok(source.includes("JA.getActiveChart?.()"));
 assert.ok(source.includes("JA.activateChart?.(+chart.dataset.chartIndex,{stay:true})"));
 assert.ok(source.includes("data-global-chart-action=\"demo\""));
+assert.ok(source.includes("data-global-chart-action=\"import\""));
+assert.ok(source.includes("JA.openImportModal?.(action)"));
+assert.ok(source.includes("data-remove-index"));
 assert.ok(source.includes("Moon Nakshatra")===false,'The compact pill derives actual nakshatra instead of a static label.');
 assert.ok(source.includes("nakInfo(moon.sign*30+moon.deg)"));
 assert.ok(source.includes("celestial-gate"));
@@ -12,5 +15,7 @@ const html=fs.readFileSync('index.html','utf8');
 assert.ok(html.includes('global-chart.css'));
 assert.ok(html.includes('global-chart.js'));
 assert.ok(html.includes('JA.activateChart=(i,opts={})'));
+assert.ok(html.includes('jyotish_active_chart_v1'));
+assert.ok(html.includes('JA.openImportModal=openModal'));
 assert.doesNotThrow(()=>new vm.Script(source));
 console.log('Global active-chart source, switcher, gate and integration checks passed.');

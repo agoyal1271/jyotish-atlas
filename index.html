@@ -8327,6 +8327,7 @@ const PLANET_ASPECT_AL={
 /* ===== MY CHARTS (parse + persist + apply) ===== */
 (function(){
   const LS="jyotish_charts_v1";
+  const ACTIVE_LS="jyotish_active_chart_v1";
   const ABBR={Ar:0,Ta:1,Ge:2,Cn:3,Le:4,Vi:5,Li:6,Sc:7,Sg:8,Cp:9,Aq:10,Pi:11};
   const ROWS=[["Lagna","La"],["Sun","Su"],["Moon","Mo"],["Mars","Ma"],["Mercury","Me"],["Jupiter","Ju"],["Venus","Ve"],["Saturn","Sa"],["Rahu","Ra"],["Ketu","Ke"]];
   const PORDER=["Su","Mo","Ma","Me","Ju","Ve","Sa","Ra","Ke"];
@@ -8402,9 +8403,23 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
   }
   JA.pdfPageToText=pdfPageToText;
   function load(){ try{return JSON.parse(localStorage.getItem(LS))||[]}catch(e){return[]} }
-  function save(a){ localStorage.setItem(LS,JSON.stringify(a)); }
+  function save(a){
+    localStorage.setItem(LS,JSON.stringify(a));
+    // Keep the chosen Kundali across reloads. Index is clamped on load/deletion below.
+    localStorage.setItem(ACTIVE_LS,String(active));
+  }
 
-  let charts=load(), active=charts.length?0:-1;
+  let charts=load(), active=charts.length?Math.max(0,Math.min(charts.length-1,parseInt(localStorage.getItem(ACTIVE_LS),10)||0)):-1;
+  function removeChart(i,opts={}){
+    if(i<0||i>=charts.length)return false;
+    const nm=charts[i]?.name||"Chart";
+    if(opts.confirm!==false&&!window.confirm(`Remove “${nm}”? This only removes its saved data from this browser.`))return false;
+    charts.splice(i,1);
+    if(active>=charts.length)active=charts.length-1;
+    if(i<active)active--;
+    save(charts);draw();JA.onChartsChange&&JA.onChartsChange();
+    JA.toast&&JA.toast(`Removed “${nm}”`,"warn");return true;
+  }
   const tabs=document.getElementById("chartTabs"), empty=document.getElementById("chartEmpty"), view=document.getElementById("chartView");
 
   function renderTabs(){
@@ -8412,8 +8427,8 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
     charts.forEach((c,i)=>{
       const t=document.createElement("button"); t.type="button"; t.className="ctab"+(i===active?" active":"");
       t.innerHTML=`<span>${c.name}</span><span class="x" title="remove">✕</span>`;
-      t.onclick=(e)=>{if(e.target.classList.contains("x"))return;active=i;draw();JA.onChartsChange&&JA.onChartsChange();};
-      t.querySelector(".x").onclick=(e)=>{e.stopPropagation();const nm=charts[i]?.name||"Chart";charts.splice(i,1);if(active>=charts.length)active=charts.length-1;save(charts);draw();JA.onChartsChange&&JA.onChartsChange();JA.toast&&JA.toast(`Removed “${nm}”`,"warn");};
+      t.onclick=(e)=>{if(e.target.classList.contains("x"))return;active=i;save(charts);draw();JA.onChartsChange&&JA.onChartsChange();};
+      t.querySelector(".x").onclick=(e)=>{e.stopPropagation();removeChart(i);};
       tabs.appendChild(t);
     });
     const create=document.createElement("button");create.type="button";create.className="ctab add";create.textContent="✦ Create Kundali";create.onclick=()=>JA.openBirthModal&&JA.openBirthModal(create);tabs.appendChild(create);
@@ -8562,6 +8577,7 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
     modal.classList.add("show");modal.setAttribute("aria-hidden","false");
     nameEl.focus();
   }
+  JA.openImportModal=openModal;
   function closeModal(){
     modal.classList.remove("show");modal.setAttribute("aria-hidden","true");
     if(modalTrigger&&typeof modalTrigger.focus==="function")modalTrigger.focus();
@@ -8628,7 +8644,8 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
   JA.getCharts=()=>charts.slice();
   JA.getActiveIndex=()=>active;
   JA.getActiveChart=()=>(active>=0?charts[active]:null);
-  JA.activateChart=(i,opts={})=>{if(i>=0&&i<charts.length){active=i;draw();JA.onChartsChange&&JA.onChartsChange();if(!opts.stay)AtlasNavigate("charts");}};
+  JA.activateChart=(i,opts={})=>{if(i>=0&&i<charts.length){active=i;save(charts);draw();JA.onChartsChange&&JA.onChartsChange();if(!opts.stay)AtlasNavigate("charts");}};
+  JA.removeChart=removeChart;
   JA.importChart=(obj)=>{
     if(!obj||!obj.La||!obj.planets) return false;
     charts.push(obj);active=charts.length-1;save(charts);draw();JA.onChartsChange&&JA.onChartsChange();
