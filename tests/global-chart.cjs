@@ -17,5 +17,7 @@ assert.ok(html.includes('global-chart.js'));
 assert.ok(html.includes('JA.activateChart=(i,opts={})'));
 assert.ok(html.includes('jyotish_active_chart_v1'));
 assert.ok(html.includes('JA.openImportModal=openModal'));
+assert.ok(html.includes("new CustomEvent('atlas-active-chart-change'"));
+assert.ok(source.includes("window.addEventListener('atlas-active-chart-change'"));
 assert.doesNotThrow(()=>new vm.Script(source));
 console.log('Global active-chart source, switcher, gate and integration checks passed.');

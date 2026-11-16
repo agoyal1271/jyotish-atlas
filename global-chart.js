@@ -47,6 +47,10 @@
     document.addEventListener('click',e=>{if(!e.target.closest('#activeChartPill')&&!e.target.closest('#globalChartMenu'))closeMenu();});window.addEventListener('resize',positionMenu);
     document.addEventListener('click',e=>{const action=e.target.closest('[data-global-chart-action]');if(!action||action.closest('#globalChartMenu'))return;if(action.dataset.globalChartAction==='create')JA.openBirthModal?.(action);if(action.dataset.globalChartAction==='import')JA.openImportModal?.(action);if(action.dataset.globalChartAction==='demo')document.getElementById('demoFirst')?.click();});
     const prior=JA.onChartsChange;JA.onChartsChange=function(){prior?.();afterChartChange();};afterChartChange();
+    // The core chart store emits this after every activation path. Queue one final binding pass
+    // after legacy render callbacks have completed, preventing any tool-local select from
+    // silently restoring its first option.
+    window.addEventListener('atlas-active-chart-change',()=>queueMicrotask(afterChartChange));
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();

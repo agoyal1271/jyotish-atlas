@@ -8410,6 +8410,10 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
   }
 
   let charts=load(), active=charts.length?Math.max(0,Math.min(charts.length-1,parseInt(localStorage.getItem(ACTIVE_LS),10)||0)):-1;
+  function notifyActive(){
+    JA.onChartsChange&&JA.onChartsChange();
+    window.dispatchEvent(new CustomEvent('atlas-active-chart-change',{detail:{index:active,chart:active>=0?charts[active]:null}}));
+  }
   function removeChart(i,opts={}){
     if(i<0||i>=charts.length)return false;
     const nm=charts[i]?.name||"Chart";
@@ -8417,7 +8421,7 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
     charts.splice(i,1);
     if(active>=charts.length)active=charts.length-1;
     if(i<active)active--;
-    save(charts);draw();JA.onChartsChange&&JA.onChartsChange();
+    save(charts);draw();notifyActive();
     JA.toast&&JA.toast(`Removed “${nm}”`,"warn");return true;
   }
   const tabs=document.getElementById("chartTabs"), empty=document.getElementById("chartEmpty"), view=document.getElementById("chartView");
@@ -8427,7 +8431,7 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
     charts.forEach((c,i)=>{
       const t=document.createElement("button"); t.type="button"; t.className="ctab"+(i===active?" active":"");
       t.innerHTML=`<span>${c.name}</span><span class="x" title="remove">✕</span>`;
-      t.onclick=(e)=>{if(e.target.classList.contains("x"))return;active=i;save(charts);draw();JA.onChartsChange&&JA.onChartsChange();};
+      t.onclick=(e)=>{if(e.target.classList.contains("x"))return;JA.activateChart(i,{stay:true});};
       t.querySelector(".x").onclick=(e)=>{e.stopPropagation();removeChart(i);};
       tabs.appendChild(t);
     });
@@ -8618,7 +8622,7 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
     }
   };
   document.getElementById("addFirst").onclick=e=>{e.preventDefault();openModal(e.currentTarget);};
-  document.getElementById("demoFirst").onclick=e=>{e.preventDefault();charts.push({name:"Demo chart",...parse(DEMO)});active=charts.length-1;save(charts);draw();JA.onChartsChange&&JA.onChartsChange();JA.toast&&JA.toast("Demo chart loaded","ok");};
+  document.getElementById("demoFirst").onclick=e=>{e.preventDefault();charts.push({name:"Demo chart",...parse(DEMO)});JA.activateChart(charts.length-1,{stay:true});JA.toast&&JA.toast("Demo chart loaded","ok");};
   document.getElementById("addSave").onclick=()=>{
     const btn=document.getElementById("addSave");
     btn.disabled=true;
@@ -8633,7 +8637,7 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
         const dashas=parsed.dashas||(bd&&parsed.planets.Mo?computeVimDashas(parsed.planets.Mo,bd):null);
         const nm=(nameEl.value.trim()||`Chart ${charts.length+1}`);
         charts.push({name:nm,La:parsed.La,planets:parsed.planets,birthDate:bd,dashas});
-        active=charts.length-1; save(charts); closeModal(); draw(); JA.onChartsChange&&JA.onChartsChange();
+        closeModal(); JA.activateChart(charts.length-1,{stay:true});
         JA.toast&&JA.toast(`Saved “${nm}”`,"ok");
       }finally{
         btn.disabled=false;
@@ -8644,11 +8648,11 @@ Ketu    14 Sc 00' 00" Anu  3 Sc`;
   JA.getCharts=()=>charts.slice();
   JA.getActiveIndex=()=>active;
   JA.getActiveChart=()=>(active>=0?charts[active]:null);
-  JA.activateChart=(i,opts={})=>{if(i>=0&&i<charts.length){active=i;save(charts);draw();JA.onChartsChange&&JA.onChartsChange();if(!opts.stay)AtlasNavigate("charts");}};
+  JA.activateChart=(i,opts={})=>{if(i>=0&&i<charts.length){active=i;save(charts);draw();notifyActive();if(!opts.stay)AtlasNavigate("charts");}};
   JA.removeChart=removeChart;
   JA.importChart=(obj)=>{
     if(!obj||!obj.La||!obj.planets) return false;
-    charts.push(obj);active=charts.length-1;save(charts);draw();JA.onChartsChange&&JA.onChartsChange();
+    charts.push(obj);JA.activateChart(charts.length-1,{stay:true});
     return true;
   };
   draw();
