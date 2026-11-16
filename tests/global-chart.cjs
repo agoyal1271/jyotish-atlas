@@ -20,5 +20,8 @@ assert.ok(html.includes('JA.openImportModal=openModal'));
 assert.ok(html.includes("new CustomEvent('atlas-active-chart-change'"));
 assert.ok(source.includes("window.addEventListener('atlas-active-chart-change'"));
 assert.ok(html.includes('active=i;persistActive();draw();notifyActive()'),'switching must not rewrite all chart data before updating the interface');
+assert.ok(html.includes('const legacyName=pill.querySelector(".cp-name");'),'legacy pill updater must tolerate global-pill markup');
+assert.ok(html.includes('if(!legacyName) return;'),'a legacy callback must not abort active-chart updates');
+assert.ok(source.includes("pill.dataset.globalChartPill='true'"));
 assert.doesNotThrow(()=>new vm.Script(source));
 console.log('Global active-chart source, switcher, gate and integration checks passed.');

@@ -42,6 +42,7 @@
   function init(){
     menu=document.createElement('div');menu.className='global-chart-menu';menu.id='globalChartMenu';menu.hidden=true;menu.setAttribute('role','menu');document.body.append(menu);
     const pill=document.getElementById('activeChartPill');
+    if(pill)pill.dataset.globalChartPill='true';
     pill?.addEventListener('click',e=>{e.preventDefault();if(menu.hidden){renderMenu();menu.hidden=false;pill.setAttribute('aria-expanded','true');}else closeMenu();});
     menu.addEventListener('click',e=>{const chart=e.target.closest('[data-chart-index]'),remove=e.target.closest('[data-remove-index]'),action=e.target.closest('[data-global-chart-action]');if(chart){JA.activateChart?.(+chart.dataset.chartIndex,{stay:true});closeMenu();return;}if(remove){JA.removeChart?.(+remove.dataset.removeIndex);closeMenu();return;}if(action){closeMenu();if(action.dataset.globalChartAction==='create')JA.openBirthModal?.(action);if(action.dataset.globalChartAction==='import')JA.openImportModal?.(action);if(action.dataset.globalChartAction==='demo')document.getElementById('demoFirst')?.click();if(action.dataset.globalChartAction==='manage')AtlasNavigate?.('charts');}});
     document.addEventListener('click',e=>{if(!e.target.closest('#activeChartPill')&&!e.target.closest('#globalChartMenu'))closeMenu();});window.addEventListener('resize',positionMenu);

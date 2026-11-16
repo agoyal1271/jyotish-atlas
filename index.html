@@ -11523,11 +11523,15 @@ function toggleTheme(){
   const pill=document.getElementById("activeChartPill");
   function updatePill(){
     if(!pill||!JA.getActiveChart) return;
+    // The global chart component replaces the legacy cp-name markup. Do not let this older
+    // enhancement callback throw and abort the remaining chart-change subscribers.
+    const legacyName=pill.querySelector(".cp-name");
+    if(!legacyName) return;
     const c=JA.getActiveChart();
-    if(c){pill.hidden=false;pill.querySelector(".cp-name").textContent=c.name;}
+    if(c){pill.hidden=false;legacyName.textContent=c.name;}
     else pill.hidden=true;
   }
-  pill&&pill.addEventListener("click",()=>AtlasNavigate("charts"));
+  pill&&pill.addEventListener("click",()=>{if(pill.dataset.globalChartPill!=="true")AtlasNavigate("charts");});
 
   /* ---- Command palette ---- */
   const cmdP=document.getElementById("cmdPalette");
