@@ -3260,7 +3260,7 @@ function bmSetSimpleMode(simple){
   BM_SIMPLE=!!simple;
   if(BM_SIMPLE){
     BM_SELECTED_HOUSE=BM_SELECTED_HOUSE||1;
-    BM_CTX.ref='la'; BM_CTX.layer='lord'; BM_CTX.gochara=false;
+    BM_CTX.ref='la'; BM_CTX.layer='lord'; BM_CTX.gochara=true;
   }
   renderBhavaMandala(BM_CTX.c,BM_CTX.baseLa,BM_SIMPLE?(BM_CTX.N===10?10:1):(BM_CTX.N||1),false);
 }
@@ -4004,7 +4004,7 @@ function renderBhavaMandala(c,La,N,motion){
   const isRTN=N===BM_RTN;
   const layer=(BM_CTX&&BM_CTX.layer)||'lord';
   const ref=isRTN?'la':((BM_CTX&&BM_CTX.ref)||'la');
-  const gochara=(BM_CTX&&BM_CTX.gochara)||false;
+  const gochara=BM_CTX?.gochara??true;
   const gDate=bmSelectedDate();
   if(BM_CTX&&BM_CTX.c!==c) BM_TRANSIT_PREVIOUS=null;
   BM_CTX={c:c,baseLa:La,N:N,layer:layer,ref:ref,gochara:gochara,gDate:gDate,simple:simple,selectedHouse:selectedH};
@@ -4222,6 +4222,7 @@ function renderBhavaMandala(c,La,N,motion){
   //      which Reference (Lagna/Moon) is on screen — this is a D-1-only overlay.
   if(gochara&&N===1){
     const natC=(typeof BM_CTX!=='undefined'&&BM_CTX&&BM_CTX.c)?BM_CTX.c:c;
+    const transitSnapshot=bmTransitSnapshot(natC,BM_CTX.baseLa,gDate);
     const natMoonSign=natC.planets.Mo?natC.planets.Mo.sign:null;
     let trPos=null; try{trPos=getTransitPlanets(gDate).pos;}catch(e){}
     if(trPos&&natMoonSign!=null){
@@ -4231,9 +4232,9 @@ function renderBhavaMandala(c,La,N,motion){
       let trG=`<g class="bm-g-transit">`;
       Object.keys(trOcc).forEach(siKey=>{
         const si=+siKey, arr=trOcc[si], base=sa(si)+15;
-        const step=arr.length>1?Math.min(11,26/(arr.length-1)):10;
+        const step=arr.length>1?Math.min(12,28/(arr.length-1)):10;
         arr.forEach((k,idx)=>{
-          const off=(idx-(arr.length-1)/2)*step, pos=pol(RTR,base+off), spoke=pol(RL+2,base+off);
+          const off=(idx-(arr.length-1)/2)*step, pos=pol(RTR+(idx%2)*16,base+off), spoke=pol(RL+2,base+off);
           const hFromMoon=houseFromSigns(natMoonSign,si), hFromRef=houseFromSigns(La,si);
           const good=(GCH_GOOD[k]||[]).includes(hFromMoon);
           let vedhaBy=null;
@@ -4245,12 +4246,12 @@ function renderBhavaMandala(c,La,N,motion){
           if(k==='Sa'){ if([12,1,2].includes(hFromMoon)) satSpecial='sade-sati'; else if(hFromMoon===4||hFromMoon===8) satSpecial='dhaiya'; }
           const statusCol=vedhaBy?'#f5d894':good?'#6fbf86':'#e2705a';
           const statusLbl=vedhaBy?`Vedha (cancelled by ${GBYK[vedhaBy].name})`:good?'Favourable':'Challenging';
-          const v=PV[k], nm=SHORT[k]||k, hh=16, w=Math.max(30,nm.length*6.2+10);
-          const tip=`Transiting ${GBYK[k].name} · ${SN[si]} — H${hFromMoon} from natal Moon (${statusLbl})${satSpecial?(satSpecial==='sade-sati'?' · SADE SATI':' · Dhaiya/Kantaka'):''} · H${hFromRef} on this wheel — click for details`;
-          trG+=`<g class="bm-tr" data-trk="${k}" onclick="bmTransitInfo('${k}')">`+
+          const v=PV[k], nm=SHORT[k]||k, sav=transitSnapshot?.sav?.[si], savLabel=sav==null?'—':String(sav), hh=18, w=Math.max(48,nm.length*6.2+25);
+          const tip=`Transiting ${GBYK[k].name} · ${SN[si]} · natal SAV ${savLabel} · H${hFromMoon} from natal Moon (${statusLbl})${satSpecial?(satSpecial==='sade-sati'?' · SADE SATI':' · Dhaiya/Kantaka'):''} · H${hFromRef} on this wheel — select for details`;
+          trG+=`<g class="bm-tr" data-trk="${k}" role="button" tabindex="0" aria-label="${tip}" onclick="bmTransitInfo('${k}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmTransitInfo('${k}')}" >`+
             `<line x1="${spoke.x}" y1="${spoke.y}" x2="${pos.x}" y2="${pos.y}" stroke="${statusCol}" stroke-width="1.2" stroke-dasharray="2,3" opacity="0.65"/>`+
             `<rect x="${pos.x-w/2}" y="${pos.y-hh/2}" width="${w}" height="${hh}" rx="8" fill="rgba(9,12,26,0.92)" stroke="${statusCol}" stroke-width="2" stroke-dasharray="3,2"><title>${tip}</title></rect>`+
-            `<text x="${pos.x}" y="${pos.y}" text-anchor="middle" dominant-baseline="central" font-size="9.5" font-weight="700" fill="${v.col}" style="pointer-events:none">${nm}</text>`+
+            `<text x="${pos.x}" y="${pos.y}" text-anchor="middle" dominant-baseline="central" font-size="9.5" font-weight="700" style="pointer-events:none"><tspan fill="${v.col}">${nm}</tspan><tspan fill="#f5d894"> ${savLabel}</tspan></text>`+
             (satSpecial?`<circle cx="${pos.x+w/2-3}" cy="${pos.y-hh/2-3}" r="6.5" fill="#220a3a" stroke="#c080f0" stroke-width="1"/><text x="${pos.x+w/2-3}" y="${pos.y-hh/2-3}" text-anchor="middle" dominant-baseline="central" font-size="6.5" font-weight="800" fill="#c080f0" style="pointer-events:none">${satSpecial==='sade-sati'?'SS':'D'}</text>`:'')+
             `</g>`;
         });
@@ -4297,7 +4298,7 @@ function renderBhavaMandala(c,La,N,motion){
   const snapshot=bmTransitSnapshot(BM_CTX.c,BM_CTX.baseLa,gDate);
   const transitKey=['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke'];
   const transitStrip=`<div class="bm-sky-strip" aria-label="D-1 natal SAV in current transit signs"><div class="bm-sky-heading"><div><b>Transit support by sign</b><span>Natal D-1 SAV in each planet’s transit sign · ${bmDateLabel(gDate)}</span></div><label>Date <input type="date" value="${gDate.toISOString().slice(0,10)}" min="1900-01-01" max="2100-12-31" onchange="bmGocharaDate(this.value)"></label></div><div class="bm-sky-items">${snapshot?transitKey.map(k=>{const p=snapshot.sky[k],sav=snapshot.sav?.[p.sign];return `<span class="bm-sky-item"><b>${SHORT[k]}</b><span>${SN[p.sign]}</span><strong>${sav??'—'}</strong></span>`;}).join(''):'<span>Transit or SAV data unavailable.</span>'}</div><small>SAV is fixed natal sign support, not a separate transit score. Nodes use the same sign total; they have no individual BAV. D-1 values are shown as context and are not applied to divisional houses.</small></div>`;
-  const degreeKey=`<div class="bm-degree-key"><span>◌</span> Planet labels show natal D-1 degrees${N===1?' in their natal signs':'; the sign and house shown on this wheel belong to the selected divisional view'}. Degrees are not positions within the divisional sign.</div>`;
+  const degreeKey=`<div class="bm-degree-key"><span>◌</span> Planet labels show natal D-1 degrees${N===1?' in their natal signs':'; the sign and house shown on this wheel belong to the selected divisional view'}. Degrees are not positions within the divisional sign.${N===1&&gochara?' Dashed outer labels show transiting planet + natal SAV of its current sign; change the date above to move the transit.':''}</div>`;
   const tabs=`<div class="bm-vtabs">`+BM_TABS.map(([n,lab,nm])=>`<button type="button" class="bm-vtab${n===N?' active':''}" onclick="bmTurn(${n})" title="${nm}">${lab}</button>`).join('')+`</div>`;
   // Reference row: Lagna chart ↔ Moon chart (Chandra Kundali), plus the Gochara transit-ring toggle (D-1 only)
   const fmtISO=d=>d.toISOString().slice(0,10);
