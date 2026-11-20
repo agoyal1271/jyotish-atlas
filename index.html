@@ -4180,12 +4180,13 @@ function renderBhavaMandala(c,La,N,motion){
       const dig=dignityOf(k,si);
       const digGlyph=dig.score>=2?'⬆':dig.score<=-2?'⬇':dig.score>=1.5?'●':'';
       const digCol=dig.score>=2?'#6fbf86':dig.score<=-2?'#e2705a':dig.score>=1.5?'#e9bf6a':null;
-      const degStr=showDeg?`${p.deg.toFixed(0)}°${p.retro?'ʳ':''}`:(p.retro?'ʳ':'');
+      const natal=BM_CTX.c.planets[k], natalDeg=natal?.deg;
+      const degStr=Number.isFinite(natalDeg)?`${natalDeg.toFixed(1)}°${p.retro?'ʳ':''}`:(p.retro?'ʳ':'');
       const label=nm+(degStr?' '+degStr:'')+(digGlyph?' '+digGlyph:''), w=Math.max(42,label.length*6.3+16);
-      const tip=(showDeg?`${GBYK[k].name} · ${SN[si]} ${p.deg.toFixed(1)}°${p.retro?' (retrograde)':''}`:`${GBYK[k].name} · ${SN[si]} (${isRTN?'RTN':`D-${N}`})${p.retro?' · retrograde':''}`)+` · ${dig.full}`;
+      const tip=`${GBYK[k].name} · ${isRTN?'RTN':`D-${N}`} ${SN[si]} · natal D-1 ${SIGNS[natal.sign]} ${natalDeg.toFixed(2)}°${p.retro?' (retrograde)':''} · ${dig.full}`;
       const degTsp=degStr?`<tspan font-size="9.5" dx="2.5" fill="rgba(206,220,252,0.9)">${degStr}</tspan>`:'';
       const digTsp=digGlyph?`<tspan font-size="9.5" dx="2.5" fill="${digCol}">${digGlyph}</tspan>`:'';
-      sv+=`<g class="bm-pill" data-pk="${k}" role="button" tabindex="0" aria-label="${GBYK[k].name} in House ${houseFromSigns(La,si)}" style="cursor:pointer" onclick="${simple?`bmShowSimplePlanet('${k}')`:`bmFocusPlanet('${k}')`}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${simple?`bmShowSimplePlanet('${k}')`:`bmFocusPlanet('${k}')`}}">`+
+      sv+=`<g class="bm-pill" data-pk="${k}" role="button" tabindex="0" aria-label="${GBYK[k].name} in House ${houseFromSigns(La,si)}, natal D-1 ${natalDeg.toFixed(1)} degrees" style="cursor:pointer" onclick="${simple?`bmShowSimplePlanet('${k}')`:`bmFocusPlanet('${k}')`}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${simple?`bmShowSimplePlanet('${k}')`:`bmFocusPlanet('${k}')`}}">`+
         `<rect x="${pos.x-w/2}" y="${pos.y-hh/2}" width="${w}" height="${hh}" rx="11" fill="rgba(9,12,26,0.97)" stroke="${digCol||v.col}" stroke-width="${digCol?2.2:1.6}"${dig.score<=-2?' stroke-dasharray="3,2"':''}><title>${tip} — ${simple?'select for a plain-language reading':'click to see what it aspects'}</title></rect>`+
         `<text x="${pos.x}" y="${pos.y}" text-anchor="middle" dominant-baseline="central" style="pointer-events:none"><tspan font-size="11" font-weight="700" fill="${v.col}">${nm}</tspan>${degTsp}${digTsp}</text>`+
         `</g>`;
@@ -4293,6 +4294,10 @@ function renderBhavaMandala(c,La,N,motion){
       `<div class="bm-hc-pl">${occ}</div></div>`;
   }
 
+  const snapshot=bmTransitSnapshot(BM_CTX.c,BM_CTX.baseLa,gDate);
+  const transitKey=['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke'];
+  const transitStrip=`<div class="bm-sky-strip" aria-label="D-1 natal SAV in current transit signs"><div class="bm-sky-heading"><div><b>Transit support by sign</b><span>Natal D-1 SAV in each planet’s transit sign · ${bmDateLabel(gDate)}</span></div><label>Date <input type="date" value="${gDate.toISOString().slice(0,10)}" min="1900-01-01" max="2100-12-31" onchange="bmGocharaDate(this.value)"></label></div><div class="bm-sky-items">${snapshot?transitKey.map(k=>{const p=snapshot.sky[k],sav=snapshot.sav?.[p.sign];return `<span class="bm-sky-item"><b>${SHORT[k]}</b><span>${SN[p.sign]}</span><strong>${sav??'—'}</strong></span>`;}).join(''):'<span>Transit or SAV data unavailable.</span>'}</div><small>SAV is fixed natal sign support, not a separate transit score. Nodes use the same sign total; they have no individual BAV. D-1 values are shown as context and are not applied to divisional houses.</small></div>`;
+  const degreeKey=`<div class="bm-degree-key"><span>◌</span> Planet labels show natal D-1 degrees${N===1?' in their natal signs':'; the sign and house shown on this wheel belong to the selected divisional view'}. Degrees are not positions within the divisional sign.</div>`;
   const tabs=`<div class="bm-vtabs">`+BM_TABS.map(([n,lab,nm])=>`<button type="button" class="bm-vtab${n===N?' active':''}" onclick="bmTurn(${n})" title="${nm}">${lab}</button>`).join('')+`</div>`;
   // Reference row: Lagna chart ↔ Moon chart (Chandra Kundali), plus the Gochara transit-ring toggle (D-1 only)
   const fmtISO=d=>d.toISOString().slice(0,10);
@@ -4328,10 +4333,10 @@ function renderBhavaMandala(c,La,N,motion){
   if(simple){
     const houseNames=N===10?D10_HOUSE_INFO.map(x=>x.title):BM_HOUSE_NAMES;
     const picker=`<div class="bm-house-picker"><label for="bmHouseSelect">Explore a house</label><select id="bmHouseSelect" onchange="bmChooseHouse(this.value)">${houseNames.map((name,i)=>`<option value="${i+1}"${selectedH===i+1?' selected':''}>${i+1} · ${name}</option>`).join('')}</select></div>`;
-    ct.innerHTML=`${modeRow}${N===1?bmTransitOverview(BM_CTX.c,BM_CTX.baseLa):''}${picker}<div class="bm-simple-layout"><div><div class="bm-container">${sv}</div><div class="bm-simple-hint">Choose a house above or on the wheel. Select a planet to understand its role.${N===1?'<br>Transit dots: green · supportive, amber · mixed, coral · demanding.':''}</div></div><aside class="bm-reading" id="bmReading" tabindex="-1" style="scroll-margin-top:150px" aria-live="polite"></aside></div>`;
+    ct.innerHTML=`${modeRow}${transitStrip}${picker}<div class="bm-simple-layout"><div><div class="bm-container">${sv}</div>${degreeKey}<div class="bm-simple-hint">Choose a house above or on the wheel. Select a planet to understand its role.${N===1?'<br>Transit dots: green · supportive, amber · mixed, coral · demanding.':''}</div></div><aside class="bm-reading" id="bmReading" tabindex="-1" style="scroll-margin-top:150px" aria-live="polite"></aside></div>`;
     N===10?bmRenderD10HouseReading(selectedH):bmRenderHouseReading(selectedH);
   }else{
-    ct.innerHTML=`${modeRow}${tabs}${refsRow}${lensRow}<div class="bm-container">${sv}</div>${aspLegend}${gocharaLegend}<div class="bm-trace" id="bmTrace">${traceDefault}</div>${caption}<div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${isRTN?'RTN (D-9 sign / D-1 house)':vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div>${d10Html}<div class="bm-planet-panel" id="bmPlanetPanel"></div>`;
+    ct.innerHTML=`${modeRow}${tabs}${refsRow}${lensRow}${transitStrip}<div class="bm-container">${sv}</div>${degreeKey}${aspLegend}${gocharaLegend}<div class="bm-trace" id="bmTrace">${traceDefault}</div>${caption}<div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${isRTN?'RTN (D-9 sign / D-1 house)':vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div>${d10Html}<div class="bm-planet-panel" id="bmPlanetPanel"></div>`;
   }
   if(motion){const ns=ct.querySelector('.bm-svg');if(ns){ns.style.transformOrigin='center';ns.style.transform='rotate(14deg) scale(.9)';ns.style.opacity='0';requestAnimationFrame(()=>{ns.style.transition='transform .46s cubic-bezier(.34,1.12,.4,1),opacity .4s';ns.style.transform='none';ns.style.opacity='1';});}}
 }
