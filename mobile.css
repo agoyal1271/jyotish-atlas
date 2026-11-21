@@ -1,0 +1,13 @@
+/* Loaded after the legacy shell and visual layers so phone layout takes precedence. */
+@media(max-width:680px){
+ html.app-shell #workspaceBar{height:154px;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:44px 44px 38px;gap:4px 8px;padding:6px 12px}
+ #workspaceBar>.header-mandala{display:none}
+ html.app-shell #workspaceBar .workspace-picker{grid-column:1/-1;grid-row:1;width:100%}
+ html.app-shell #workspaceBar .header-actions{grid-column:1/-1;grid-row:2;display:flex;flex-wrap:nowrap;min-width:0;width:100%;margin:0;gap:6px}
+ html.app-shell #workspaceBar #activeChartPill{order:0;flex:1;min-width:0;max-width:none}
+ html.app-shell #workspaceBar .appearance-field{grid-column:1/-1;grid-row:3;width:auto;font-size:12px}
+ html.app-shell #workspaceBar .appearance-field select{min-height:36px;padding:4px}
+ html.app-shell #main{top:154px;padding:14px 12px max(24px,env(safe-area-inset-bottom));overflow-x:hidden}
+ #bhavaMandala .bm-container{display:block;max-width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-inline:contain;padding:8px 14px 12px;-webkit-overflow-scrolling:touch}
+ #bhavaMandala .bm-container .bm-svg{display:block;width:560px;min-width:560px;max-width:none;overflow:visible;margin:0 18px}
+}
