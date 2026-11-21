@@ -1,4 +1,15 @@
 /* Loaded after the legacy shell and visual layers so phone layout takes precedence. */
+@media(max-width:900px){
+ html.app-shell #workspaceBar{height:154px;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:44px 44px 38px;gap:4px 8px;padding:6px 12px}
+ #workspaceBar>.header-mandala{display:none}
+ html.app-shell #workspaceBar .workspace-picker{grid-column:1/-1;grid-row:1;width:100%;min-width:0}
+ html.app-shell #workspaceBar .header-actions{grid-column:1/-1;grid-row:2;display:flex;flex-wrap:nowrap;min-width:0;width:100%;margin:0;gap:6px}
+ html.app-shell #workspaceBar #activeChartPill{order:0;flex:1;min-width:0;max-width:none}
+ html.app-shell #workspaceBar .appearance-field{grid-column:1/-1;grid-row:3;width:auto;font-size:12px}
+ html.app-shell #workspaceBar .appearance-field select{min-height:36px;padding:4px}
+ html.app-shell #main{top:154px;bottom:0;padding:18px 16px max(24px,env(safe-area-inset-bottom));overflow-x:hidden;overscroll-behavior-y:contain}
+ .global-chart-menu{max-height:calc(100dvh - 170px);overflow-y:auto;overscroll-behavior:contain}
+}
 @media(max-width:680px){
  html.app-shell #workspaceBar{height:154px;display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:44px 44px 38px;gap:4px 8px;padding:6px 12px}
  #workspaceBar>.header-mandala{display:none}
@@ -10,4 +21,21 @@
  html.app-shell #main{top:154px;padding:14px 12px max(24px,env(safe-area-inset-bottom));overflow-x:hidden}
  #bhavaMandala .bm-container{display:block;max-width:100%;overflow-x:auto;overflow-y:hidden;overscroll-behavior-inline:contain;padding:8px 14px 12px;-webkit-overflow-scrolling:touch}
  #bhavaMandala .bm-container .bm-svg{display:block;width:560px;min-width:560px;max-width:none;overflow:visible;margin:0 18px}
+ /* Keep document flow inside the stage; wide data gets its own scroll boundary. */
+ #main,#main>section,#main .panel,#main .detail,#main .ec-zone-card,#main .charts-layout,#main .charts-main{box-sizing:border-box;min-width:0;max-width:100%}
+ #main :is(.bb-selectors,.kd-controls,.op-controls,.ol-controls,.cmp-controls,.dp-selector,.pr-grid,.jr-form){display:flex;flex-direction:column;align-items:stretch;gap:12px;min-width:0}
+ #main :is(.bb-sel-grp,.dp-sel-group,.ctrl,.birth-field){width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+ #main :is(input:not([type=checkbox]):not([type=radio]),select,textarea){box-sizing:border-box;min-width:0;max-width:100%;font-size:16px}
+ #main :is(.bb-sel-grp,.dp-sel-group,.ctrl) :is(input,select,textarea){width:100%}
+ #main :is(.pb-date-grid,.birth-grid,.cmp-grid,.dp-lord-grid,.dp-transit-grid,.dp-topic-grid,.dp-tl-cards,.yg-grid,.tr-grid,.jr-ins,.bm-houses,.bm-legend){grid-template-columns:minmax(0,1fr)}
+ #main :is(.detail,.panel,.ec-zone-card) [style*='min-width']{min-width:0!important;max-width:100%;box-sizing:border-box}
+ #main :is(table){display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+ #main :is(.lp-wrap,.dp-wrap,.bav-table-wrap,.varga-table-wrap){max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain}
+ #main :is(.ol-ai-btns,.hero-cta,.ax-actions){display:flex;flex-wrap:wrap;gap:8px}
+ #main :is(.ol-ai-btns,.hero-cta,.ax-actions)>button{min-height:44px;max-width:100%}
+ #main :is(.ol-ai-btn,.cvt-btn,.bm-vtab,.bm-lens,.tok,.opt){min-height:44px}
+ #main :is(pre,code){max-width:100%;overflow-wrap:anywhere;white-space:pre-wrap}
+ #main :is(.detail,.bm-reading,.panel,.chart-story){overflow-wrap:anywhere}
+ .modal .card{width:100%;max-width:100%;box-sizing:border-box}
+ .cmdp-box{max-height:calc(100dvh - 32px);overflow:auto}
 }
