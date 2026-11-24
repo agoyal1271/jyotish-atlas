@@ -1914,6 +1914,27 @@ html.bm-focus-open #main{z-index:2000}
   transform:translate(-100%,-50%) rotateZ(calc(-1*var(--bm-rz))) rotateX(calc(-1*var(--bm-rx)));transform-origin:100% 50%}
 .bm-dragging :is(.bm-stage,.bm-plane,.bm-tok,.bm-stem){transition:none}
 /* Always-visible key under the Simple wheel (bmSimpleLegend) */
+/* Phone house cards (bmHouseCards) — only shown on narrow screens */
+.bm-hcards-wrap{display:none}
+@media(max-width:680px){
+  .bm-hcards-wrap{display:block;margin:12px 0 4px}
+  .bm-hcards-hint{margin:0 0 6px;font-size:12.5px;color:var(--muted)}
+  .bm-hcards{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-inline:contain;padding:2px 12px 10px;margin:0 -12px;scrollbar-width:thin}
+  .bm-hcard{flex:0 0 82%;scroll-snap-align:center;display:flex;flex-direction:column;gap:5px;padding:14px;border-radius:14px;border:1px solid var(--line);background:var(--panel2);min-width:0}
+  .bm-hcard.on{border-color:var(--gold);box-shadow:0 0 0 1px color-mix(in srgb,var(--gold) 40%,transparent)}
+  .bm-hcard-n{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--gold2)}
+  .bm-hcard-n span{color:var(--muted);font-weight:600}
+  .bm-hcard h4{margin:0;font-family:var(--font-display);font-size:21px;color:var(--ink)}
+  .bm-hcard-s,.bm-hcard-p{font-size:13px;color:var(--muted)}
+  .bm-hcard p{margin:0;font-size:13.5px;line-height:1.5;color:var(--ink)}
+  .bm-hcard button{margin-top:auto;min-height:44px;border-radius:10px;border:1px solid color-mix(in srgb,var(--gold) 55%,var(--line));background:transparent;color:var(--gold2);font:inherit;font-weight:700}
+  .bm-hcard.on button{background:var(--gold);color:#2a1a0c;border-color:transparent}
+}
+@media(max-width:680px) and (prefers-reduced-motion:reduce){.bm-hcards{scroll-behavior:auto}}
+/* Keyboard focus on wheel items: a bright ring on the item's own shape, not a box. */
+.bm-svg :is(.bm-hmark,.bm-pill,.bm-tr):focus{outline:none}
+.bm-svg :is(.bm-hmark,.bm-pill,.bm-tr):focus-visible>rect,
+.bm-svg .bm-tr:focus-visible .bm-trl>rect{stroke:#fff!important;stroke-width:3!important}
 /* Beginner reads the house itself first; today's transit verdict starts at Intermediate. */
 .bm-level-beginner #bmReading .bm-transit-reading{display:none}
 .bm-time{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0 2px}
@@ -2001,7 +2022,7 @@ html.bm-focus-open #main{z-index:2000}
 .bm-viewbtn:focus-visible,.bm-viewturn button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
 .bm-viewhint{font-size:12px;color:var(--muted);flex:1 1 220px}
 @media(max-width:680px){.bm-3d{touch-action:auto}.bm-viewbtn,.bm-viewturn button{min-height:44px}}
-@media(prefers-reduced-motion:reduce){:is(.bm-stage,.bm-plane,.bm-tok,.bm-stem,.bm-plane>.bm-layer){transition:none!important}}
+@media(prefers-reduced-motion:reduce){:is(.bm-svg,.bm-stage,.bm-plane,.bm-tok,.bm-stem,.bm-plane>.bm-layer,.bm-x-on .bm-hmark,.bm-x-on .bm-pill){transition:none!important}}
 @media print{.bm-3d :is(.bm-stage,.bm-plane,.bm-tok){transform:none!important}.bm-stem,.bm-foot,.bm-plabel,.bm-viewbar{display:none!important}}
 .bm-house-picker{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px 0}
 .bm-house-picker label{font-size:13px;font-weight:700;color:var(--ink)}
@@ -3412,7 +3433,7 @@ function bmSimpleLegend(N,beginner){
     it('<i class="bm-key-pill" style="border-style:dashed;border-color:#c8c5bd"></i>','Dashed outer labels: where planets are today'),
     it('<i class="bm-key-dot" style="background:#6fbf86"></i><i class="bm-key-dot" style="background:#e9bf6a"></i><i class="bm-key-dot" style="background:#e2705a"></i>','House dot: today supportive · mixed · demanding'));
   return `<div class="bm-key" aria-label="How to read the chart"><b>How to read it</b>${items.join('')}`+
-    `<p>${window.matchMedia&&matchMedia('(hover:hover)').matches?'Point at any house or planet for a quick explanation; click it for the full reading.':'Tap any house or planet for its reading.'}</p></div>`;
+    `<p>${window.matchMedia&&matchMedia('(hover:hover)').matches?'Point at any house or planet for a quick explanation; click it for the full reading. Keyboard: Tab to the wheel, use the arrow keys to move between houses or planets, and Enter to open one.':'Tap any house or planet for its reading, or swipe through the house cards below the wheel.'}</p></div>`;
 }
 const BM_RTN=-9;
 const BM_VARGAS=[[1,'D-1','Rāśi'],[2,'D-2','Horā'],[4,'D-4','Caturthāṁśa'],[7,'D-7','Saptāṁśa'],[9,'D-9','Navāṁśa'],[10,'D-10','Daśāṁśa'],[16,'D-16','Ṣoḍaśāṁśa'],[27,'D-27','Bhāṁśa'],[60,'D-60','Ṣaṣṭyāṁśa']];
@@ -4476,6 +4497,90 @@ function bmExplainHide(){
   document.addEventListener('pointerdown',()=>{if(cur){cur=null;bmExplainHide();}},true);
 })();
 
+/* ---- Phones: swipe-through house cards under the wheel ----
+   On narrow screens the wheel is wider than the screen, so browsing house by house is
+   easier as a strip of cards. The card in view is highlighted on the wheel, and the
+   wheel scrolls sideways to show it. Hidden on wider screens (CSS). */
+function bmHouseCards(N,selectedH){
+  const g=BM_GEOM; if(!g) return '';
+  const cards=[];
+  for(let h=1;h<=12;h++){
+    const si=g.house[h].si, lord=SIGN_LORD[si], lordH=bmPlanetHouse(lord);
+    const inside=BM_XP_ORDER.filter(k=>g.c.planets[k]&&bmPlanetHouse(k)===h).map(k=>`<span style="color:${GBYK[k].col}">${GBYK[k].name}</span>`);
+    cards.push(`<article class="bm-hcard${h===selectedH?' on':''}" data-h="${h}" aria-label="House ${h} of 12">`+
+      `<div class="bm-hcard-n">House ${h} <span>of 12</span></div><h4>${bmHouseName(h)}</h4>`+
+      `<div class="bm-hcard-s">${SIGNS[si]} · ruled by ${GBYK[lord].name}${lordH?(lordH===h?' (here)':` (in House ${lordH})`):''}</div>`+
+      (N===1?`<p>${BHAVAS[h-1].kar.slice(0,3).join(' · ')}</p>`:'')+
+      `<div class="bm-hcard-p">${inside.length?'Planets here: '+inside.join(', '):'No planets here'}</div>`+
+      `<button type="button" onclick="bmSelectHouse(${h})">${h===selectedH?'Showing this house':'Read House '+h}</button></article>`);
+  }
+  return `<div class="bm-hcards-wrap"><p class="bm-hcards-hint">Swipe through your 12 houses</p><div class="bm-hcards" role="group" aria-label="Your 12 houses">${cards.join('')}</div></div>`;
+}
+let BM_HCARD_IO=null;
+function bmWatchHouseCards(ct){
+  if(BM_HCARD_IO){BM_HCARD_IO.disconnect();BM_HCARD_IO=null;}
+  const strip=ct.querySelector('.bm-hcards'); if(!strip||!strip.getClientRects().length) return;
+  // Start on the selected house without animating.
+  const on=strip.querySelector('.bm-hcard.on'); if(on) strip.scrollLeft=on.offsetLeft-strip.offsetLeft-12;
+  if(!('IntersectionObserver' in window)) return;
+  BM_HCARD_IO=new IntersectionObserver(es=>{
+    const vis=es.filter(e=>e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio)[0];
+    if(!vis) return;
+    const h=+vis.target.dataset.h, w=ct.querySelector('.bm-svg'), box=ct.querySelector('.bm-container');
+    ct.querySelectorAll('.bm-hmark.bm-x-self').forEach(n=>n.classList.remove('bm-x-self'));
+    ct.querySelector(`.bm-hmark[data-h="${h}"]`)?.classList.add('bm-x-self');
+    w?.classList.add('bm-x-on');
+    // Bring that house into view inside the sideways-scrolling wheel.
+    const pt=BM_GEOM&&BM_GEOM.house[h];
+    if(pt&&w&&box&&box.scrollWidth>box.clientWidth){
+      const x=w.offsetLeft+pt.x/700*w.offsetWidth;
+      box.scrollTo({left:Math.max(0,x-box.clientWidth/2),behavior:bmIntroReduce()?'auto':'smooth'});
+    }
+  },{root:strip,threshold:[.6]});
+  strip.querySelectorAll('.bm-hcard').forEach(c=>BM_HCARD_IO.observe(c));
+}
+
+/* ---- Keyboard: arrows move between houses (around the wheel), planets or transits ----
+   Each group has a single Tab stop (roving tabindex). The explainer card follows focus
+   and is linked with aria-describedby, so screen readers hear the same explanation. */
+const BM_KEY_GROUPS=[['.bm-hmark','data-h'],['.bm-pill','data-pk'],['.bm-tr','data-trk']];
+function bmGroupItems(ct,sel){
+  const items=[...ct.querySelectorAll(sel)];
+  if(sel==='.bm-hmark') return items.sort((a,b)=>a.dataset.h-b.dataset.h);
+  if(sel==='.bm-pill'&&BM_GEOM) return items.sort((a,b)=>(bmPlanetHouse(a.dataset.pk)||0)-(bmPlanetHouse(b.dataset.pk)||0));
+  return items;
+}
+function bmRoveTo(items,next){
+  items.forEach(n=>n.setAttribute('tabindex','-1'));
+  next.setAttribute('tabindex','0'); next.focus({preventScroll:true});
+}
+document.addEventListener('keydown',e=>{
+  const ct=document.getElementById('bhavaMandala'); if(!ct) return;
+  const grp=BM_KEY_GROUPS.find(([sel])=>e.target.matches?.(`#bhavaMandala ${sel}`)); if(!grp) return;
+  const step={ArrowRight:1,ArrowDown:1,ArrowLeft:-1,ArrowUp:-1}[e.key];
+  if(step===undefined&&e.key!=='Home'&&e.key!=='End') return;
+  e.preventDefault();
+  const items=bmGroupItems(ct,grp[0]), i=items.indexOf(e.target);
+  const j=e.key==='Home'?0:e.key==='End'?items.length-1:(i+step+items.length)%items.length;
+  if(items[j]) bmRoveTo(items,items[j]);
+});
+// After a re-render (e.g. Enter on a house), put focus back on the same item.
+let BM_REFOCUS=null;
+function bmRememberFocus(){
+  const a=document.activeElement, ct=document.getElementById('bhavaMandala');
+  BM_REFOCUS=null;
+  if(!a||!ct||!ct.contains(a)) return;
+  for(const [sel,attr] of BM_KEY_GROUPS) if(a.matches(sel)){BM_REFOCUS=`${sel}[${attr}="${a.getAttribute(attr)}"]`;return;}
+  if(a.matches('.bm-mode-btn,.bm-viewbtn,.bm-time button')) BM_REFOCUS=null; // those manage their own focus
+}
+function bmRestoreFocus(ct){
+  if(!BM_REFOCUS) return;
+  const el=ct.querySelector(BM_REFOCUS); BM_REFOCUS=null;
+  if(!el) return;
+  const sel=BM_KEY_GROUPS.find(([s])=>el.matches(s))[0];
+  bmRoveTo(bmGroupItems(ct,sel),el);
+}
+
 // Called from the home-screen orrery's "See how this sky becomes your chart" link: once the
 // My Charts route has rendered, bring the wheel into view and play the intro.
 function bmQueueIntro(){
@@ -4579,6 +4684,7 @@ function renderBhavaMandala(c,La,N,motion){
   N=N||1;
   if(BM_INTRO){clearTimeout(BM_INTRO.timer);BM_INTRO=null;} // the re-render replaces the intro card
   if(typeof bmExplainHide==='function') bmExplainHide();
+  if(typeof bmRememberFocus==='function') bmRememberFocus();
   if(BM_SIMPLE && N!==10) N=1;
   const ct=document.getElementById('bhavaMandala');
   if(!ct)return;
@@ -4804,7 +4910,8 @@ function renderBhavaMandala(c,La,N,motion){
     const transit=transitHouses?.[h-1];
     let hsv='';
     if(transit)hsv+=`<circle cx="${p.x+mw/2}" cy="${p.y-mh/2}" r="5" fill="${transit.tone==='supportive'?'#6fbf86':transit.tone==='demanding'?'#e2705a':'#e9bf6a'}"><title>${transit.label} on ${bmDateLabel()}</title></circle>`;
-    hsv+=`<g class="bm-hmark${isSelected?' on':''}" data-h="${h}" data-si="${si}" role="button" tabindex="0" aria-label="House ${h}, ${wheelNames[h-1]}" onclick="bmSelectHouse(${h})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmSelectHouse(${h})}">`+
+    // Roving tab stop: only the selected house is in the Tab order; arrows move between houses.
+    hsv+=`<g class="bm-hmark${isSelected?' on':''}" data-h="${h}" data-si="${si}" role="button" tabindex="${isSelected?0:-1}" aria-label="House ${h}, ${wheelNames[h-1]}" onclick="bmSelectHouse(${h})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmSelectHouse(${h})}">`+
       `<rect x="${p.x-mw/2}" y="${p.y-mh/2}" width="${mw}" height="${mh}" rx="9" fill="${isSelected?'rgba(231,193,78,0.18)':'rgba(8,12,28,0.84)'}" stroke="${isSelected?'#e7c14e':isH1?'rgba(231,193,78,.7)':'rgba(95,120,205,0.42)'}" stroke-width="${isSelected?2.5:isH1?1.5:1}"><title>${tip} — select ${wheelNames[h-1]}</title></rect>`+
       `<text x="${p.x}" y="${p.y-6}" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="${isSelected?'#f5d894':isH1?'#e7c14e':HCOL[ht]}" style="pointer-events:none">${h}</text>`+
       `<text x="${p.x}" y="${p.y+9}" text-anchor="middle" dominant-baseline="central" font-size="${simple?'9.6':'11.5'}" fill="${simple?'rgba(225,232,248,.9)':lv.col}" style="pointer-events:none">${simple?wheelShort[h-1]:lv.gl}</text>`+
@@ -4842,7 +4949,7 @@ function renderBhavaMandala(c,La,N,motion){
       const tip=`${GBYK[k].name} · ${isRTN?'RTN':`D-${N}`} ${SN[si]} · natal D-1 ${SIGNS[natal.sign]} ${natalDeg.toFixed(2)}°${p.retro?' (retrograde)':''} · ${dig.full}`;
       const degTsp=degStr&&!planetCompact[k]?`<tspan font-size="9.5" dx="2.5" fill="rgba(206,220,252,0.9)">${degStr}</tspan>`:'';
       const digTsp=digGlyph?`<tspan font-size="9.5" dx="2.5" fill="${digCol}">${digGlyph}</tspan>`:'';
-      const psv=`<g class="bm-pill" data-pk="${k}" role="button" tabindex="0" aria-label="${GBYK[k].name} in House ${houseFromSigns(La,si)}, natal D-1 ${natalDeg.toFixed(1)} degrees" style="cursor:pointer" onclick="${simple?`bmShowSimplePlanet('${k}')`:`bmFocusPlanet('${k}')`}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${simple?`bmShowSimplePlanet('${k}')`:`bmFocusPlanet('${k}')`}}">`+
+      const psv=`<g class="bm-pill" data-pk="${k}" role="button" tabindex="${pTok.length?-1:0}" aria-label="${GBYK[k].name} in House ${houseFromSigns(La,si)}, natal D-1 ${natalDeg.toFixed(1)} degrees" style="cursor:pointer" onclick="${simple?`bmShowSimplePlanet('${k}')`:`bmFocusPlanet('${k}')`}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${simple?`bmShowSimplePlanet('${k}')`:`bmFocusPlanet('${k}')`}}">`+
         `<rect x="${pos.x-w/2}" y="${pos.y-hh/2}" width="${w}" height="${hh}" rx="11" fill="rgba(9,12,26,0.97)" stroke="${digCol||v.col}" stroke-width="${digCol?2.2:1.6}"${dig.score<=-2?' stroke-dasharray="3,2"':''}><title>${tip} — ${simple?'select for a plain-language reading':'click to see what it aspects'}</title></rect>`+
         `<text x="${pos.x}" y="${pos.y}" text-anchor="middle" dominant-baseline="central" style="pointer-events:none"><tspan font-size="11" font-weight="700" fill="${v.col}">${nm}</tspan>${degTsp}${digTsp}</text>`+
         `</g>`;
@@ -4914,7 +5021,7 @@ function renderBhavaMandala(c,La,N,motion){
           const tip=`Transiting ${GBYK[k].name} · ${SN[si]} · ${bavText} · natal sign SAV ${savLabel} · H${hFromMoon} from natal Moon (${statusLbl})${satSpecial?(satSpecial==='sade-sati'?' · SADE SATI':' · Dhaiya/Kantaka'):''} · H${hFromRef} on this wheel — select for details`;
           // The leader line stays on the transit plane; the chip is an upright token.
           trG+=`<line x1="${spoke.x}" y1="${spoke.y}" x2="${pos.x}" y2="${pos.y}" stroke="${statusCol}" stroke-width="1.2" stroke-dasharray="2,3" opacity="0.65" style="pointer-events:none"/>`;
-          tTok.push({x:pos.x,y:pos.y,w,h:hh,pad:11,html:`<g class="bm-tr" data-trk="${k}" role="button" tabindex="0" aria-label="${tip}" onclick="bmTransitInfo('${k}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmTransitInfo('${k}')}" >`+
+          tTok.push({x:pos.x,y:pos.y,w,h:hh,pad:11,html:`<g class="bm-tr" data-trk="${k}" role="button" tabindex="${tTok.length?-1:0}" aria-label="${tip}" onclick="bmTransitInfo('${k}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmTransitInfo('${k}')}" >`+
             `<g class="bm-trl"><rect x="${pos.x-w/2}" y="${pos.y-hh/2}" width="${w}" height="${hh}" rx="8" fill="rgba(9,12,26,0.92)" stroke="${statusCol}" stroke-width="2" stroke-dasharray="3,2"><title>${tip}</title></rect>`+
             `<text x="${pos.x}" y="${pos.y-4}" text-anchor="middle" dominant-baseline="central" font-size="9.5" font-weight="700" fill="${v.col}" style="pointer-events:none">${nm}</text>`+
             (bav==null?`<text x="${pos.x}" y="${pos.y+5}" text-anchor="middle" font-size="6.5" fill="#c8c5bd" style="pointer-events:none">${['Ra','Ke'].includes(k)?'no BAV':'unavailable'}</text>`:Array.from({length:8},(_,n)=>`<circle cx="${pos.x-14+n*4}" cy="${pos.y+5}" r="1.35" fill="${n<bav?'#f5d894':'none'}" stroke="#f5d894" stroke-width=".6"/>`).join(''))+
@@ -5003,12 +5110,14 @@ function renderBhavaMandala(c,La,N,motion){
   if(simple){
     const houseNames=N===10?D10_HOUSE_INFO.map(x=>x.title):BM_HOUSE_NAMES;
     const picker=`<div class="bm-house-picker"><label for="bmHouseSelect">Explore a house</label><select id="bmHouseSelect" onchange="bmChooseHouse(this.value)">${houseNames.map((name,i)=>`<option value="${i+1}"${selectedH===i+1?' selected':''}>${i+1} · ${name}</option>`).join('')}</select></div>`;
-    ct.innerHTML=`${modeRow}${beginner?'':transitStrip}${picker}<div class="bm-simple-layout"><div>${viewBar}<p class="bm-wheel-scroll-hint">Swipe sideways to explore the wheel</p><div class="bm-container" tabindex="0" role="region" aria-label="Scrollable Bhava Mandala">${sv}</div>${beginner?'':degreeKey}${mobilePlanets}${bmSimpleLegend(N,beginner)}</div><aside class="bm-reading" id="bmReading" tabindex="-1" style="scroll-margin-top:150px" aria-live="polite"></aside></div>`;
+    ct.innerHTML=`${modeRow}${beginner?'':transitStrip}${picker}<div class="bm-simple-layout"><div>${viewBar}<p class="bm-wheel-scroll-hint">Swipe sideways to explore the wheel</p><div class="bm-container" tabindex="0" role="region" aria-label="Scrollable Bhava Mandala">${sv}</div>${beginner?'':degreeKey}${bmHouseCards(N,selectedH)}${mobilePlanets}${bmSimpleLegend(N,beginner)}</div><aside class="bm-reading" id="bmReading" tabindex="-1" style="scroll-margin-top:150px" aria-live="polite"></aside></div>`;
     N===10?bmRenderD10HouseReading(selectedH):bmRenderHouseReading(selectedH);
   }else{
     ct.innerHTML=`${modeRow}${tabs}${refsRow}${lensRow}${transitStrip}${viewBar}<p class="bm-wheel-scroll-hint">Swipe sideways to explore the wheel</p><div class="bm-container" tabindex="0" role="region" aria-label="Scrollable Bhava Mandala">${sv}</div>${degreeKey}${mobilePlanets}${aspLegend}${gocharaLegend}<div class="bm-trace" id="bmTrace">${traceDefault}</div>${caption}<div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${isRTN?'RTN (D-9 sign / D-1 house)':vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div>${d10Html}<div class="bm-planet-panel" id="bmPlanetPanel"></div>`;
   }
   bmWatchLabelScale(ct);
+  bmRestoreFocus(ct);
+  bmWatchHouseCards(ct);
   bmMaybeAutoIntro(ct);
   if(motion){const ns=ct.querySelector('.bm-svg');if(ns){ns.style.transformOrigin='center';ns.style.transform='rotate(14deg) scale(.9)';ns.style.opacity='0';requestAnimationFrame(()=>{ns.style.transition='transform .46s cubic-bezier(.34,1.12,.4,1),opacity .4s';ns.style.transform='none';ns.style.opacity='1';});}}
 }
