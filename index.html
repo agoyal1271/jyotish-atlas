@@ -226,6 +226,12 @@
   .hero-emblem{flex:0 0 auto}
   /* == ORRERY == */
   .orrery{position:relative;width:360px;height:360px;max-width:100%}
+  /* Centred under the 360px orrery, whatever width its host has. */
+  .orrery-cta{display:block;width:max-content;max-width:100%;margin:4px 0 0;position:relative;left:min(180px,50%);transform:translateX(-50%);padding:8px 14px;border-radius:999px;border:1px solid color-mix(in srgb,var(--gold) 55%,var(--line));
+    color:var(--gold2);font:inherit;font-size:13px;font-weight:700;cursor:pointer;background:color-mix(in srgb,var(--gold) 8%,transparent)}
+  .orrery-cta:hover{background:color-mix(in srgb,var(--gold) 16%,transparent)}
+  .orrery-cta:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+  .orrery-cta[hidden]{display:none}
   .orrery-stars{position:absolute;inset:0;pointer-events:none}
   .orrery-wrap{position:absolute;inset:0;will-change:transform}
   .orrery-core{position:absolute;left:50%;top:48.9%;width:54px;height:54px;transform:translate(-50%,-50%);border-radius:50%;
@@ -1873,6 +1879,84 @@ body:has(.modal.show){overflow:hidden}
 html.bm-focus-open,html.bm-focus-open body,html.bm-focus-open #main{overflow:hidden}
 /* #main is position:fixed, i.e. its own stacking context: lift it over the rail and bar. */
 html.bm-focus-open #main{z-index:2000}
+/* == MANDALA DEPTH (Flat · 3D · Layers) — see bmAssembleLayers == */
+.bm-svg{position:relative;aspect-ratio:1/1;transition:aspect-ratio .5s}
+.bm-stage,.bm-plane{position:absolute;inset:0;pointer-events:none}
+/* A tilted disc is shorter than it is wide: trim the frame and keep the square stage centred. */
+.bm-3d{aspect-ratio:1/.84}
+.bm-3d .bm-stage{inset:auto 0;top:50%;margin-top:-50%;aspect-ratio:1/1}
+.bm-stage{transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.bm-plane{transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.bm-layer{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.bm-tok{position:absolute;overflow:visible;pointer-events:none;transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.bm-layer>*,.bm-tok>*{pointer-events:auto}
+.bm-stem,.bm-foot,.bm-plabel{display:none}
+.bm-v-tilt{--bm-gap:.004;--bm-ty:0}
+.bm-v-layers{--bm-gap:.15;--bm-ty:.06}
+.bm-v-layers.bm-3d{aspect-ratio:1/1.05}
+/* Layers: look more from the side, shrink to leave room for the plane labels, and give
+   each raised plane a faint glass disc so it reads as a surface, not floating debris. */
+.bm-v-layers.bm-3d .bm-stage{transform:translateY(calc(var(--bm-w,700px)*var(--bm-ty))) scale(.74) rotateX(calc(var(--bm-rx) + 12deg)) rotateZ(var(--bm-rz))}
+.bm-v-layers .bm-plane+.bm-plane::before{content:'';position:absolute;inset:8.5%;border-radius:50%;
+  border:1px solid color-mix(in srgb,var(--gold) 38%,transparent);background:radial-gradient(circle,color-mix(in srgb,var(--gold) 7%,transparent),color-mix(in srgb,#6f86ff 5%,transparent) 70%)}
+.bm-3d{perspective:calc(var(--bm-w,700px)*2.6);perspective-origin:50% 25%;cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.bm-3d.bm-dragging{cursor:grabbing}
+.bm-3d .bm-stage{transform-style:preserve-3d;transform:translateY(calc(var(--bm-w,700px)*var(--bm-ty))) rotateX(var(--bm-rx)) rotateZ(var(--bm-rz))}
+.bm-3d .bm-plane{transform-style:preserve-3d;transform:translateZ(calc(var(--bm-w,700px)*var(--pz)*var(--bm-gap)))}
+.bm-3d .bm-tok{--lift:0px;transform:translateZ(var(--lift)) rotateZ(calc(-1*var(--bm-rz))) rotateX(calc(-1*var(--bm-rx)))}
+/* Stem height stays short enough that a raised pill still reads as sitting in its own sign. */
+.bm-3d .bm-tok-planet{--lift:calc(var(--bm-w,700px)*(.018 + var(--lv)*.011))}
+.bm-3d .bm-stem{display:block;position:absolute;width:2px;margin-left:-1px;height:calc(var(--bm-w,700px)*(.018 + var(--lv)*.011));transform-origin:50% 0;
+  transform:rotateZ(calc(-1*var(--bm-rz))) rotateX(90deg);background:linear-gradient(to bottom,color-mix(in srgb,var(--c) 15%,transparent),var(--c));transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.bm-3d .bm-foot{display:block;position:absolute;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:radial-gradient(circle,var(--c) 0,transparent 70%);opacity:.75}
+.bm-v-layers .bm-plabel{display:block;position:absolute;left:9%;top:50%;white-space:nowrap;font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--gold2);
+  background:color-mix(in srgb,var(--panel) 88%,transparent);border:1px solid var(--line);border-radius:999px;padding:3px 10px;
+  transform:translate(-100%,-50%) rotateZ(calc(-1*var(--bm-rz))) rotateX(calc(-1*var(--bm-rx)));transform-origin:100% 50%}
+.bm-dragging :is(.bm-stage,.bm-plane,.bm-tok,.bm-stem){transition:none}
+/* "How this chart is made" intro (bmPlayIntro). Steps: sky → signs → houses → strength. */
+.bm-plane>.bm-layer{transition:opacity .6s ease}
+.bm-tok-house{transition:transform .7s cubic-bezier(.2,.8,.2,1),opacity .6s ease}
+.bm-tok-planet{transition:transform .7s cubic-bezier(.2,.8,.2,1),translate 1.3s cubic-bezier(.3,.7,.2,1)}
+.bm-stem{transition:transform .7s cubic-bezier(.2,.8,.2,1),scale .8s cubic-bezier(.3,.7,.2,1) .2s}
+.bm-svg[data-intro] .bm-tok-planet{--lift:0px}
+.bm-svg[data-intro]:not([data-intro="strength"]) .bm-stem{scale:1 0}
+.bm-svg[data-intro]:not([data-intro="strength"]) .bm-foot{opacity:0}
+.bm-svg[data-intro="strength"] .bm-tok-planet{--lift:calc(var(--bm-w,700px)*(.018 + var(--lv)*.011))}
+.bm-svg:is([data-intro="sky"],[data-intro="signs"]) .bm-tok-planet{translate:calc(var(--bm-w,700px)*var(--dx,0)) calc(var(--bm-w,700px)*var(--dy,0))}
+.bm-svg:is([data-intro="sky"],[data-intro="signs"]) .bm-tok-house{opacity:0;pointer-events:none}
+.bm-svg[data-intro="houses"] .bm-tok-house{transition-delay:calc(var(--i,0)*70ms)}
+.bm-svg[data-intro="sky"] .bm-p-floor>.bm-layer{opacity:.32}
+.bm-svg:is([data-intro="sky"],[data-intro="signs"]) .bm-p-houses>.bm-layer{opacity:0}
+.bm-svg[data-intro] :is(.bm-p-links,.bm-p-sky){opacity:0;transition:opacity .6s}
+.bm-p-links,.bm-p-sky{transition:transform .7s cubic-bezier(.2,.8,.2,1),opacity .6s}
+.bm-intro-jump,.bm-intro-jump *{transition:none!important}
+.bm-intro{margin:0 0 10px}
+.bm-intro-card{position:relative;overflow:hidden;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px 16px;padding:12px 14px;border-radius:12px;
+  border:1px solid color-mix(in srgb,var(--gold) 50%,var(--line));background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 12%,var(--panel)),var(--panel))}
+.bm-intro-steps{display:flex;flex-direction:column;gap:4px}
+.bm-intro-steps i{width:8px;height:8px;border-radius:50%;background:var(--line)}
+.bm-intro-steps i.done{background:color-mix(in srgb,var(--gold) 55%,var(--line))}
+.bm-intro-steps i.on{background:var(--gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 25%,transparent)}
+.bm-intro-body b{display:block;font-size:13px;color:var(--gold2);margin-bottom:2px}
+.bm-intro-body p{margin:0;font-size:13.5px;line-height:1.55;color:var(--ink)}
+.bm-intro-actions{display:flex;gap:6px}
+.bm-intro-actions button,.bm-intro-btn{border:1px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:9px;padding:7px 12px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;min-height:34px}
+.bm-intro-next{background:var(--gold)!important;color:#2a1a0c!important;border-color:transparent!important}
+.bm-intro-btn{border-color:color-mix(in srgb,var(--gold) 55%,var(--line));color:var(--gold2)}
+:is(.bm-intro-actions button,.bm-intro-btn):focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.bm-intro-timer{position:absolute;left:0;bottom:0;height:2px;width:100%;background:var(--gold);transform-origin:0 50%;animation:bm-intro-timer linear forwards}
+@keyframes bm-intro-timer{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@media(max-width:680px){.bm-intro-card{grid-template-columns:1fr}.bm-intro-steps{flex-direction:row}.bm-intro-actions button,.bm-intro-btn{min-height:44px;flex:1}}
+.bm-viewbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin:0 0 8px}
+.bm-viewseg,.bm-viewturn{display:inline-flex;gap:3px;padding:3px;border:1px solid var(--line);background:var(--panel2);border-radius:10px}
+.bm-viewbtn,.bm-viewturn button{border:0;background:transparent;color:var(--muted);border-radius:7px;padding:6px 12px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;min-height:32px}
+.bm-viewbtn.active{background:var(--gold);color:#2a1a0c}
+.bm-viewturn button:hover,.bm-viewbtn:not(.active):hover{color:var(--ink)}
+.bm-viewbtn:focus-visible,.bm-viewturn button:focus-visible{outline:2px solid var(--gold);outline-offset:1px}
+.bm-viewhint{font-size:12px;color:var(--muted);flex:1 1 220px}
+@media(max-width:680px){.bm-3d{touch-action:auto}.bm-viewbtn,.bm-viewturn button{min-height:44px}}
+@media(prefers-reduced-motion:reduce){:is(.bm-stage,.bm-plane,.bm-tok,.bm-stem,.bm-plane>.bm-layer){transition:none!important}}
+@media print{.bm-3d :is(.bm-stage,.bm-plane,.bm-tok){transform:none!important}.bm-stem,.bm-foot,.bm-plabel,.bm-viewbar{display:none!important}}
 .bm-house-picker{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px 0}
 .bm-house-picker label{font-size:13px;font-weight:700;color:var(--ink)}
 .bm-house-picker select{flex:1;min-width:0;min-height:44px;max-width:100%;font-size:16px}
@@ -4035,6 +4119,7 @@ const BM_LABEL_MIN_PX=12, BM_LABEL_BASE_UNITS=11, BM_LABEL_MAX_GROWTH=1.2;
 let BM_LABEL_RO=null;
 function bmFitLabels(svg,width){
   if(!svg||!width) return;
+  svg.style.setProperty('--bm-w',width.toFixed(1)+'px'); // 3D depths are fractions of the wheel width
   const scale=width/700;
   const grow=Math.min(BM_LABEL_MAX_GROWTH,Math.max(1,BM_LABEL_MIN_PX/(BM_LABEL_BASE_UNITS*scale)));
   svg.style.setProperty('--bm-lbl',grow.toFixed(3));
@@ -4070,12 +4155,202 @@ function bmToggleFocus(force){
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'&&document.getElementById('bhavaMandala')?.classList.contains('bm-focus')) bmToggleFocus(false);
 });
+
+/* ---- Mandala depth: Flat · 3D · Layers ----
+   No WebGL (the app is offline/single-file): the wheel is split into stacked planes
+   (zodiac floor → connection lines → houses & planets → today's transits) inside a CSS
+   3D stage. House and planet labels are separate upright "tokens" that counter-rotate
+   so they always face the reader; each planet stands on a stem whose height is its
+   dignity (exalted tallest, debilitated shortest). Flat mode keeps every plane at z=0,
+   which renders exactly like the original single SVG. */
+const BM_VIEWS={
+  flat:{label:'Flat',hint:'The classic chart, seen from directly above.'},
+  tilt:{label:'3D',hint:'Drag the chart (or use Turn) to rotate it. Taller stem = stronger planet.'},
+  layers:{label:'Layers',hint:'Bottom to top: zodiac signs · connections · houses &amp; your planets · today’s sky.'}
+};
+const BM_VIEW_DEFAULT={mode:'tilt',rx:50,rz:0};
+let BM_VIEW={...BM_VIEW_DEFAULT};
+try{const saved=JSON.parse(localStorage.getItem('ja.bmView')||'null');if(saved&&BM_VIEWS[saved.mode]) BM_VIEW={...BM_VIEW,...saved};}catch(e){}
+function bmSaveView(){try{localStorage.setItem('ja.bmView',JSON.stringify(BM_VIEW));}catch(e){}}
+// Dignity score (−2 debilitated … +2 exalted) → stem level 0…5.
+function bmLiftLevel(score){return ({'2':5,'1.5':4,'1':3,'0':2,'-1':1,'-2':0})[String(score)]??2;}
+function bmViewClass(){return `bm-v-${BM_VIEW.mode}${BM_VIEW.mode==='flat'?'':' bm-3d'}`;}
+function bmViewStyle(){return `--bm-rx:${BM_VIEW.rx.toFixed(1)}deg;--bm-rz:${BM_VIEW.rz.toFixed(1)}deg`;}
+function bmViewBar(){
+  const m=BM_VIEW.mode;
+  return `<div class="bm-viewbar" role="group" aria-label="Chart view">`+
+    `<div class="bm-viewseg">${Object.entries(BM_VIEWS).map(([id,v])=>`<button type="button" class="bm-viewbtn${id===m?' active':''}" aria-pressed="${id===m}" onclick="bmSetView('${id}')">${v.label}</button>`).join('')}</div>`+
+    (m==='flat'?'':`<div class="bm-viewturn"><button type="button" onclick="bmNudgeView(-30,0)" aria-label="Turn the chart left" title="Turn left">↺ Turn</button><button type="button" onclick="bmNudgeView(30,0)" aria-label="Turn the chart right" title="Turn right">Turn ↻</button><button type="button" onclick="bmResetView()" title="Reset the angle">Reset</button></div>`)+
+    (BM_CTX&&BM_CTX.N===1?`<button type="button" class="bm-intro-btn" onclick="bmPlayIntro()">▶ How this chart is made</button>`:'')+
+    `<span class="bm-viewhint">${BM_VIEWS[m].hint}</span></div>`;
+}
+
+/* ---- "How this chart is made": sky → signs → houses → strength ----
+   The same picture as the home-screen orrery (planets at their real sky positions),
+   unfolding into the chart. Driven by data-intro on .bm-svg; the CSS does the motion. */
+const BM_INTRO_STEPS=[
+  {id:'sky',title:'The sky at your birth',text:'Each planet is shown at its exact place along the zodiac, the band of sky that the Sun, Moon and planets travel through.'},
+  {id:'signs',title:'Twelve signs',text:'The zodiac is divided into 12 equal signs of 30°. Every planet falls inside one sign.'},
+  {id:'houses',title:'Twelve houses',text:'The sign rising in the east when you were born becomes House 1: you. Counting on from it, every sign becomes a house, an area of life such as money, home or career. The planets settle into their houses.'},
+  {id:'strength',title:'How strong each planet is',text3d:'Each planet now stands on a stem. The taller it stands, the stronger its placement: exalted planets stand tallest, debilitated ones lowest.',
+    textFlat:'Marks beside a name show strength: ⬆ exalted (strongest), ● own sign, ⬇ debilitated (weakest). Switch to 3D to see strength as height.'}
+];
+const BM_INTRO_STEP_MS=5200;
+let BM_INTRO=null, BM_INTRO_PENDING=false;
+function bmIntroReduce(){return !!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches);}
+function bmIntroCard(i){
+  const s=BM_INTRO_STEPS[i], last=i===BM_INTRO_STEPS.length-1;
+  const text=s.id==='strength'?(BM_VIEW.mode==='flat'?s.textFlat:s.text3d):s.text;
+  return `<div class="bm-intro-card" role="region" aria-label="How this chart is made">`+
+    `<div class="bm-intro-steps" aria-hidden="true">${BM_INTRO_STEPS.map((_,j)=>`<i class="${j<i?'done':j===i?'on':''}"></i>`).join('')}</div>`+
+    `<div class="bm-intro-body" aria-live="polite"><b>${i+1} of ${BM_INTRO_STEPS.length} · ${s.title}</b><p>${text}</p></div>`+
+    `<div class="bm-intro-actions"><button type="button" class="bm-intro-skip" onclick="bmStopIntro()">${last?'Close':'Skip'}</button>`+
+    `<button type="button" class="bm-intro-next" onclick="bmIntroStep(${i+1})">${last?'Explore my chart':'Next'}</button></div>`+
+    (bmIntroReduce()?'':`<span class="bm-intro-timer" style="animation-duration:${BM_INTRO_STEP_MS}ms"></span>`)+`</div>`;
+}
+function bmPlayIntro(){
+  const ct=document.getElementById('bhavaMandala'), w=ct&&ct.querySelector('.bm-svg');
+  if(!w||!BM_CTX||BM_CTX.N!==1) return;
+  bmStopIntro(true);
+  try{localStorage.setItem('ja.bmIntroSeen','1');}catch(e){}
+  // Jump (no transition) to the sky picture, then let each later step animate.
+  w.classList.add('bm-intro-jump'); w.dataset.intro='sky'; void w.offsetWidth; w.classList.remove('bm-intro-jump');
+  BM_INTRO={i:0,timer:0};
+  (ct.querySelector('.bm-container')||w).insertAdjacentHTML('beforebegin','<div class="bm-intro" id="bmIntro"></div>');
+  w.scrollIntoView({block:'nearest',behavior:bmIntroReduce()?'auto':'smooth'});
+  bmIntroStep(0);
+}
+function bmIntroStep(i){
+  const ct=document.getElementById('bhavaMandala'), w=ct&&ct.querySelector('.bm-svg'), box=ct&&ct.querySelector('#bmIntro');
+  if(!BM_INTRO||!w||!box) return;
+  clearTimeout(BM_INTRO.timer);
+  if(i>=BM_INTRO_STEPS.length){bmStopIntro();return;}
+  BM_INTRO.i=i; w.dataset.intro=BM_INTRO_STEPS[i].id; box.innerHTML=bmIntroCard(i);
+  if(i>0) box.querySelector('.bm-intro-next')?.focus({preventScroll:true});
+  // Auto-advance (except on the last step); reduced motion waits for "Next".
+  if(!bmIntroReduce()&&i<BM_INTRO_STEPS.length-1) BM_INTRO.timer=setTimeout(()=>bmIntroStep(i+1),BM_INTRO_STEP_MS);
+}
+function bmStopIntro(silent){
+  if(BM_INTRO) clearTimeout(BM_INTRO.timer);
+  BM_INTRO=null;
+  const ct=document.getElementById('bhavaMandala'); if(!ct) return;
+  const w=ct.querySelector('.bm-svg'); if(w) delete w.dataset.intro;
+  ct.querySelector('#bmIntro')?.remove();
+  if(!silent) ct.querySelector('.bm-intro-btn')?.focus({preventScroll:true});
+}
+// Play once automatically the first time a birth chart's wheel comes into view on this device.
+let BM_INTRO_IO=null;
+function bmMaybeAutoIntro(ct){
+  let seen=false; try{seen=localStorage.getItem('ja.bmIntroSeen')==='1';}catch(e){seen=true;}
+  const w=ct&&ct.querySelector('.bm-svg');
+  if(BM_INTRO_IO){BM_INTRO_IO.disconnect();BM_INTRO_IO=null;}
+  if(!w||!BM_CTX||BM_CTX.N!==1||BM_INTRO_PENDING||seen||bmIntroReduce()||!('IntersectionObserver' in window)) return;
+  BM_INTRO_IO=new IntersectionObserver(es=>{
+    if(!es[0].isIntersecting) return;
+    BM_INTRO_IO.disconnect(); BM_INTRO_IO=null;
+    setTimeout(bmPlayIntro,350);
+  },{threshold:.45});
+  BM_INTRO_IO.observe(w);
+}
+// Called from the home-screen orrery's "See how this sky becomes your chart" link: once the
+// My Charts route has rendered, bring the wheel into view and play the intro.
+function bmQueueIntro(){
+  BM_INTRO_PENDING=true;
+  if(BM_INTRO_IO){BM_INTRO_IO.disconnect();BM_INTRO_IO=null;}
+  let tries=0;
+  const go=()=>{
+    const ct=document.getElementById('bhavaMandala'), w=ct&&ct.querySelector('.bm-svg');
+    if(location.hash==='#charts'&&w&&w.offsetParent&&BM_CTX&&BM_CTX.N===1){
+      BM_INTRO_PENDING=false; w.scrollIntoView({block:'center'}); setTimeout(bmPlayIntro,250); return;
+    }
+    if(++tries<30) setTimeout(go,150); else BM_INTRO_PENDING=false;
+  };
+  setTimeout(go,300);
+}
+function bmApplyAngles(w){
+  if(!w) return;
+  w.style.setProperty('--bm-rx',BM_VIEW.rx.toFixed(1)+'deg');
+  w.style.setProperty('--bm-rz',BM_VIEW.rz.toFixed(1)+'deg');
+}
+function bmSetView(mode){
+  if(!BM_VIEWS[mode]) return;
+  BM_VIEW.mode=mode; bmSaveView();
+  const ct=document.getElementById('bhavaMandala'); if(!ct) return;
+  const w=ct.querySelector('.bm-svg');
+  if(w){w.className='bm-svg '+bmViewClass();bmApplyAngles(w);}
+  const bar=ct.querySelector('.bm-viewbar');
+  if(bar){bar.outerHTML=bmViewBar();ct.querySelector(`.bm-viewbtn[aria-pressed="true"]`)?.focus({preventScroll:true});}
+}
+function bmNudgeView(dz,dx){
+  BM_VIEW.rz=((BM_VIEW.rz+dz+540)%360)-180;
+  BM_VIEW.rx=Math.max(15,Math.min(72,BM_VIEW.rx+dx));
+  bmApplyAngles(document.querySelector('#bhavaMandala .bm-svg')); bmSaveView();
+}
+function bmResetView(){
+  BM_VIEW.rx=BM_VIEW_DEFAULT.rx; BM_VIEW.rz=BM_VIEW_DEFAULT.rz;
+  bmApplyAngles(document.querySelector('#bhavaMandala .bm-svg')); bmSaveView();
+}
+function bmAssembleLayers(raw,hTok,pTok,tTok,SZ){
+  const body=raw.replace(/^<svg[^>]*>/,'').replace(/<\/svg>$/,'');
+  const parts={floor:'',aspects:'',marks:'',transit:''};
+  const re=/<!--bm:(aspects|marks|transit)-->/g; let cur='floor',last=0,m;
+  while((m=re.exec(body))){parts[cur]+=body.slice(last,m.index);cur=m[1];last=re.lastIndex;}
+  parts[cur]+=body.slice(last);
+  const NS='xmlns="http://www.w3.org/2000/svg"';
+  const pct=v=>(v/SZ*100).toFixed(3)+'%';
+  const layer=inner=>`<svg ${NS} viewBox="0 0 ${SZ} ${SZ}" class="bm-layer">${inner}</svg>`;
+  const tok=(t,cls,extra)=>{
+    const p=t.pad||2,x0=t.x-t.w/2-p,y0=t.y-t.h/2-p,w=t.w+2*p,h=t.h+2*p;
+    return `<svg ${NS} class="bm-tok ${cls}" viewBox="${x0} ${y0} ${w} ${h}" style="left:${pct(x0)};top:${pct(y0)};width:${pct(w)};height:${pct(h)};${extra||''}">${t.html}</svg>`;
+  };
+  const plabel=txt=>`<span class="bm-plabel" aria-hidden="true">${txt}</span>`;
+  const stems=pTok.map(t=>{const at=`left:${pct(t.x)};top:${pct(t.y)};--lv:${bmLiftLevel(t.score)};--c:${t.col}`;
+    return `<i class="bm-foot" style="${at}" aria-hidden="true"></i><i class="bm-stem" style="${at}" aria-hidden="true"></i>`;}).join('');
+  return `<div class="bm-svg ${bmViewClass()}" style="${bmViewStyle()}"><div class="bm-stage">`+
+    `<div class="bm-plane bm-p-floor" style="--pz:0">${layer(parts.floor)}${plabel('Zodiac signs')}</div>`+
+    `<div class="bm-plane bm-p-links" style="--pz:1">${layer(parts.aspects)}${plabel('Connections')}</div>`+
+    `<div class="bm-plane bm-p-houses" style="--pz:2">${layer(parts.marks)}${hTok.map((t,i)=>tok(t,'bm-tok-house',`--i:${i}`)).join('')}${stems}`+
+      `${pTok.map(t=>tok(t,'bm-tok-planet',`--lv:${bmLiftLevel(t.score)};--dx:${(t.dx||0).toFixed(4)};--dy:${(t.dy||0).toFixed(4)}`)).join('')}${plabel('Houses &amp; your planets')}</div>`+
+    (parts.transit.trim()||tTok.length?`<div class="bm-plane bm-p-sky" style="--pz:3">${layer(parts.transit)}${tTok.map(t=>tok(t,'bm-tok-transit')).join('')}${plabel('Today’s sky')}</div>`:'')+
+    `</div></div>`;
+}
+// Drag the empty part of the 3D wheel to turn (sideways) and tilt (up/down) it.
+document.addEventListener('pointerdown',e=>{
+  const w=e.target.closest?.('#bhavaMandala .bm-svg.bm-3d');
+  if(!w||e.button!==0||e.target.closest('.bm-pill,.bm-hmark,.bm-tr,button,a')) return;
+  const sx=e.clientX,sy=e.clientY,rx0=BM_VIEW.rx,rz0=BM_VIEW.rz; let moved=false;
+  const move=ev=>{
+    const dx=ev.clientX-sx,dy=ev.clientY-sy;
+    if(!moved&&Math.hypot(dx,dy)<4) return;
+    if(!moved){moved=true;w.classList.add('bm-dragging');try{w.setPointerCapture(e.pointerId);}catch(_){}}
+    BM_VIEW.rz=((rz0+dx*0.45+540)%360)-180;
+    BM_VIEW.rx=Math.max(15,Math.min(72,rx0-dy*0.3));
+    bmApplyAngles(w);
+  };
+  const end=()=>{
+    w.classList.remove('bm-dragging');
+    w.removeEventListener('pointermove',move);w.removeEventListener('pointerup',end);w.removeEventListener('pointercancel',end);
+    if(moved) bmSaveView();
+  };
+  w.addEventListener('pointermove',move);w.addEventListener('pointerup',end);w.addEventListener('pointercancel',end);
+});
+document.addEventListener('dblclick',e=>{
+  if(e.target.closest?.('#bhavaMandala .bm-svg.bm-3d')&&!e.target.closest('.bm-pill,.bm-hmark,.bm-tr')) bmResetView();
+});
+// Keyboard: with the wheel region focused, arrows turn/tilt the 3D wheel.
+document.addEventListener('keydown',e=>{
+  if(!e.target.matches?.('#bhavaMandala .bm-container')||BM_VIEW.mode==='flat') return;
+  const map={ArrowLeft:[-15,0],ArrowRight:[15,0],ArrowUp:[0,5],ArrowDown:[0,-5]}[e.key];
+  if(!map) return;
+  e.preventDefault(); bmNudgeView(map[0],map[1]);
+});
 window.addEventListener('hashchange',()=>{
   if(document.getElementById('bhavaMandala')?.classList.contains('bm-focus')) bmToggleFocus(false);
 });
 
 function renderBhavaMandala(c,La,N,motion){
   N=N||1;
+  if(BM_INTRO){clearTimeout(BM_INTRO.timer);BM_INTRO=null;} // the re-render replaces the intro card
   if(BM_SIMPLE && N!==10) N=1;
   const ct=document.getElementById('bhavaMandala');
   if(!ct)return;
@@ -4277,7 +4552,7 @@ function renderBhavaMandala(c,La,N,motion){
     lordG+=`<line class="bm-lord-line" data-h="${h}" data-lk="${lord}" data-msg="${msg}" x1="${hp.x}" y1="${hp.y}" x2="${lpos.x}" y2="${lpos.y}" stroke="${simple&&h===selectedH?'#e7c14e':v.col}" stroke-width="${simple&&h===selectedH?2.4:1.1}" stroke-dasharray="${simple&&h===selectedH?'5,4':'2,4'}" opacity="${lineOpacity}"/>`;
   }
   lordG+=`</g>`;
-  sv+=rashiG+grahaG+lordG;
+  sv+='<!--bm:aspects-->'+rashiG+grahaG+lordG+'<!--bm:marks-->';
 
   // ---- House markers: house number + its ruling lord's glyph ----
   const HT=h=>[1,4,7,10].includes(h)?'ken':[5,9].includes(h)?'trik':[6,8,12].includes(h)?'dust':'';
@@ -4285,18 +4560,38 @@ function renderBhavaMandala(c,La,N,motion){
   const wheelShort=N===10?D10_HOUSE_SHORT:BM_HOUSE_SHORT;
   const transitHouses=simple&&N===1?bmTransitSnapshot(BM_CTX.c,BM_CTX.baseLa)?.houses:null;
   const HCOL={ken:'#9db4ff',trik:'#7fe0a0',dust:'#f0a890','':'rgba(178,198,242,0.82)'};
+  // House markers and planet pills become "tokens": small upright SVGs that stay readable
+  // when the wheel is tilted in 3D (see bmAssembleLayers).
+  const hTok=[], pTok=[], tTok=[];
   for(let h=1;h<=12;h++){
     const si=(La+h-1)%12,a=sa(si)+15,p=pol(RHNUM,a),ht=HT(h),isH1=h===1,isSelected=h===selectedH;
     const lord=SIGN_LORD[si],lv=PV[lord],lp=c.planets[lord],lordH=lp?houseFromSigns(La,lp.sign):null;
     const tip=`House ${h} · ${SN[si]} · lord ${GBYK[lord].name}${lordH?(lordH===h?' in own house':` in H${lordH}`):''}${isH1?' · Lagna':ht==='ken'?' · Kendra':ht==='trik'?' · Trikona':ht==='dust'?' · Dusthana':''}`;
     const mw=HM_W,mh=HM_H;
     const transit=transitHouses?.[h-1];
-    if(transit)sv+=`<circle cx="${p.x+mw/2}" cy="${p.y-mh/2}" r="5" fill="${transit.tone==='supportive'?'#6fbf86':transit.tone==='demanding'?'#e2705a':'#e9bf6a'}"><title>${transit.label} on ${bmDateLabel()}</title></circle>`;
-    sv+=`<g class="bm-hmark${isSelected?' on':''}" data-h="${h}" data-si="${si}" role="button" tabindex="0" aria-label="House ${h}, ${wheelNames[h-1]}" onclick="bmSelectHouse(${h})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmSelectHouse(${h})}">`+
+    let hsv='';
+    if(transit)hsv+=`<circle cx="${p.x+mw/2}" cy="${p.y-mh/2}" r="5" fill="${transit.tone==='supportive'?'#6fbf86':transit.tone==='demanding'?'#e2705a':'#e9bf6a'}"><title>${transit.label} on ${bmDateLabel()}</title></circle>`;
+    hsv+=`<g class="bm-hmark${isSelected?' on':''}" data-h="${h}" data-si="${si}" role="button" tabindex="0" aria-label="House ${h}, ${wheelNames[h-1]}" onclick="bmSelectHouse(${h})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmSelectHouse(${h})}">`+
       `<rect x="${p.x-mw/2}" y="${p.y-mh/2}" width="${mw}" height="${mh}" rx="9" fill="${isSelected?'rgba(231,193,78,0.18)':'rgba(8,12,28,0.84)'}" stroke="${isSelected?'#e7c14e':isH1?'rgba(231,193,78,.7)':'rgba(95,120,205,0.42)'}" stroke-width="${isSelected?2.5:isH1?1.5:1}"><title>${tip} — select ${wheelNames[h-1]}</title></rect>`+
       `<text x="${p.x}" y="${p.y-6}" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="${isSelected?'#f5d894':isH1?'#e7c14e':HCOL[ht]}" style="pointer-events:none">${h}</text>`+
       `<text x="${p.x}" y="${p.y+9}" text-anchor="middle" dominant-baseline="central" font-size="${simple?'9.6':'11.5'}" fill="${simple?'rgba(225,232,248,.9)':lv.col}" style="pointer-events:none">${simple?wheelShort[h-1]:lv.gl}</text>`+
       `</g>`;
+    hTok.push({x:p.x,y:p.y,w:mw,h:mh,pad:7,html:hsv});
+  }
+
+  // ---- Sky positions for the intro: exact longitude on the zodiac ring. Planets within a
+  //      few degrees of each other (conjunctions) step inward so none is hidden.
+  const skyPos={};
+  if(N===1&&!isRTN){
+    const lon=PO.filter(k=>c.planets[k]&&Number.isFinite(c.planets[k].deg)).map(k=>({k,l:c.planets[k].sign*30+c.planets[k].deg})).sort((a,b)=>a.l-b.l);
+    let lane=0, r=0;
+    lon.forEach((p,i)=>{
+      const a=sa(c.planets[p.k].sign)+c.planets[p.k].deg, ux=Math.abs(Math.cos((a-90)*Math.PI/180));
+      lane=i>0&&p.l-lon[i-1].l<11?lane+1:0;
+      // Step inward by one label's extent along the spoke: short at 12/6 o'clock, wide at 3/9.
+      r=lane===0?(ROo+ROi)/2:r-(30+52*ux);
+      skyPos[p.k]=pol(Math.max(RC+30,r),a);
+    });
   }
 
   // ---- Planets: named pills within their sign sector (name, not glyph) ----
@@ -4313,18 +4608,25 @@ function renderBhavaMandala(c,La,N,motion){
       const tip=`${GBYK[k].name} · ${isRTN?'RTN':`D-${N}`} ${SN[si]} · natal D-1 ${SIGNS[natal.sign]} ${natalDeg.toFixed(2)}°${p.retro?' (retrograde)':''} · ${dig.full}`;
       const degTsp=degStr&&!planetCompact[k]?`<tspan font-size="9.5" dx="2.5" fill="rgba(206,220,252,0.9)">${degStr}</tspan>`:'';
       const digTsp=digGlyph?`<tspan font-size="9.5" dx="2.5" fill="${digCol}">${digGlyph}</tspan>`:'';
-      sv+=`<g class="bm-pill" data-pk="${k}" role="button" tabindex="0" aria-label="${GBYK[k].name} in House ${houseFromSigns(La,si)}, natal D-1 ${natalDeg.toFixed(1)} degrees" style="cursor:pointer" onclick="${simple?`bmShowSimplePlanet('${k}')`:`bmFocusPlanet('${k}')`}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${simple?`bmShowSimplePlanet('${k}')`:`bmFocusPlanet('${k}')`}}">`+
+      const psv=`<g class="bm-pill" data-pk="${k}" role="button" tabindex="0" aria-label="${GBYK[k].name} in House ${houseFromSigns(La,si)}, natal D-1 ${natalDeg.toFixed(1)} degrees" style="cursor:pointer" onclick="${simple?`bmShowSimplePlanet('${k}')`:`bmFocusPlanet('${k}')`}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${simple?`bmShowSimplePlanet('${k}')`:`bmFocusPlanet('${k}')`}}">`+
         `<rect x="${pos.x-w/2}" y="${pos.y-hh/2}" width="${w}" height="${hh}" rx="11" fill="rgba(9,12,26,0.97)" stroke="${digCol||v.col}" stroke-width="${digCol?2.2:1.6}"${dig.score<=-2?' stroke-dasharray="3,2"':''}><title>${tip} — ${simple?'select for a plain-language reading':'click to see what it aspects'}</title></rect>`+
         `<text x="${pos.x}" y="${pos.y}" text-anchor="middle" dominant-baseline="central" style="pointer-events:none"><tspan font-size="11" font-weight="700" fill="${v.col}">${nm}</tspan>${degTsp}${digTsp}</text>`+
         `</g>`;
+      // Where this planet actually is in the sky: its exact degree on the zodiac ring. The
+      // "How this chart is made" intro starts every planet there before it settles into its house.
+      let dx=0,dy=0;
+      if(skyPos[k]){dx=(skyPos[k].x-pos.x)/SZ;dy=(skyPos[k].y-pos.y)/SZ;}
+      pTok.push({k,x:pos.x,y:pos.y,w,h:hh,pad:4,score:dig.score,col:digCol||v.col,strength:dig.full,dx,dy,html:psv});
     });
   });
 
   // ---- Centre: ascendant (or Moon, when the Chandra Kundali reference is active) ----
   const refIsMoon=(ref==='mo'&&canMoonRef);
   sv+=`<circle cx="${CX}" cy="${CY}" r="${RC}" fill="rgba(8,11,24,0.96)" stroke="${refIsMoon?'rgba(200,216,255,0.6)':'rgba(231,193,78,0.55)'}" stroke-width="1.4"/>`;
-  sv+=`<text x="${CX}" y="${CY-10}" text-anchor="middle" dominant-baseline="central" font-size="10" letter-spacing="1.5" fill="rgba(175,198,255,0.8)">${simple?'HOUSE '+selectedH:isRTN?'RTN':refIsMoon?'MOON':'ASC'}</text>`;
-  sv+=`<text x="${CX}" y="${CY+9}" text-anchor="middle" dominant-baseline="central" font-size="${simple?'12':'17'}" font-weight="bold" fill="${refIsMoon?'#c8d8ff':'#e7c14e'}">${simple?(N===10?wheelShort[selectedH-1]:wheelNames[selectedH-1].toUpperCase()):(typeof SIGN3!=='undefined'?SIGN3[La]:La)}</text>`;
+  // Centre caption is an upright token so it stays readable when the wheel turns in 3D.
+  hTok.push({x:CX,y:CY,w:RC*2-8,h:44,pad:2,html:`<g style="pointer-events:none">`+
+  `<text x="${CX}" y="${CY-10}" text-anchor="middle" dominant-baseline="central" font-size="10" letter-spacing="1.5" fill="rgba(175,198,255,0.8)">${simple?'HOUSE '+selectedH:isRTN?'RTN':refIsMoon?'MOON':'ASC'}</text>`+
+  `<text x="${CX}" y="${CY+9}" text-anchor="middle" dominant-baseline="central" font-size="${simple?'12':'17'}" font-weight="bold" fill="${refIsMoon?'#c8d8ff':'#e7c14e'}">${simple?(N===10?wheelShort[selectedH-1]:wheelNames[selectedH-1].toUpperCase()):(typeof SIGN3!=='undefined'?SIGN3[La]:La)}</text></g>`});
   // ---- When reading the Moon chart, keep the birth Ascendant visible as a small "Lg" tag ----
   if(refIsMoon&&natLaSign!==La){
     const lgp=pol(ROi+11,sa(natLaSign)+15);
@@ -4376,20 +4678,23 @@ function renderBhavaMandala(c,La,N,motion){
           const v=PV[k], nm=SHORT[k]||k, bav=transitSnapshot?.bav?.[k]?.[si], sav=transitSnapshot?.sav?.[si], savLabel=sav==null?'unavailable':String(sav), hh=23, w=52;
           const bavText=bav==null?(['Ra','Ke'].includes(k)?'no individual BAV':'BAV unavailable'):`${bav} of 8 BAV bindus`;
           const tip=`Transiting ${GBYK[k].name} · ${SN[si]} · ${bavText} · natal sign SAV ${savLabel} · H${hFromMoon} from natal Moon (${statusLbl})${satSpecial?(satSpecial==='sade-sati'?' · SADE SATI':' · Dhaiya/Kantaka'):''} · H${hFromRef} on this wheel — select for details`;
-          trG+=`<g class="bm-tr" data-trk="${k}" role="button" tabindex="0" aria-label="${tip}" onclick="bmTransitInfo('${k}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmTransitInfo('${k}')}" >`+
-            `<line x1="${spoke.x}" y1="${spoke.y}" x2="${pos.x}" y2="${pos.y}" stroke="${statusCol}" stroke-width="1.2" stroke-dasharray="2,3" opacity="0.65"/>`+
+          // The leader line stays on the transit plane; the chip is an upright token.
+          trG+=`<line x1="${spoke.x}" y1="${spoke.y}" x2="${pos.x}" y2="${pos.y}" stroke="${statusCol}" stroke-width="1.2" stroke-dasharray="2,3" opacity="0.65" style="pointer-events:none"/>`;
+          tTok.push({x:pos.x,y:pos.y,w,h:hh,pad:11,html:`<g class="bm-tr" data-trk="${k}" role="button" tabindex="0" aria-label="${tip}" onclick="bmTransitInfo('${k}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmTransitInfo('${k}')}" >`+
             `<g class="bm-trl"><rect x="${pos.x-w/2}" y="${pos.y-hh/2}" width="${w}" height="${hh}" rx="8" fill="rgba(9,12,26,0.92)" stroke="${statusCol}" stroke-width="2" stroke-dasharray="3,2"><title>${tip}</title></rect>`+
             `<text x="${pos.x}" y="${pos.y-4}" text-anchor="middle" dominant-baseline="central" font-size="9.5" font-weight="700" fill="${v.col}" style="pointer-events:none">${nm}</text>`+
             (bav==null?`<text x="${pos.x}" y="${pos.y+5}" text-anchor="middle" font-size="6.5" fill="#c8c5bd" style="pointer-events:none">${['Ra','Ke'].includes(k)?'no BAV':'unavailable'}</text>`:Array.from({length:8},(_,n)=>`<circle cx="${pos.x-14+n*4}" cy="${pos.y+5}" r="1.35" fill="${n<bav?'#f5d894':'none'}" stroke="#f5d894" stroke-width=".6"/>`).join(''))+
             (satSpecial?`<circle cx="${pos.x+w/2-3}" cy="${pos.y-hh/2-3}" r="6.5" fill="#220a3a" stroke="#c080f0" stroke-width="1"/><text x="${pos.x+w/2-3}" y="${pos.y-hh/2-3}" text-anchor="middle" dominant-baseline="central" font-size="6.5" font-weight="800" fill="#c080f0" style="pointer-events:none">${satSpecial==='sade-sati'?'SS':'D'}</text>`:'')+
-            `</g></g>`;
+            `</g></g>`});
         });
       });
       trG+=`</g>`;
-      sv+=trG;
+      sv+='<!--bm:transit-->'+trG;
     }
   }
   sv+=`</svg>`;
+  sv=bmAssembleLayers(sv,hTok,pTok,tTok,SZ);
+  const viewBar=bmViewBar();
 
   // Planets — name·degree·rāśi·nakshatra + avasthā (recomputed for this varga), combustion
   // (carried up from D-1, since vargas have no degrees) and functional nature (by the Lagna).
@@ -4464,12 +4769,13 @@ function renderBhavaMandala(c,La,N,motion){
   if(simple){
     const houseNames=N===10?D10_HOUSE_INFO.map(x=>x.title):BM_HOUSE_NAMES;
     const picker=`<div class="bm-house-picker"><label for="bmHouseSelect">Explore a house</label><select id="bmHouseSelect" onchange="bmChooseHouse(this.value)">${houseNames.map((name,i)=>`<option value="${i+1}"${selectedH===i+1?' selected':''}>${i+1} · ${name}</option>`).join('')}</select></div>`;
-    ct.innerHTML=`${modeRow}${transitStrip}${picker}<div class="bm-simple-layout"><div><p class="bm-wheel-scroll-hint">Swipe sideways to explore the wheel</p><div class="bm-container" tabindex="0" role="region" aria-label="Scrollable Bhava Mandala">${sv}</div>${degreeKey}${mobilePlanets}<div class="bm-simple-hint">Choose a house above or on the wheel. Select a planet to understand its role.${N===1?'<br>Transit dots: green · supportive, amber · mixed, coral · demanding.':''}</div></div><aside class="bm-reading" id="bmReading" tabindex="-1" style="scroll-margin-top:150px" aria-live="polite"></aside></div>`;
+    ct.innerHTML=`${modeRow}${transitStrip}${picker}<div class="bm-simple-layout"><div>${viewBar}<p class="bm-wheel-scroll-hint">Swipe sideways to explore the wheel</p><div class="bm-container" tabindex="0" role="region" aria-label="Scrollable Bhava Mandala">${sv}</div>${degreeKey}${mobilePlanets}<div class="bm-simple-hint">Choose a house above or on the wheel. Select a planet to understand its role.${N===1?'<br>Transit dots: green · supportive, amber · mixed, coral · demanding.':''}</div></div><aside class="bm-reading" id="bmReading" tabindex="-1" style="scroll-margin-top:150px" aria-live="polite"></aside></div>`;
     N===10?bmRenderD10HouseReading(selectedH):bmRenderHouseReading(selectedH);
   }else{
-    ct.innerHTML=`${modeRow}${tabs}${refsRow}${lensRow}${transitStrip}<p class="bm-wheel-scroll-hint">Swipe sideways to explore the wheel</p><div class="bm-container" tabindex="0" role="region" aria-label="Scrollable Bhava Mandala">${sv}</div>${degreeKey}${mobilePlanets}${aspLegend}${gocharaLegend}<div class="bm-trace" id="bmTrace">${traceDefault}</div>${caption}<div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${isRTN?'RTN (D-9 sign / D-1 house)':vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div>${d10Html}<div class="bm-planet-panel" id="bmPlanetPanel"></div>`;
+    ct.innerHTML=`${modeRow}${tabs}${refsRow}${lensRow}${transitStrip}${viewBar}<p class="bm-wheel-scroll-hint">Swipe sideways to explore the wheel</p><div class="bm-container" tabindex="0" role="region" aria-label="Scrollable Bhava Mandala">${sv}</div>${degreeKey}${mobilePlanets}${aspLegend}${gocharaLegend}<div class="bm-trace" id="bmTrace">${traceDefault}</div>${caption}<div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${isRTN?'RTN (D-9 sign / D-1 house)':vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div>${d10Html}<div class="bm-planet-panel" id="bmPlanetPanel"></div>`;
   }
   bmWatchLabelScale(ct);
+  bmMaybeAutoIntro(ct);
   if(motion){const ns=ct.querySelector('.bm-svg');if(ns){ns.style.transformOrigin='center';ns.style.transform='rotate(14deg) scale(.9)';ns.style.opacity='0';requestAnimationFrame(()=>{ns.style.transition='transform .46s cubic-bezier(.34,1.12,.4,1),opacity .4s';ns.style.transform='none';ns.style.opacity='1';});}}
 }
 
@@ -5118,6 +5424,12 @@ function initOrrery(){
     const root=host.firstChild, wrap=root.querySelector(".orrery-wrap");
     const nodesEl=root.querySelector(".orrery-nodes"), ticksEl=root.querySelector(".orrery-ticks");
     const ascEl=root.querySelector(".orrery-asc"), canvas=root.querySelector(".orrery-stars"), ctx=canvas.getContext("2d");
+    // Link to the chart: once the orrery shows the user's own sky, offer to watch that sky
+    // become their chart (plays the Bhava Mandala intro on My Charts).
+    // A button, not an <a href="#charts">: app-shell.js swallows hash-link clicks in the capture phase.
+    host.insertAdjacentHTML("beforeend",'<button type="button" class="orrery-cta" hidden>See how this sky becomes your chart →</button>');
+    const ctaEl=host.querySelector(".orrery-cta");
+    ctaEl.addEventListener("click",()=>{if(typeof bmQueueIntro==="function")bmQueueIntro();location.hash="#charts";});
     for(let i=0;i<12;i++){const th=i*30*Math.PI/180,x=CX+(RX+8)*Math.cos(th),y=CY+(RY+4)*Math.sin(th);
       const t=document.createElement("div");t.className="orrery-tick";t.style.left=x+"px";t.style.top=y+"px";ticksEl.appendChild(t);}
     const nodes=KEYS.map((k,i)=>{const el=document.createElement("div");el.className="orrery-node";
@@ -5134,15 +5446,17 @@ function initOrrery(){
     function place(n){const th=n.cur*Math.PI/180,x=CX+RX*Math.cos(th),y=CY+RY*Math.sin(th),d=Math.sin(th),sc=0.74+0.26*((d+1)/2);
       n.el.style.transform="translate("+(x-HALF)+"px,"+(y-HALF)+"px) scale("+sc.toFixed(3)+")";
       n.el.style.opacity=(0.5+0.5*((d+1)/2)).toFixed(3);n.el.style.zIndex=Math.round(100+d*100);}
-    function syncTargets(){const c=(window.JA&&JA.getActiveChart)?JA.getActiveChart():null;
+    // JA is a top-level `const`: global, but never a property of window, so test it directly.
+    const activeChart=()=>(typeof JA!=="undefined"&&JA.getActiveChart)?JA.getActiveChart():null;
+    function syncTargets(){const c=activeChart();
       if(c&&c.planets){for(const n of nodes){const p=c.planets[n.k];if(p)n.target=(p.sign*30+(p.deg||0))%360;}
         if(c.La){const L=(c.La.sign*30+(c.La.deg||0))%360,th=L*Math.PI/180;ascEl.hidden=false;
           ascEl.style.left=(CX+(RX+2)*Math.cos(th))+"px";ascEl.style.top=(CY+(RY+1)*Math.sin(th))+"px";}
-        root.classList.add("has-chart");}
-      else{ascEl.hidden=true;root.classList.remove("has-chart");}
+        root.classList.add("has-chart");ctaEl.hidden=false;}
+      else{ascEl.hidden=true;root.classList.remove("has-chart");ctaEl.hidden=true;}
       lastChart=c;}
     syncTargets();
-    if(window.JA){const prev=JA.onChartsChange;JA.onChartsChange=function(){try{prev&&prev();}finally{syncTargets();if(reduce){for(const n of nodes){n.cur=n.target;place(n);}}}};}
+    if(typeof JA!=="undefined"){const prev=JA.onChartsChange;JA.onChartsChange=function(){try{prev&&prev();}finally{syncTargets();if(reduce){for(const n of nodes){n.cur=n.target;place(n);}}}};}
     let pX=0,pY=0,tX=0,tY=0;
     if(!reduce){root.addEventListener("pointermove",e=>{const r=root.getBoundingClientRect();tX=((e.clientX-r.left)/r.width-0.5)*2;tY=((e.clientY-r.top)/r.height-0.5)*2;});
       root.addEventListener("pointerleave",()=>{tX=0;tY=0;});}
@@ -5153,7 +5467,7 @@ function initOrrery(){
       const hasChart=root.classList.contains("has-chart");
       for(const n of nodes){if(!hasChart){n.idle=(n.idle+n.speed*dt)%360;n.target=n.idle;}n.cur+=angdelta(n.cur,n.target)*Math.min(1,dt*3);place(n);}
       drawStars(t/1000,pX,pY);
-      if((++pollC%20)===0){const c=(window.JA&&JA.getActiveChart)?JA.getActiveChart():null;if(c!==lastChart)syncTargets();}}
+      if((++pollC%20)===0){const c=activeChart();if(c!==lastChart)syncTargets();}}
     function loop(t){render(t);if(active)raf=requestAnimationFrame(loop);}
     if(reduce){for(const n of nodes){n.cur=n.target;place(n);}drawStars(0,0,0);}
     else{raf=requestAnimationFrame(loop);
