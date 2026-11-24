@@ -6305,6 +6305,9 @@ explorer("nakshatraTokens","nakshatraDetail",NAK,n=>`${nakGlyph(NAK.indexOf(n),2
 
 /* ===== SYNTHESIZER ===== */
 const JA={};
+// A top-level `const` is global but is NOT a property of window. Several modules test
+// `window.JA` (colorblind palette, the Predictions panel, the orrery), so publish it.
+window.JA=JA;
 (function(){
   const sG=document.getElementById("sGraha"),sR=document.getElementById("sRashi"),sD=document.getElementById("sDeg"),sB=document.getElementById("sBhava");
   GRAHAS.forEach(g=>sG.add(new Option(`${g.gl} ${g.name}`,g.k)));
