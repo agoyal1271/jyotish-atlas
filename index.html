@@ -1846,9 +1846,33 @@ body:has(.modal.show){overflow:hidden}
 .charts-main{width:100%}
 #chartView{overflow-wrap:anywhere}
 .kd-controls select,.op-controls select{min-width:0;max-width:100%}
-.bm-simple-layout{grid-template-columns:repeat(2,minmax(0,1fr))}
+/* Chart-first layout: the wheel takes the larger column; the reading stacks below it
+   when the Mandala panel itself is too narrow for two useful columns. */
+#bhavaMandala{container:bm / inline-size;overflow:clip}
+.bm-simple-layout{grid-template-columns:minmax(0,1fr)}
 .bm-simple-layout>*{min-width:0}
 .bm-reading{position:static;overflow-wrap:anywhere}
+/* Phones keep their wider, sideways-scrolling wheel from mobile.css. */
+@media(min-width:681px){
+  .bm-simple-layout .bm-svg,#bhavaMandala .bm-container>.bm-svg{display:block;width:100%;max-width:min(880px,calc(100dvh - 150px));margin-inline:auto}
+}
+@container bm (min-width:860px){
+  .bm-simple-layout{grid-template-columns:minmax(0,1.6fr) minmax(300px,1fr)}
+  .bm-reading{position:sticky;top:12px;max-height:calc(100dvh - 120px);overflow:auto;overscroll-behavior:contain}
+}
+/* Label chips grow together with their text (see bmFitLabels). `scale` composes with
+   the bm-pop `transform` animation instead of replacing it. */
+.bm-svg :is(.bm-pill,.bm-hmark,.bm-trl){scale:var(--bm-lbl,1);transform-box:fill-box;transform-origin:center}
+/* Full-screen focus mode */
+.bm-focus-btn{border:1px solid var(--line);background:var(--panel2);color:var(--ink);border-radius:10px;padding:7px 12px;font:inherit;font-size:12px;font-weight:700;cursor:pointer;min-height:36px}
+.bm-focus-btn:hover{border-color:var(--gold)}
+.bm-focus-btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#bhavaMandala.bm-focus{position:fixed;inset:0;z-index:2000;margin:0!important;border-radius:0;border:0;overflow:auto;overscroll-behavior:contain;background:var(--panel)}
+#bhavaMandala.bm-focus .bm-modebar{position:sticky;top:0;z-index:3;background:var(--panel);border-bottom:1px solid var(--line);padding-bottom:12px}
+#bhavaMandala.bm-focus .bm-simple-layout .bm-svg,#bhavaMandala.bm-focus .bm-container>.bm-svg{max-width:min(1100px,calc(100dvh - 60px))}
+html.bm-focus-open,html.bm-focus-open body,html.bm-focus-open #main{overflow:hidden}
+/* #main is position:fixed, i.e. its own stacking context: lift it over the rail and bar. */
+html.bm-focus-open #main{z-index:2000}
 .bm-house-picker{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px 0}
 .bm-house-picker label{font-size:13px;font-weight:700;color:var(--ink)}
 .bm-house-picker select{flex:1;min-width:0;min-height:44px;max-width:100%;font-size:16px}
@@ -1871,12 +1895,13 @@ body:has(.modal.show){overflow:hidden}
   .jm-home,.jm-topics-btn,.jm-explore-btn{min-height:44px}
  .bm-quick-varga{width:100%;margin-left:0;order:3}
 }
-@media(max-width:1200px){
+/* The saved-charts list sits in a strip above the chart (not a side column) up to
+   wide desktops, so the Mandala gets the full workspace width. */
+@media(max-width:1680px){
   .charts-layout{flex-direction:column}
   .charts-sidebar{width:100%;position:static}
   .charts-sidebar .chartbar{flex-direction:row;flex-wrap:wrap}
   .charts-sidebar .ctab{width:auto;max-width:100%;overflow-wrap:anywhere}
-  .bm-simple-layout{grid-template-columns:minmax(0,1fr)}
 }
 @media(max-width:600px){
  .gloss::after,.gloss:hover::after,.gloss:focus::after{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));width:auto;max-width:none;transform:none}
@@ -4001,6 +4026,54 @@ function bmShowSimplePlanet(k){
       Nakshatra: ${nak.n}, pada ${nak.pada}${p.retro?' · retrograde':''}.
     </div></details>`;
 }
+/* ---- Mandala readability: label floor + full-screen focus ----
+   The wheel is drawn in a fixed 700-unit viewBox and scaled to fit, so every label
+   shrinks with it. When the wheel renders small, enlarge the label chips (pill + text
+   together, around their own centre) so planet names stay at least BM_LABEL_MIN_PX.
+   Growth is capped because chips sit close together and would start to overlap. */
+const BM_LABEL_MIN_PX=12, BM_LABEL_BASE_UNITS=11, BM_LABEL_MAX_GROWTH=1.2;
+let BM_LABEL_RO=null;
+function bmFitLabels(svg,width){
+  if(!svg||!width) return;
+  const scale=width/700;
+  const grow=Math.min(BM_LABEL_MAX_GROWTH,Math.max(1,BM_LABEL_MIN_PX/(BM_LABEL_BASE_UNITS*scale)));
+  svg.style.setProperty('--bm-lbl',grow.toFixed(3));
+}
+function bmWatchLabelScale(ct){
+  const svg=ct&&ct.querySelector('.bm-svg');
+  if(!svg) return;
+  if(!('ResizeObserver' in window)){ bmFitLabels(svg,svg.getBoundingClientRect().width); return; }
+  if(!BM_LABEL_RO) BM_LABEL_RO=new ResizeObserver(entries=>{for(const e of entries) bmFitLabels(e.target,e.contentRect.width);});
+  BM_LABEL_RO.disconnect();
+  BM_LABEL_RO.observe(svg);
+}
+function bmToggleFocus(force){
+  const ct=document.getElementById('bhavaMandala');
+  if(!ct) return;
+  const on=typeof force==='boolean'?force:!ct.classList.contains('bm-focus');
+  ct.classList.toggle('bm-focus',on);
+  document.documentElement.classList.toggle('bm-focus-open',on);
+  const btn=ct.querySelector('.bm-focus-btn');
+  if(btn){
+    btn.setAttribute('aria-pressed',String(on));
+    btn.title=on?'Exit full screen (Esc)':'Show the chart full screen';
+    btn.textContent=on?'✕ Exit full screen':'⤢ Full screen';
+    btn.focus({preventScroll:true});
+  }
+  if(on){
+    // Open on the wheel itself rather than the controls above it.
+    const wheel=ct.querySelector('.bm-simple-layout,.bm-container');
+    const bar=ct.querySelector('.bm-modebar');
+    ct.scrollTop=wheel?Math.max(0,wheel.offsetTop-(bar?bar.offsetHeight:0)-8):0;
+  }else ct.scrollIntoView({block:'start'});
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&document.getElementById('bhavaMandala')?.classList.contains('bm-focus')) bmToggleFocus(false);
+});
+window.addEventListener('hashchange',()=>{
+  if(document.getElementById('bhavaMandala')?.classList.contains('bm-focus')) bmToggleFocus(false);
+});
+
 function renderBhavaMandala(c,La,N,motion){
   N=N||1;
   if(BM_SIMPLE && N!==10) N=1;
@@ -4105,11 +4178,60 @@ function renderBhavaMandala(c,La,N,motion){
   });
 
   // Pre-compute each planet's pill position (shared by lordship lines, aspect arcs + planet pills)
-  const planetPos={};
+  // Planet pills stack inward along their sign's spoke, below that sign's house marker.
+  // Spacing uses each box's extent *along the spoke*: at 12/6 o'clock that is the box
+  // height, at 3/9 o'clock the full pill width — a fixed step overlapped wide pills there.
+  // Boxes are budgeted at the maximum label growth so bmFitLabels cannot make them collide.
+  // Simple mode is the novice view: spell planets out in full; Advanced keeps the compact forms.
+  const SHORT=simple
+    ?{Su:'Sun',Mo:'Moon',Ma:'Mars',Me:'Mercury',Ju:'Jupiter',Ve:'Venus',Sa:'Saturn',Ra:'Rahu',Ke:'Ketu'}
+    :{Su:'Sun',Mo:'Moon',Ma:'Mars',Me:'Merc',Ju:'Jup',Ve:'Ven',Sa:'Sat',Ra:'Rahu',Ke:'Ketu'};
+  const HM_W=simple?66:30, HM_H=simple?40:34, PILL_H=22, STACK_GAP=4, INNER_R=RC+18;
+  const pillLabelW=(k,si,compact)=>{
+    const natal=BM_CTX.c.planets[k], p=c.planets[k], d=dignityOf(k,si);
+    const deg=compact?'':Number.isFinite(natal?.deg)?`${natal.deg.toFixed(1)}°${p.retro?'ʳ':''}`:(p.retro?'ʳ':'');
+    const glyph=d.score>=2||d.score<=-2||d.score>=1.5?' ●':'';
+    return Math.max(42,(SHORT[k]+(deg?' '+deg:'')+glyph).length*6.3+16);
+  };
+  // planetCompact[k]: the sign is too crowded for degree text, so the pill shows the name
+  // (+ dignity mark) only; the degree stays in its tooltip, aria-label and the reading panel.
+  const planetPos={}, planetW={}, planetCompact={};
   Object.keys(occ).forEach(siKey=>{
-    const si=+siKey, arr=occ[si], a=sa(si)+15;
-    const step=arr.length>3?(RP-64)/(arr.length-1):RSTEP;
-    arr.forEach((k,idx)=>{ planetPos[k]=pol(RP-idx*step,a); });
+    const si=+siKey, arr=occ[si], a=sa(si)+15, rad=(a-90)*Math.PI/180;
+    const cs=Math.cos(rad), sn=Math.sin(rad), ux=Math.abs(cs), uy=Math.abs(sn), g=BM_LABEL_MAX_GROWTH;
+    const along=(w,h)=>(ux*w+uy*h)*g, across=(w,h)=>(uy*w+ux*h)*g;
+    const edge=RHNUM-along(HM_W,HM_H)/2-STACK_GAP, room=edge-INNER_R;
+    const sectorHalf=((edge+INNER_R)/2)*Math.sin(13*Math.PI/180);
+    const stackLen=ks=>ks.reduce((s,k)=>s+along(planetW[k],PILL_H),0)+STACK_GAP*(ks.length-1);
+    // A lone pill may run past the inner edge (the centre disc is smaller than INNER_R).
+    const laneFits=ks=>ks.length<2||stackLen(ks)<=room;
+    const size=compact=>arr.forEach(k=>{planetW[k]=pillLabelW(k,si,compact);planetCompact[k]=compact;});
+    const split=[arr.filter((_,i)=>i%2===0),arr.filter((_,i)=>i%2===1)];
+    const laneOff=()=>Math.max(...arr.map(k=>across(planetW[k],PILL_H)))/2+STACK_GAP/2;
+    // Try, in order: full labels in one lane; full labels in two side-by-side lanes (only
+    // where both lanes stay inside this sign's sector); then the same with compact labels.
+    let lanes=null, off=0;
+    for(const compact of [false,true]){
+      size(compact);
+      if(laneFits(arr)){lanes=[arr];break;}
+      if(arr.length>1&&laneOff()<=sectorHalf&&split.every(laneFits)){lanes=split;off=laneOff();break;}
+    }
+    if(!lanes){ // densest stelliums: compact labels, best available arrangement, squeezed
+      off=laneOff();
+      lanes=arr.length>1&&off<=sectorHalf?split:[arr];
+      if(lanes.length===1) off=0;
+    }
+    lanes.forEach((ks,li)=>{
+      const len=stackLen(ks), squeeze=ks.length>1&&len>room?room/len:1, side=lanes.length>1?(li===0?-off:off):0;
+      let r=edge;
+      ks.forEach(k=>{
+        const ext=along(planetW[k],PILL_H)*squeeze;
+        r-=ext/2;
+        const base=pol(r,a);
+        planetPos[k]={x:base.x-sn*side,y:base.y+cs*side};
+        r-=ext/2+STACK_GAP*squeeze;
+      });
+    });
   });
 
   // arc geometry: quadratic curve bent toward centre + a matching arrowhead at the target
@@ -4167,18 +4289,17 @@ function renderBhavaMandala(c,La,N,motion){
     const si=(La+h-1)%12,a=sa(si)+15,p=pol(RHNUM,a),ht=HT(h),isH1=h===1,isSelected=h===selectedH;
     const lord=SIGN_LORD[si],lv=PV[lord],lp=c.planets[lord],lordH=lp?houseFromSigns(La,lp.sign):null;
     const tip=`House ${h} · ${SN[si]} · lord ${GBYK[lord].name}${lordH?(lordH===h?' in own house':` in H${lordH}`):''}${isH1?' · Lagna':ht==='ken'?' · Kendra':ht==='trik'?' · Trikona':ht==='dust'?' · Dusthana':''}`;
-    const mw=simple?58:30,mh=simple?38:34;
+    const mw=HM_W,mh=HM_H;
     const transit=transitHouses?.[h-1];
     if(transit)sv+=`<circle cx="${p.x+mw/2}" cy="${p.y-mh/2}" r="5" fill="${transit.tone==='supportive'?'#6fbf86':transit.tone==='demanding'?'#e2705a':'#e9bf6a'}"><title>${transit.label} on ${bmDateLabel()}</title></circle>`;
     sv+=`<g class="bm-hmark${isSelected?' on':''}" data-h="${h}" data-si="${si}" role="button" tabindex="0" aria-label="House ${h}, ${wheelNames[h-1]}" onclick="bmSelectHouse(${h})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmSelectHouse(${h})}">`+
       `<rect x="${p.x-mw/2}" y="${p.y-mh/2}" width="${mw}" height="${mh}" rx="9" fill="${isSelected?'rgba(231,193,78,0.18)':'rgba(8,12,28,0.84)'}" stroke="${isSelected?'#e7c14e':isH1?'rgba(231,193,78,.7)':'rgba(95,120,205,0.42)'}" stroke-width="${isSelected?2.5:isH1?1.5:1}"><title>${tip} — select ${wheelNames[h-1]}</title></rect>`+
       `<text x="${p.x}" y="${p.y-6}" text-anchor="middle" dominant-baseline="central" font-size="14" font-weight="700" fill="${isSelected?'#f5d894':isH1?'#e7c14e':HCOL[ht]}" style="pointer-events:none">${h}</text>`+
-      `<text x="${p.x}" y="${p.y+9}" text-anchor="middle" dominant-baseline="central" font-size="${simple?'8.2':'11.5'}" fill="${simple?'rgba(225,232,248,.9)':lv.col}" style="pointer-events:none">${simple?wheelShort[h-1]:lv.gl}</text>`+
+      `<text x="${p.x}" y="${p.y+9}" text-anchor="middle" dominant-baseline="central" font-size="${simple?'9.6':'11.5'}" fill="${simple?'rgba(225,232,248,.9)':lv.col}" style="pointer-events:none">${simple?wheelShort[h-1]:lv.gl}</text>`+
       `</g>`;
   }
 
   // ---- Planets: named pills within their sign sector (name, not glyph) ----
-  const SHORT={Su:'Sun',Mo:'Moon',Ma:'Mars',Me:'Merc',Ju:'Jup',Ve:'Ven',Sa:'Sat',Ra:'Rahu',Ke:'Ketu'};
   Object.keys(occ).forEach(siKey=>{
     const si=+siKey, arr=occ[si];
     arr.forEach(k=>{
@@ -4188,9 +4309,9 @@ function renderBhavaMandala(c,La,N,motion){
       const digCol=dig.score>=2?'#6fbf86':dig.score<=-2?'#e2705a':dig.score>=1.5?'#e9bf6a':null;
       const natal=BM_CTX.c.planets[k], natalDeg=natal?.deg;
       const degStr=Number.isFinite(natalDeg)?`${natalDeg.toFixed(1)}°${p.retro?'ʳ':''}`:(p.retro?'ʳ':'');
-      const label=nm+(degStr?' '+degStr:'')+(digGlyph?' '+digGlyph:''), w=Math.max(42,label.length*6.3+16);
+      const w=planetW[k];
       const tip=`${GBYK[k].name} · ${isRTN?'RTN':`D-${N}`} ${SN[si]} · natal D-1 ${SIGNS[natal.sign]} ${natalDeg.toFixed(2)}°${p.retro?' (retrograde)':''} · ${dig.full}`;
-      const degTsp=degStr?`<tspan font-size="9.5" dx="2.5" fill="rgba(206,220,252,0.9)">${degStr}</tspan>`:'';
+      const degTsp=degStr&&!planetCompact[k]?`<tspan font-size="9.5" dx="2.5" fill="rgba(206,220,252,0.9)">${degStr}</tspan>`:'';
       const digTsp=digGlyph?`<tspan font-size="9.5" dx="2.5" fill="${digCol}">${digGlyph}</tspan>`:'';
       sv+=`<g class="bm-pill" data-pk="${k}" role="button" tabindex="0" aria-label="${GBYK[k].name} in House ${houseFromSigns(La,si)}, natal D-1 ${natalDeg.toFixed(1)} degrees" style="cursor:pointer" onclick="${simple?`bmShowSimplePlanet('${k}')`:`bmFocusPlanet('${k}')`}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${simple?`bmShowSimplePlanet('${k}')`:`bmFocusPlanet('${k}')`}}">`+
         `<rect x="${pos.x-w/2}" y="${pos.y-hh/2}" width="${w}" height="${hh}" rx="11" fill="rgba(9,12,26,0.97)" stroke="${digCol||v.col}" stroke-width="${digCol?2.2:1.6}"${dig.score<=-2?' stroke-dasharray="3,2"':''}><title>${tip} — ${simple?'select for a plain-language reading':'click to see what it aspects'}</title></rect>`+
@@ -4257,11 +4378,11 @@ function renderBhavaMandala(c,La,N,motion){
           const tip=`Transiting ${GBYK[k].name} · ${SN[si]} · ${bavText} · natal sign SAV ${savLabel} · H${hFromMoon} from natal Moon (${statusLbl})${satSpecial?(satSpecial==='sade-sati'?' · SADE SATI':' · Dhaiya/Kantaka'):''} · H${hFromRef} on this wheel — select for details`;
           trG+=`<g class="bm-tr" data-trk="${k}" role="button" tabindex="0" aria-label="${tip}" onclick="bmTransitInfo('${k}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();bmTransitInfo('${k}')}" >`+
             `<line x1="${spoke.x}" y1="${spoke.y}" x2="${pos.x}" y2="${pos.y}" stroke="${statusCol}" stroke-width="1.2" stroke-dasharray="2,3" opacity="0.65"/>`+
-            `<rect x="${pos.x-w/2}" y="${pos.y-hh/2}" width="${w}" height="${hh}" rx="8" fill="rgba(9,12,26,0.92)" stroke="${statusCol}" stroke-width="2" stroke-dasharray="3,2"><title>${tip}</title></rect>`+
+            `<g class="bm-trl"><rect x="${pos.x-w/2}" y="${pos.y-hh/2}" width="${w}" height="${hh}" rx="8" fill="rgba(9,12,26,0.92)" stroke="${statusCol}" stroke-width="2" stroke-dasharray="3,2"><title>${tip}</title></rect>`+
             `<text x="${pos.x}" y="${pos.y-4}" text-anchor="middle" dominant-baseline="central" font-size="9.5" font-weight="700" fill="${v.col}" style="pointer-events:none">${nm}</text>`+
             (bav==null?`<text x="${pos.x}" y="${pos.y+5}" text-anchor="middle" font-size="6.5" fill="#c8c5bd" style="pointer-events:none">${['Ra','Ke'].includes(k)?'no BAV':'unavailable'}</text>`:Array.from({length:8},(_,n)=>`<circle cx="${pos.x-14+n*4}" cy="${pos.y+5}" r="1.35" fill="${n<bav?'#f5d894':'none'}" stroke="#f5d894" stroke-width=".6"/>`).join(''))+
             (satSpecial?`<circle cx="${pos.x+w/2-3}" cy="${pos.y-hh/2-3}" r="6.5" fill="#220a3a" stroke="#c080f0" stroke-width="1"/><text x="${pos.x+w/2-3}" y="${pos.y-hh/2-3}" text-anchor="middle" dominant-baseline="central" font-size="6.5" font-weight="800" fill="#c080f0" style="pointer-events:none">${satSpecial==='sade-sati'?'SS':'D'}</text>`:'')+
-            `</g>`;
+            `</g></g>`;
         });
       });
       trG+=`</g>`;
@@ -4337,7 +4458,7 @@ function renderBhavaMandala(c,La,N,motion){
 
   let d10Html='';
   if(N===10&&BM_CTX.c){try{d10Html=renderD10Guide(BM_CTX.c,BM_CTX.baseLa);}catch(e){console.warn('D10 guide:',e);}}
-  const modeRow=`<div class="bm-modebar"><div class="bm-mode-copy"><b>${N===10?'Read your career house by house':'Read this chart house by house'}</b>${simple?'Select a house, then select a planet for one more layer.':'Technical chart layers and classical relationships.'}</div>${simple?`<div class="bm-quick-varga"><button type="button" class="bm-mode-btn${N===1?' active':''}" onclick="bmTurn(1)">D-1 · Life</button><button type="button" class="bm-mode-btn${N===10?' active':''}" onclick="bmTurn(10)">D-10 · Career</button></div>`:''}<div class="bm-mode-actions"><button type="button" class="bm-mode-btn${simple?' active':''}" onclick="bmSetSimpleMode(true)">Simple reading</button><button type="button" class="bm-mode-btn${simple?'':' active'}" onclick="bmSetSimpleMode(false)">Advanced chart</button></div></div>`;
+  const modeRow=`<div class="bm-modebar"><div class="bm-mode-copy"><b>${N===10?'Read your career house by house':'Read this chart house by house'}</b>${simple?'Select a house, then select a planet for one more layer.':'Technical chart layers and classical relationships.'}</div>${simple?`<div class="bm-quick-varga"><button type="button" class="bm-mode-btn${N===1?' active':''}" onclick="bmTurn(1)">D-1 · Life</button><button type="button" class="bm-mode-btn${N===10?' active':''}" onclick="bmTurn(10)">D-10 · Career</button></div>`:''}<div class="bm-mode-actions"><button type="button" class="bm-mode-btn${simple?' active':''}" onclick="bmSetSimpleMode(true)">Simple reading</button><button type="button" class="bm-mode-btn${simple?'':' active'}" onclick="bmSetSimpleMode(false)">Advanced chart</button></div>${(()=>{const on=ct.classList.contains('bm-focus');return `<button type="button" class="bm-focus-btn" onclick="bmToggleFocus()" aria-pressed="${on}" title="${on?'Exit full screen (Esc)':'Show the chart full screen'}">${on?'✕ Exit full screen':'⤢ Full screen'}</button>`;})()}</div>`;
   const chartView=document.getElementById('chartView');
   if(chartView) chartView.classList.toggle('bm-simple-active',simple);
   if(simple){
@@ -4348,6 +4469,7 @@ function renderBhavaMandala(c,La,N,motion){
   }else{
     ct.innerHTML=`${modeRow}${tabs}${refsRow}${lensRow}${transitStrip}<p class="bm-wheel-scroll-hint">Swipe sideways to explore the wheel</p><div class="bm-container" tabindex="0" role="region" aria-label="Scrollable Bhava Mandala">${sv}</div>${degreeKey}${mobilePlanets}${aspLegend}${gocharaLegend}<div class="bm-trace" id="bmTrace">${traceDefault}</div>${caption}<div class="bm-sec">Rāśi → Lord · linkage</div><div class="bm-houses">${houseRows}</div><div class="bm-sec">Planets · ${isRTN?'RTN (D-9 sign / D-1 house)':vName} dignity &amp; avasthā · functional nature (by Lagna) · ⊙ combustion from D-1</div><div class="bm-legend">${leg}</div>${d10Html}<div class="bm-planet-panel" id="bmPlanetPanel"></div>`;
   }
+  bmWatchLabelScale(ct);
   if(motion){const ns=ct.querySelector('.bm-svg');if(ns){ns.style.transformOrigin='center';ns.style.transform='rotate(14deg) scale(.9)';ns.style.opacity='0';requestAnimationFrame(()=>{ns.style.transition='transform .46s cubic-bezier(.34,1.12,.4,1),opacity .4s';ns.style.transform='none';ns.style.opacity='1';});}}
 }
 
