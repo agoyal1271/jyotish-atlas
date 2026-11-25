@@ -13275,7 +13275,7 @@ function journalFitLabel(score){
         `<div class="jr-sig">${tags||'<span class="jr-tag">no daśā data</span>'}</div>`+
         (fit?`<div class="jr-fit"><span class="jr-fit-badge ${fit.lbl.cls}">${fit.lbl.label}</span>${fit.text}</div>`:'')+
         `</div>`+
-        `<button type="button" class="jr-del" data-id="${ev.id}" title="Delete">✕</button></div>`;
+        `<button type="button" class="jr-del" data-id="${esc(ev.id)}" title="Delete">✕</button></div>`;
     }).join('');
     listD.querySelectorAll('.jr-del').forEach(b=>b.onclick=()=>{
       const j=loadJ(); j[key]=(j[key]||[]).filter(e=>e.id!==b.dataset.id); saveJ(j); renderList(c);
