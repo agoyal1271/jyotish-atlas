@@ -2631,7 +2631,7 @@ html.bm-focus-open #main{z-index:2000}
   <section id="lifepredictor" class="section-reveal">
     <div class="eyebrow">Full-life timeline</div>
     <h2 class="display">Life Predictor</h2>
-    <p class="sub">A scrollable life map — each Antardasha colored by the same 4-layer Dasha Prediction Engine (natal dignity, functional role, Gochara, yogas). <b style="color:var(--exalt)">Green</b> favors delivery; <b style="color:var(--debil)">red</b> signals friction. Click any segment for details.</p>
+    <p class="sub">Explore Mahadasha and Antardasha dates, then select a period to inspect its chart connections and transit context.</p>
     <div class="panel ec-zone-card" style="padding:22px">
       <div class="ol-controls">
         <div class="bb-sel-grp">
@@ -3844,21 +3844,8 @@ function bmCurrentPhase(c,La,h,date=bmSelectedDate()){
   return{md,ad,mdH,adH,active,isActive:active.includes(h)};
 }
 function bmPhaseTone(c,La,x){
-  const ad=x.ad||{lord:x.md.lord,start:x.md.start,end:x.md.end};
-  let verdict={label:'Mixed'},score=null;
-  try{
-    const result=lpComputePeriodScore(c,La,lpBuildBAV(c,La),x.md,ad);
-    verdict=result.verdict; score=result.total;
-  }catch(e){}
-  const supportive=['Exceptional','Strong','Favorable'].includes(verdict.label);
-  const demanding=['Challenging','Difficult'].includes(verdict.label);
-  const cls=supportive?'supportive':demanding?'demanding':'mixed';
-  const label=supportive?'Supportive phase':demanding?'Demanding phase':'Mixed phase';
-  const copy=supportive
-    ?'More factors support delivery than resist it. Use the opening, while still working consciously with the active houses.'
-    :demanding
-      ?'Resistance and responsibility are more prominent. This favors patience, preparation and realistic pacing—not fear or fatalism.'
-      :'Helpful and difficult factors coexist. Results are likely to depend more on choices, timing and sustained effort.';
+  const cls='mixed',label='Active life phase',score=null;
+  const copy='Explore the period lords, their house connections and the supporting and conflicting evidence in the Dasha Prediction Engine.';
   const degreeNote=k=>{
     const p=c.planets[k]; if(!p) return '';
     const av=baladiAvastha(p.sign,p.deg),dig=dignityOf(k,p.sign);
@@ -7933,7 +7920,9 @@ function dpLayer2(k,c,La){
   // Kendradhipati dosha — the yoga prevails over the benefic-ruling-kendras penalty.
   if(rajaMod>0 && fnScore<0 && fn.tier==='neutral') fnScore=0;
 
-  const relief=dpFunctionalReliefs(k,c,La,fnScore,house);
+  // Former percentage-based relief had no classical calibration. Keep legacy callers
+  // compatible but do not apply the 70% score cancellation to any output.
+  const relief={ishtaRelief:0,lagnaAspectRelief:0,ishtaApplied:0,lagnaAspectApplied:0,total:0};
   const adjustedFnScore=fnScore+relief.total;
 
   return{score:adjustedFnScore+hq+rajaMod,fnScore,adjustedFnScore,hq,rajaMod,fn,house,...relief};
@@ -8297,7 +8286,81 @@ function dpBuildPratyantarOpts(antar,defIdx){
   }).join('');
 }
 
+// Evidence-based dasha reading. The rules below describe chart connections; they do not
+// calculate event probabilities or convert one factor into an overriding verdict.
+function dpEvidenceAnalyze(){
+  const c=_dpC,La=_dpLa,out=document.getElementById('dpResult');if(!c||!out)return;
+  const el=id=>document.getElementById(id),idx=id=>parseInt(el(id)?.value,10)||0;
+  const md=c.dashas?.mahas?.[idx('dpMahaSelect')],ad=md?.antars?.[idx('dpAntarSelect')],pd=ad?.pratyantars?.[idx('dpPratyantarSelect')];
+  if(!md){out.textContent='The selected Mahadasha is unavailable.';return;}
+  const key=el('dpTopicSelect')?.value||'general';
+  const topics={career:{name:'Career',houses:[10,6,7,2,11],varga:10,main:10},relationship:{name:'Relationships',houses:[7,2,8,12],varga:9,main:7},wealth:{name:'Wealth',houses:[2,11,5,9],varga:2,main:2},health:{name:'Health',houses:[1,6,8,12],varga:30,main:1},general:{name:'Whole life',houses:[],varga:9,main:1}};
+  const topic=topics[key]||topics.general,signs=SIGNS,esc=s=>String(s??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x]));
+  const nm=k=>GBYK[k]?.name||k||'Unavailable',fmt=t=>Number.isFinite(t)?new Date(t).toISOString().slice(0,10):'not supplied';
+  const period=(label,p)=>p?`${label}: ${nm(p.lord)} · ${fmt(p.start)} to ${fmt(p.end)} (end exclusive)`:`${label}: not supplied`;
+  const lords=[{label:'Mahadasha',p:md},{label:'Antardasha',p:ad},{label:'Pratyantardasha',p:pd}].filter(x=>x.p);
+  const targetSigns=topic.houses.map(h=>(La+h-1)%12),targetLords=targetSigns.map(s=>SIGN_LORD[s]);
+  const cards=[],links=[];
+  const avComplete=Number.isInteger(La)&&['Su','Mo','Ma','Me','Ju','Ve','Sa'].every(k=>Number.isInteger(c.planets?.[k]?.sign));
+  const sav=avComplete?computeSAV(Object.assign({La},Object.fromEntries(['Su','Mo','Ma','Me','Ju','Ve','Sa'].map(k=>[k,c.planets[k].sign])))):null;
+  function add(group,fact,interpretation,source){cards.push({group,fact,interpretation,source});}
+  for(const {label,p:periodData} of lords){
+    const k=periodData.lord,p=c.planets?.[k];
+    if(!p||!Number.isInteger(p.sign)||!Number.isFinite(p.deg)){add('Missing data',`${label} lord ${nm(k)} has no complete natal placement.`, 'The period cannot be assessed fully.','Chart data');continue;}
+    const h=houseFromSigns(La,p.sign),rules=Array.from({length:12},(_,i)=>i+1).filter(hh=>SIGN_LORD[(La+hh-1)%12]===k),ni=nakInfo(p.sign*30+p.deg);
+    const dig=(k==='Ra'||k==='Ke')?'Node dignity varies by tradition':dignityOf(k,p.sign).full.split('·')[0].trim();
+    const connection=[];
+    if(topic.houses.includes(h))connection.push(`occupies H${h}`);
+    for(const hh of rules)if(topic.houses.includes(hh))connection.push(`rules H${hh}`);
+    for(const hh of topic.houses)if(aspectsFromHouse(k,h).includes(hh))connection.push(`aspects H${hh} from H${h}`);
+    if(topic.houses.length&&connection.length)links.push(`${nm(k)} (${label}): ${connection.join(', ')}`);
+    add(connection.length?'Topic connections':'Period lords',`${label}: ${nm(k)} in ${signs[p.sign]} H${h}; rules ${rules.map(x=>'H'+x).join(', ')||'no signs in this convention'}; ${dig}.`,`Nakshatra ${ni.n}, pada ${ni.pada}, ruled by ${nm(ni.l)}. ${connection.length?'Connects to the topic: '+connection.join('; ')+'.':'No direct target-house connection found by these rules.'}`, 'D-1 · whole-sign houses; node aspects follow Atlas convention');
+    if(k!=='Ra'&&k!=='Ke'){
+      const d=dignityOf(k,p.sign),combust=isCombustDE(k,c);
+      if(d.score>=1.5)add('Supporting indications',`${nm(k)} is ${dig} in D-1.`, 'A traditional dignity factor supporting capacity; it does not promise an easy or favourable outcome.','D-1 · dignity convention');
+      if(d.score<=-1||combust||[6,8,12].includes(h))add('Complicating indications',`${nm(k)}: ${dig}${combust?' · combustion calculated by Atlas':''}${[6,8,12].includes(h)?` · H${h}`:''}.`, 'These factors merit context; a difficult house, sign or combustion does not automatically deny a result.','D-1 · Atlas condition conventions');
+    }
+    if(Number.isFinite(p.ishta)&&Number.isFinite(p.kashta))add('Strength context',`${nm(k)}: Ishta ${p.ishta.toFixed(2)}, Kashta ${p.kashta.toFixed(2)}.`, 'Supplied strength indicators qualify the reading; neither cancels lordship or guarantees an outcome.','Imported chart');
+    if(k==='Ra'||k==='Ke'){
+      const disp=SIGN_LORD[p.sign],conj=Object.keys(c.planets).filter(x=>x!==k&&!['Ra','Ke'].includes(x)&&c.planets[x]?.sign===p.sign);
+      add('Node context',`${nm(k)} occupies H${h}; sign dispositor ${nm(disp)}; same-sign planets: ${conj.map(nm).join(', ')||'none'}.`,'Read the node through its house, dispositor and associations; competing interpretations exist.','Atlas node convention');
+    }
+  }
+  if(topic.houses.length){
+    for(const hh of topic.houses){const s=(La+hh-1)%12,l=SIGN_LORD[s],occ=Object.keys(c.planets||{}).filter(k=>GBYK[k]&&c.planets[k]?.sign===s),a=dpAspectsOn(c,La,s),aspect=[...a.ben,...a.mal];
+      add('Natal foundation',`H${hh} ${BHAVAS[hh-1]?.en||''}: ${signs[s]}; lord ${nm(l)}; occupants ${occ.map(nm).join(', ')||'none'}; aspects ${aspect.map(x=>`${nm(x.k)} from H${x.fromH}`).join(', ')||'none'}; natal sign SAV ${sav?.[s]??'unavailable'}.`,'House occupancy, rulership and aspects describe connections; SAV is natal sign context and does not by itself establish an event.','D-1 · whole-sign aspects and natal SAV');}
+  }
+  const required=['Su','Mo','Ma','Me','Ju','Ve','Sa','Ra','Ke'];
+  const complete=Number.isInteger(c.La?.sign)&&Number.isFinite(c.La?.deg)&&required.every(k=>Number.isInteger(c.planets?.[k]?.sign)&&Number.isFinite(c.planets[k].deg));
+  if(complete){
+    for(const N of [...new Set([9,topic.varga])]){
+      const vLa=vargaSign(c.La.sign,c.La.deg,N),vh=topic.main,vs=(vLa+vh-1)%12,vl=SIGN_LORD[vs],vp=c.planets[vl];
+      const vLordSign=vp?vargaSign(vp.sign,vp.deg,N):null;
+      add('Divisional context',`D-${N} Lagna ${signs[vLa]}; H${vh} ${signs[vs]}, lord ${nm(vl)}${vLordSign==null?' (placement unavailable)':` in ${signs[vLordSign]} H${houseFromSigns(vLa,vLordSign)}`}.`, 'Counted from this divisional chart’s own ascendant. This is a separate lens, not a guarantee or a first/second-half timing rule.',`D-${N} · Atlas varga convention`);
+      const d1Lord=SIGN_LORD[(La+topic.main-1)%12],d1LordP=c.planets[d1Lord];if(d1LordP){const v=vargaSign(d1LordP.sign,d1LordP.deg,N);add('Divisional context',`D-1 H${topic.main} lord ${nm(d1Lord)} in D-${N}: ${signs[v]}, H${houseFromSigns(vLa,v)}.`, 'This is the D-1 house lord, which may differ from the divisional chart’s own house lord.',`D-${N} · natal longitude`);}
+      for(const {label,p:periodData} of lords){const q=c.planets[periodData.lord];if(!q)continue;const v=vargaSign(q.sign,q.deg,N);add('Divisional context',`${nm(periodData.lord)} (${label}): D-${N} ${signs[v]}, H${houseFromSigns(vLa,v)}${v===q.sign&&N===9?' · same sign as D-1':''}.`,'Compare this placement with D-1; it does not erase contradictory factors.',`D-${N} · calculated from natal longitude`);}
+    }
+  }else add('Missing data','Divisional evidence is incomplete.','A complete ascendant and planetary longitudes are required for this calculation.','Chart data');
+  const now=Date.now(),span=pd||ad||md,start=span.start,end=span.end;let date=now,when='today';
+  if(Number.isFinite(start)&&Number.isFinite(end)&&(now<start||now>=end)){date=(start+end)/2;when='midpoint of the selected period';}
+  try{
+    const sky=getTransitPlanets(new Date(date)).pos,base=c.planets?.Mo?.sign;
+    if(Number.isInteger(base)){
+      const bav=lpBuildBAV(c,La),go=gocharaAnalysis(sky,base,La,bav);
+      for(const k of ['Ju','Sa','Ra','Ke']){const g=go[k];if(!g)continue;const av=(k==='Ra'||k==='Ke')?'No individual BAV for nodes.':`Natal BAV ${g.bavSign??'unavailable'}/8; sign SAV ${g.savSign??'unavailable'}.`;
+        add('Transit snapshot',`${nm(k)} in ${signs[g.sign]}, H${g.hLa} from Lagna and H${g.h} from Moon, ${fmt(date)} (${when}).`,`${av} SAV includes BAV; neither proves an event. ${k==='Sa'&&g.satSpecial?'Saturn condition: '+g.satSpecial+'.':''}`,'Atlas sidereal transit calculation · single snapshot');}
+    }else add('Missing data','Natal Moon is unavailable.','Moon-relative transit houses cannot be calculated.','Chart data');
+  }catch(e){add('Missing data','Transit snapshot unavailable.','No transit timing conclusion is made.','Calculation');}
+  const groups=[...new Set(cards.map(x=>x.group))];
+  const details=groups.map(g=>`<section class="dpe-group"><h5>${esc(g)}</h5>${cards.filter(x=>x.group===g).map(x=>`<article class="dpe-card"><b>${esc(x.fact)}</b><p>${esc(x.interpretation)}</p><small>${esc(x.source)}</small></article>`).join('')}</section>`).join('');
+  const relation=key==='general'?'Choose a focus to inspect topic connections.':links.length?`Direct connections found: ${links.join('; ')}.`:'No direct connection found by the selected house rules. This does not mean the area is inactive.';
+  const missing=[!ad?'Antardasha unavailable':null,!pd?'Pratyantardasha unavailable':null,!complete?'Incomplete chart placements':null,'Birth-time sensitivity not assessed','Imported calculation settings may be unverified'].filter(Boolean);
+  el('dpTransitNote').textContent='Transit evidence is a single dated snapshot, not an exact event window.';
+  out.innerHTML=`<div class="dp-body dpe-evidence"><div class="dpe-header"><div><small>Topic connections</small><b>${key==='general'?'Choose a focus':links.length?'Direct connections found':'No direct connection found'}</b></div><div><small>Evidence balance</small><b>Review supporting and conflicting evidence</b></div><div><small>Data reliability</small><b>${complete?'Sensitivity not assessed':'Incomplete data'}</b></div></div><p>${esc(relation)}</p><div class="dpe-periods"><b>Selected period</b><p>${esc(period('MD',md))}<br>${esc(period('AD',ad))}<br>${esc(period('PD',pd))}</p></div>${details}<p class="note"><b>Limits:</b> ${esc(missing.join('; '))}. Interpretations are traditional perspectives, not event probabilities or guarantees. D-1 SAV is not assigned to varga houses.</p></div>`;
+}
+
 function dpAnalyze(){
+  return dpEvidenceAnalyze();
   const c=_dpC,La=_dpLa,allBAV=_dpBAV; if(!c) return;
   const mSel=document.getElementById('dpMahaSelect'), aSel=document.getElementById('dpAntarSelect'), pSel=document.getElementById('dpPratyantarSelect');
   if(!mSel||!aSel) return;
@@ -8661,7 +8724,7 @@ function renderDashaPrediction(c,La,allBAV){
 
   wrap.style.display='block';
   wrap.innerHTML=`<div class="dp-wrap">
-  <div class="dp-head"><h4>Dasha Prediction Engine</h4><span style="font-size:11px;color:var(--muted)">Natal (D-1 + varga) · aspects · avasthā · gochara + nakṣatra tāra</span></div>
+  <div class="dp-head"><h4>Dasha Prediction Engine</h4><span style="font-size:11px;color:var(--muted)">Period connections · chart evidence · transit context</span></div>
   <div class="dp-selector">
     <div class="dp-sel-group"><div class="dp-sel-label">Mahadasha</div><select id="dpMahaSelect">${mahaOpts}</select></div>
     <div class="dp-sel-group"><div class="dp-sel-label">Antardasha</div><select id="dpAntarSelect">${dpBuildAntarOpts(mahas[defMahaIdx],defAntarIdx)}</select></div>
@@ -8879,7 +8942,16 @@ function lpShowDetail(wrap,idx){
     <div style="margin-top:12px"><button type="button" class="lp-btn" data-lp-dpe="${idx}">Open in Dasha Prediction Engine</button></div>`;
 }
 
+function renderEvidenceTimeline(c,La,allBAV,targetId){
+  const wrap=document.getElementById(targetId);if(!wrap)return;
+  if(!c?.dashas?.mahas?.length){wrap.style.display='block';wrap.innerHTML='<div class="lp-wrap"><div class="lp-empty">Daśā dates are unavailable. Import a chart with periods or enter birth details.</div></div>';return;}
+  const esc=s=>String(s??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[x])),fmt=t=>Number.isFinite(t)?new Date(t).toISOString().slice(0,10):'not supplied',now=Date.now();
+  const rows=c.dashas.mahas.map((md,mi)=>{const current=Number.isFinite(md.start)&&md.start<=now&&(md.end==null||now<md.end);const antars=(md.antars||[]).map((ad,ai)=>{const active=ad.start<=now&&(ad.end==null||now<ad.end);return `<button type="button" class="dpe-period-button" data-dpe-maha="${mi}" data-dpe-antar="${ai}"><b>${esc(GBYK[ad.lord]?.name||ad.lord)}${active?' · active':''}</b><span>${fmt(ad.start)} – ${fmt(ad.end)}</span></button>`;}).join('');return `<details ${current?'open':''}><summary>${esc(GBYK[md.lord]?.name||md.lord)} Mahadasha · ${fmt(md.start)} – ${fmt(md.end)}${current?' · active':''}</summary><div class="dpe-period-list">${antars||'<p>Antardasha dates unavailable.</p>'}</div></details>`;}).join('');
+  wrap.style.display='block';wrap.innerHTML=`<div class="lp-wrap dpe-timeline"><h4>Life periods</h4><p>Select an antardasha to open its evidence. Dates are shown in UTC; an end date is exclusive. Period colors and event predictions are not assigned.</p>${rows}</div>`;
+  wrap.querySelectorAll('[data-dpe-maha]').forEach(btn=>btn.addEventListener('click',()=>{renderDashaPrediction(c,La,allBAV);const m=document.getElementById('dpMahaSelect'),a=document.getElementById('dpAntarSelect');m.value=btn.dataset.dpeMaha;m.onchange();a.value=btn.dataset.dpeAntar;a.onchange();if(window.AtlasNavigate)AtlasNavigate('dashaPanel');}));
+}
 function renderLifePredictor(c,La,allBAV,targetId){
+  return renderEvidenceTimeline(c,La,allBAV,targetId);
   const wrap=document.getElementById(targetId);
   if(!wrap) return;
   if(!c){
