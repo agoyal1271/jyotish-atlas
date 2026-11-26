@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict'),X=require('../dasha-extra.js'),day=86400000;
+let missing=false;
+const timeline=X.transitTimeline(0,4*day,d=>{if(d.getTime()===2*day)throw Error('gap');const sign=d.getTime()<day?0:1;return Object.fromEntries(['Ju','Sa','Ra','Ke'].map(k=>[k,{sign}]));},[{label:'H1',sign:0}]);
+assert.ok(timeline.rows.some(r=>r.planet==='Ju'&&r.start===0&&r.value.includes('H1')));
+assert.ok(timeline.rows.some(r=>r.planet==='Ju'&&r.value==='Data unavailable'));
+assert.ok(timeline.rows.some(r=>r.planet==='Ju'&&r.start===3*day&&r.end===4*day));
+assert.match(X.transitTimeline(0,6*366*day,()=>null,[]).reason,/five years/);
+const sensitivity=X.sensitivity('2020-01-01T00:00:00Z',2,d=>({vargas:{1:d.getUTCMinutes()===59?1:0,9:2},moonSign:0,moonStar:'A'}),[1,9]);
+assert.equal(sensitivity.samples,5);assert.deepEqual(new Set(sensitivity.changes[1]),new Set([0,1]));assert.equal(sensitivity.changes[9].length,1);
+assert.equal(X.sensitivity('invalid',5,()=>null,[1]),null);
+console.log('Transit interval grouping, gaps, range bounds and birth-time sensitivity passed.');

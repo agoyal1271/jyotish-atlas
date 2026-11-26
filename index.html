@@ -2149,6 +2149,7 @@ html.bm-focus-open #main{z-index:2000}
 </style>
 <script src="transit-evidence.js"></script>
 <script src="reading-packet.js"></script>
+<script src="dasha-extra.js"></script>
 <link rel="stylesheet" href="tokens.css">
 <link rel="stylesheet" href="app-shell.css">
 <link rel="stylesheet" href="global-chart.css">
@@ -2685,9 +2686,9 @@ html.bm-focus-open #main{z-index:2000}
   </section>
 
   <section id="outlook" class="section-reveal">
-    <div class="eyebrow">Life outlook · 2025 – 2029</div>
+    <div class="eyebrow">Life outlook · next two years</div>
     <h2 class="display">When is the right time?</h2>
-    <p class="sub">Jupiter and Saturn move slowly — roughly one sign per year and 2.5 years respectively. Where they land against your natal houses, crossed with SAV, reveals your strongest windows for each goal.</p>
+    <p class="sub">Explore the period dates and sampled transit contacts connected to a life area over the next two years.</p>
     <div class="panel ec-zone-card" style="padding:22px">
       <div class="ol-controls">
         <div class="bb-sel-grp">
@@ -2703,7 +2704,7 @@ html.bm-focus-open #main{z-index:2000}
           <input type="text" id="olBirthDate" class="bb-sel" placeholder="e.g. May 1, 1988" style="min-width:150px">
         </div>
       </div>
-      <div id="olEmpty" class="empty-rich"><div class="er-ic">🗓️</div><div class="er-title">Pick a chart and a goal</div><div>Select a saved chart and a life goal to see your 2025–2029 window analysis.</div></div>
+      <div id="olEmpty" class="empty-rich"><div class="er-ic">🗓️</div><div class="er-title">Choose a life area</div><div>Select a goal to explore its period and transit connections.</div></div>
       <div id="olResult" style="display:none"></div>
     </div>
   </section>
@@ -8395,9 +8396,26 @@ function dpEvidenceAnalyze(){
   const groups=[...new Set(cards.map(x=>x.group))];
   const details=groups.map(g=>`<section class="dpe-group"><h5>${esc(g)}</h5>${cards.filter(x=>x.group===g).map(x=>`<article class="dpe-card"><b>${esc(x.fact)}</b><p>${esc(x.interpretation)}</p><small>${esc(x.source)}</small></article>`).join('')}</section>`).join('');
   const relation=key==='general'?'Choose a focus to inspect topic connections.':links.length?`Direct connections found: ${links.join('; ')}.`:'No direct connection found by the selected house rules. This does not mean the area is inactive.';
-  const missing=[!ad?'Antardasha unavailable':null,!pd?'Pratyantardasha unavailable':null,!complete?'Incomplete chart placements':null,'Birth-time sensitivity not assessed','Imported calculation settings may be unverified'].filter(Boolean);
-  el('dpTransitNote').textContent='Transit evidence is a single dated snapshot, not an exact event window.';
-  out.innerHTML=`<div class="dp-body dpe-evidence"><div class="dpe-header"><div><small>Topic connections</small><b>${key==='general'?'Choose a focus':links.length?'Direct connections found':'No direct connection found'}</b></div><div><small>Evidence balance</small><b>Review supporting and conflicting evidence</b></div><div><small>Data reliability</small><b>${complete?'Sensitivity not assessed':'Incomplete data'}</b></div></div><p>${esc(relation)}</p><div class="dpe-periods"><b>Selected period</b><p>${esc(period('MD',md))}<br>${esc(period('AD',ad))}<br>${esc(period('PD',pd))}</p></div>${details}<p class="note"><b>Limits:</b> ${esc(missing.join('; '))}. Interpretations are traditional perspectives, not event probabilities or guarantees. D-1 SAV is not assigned to varga houses.</p></div>`;
+  const missing=[!ad?'Antardasha unavailable':null,!pd?'Pratyantardasha unavailable':null,!complete?'Incomplete chart placements':null,'Imported calculation settings may be unverified'].filter(Boolean);
+  const tsFrom=el('dpTimelineFrom')?.value,tsUntil=el('dpTimelineUntil')?.value,tsStart=Date.parse(tsFrom+'T00:00:00Z'),tsEnd=Date.parse(tsUntil+'T00:00:00Z')+86400000;
+  const targets=[...topic.houses.map(h=>({label:`H${h} ${signs[(La+h-1)%12]}`,sign:(La+h-1)%12})),...topic.houses.map(h=>({house:h,lord:SIGN_LORD[(La+h-1)%12]})).filter(x=>c.planets[x.lord]).map(x=>({label:`H${x.house} lord ${nm(x.lord)}`,sign:c.planets[x.lord].sign})),...lords.filter(x=>c.planets[x.p.lord]).map(x=>({label:`${x.label} lord ${nm(x.p.lord)}`,sign:c.planets[x.p.lord].sign}))];
+  const timeline=AtlasDashaExtra.transitTimeline(tsStart,tsEnd,d=>getTransitPlanets(d).pos,targets);
+  const timelineRows=timeline.rows.map(r=>`<li>${esc(nm(r.planet))}: ${fmt(r.start)} to ${fmt(r.end)} (exclusive) · ${esc(r.value.replace(/^sign (\d+)/,(_,n)=>signs[+n]))}</li>`).join('');
+  const bd=c.birthDetails||{},mins=Number(el('dpSensitivityMinutes')?.value||0);let sensitivityText='Not assessed. Choose a birth-time range and enter a chart created from verified birth details.';
+  if(mins>0&&bd.utc&&Number.isFinite(Number(bd.lat))&&Number.isFinite(Number(bd.lon))&&bd.lat!==null&&bd.lon!==null){try{
+    const result=AtlasDashaExtra.sensitivity(bd.utc,mins,date=>{const jd=jdFromDate(date),asc=tropToSid(tropAscendant(date,Number(bd.lat),Number(bd.lon)),lahiriAyanamsa(jd)),positions=getTransitPlanets(date).pos,mo=positions.Mo,ns=[...new Set([1,9,topic.varga])];return {vargas:Object.fromEntries(ns.map(n=>[n,vargaSign(asc.sign,asc.deg,n)])),planetVargas:Object.fromEntries(ns.map(n=>[n,Object.fromEntries(Object.entries(positions).map(([k,p])=>[k,vargaSign(p.sign,p.deg,n)]))])),moonSign:mo.sign,moonStar:nakInfo(mo.sign*30+mo.deg).n};},[...new Set([1,9,topic.varga])]);
+    sensitivityText=result?`Sampled every minute across ±${mins} minutes. `+Object.entries(result.changes).map(([n,ss])=>`D-${n} ascendant: ${ss.map(s=>signs[s]).join(' / ')}`).join('; ')+`. Moon signs: ${result.moonSigns.map(s=>signs[s]).join(' / ')}; nakshatras: ${result.moonStars.join(' / ')}.`:'Sensitivity unavailable.';
+    if(result){const changes=Object.entries(result.planetChanges).flatMap(([n,ps])=>Object.entries(ps).map(([k,ss])=>`${nm(k)} D-${n}: ${ss.map(s=>signs[s]).join(' / ')}`));sensitivityText+=changes.length?' Planetary varga changes: '+changes.join('; ')+'.':' No planetary varga sign changes were found in the minute samples.';}
+    if(result&&result.moonStars.length===1){
+      const endpoints=[-mins,mins].map(offset=>{const d=new Date(Date.parse(bd.utc)+offset*60000),moon=getTransitPlanets(d).pos.Mo;return computeVimDashas(moon,d.toISOString());});
+      const find=(d)=>{for(const m of d?.mahas||[])if(m.lord===md.lord){if(!ad)return m;for(const a of m.antars||[])if(a.lord===ad.lord){if(!pd)return a;return (a.pratyantars||[]).find(p=>p.lord===pd.lord)||null;}}return null;};
+      const [first,last]=endpoints.map(find);if(first&&last&&Number.isFinite(first.start)&&Number.isFinite(last.start))sensitivityText+=` Estimated ${pd?'PD':ad?'AD':'MD'} start differs by ${(Math.abs(last.start-first.start)/86400000).toFixed(1)} days between the two endpoints (Atlas 365.25-day convention); this does not verify imported dates.`;
+      else sensitivityText+=' Daśā-boundary comparison unavailable for this period.';
+    }else if(result)sensitivityText+=' Moon nakshatra changes; daśā sequence and boundary shifts require separate verification.';
+    sensitivityText+=' Calculations use Atlas Lahiri and mean nodes; imported placements, year basis and settings are not independently verified.';
+  }catch(e){sensitivityText='Sensitivity could not be calculated from these birth details.';}}
+  el('dpTransitNote').textContent='Contacts below are sampled daily; they are sign-based, not exact degree contacts or predicted event dates.';
+  out.innerHTML=`<div class="dp-body dpe-evidence"><div class="dpe-header"><div><small>Topic connections</small><b>${key==='general'?'Choose a focus':links.length?'Direct connections found':'No direct connection found'}</b></div><div><small>Evidence balance</small><b>Review supporting and conflicting evidence</b></div><div><small>Data reliability</small><b>${complete?'See sensitivity check':'Incomplete data'}</b></div></div><p>${esc(relation)}</p><div class="dpe-periods"><b>Selected period</b><p>${esc(period('MD',md))}<br>${esc(period('AD',ad))}<br>${esc(period('PD',pd))}</p></div>${details}<section class="dpe-group"><h5>Transit contact timeline</h5><p>Daily UTC samples · Jupiter, Saturn and mean nodes · selected houses and period-lord signs. Nodes use Atlas 5th/7th/9th convention. Retrograde revisits are shown if sampled; intraday crossings and exact degree contacts may be missed.</p>${timeline.reason?`<p>${esc(timeline.reason)}</p>`:`<details><summary>${timeline.rows.length} sampled intervals · ${esc(tsFrom)} to ${esc(tsUntil)}</summary><ol>${timelineRows}</ol></details>`}</section><section class="dpe-group"><h5>Birth-time sensitivity</h5><p>${esc(sensitivityText)}</p></section><p class="note"><b>Limits:</b> ${esc(missing.join('; '))}. Interpretations are traditional perspectives, not event probabilities or guarantees. D-1 SAV is not assigned to varga houses.</p></div>`;
 }
 
 function dpAnalyze(){
@@ -8771,6 +8789,9 @@ function renderDashaPrediction(c,La,allBAV){
     <div class="dp-sel-group"><div class="dp-sel-label">Antardasha</div><select id="dpAntarSelect">${dpBuildAntarOpts(mahas[defMahaIdx],defAntarIdx)}</select></div>
     <div class="dp-sel-group"><div class="dp-sel-label">Pratyantardasha</div><select id="dpPratyantarSelect">${dpBuildPratyantarOpts((mahas[defMahaIdx].antars||[])[defAntarIdx],defPratyIdx)}</select></div>
     <div class="dp-sel-group"><div class="dp-sel-label">Focus</div><select id="dpTopicSelect">${Object.entries(DP_TOPICS).map(([k,t])=>`<option value="${k}">${t.label}</option>`).join('')}</select></div>
+    <div class="dp-sel-group"><label for="dpTimelineFrom">Transit from (UTC)</label><input type="date" id="dpTimelineFrom" value="${new Date().toISOString().slice(0,10)}"></div>
+    <div class="dp-sel-group"><label for="dpTimelineUntil">Transit until (UTC)</label><input type="date" id="dpTimelineUntil" value="${new Date(Date.now()+365*86400000).toISOString().slice(0,10)}"></div>
+    <div class="dp-sel-group"><label for="dpSensitivityMinutes">Birth time uncertainty</label><select id="dpSensitivityMinutes"><option value="0">Not assessed</option><option value="2">±2 minutes</option><option value="5">±5 minutes</option><option value="10">±10 minutes</option><option value="30">±30 minutes</option></select></div>
   </div>
   <div class="dp-transit-note" id="dpTransitNote"></div>
   <div id="dpResult"></div>
@@ -8790,6 +8811,7 @@ function renderDashaPrediction(c,La,allBAV){
   };
   document.getElementById('dpPratyantarSelect').onchange=dpAnalyze;
   document.getElementById('dpTopicSelect').onchange=dpAnalyze;
+  for(const id of ['dpTimelineFrom','dpTimelineUntil','dpSensitivityMinutes'])document.getElementById(id).onchange=dpAnalyze;
   dpAnalyze();
 }
 
@@ -12141,6 +12163,16 @@ nakshatras and BPHS principles throughout. Avoid generic platitudes; never predi
     const charts=getCharts(),c=charts[chartIdx];
     if(!c)return;
     const goal=GOALS[goalIdx],La=c.La.sign;
+    const now=Date.now(),start=new Date(now);start.setUTCHours(0,0,0,0);const end=new Date(start);end.setUTCFullYear(end.getUTCFullYear()+2);
+    const targets=goal.houses.map(h=>({label:`H${h} ${SIGNS[(La+h-1)%12]}`,sign:(La+h-1)%12}));
+    const timeline=AtlasDashaExtra.transitTimeline(+start,+end,d=>getTransitPlanets(d).pos,targets);
+    const escapeText=s=>String(s??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    const format=t=>Number.isFinite(t)?new Date(t).toISOString().slice(0,10):'not supplied';
+    const periods=(c.dashas?.mahas||[]).flatMap(md=>(md.antars||[]).filter(ad=>ad.start<+end&&(ad.end==null||ad.end>+start)).map(ad=>`${GBYK[md.lord]?.name||md.lord} / ${GBYK[ad.lord]?.name||ad.lord}: ${format(ad.start)} – ${format(ad.end)}`));
+    const rows=timeline.rows.map(r=>`<li>${escapeText(GBYK[r.planet]?.name||r.planet)} · ${format(r.start)} to ${format(r.end)} (exclusive) · ${escapeText(r.value.replace(/^sign (\d+)/,(_,n)=>SIGNS[+n]))}</li>`).join('');
+    document.getElementById('olResult').innerHTML=`<div class="dpe-evidence"><div class="dpe-periods"><b>${escapeText(goal.label)} · ${format(+start)} to ${format(+end)} (UTC)</b><p>Relevant houses: ${goal.houses.map(h=>'H'+h).join(', ')}. This is a map of connections, not a ranking of favorable years.</p></div><section class="dpe-group"><h5>Daśā periods in this window</h5><p>${periods.length?periods.map(escapeText).join('<br>'):'No antardasha coverage available for this window.'}</p></section><section class="dpe-group"><h5>Transit contacts</h5><p>Daily sampled sign occupancy and aspects by Jupiter, Saturn and the mean nodes. A contact is not a predicted event; intraday and exact-degree contacts may be missed.</p>${timeline.reason?`<p>${escapeText(timeline.reason)}</p>`:`<details><summary>${timeline.rows.length} sampled intervals</summary><ol>${rows}</ol></details>`}</section><p class="note">Use the Dasha Prediction Engine for chart-specific D-1, D-9 and divisional evidence. Birth-time sensitivity is not assumed.</p><button class="ax-primary" type="button" onclick="AtlasNavigate('dashaPanel')">Open Daśā evidence</button></div>`;
+    document.getElementById('olResult').style.display='block';document.getElementById('olEmpty').style.display='none';
+    return;
     const dashas=c.dashas||null;
     const years=[2025,2026,2027,2028,2029];
     const results=years.map(y=>analyzeYear(c,La,goal,y));
